@@ -1,0 +1,164 @@
+#####################################################################################################
+##  Install necessary packages
+##  Install the "tidyverse"package for data manipulation
+#install.packages("tidyverse")
+#library(lubridate)
+
+#library("dplyr")
+
+#####################################################################################################
+##  Utility functions
+##  This funciton makes standard column names even if there are multiple "."s and trailing "."s
+##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
+##
+makeColNamesUserFriendly <- function(dataset) {
+
+  # Convert any number of consecutive "."s to an underscore.
+  names(dataset) <- gsub(x = names(dataset),
+                    pattern = "(\\.)+",
+                    replacement = "_")
+  
+  # Drop the trailing "."s
+  names(dataset) <- gsub(x = names(dataset),
+                    pattern = "(_)+$",
+                    replacement = "")
+
+    # Convert to lower case.
+  names(dataset) <- tolower(names(dataset))
+
+    # Return the revised column names
+  dataset
+}
+
+
+convertToDateObject <- function( dateString ) {
+# Convert the date string ("02/01/2023 11:44:53 PM") to a date-time object
+  dateTimeObject <- strptime( dateString, format = "%m/%d/%Y %I:%M:%S %p" )
+
+# Convert the new date-time object to a new string in a new format ("2023-02-02 02:52:50") 
+  newString <- format(dateTimeObject, format = "%Y-%m-%d %H:%M:%S" )
+
+# Convert the new string to a date-time object using POSIXct. This will enable calculation of duration.
+  newDateTimeObject <- as.POSIXct(newString, tz = "", format = "%Y-%m-%d %H:%M:%S" )
+
+# Return the revised variable in date-time object now formatted as "2023-04-26 21:50:45"
+  return( newDateTimeObject )
+}
+
+#######################################################################################################
+## import the data and clean the column names
+
+dataFile <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "Test_Sample.csv") 
+
+##  The file contains column names in the "header" line.
+##  The R function "read.csv" uses a "." to replace the spaces in column names. This makes the column names
+##    into legal variables, but that "." can cause problems elsewhere. The function "makeColNamesUserFriendly"
+##    by replacing the "." with an underscore "_". thus simplifying the field names. Example "Created.date"
+##    becomes "Created_date". The function also removes any additional spaces between column names and trailing spaces.
+##
+##  Additionally, the field names are converted to all lower case with the "tolower" function. Thus "Create_date"
+##    becomes "create_date".
+##
+##  These corrections are applied to the column names using the "names" data field created from the header of the file.
+##  The new field names, with the "_" character and lower case replace the current field names.
+##
+d311 <- read.csv( dataFile, header = TRUE, colClasses = rep( "character", ncol( read.csv( dataFile ))))
+d311 <- makeColNamesUserFriendly( d311 )
+
+# get the number of rows in the dataframe
+num_rows <- nrow(d311)
+
+# Print the number of rows
+cat("Number of rows:", num_rows, "\n")
+
+##  Change the various date fields to date-time objects and reformat dates.
+d311$created_date <- convertToDateObject( d311$created_date )
+d311$closed_date  <- convertToDateObject( d311$closed_date )
+d311$due_date     <- convertToDateObject( d311$due_date )
+
+d311$resolution_action_updated_date <- convertToDateObject( d311$resolution_action_updated_date )
+
+# Change the lat/long and state_plane numeric fields into type "number"
+d311$x_coordinate_state_plane <- as.numeric( d311$x_coordinate_state_plane )
+d311$y_coordinate_state_plane <- as.numeric (d311$y_coordinate_state_plane )
+d311$latitude <- as.numeric( d311$latitude )
+d311$longitude <- as.numeric( d311$longitude )
+
+
+##  Store "duration" in a new additional column for  the dataframe "d311"
+d311$duration <- as.numeric(d311$closed_date - d311$created_date)
+
+# use colSums() function to check which columns have no values
+#blank_cols <- colSums(is.na(d311) | d311 == "") == nrow(d311)
+
+# print the column names that have no values
+#names(df)[blank_cols]
+
+# display the unique values and their count for each column
+#for (col in names(d311)) {
+#  cat("Column:", col, "\n")
+#  cat("Unique values and their count:\n")
+#  print(table(d311[[col]]))
+#  cat("\n")
+#}
+
+# display the unique values, their count, and the count of blank or missing fields for each column
+#for (col in names(d311)) {
+#  cat("Column:", col, "\n")
+#  cat("Unique values and their count:\n")
+#  print(table(d311[[col]]))
+#  cat("Blank/missing fields:", sum(is.na(d311[[col]]) | !nzchar(d311[[col]])), "\n")
+#  cat("\n")
+#}
+
+# count the unique values of col2 and sort them in descending order
+#cat("Counts of unique values in borough:\n")
+#print(sort(table(d311$borough, useNA = "ifany"), decreasing = TRUE))
+
+# count the unique values of col2 and sort them in descending order
+#cat("Counts of unique values in city:\n")
+#print(sort(table(d311$city, useNA = "ifany"), decreasing = TRUE))
+
+
+
+
+## get the duration from creation time to closing time
+#t1 <- strptime(d311$closed_date, format = '%m/%d/%Y %I:%M:%S %p')
+#t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
+#tt <- as.numeric(difftime(t1, t0, units =  "secs"))
+
+
+###########################################################
+## Exploratory cleaning
+###########################################################
+
+## any creation time later than closing time?
+#table(tt < 0, useNA = "ifany")
+
+
+
+## to be organized later
+## mean(tt[d311$agency == "NYPD"]/ 3600 > 3, na.rm = TRUE)
+
+## table(d311$intersection_street_1 == d311$cross_street_1)
+
+## head(subset(d311, d311$intersection_street_1 != d311$cross_street_1, select = c("intersection_street_1", "cross_street_1")))
+
+## d311$cross_street_1 <- ifelse(is.na(d311$cross_street_1), d311$intersection_street_1, d311$cross_street_1)
+
+
+## library(lubridate)
+## library(ggplot2)
+## wkday <- ifelse(wday(t0, week_start = 1) > 5, "weekend", "weekday")
+## str_df <- na.omit(subset(data.frame(time = tt / 3600, day = wkday, borough = d311$borough),
+##                          d311$agency == "NYPD"))
+## str_df <- subset(str_df, borough != "Unspecified")
+## pdf("nypdtime.pdf", height = 10, width = 15)
+## ggplot(str_df, aes(x = borough, y = time, fill = day)) + 
+##     geom_violin() + 
+##     coord_flip() +
+##     ylim(0, 24) +
+##     ylab("time to close requests to NYPD (hours)") + 
+##     theme(legend.position = "top", 
+##           strip.background = element_rect(fill = "grey77", color = "grey77"))
+## dev.off()
