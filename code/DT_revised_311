@@ -48,7 +48,7 @@ convertToDateObject <- function( dateString ) {
 #######################################################################################################
 ## import the data and clean the column names
 
-dataFile <- file.path("C:", "Users", "david", "OneDrive", "Documents", "GitHub", "Data-Cleansing-311-data", "Test_Sample.csv") 
+dataFile <- file.path("C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "Test_Sample.csv") 
 
 ##  The file contains column names in the "header" line.
 ##  The R function "read.csv" uses a "." to replace the spaces in column names. This makes the column names
