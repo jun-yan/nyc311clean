@@ -5,89 +5,277 @@
 #library(lubridate)
 
 #library("dplyr")
-
+##
+install.packages("scales")
+library(scales)
 #####################################################################################################
 ##  Utility functions
-##  This funciton makes standard column names even if there are multiple "."s and trailing "."s
+#######################################################################################################
+##  This function makes standard column names even if there are multiple "."s and trailing "."s
 ##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
 ##
 makeColNamesUserFriendly <- function(dataset) {
 
-  # Convert any number of consecutive "."s to an underscore.
-  names(dataset) <- gsub(x = names(dataset),
-                    pattern = "(\\.)+",
-                    replacement = "_")
+  ## Convert any number of consecutive "."s to an underscore.
+  names( dataset ) <- gsub( x = names( dataset ),
+                      pattern = "(\\.)+",
+                      replacement = "_" )
   
-  # Drop the trailing "."s
-  names(dataset) <- gsub(x = names(dataset),
-                    pattern = "(_)+$",
-                    replacement = "")
+  ## Drop the trailing "."s
+  names( dataset ) <- gsub( x = names( dataset ),
+                      pattern = "(_)+$",
+                      replacement = "" )
 
-    # Convert to lower case.
-  names(dataset) <- tolower(names(dataset))
+  ## Convert to lower case. 
+  names( dataset ) <- tolower( names( dataset ) )
 
-    # Return the revised column names
-  dataset
+  ## Return the revised column names
+return( dataset )
 }
-
-
+##
+#######################################################################################################
+##
+##  This function converts a datetimestamp in character format to a date object in a slightly different format.
+##  The 311 data set is read into the d311 dataframe as all character string.
+##  It is necessary to convert these dates from string to a date object to compute duration.
+##  The data is also reformatted to a different format using YYY-MM-DD and a 24-hour clock.
+##
 convertToDateObject <- function( dateString ) {
-# Convert the date string ("02/01/2023 11:44:53 PM") to a date-time object
+
+  ## Convert the date string ("02/01/2023 11:44:53 PM") to a date-time object
   dateTimeObject <- strptime( dateString, format = "%m/%d/%Y %I:%M:%S %p" )
 
-# Convert the new date-time object to a new string in a new format ("2023-02-02 02:52:50") 
-  newString <- format(dateTimeObject, format = "%Y-%m-%d %H:%M:%S" )
+  ## Convert the new date-time object to a new string in a new format ("2023-02-02 02:52:50") 
+  newString <- format( dateTimeObject, format = "%Y-%m-%d %H:%M:%S" )
 
-# Convert the new string to a date-time object using POSIXct. This will enable calculation of duration.
-  newDateTimeObject <- as.POSIXct(newString, tz = "", format = "%Y-%m-%d %H:%M:%S" )
+  ## Convert the new string to a date-time object using POSIXct. This will enable calculation of duration.
+  newDateTimeObject <- as.POSIXct( newString, tz = "EST", format = "%Y-%m-%d %H:%M:%S" )
 
-# Return the revised variable in date-time object now formatted as "2023-04-26 21:50:45"
-  return( newDateTimeObject )
+  ## Return the revised variable in date-time object now formatted as "2023-04-26 21:50:45"
+return( newDateTimeObject )
 }
+##
+#######################################################################################################
+##
+## Function to count the number of blanks in each column of the 311 dataframe
+##
+countColumnBlanks <- function( dataset ) {
+  ## Create a dataframe to store the column name, the number of blank rows, and the percentage of rows that are blank.
+
+    result <- data.frame( columnName =    character(),
+                          blankCount =    integer(),
+                          fractionBlank = numeric() )
+
+    rowCount <- nrow( dataset )    ## Count the number of rows to step through. Used to compute % blank.
+   
+  ##  Step through the 311 dataframe to build the new dataframe containing column blank counts
+   for ( col in names( dataset ) ) {
+          numberOfBlanks <- sum( is.na(dataset[col]) | dataset[col] == "" ) 
+          newRow <- data.frame( columnName = col, 
+                                blankCount = numberOfBlanks, 
+                                fractionBlank = round(numberOfBlanks/rowCount, 6))
+          result <- rbind( result, newRow )
+   }
+   ## return the newly created dataframe with the column blank counts.   
+return( result )              
+}
+##
+#######################################################################################################
+##
+##  Function to find bad dates in the 311 data, i.e. Service Records that are closed before they're opened.
+##  Such Service Records will show a negative value for the duration. A dataframe is returned with these SR's unique_key.
+##
+findBadDates <- function( dataset, data1Position, data2Position, data3Position, data4Position, data5position ) {
+    ##  Create a dataframe with elements unique_key, created_date, closed_date, duration, and organization for rows where duration <0.
+    ##  data1Position = unique key for each row of the dataframe
+    ##  data2Position = beginning date, e.g. created_date
+    ##  data3Position = ending date, e.g. closed_date
+    ##  data4Position = duration, previously calculated
+    ##  data5Position = option value, typically organization, e.g. agency
+
+      result <- data.frame( unique_key =   character(),
+                            created_date = numeric(),
+                            closed_date =  numeric(),
+                            duration =     numeric(),
+                            organization = character())
+
+      rowCount <- nrow( dataset )         ##  Value used to control stepping through the data set
+  
+##  Step through the 311 dataframe to build a new dataframe containing created, closed, and duration values <0.
+
+      for ( row in 1:rowCount )  {
+        if ( !is.na(dataset[row, data4Position]) ){     ##  Exclude durations == "NA" which exist if there is no closed_date, i.e. SR is still open.
+          if ( dataset[row, data4Position] < 0 ) {      ##  Look for durations that are <0, indicated closed before created.
+              newRow <- data.frame(       unique_key =   dataset[row, data1Position], 
+                                          created_date = dataset[row, data2Position], 
+                                          closed_date =  dataset[row, data3Position], 
+                                          duraton =      dataset[row, data4Position],
+                                          organization = dataset[row, data5position] )
+              result <- rbind( result, newRow )
+      }
+    }
+  }
+  ## return the new dataframe (result) containing the unique_key (identifying the row), created_date,  closed_date, and duration.  
+return( result )              
+}
+##
+##
+#######################################################################################################
+##  Function to find bad zipcodes in the 311 data.
+##  This function uses a lookup of the zipcode field against the USPS reference file.
+##
+findBadZipcodes <- function( dataset, zipcodeReference, data1Position, data2Position, data3Position ) {
+  ##  data1Position = unique key for each row of the dataframe
+  ##  data2Position = target zipcode to be validated. 
+  ##  data3Position = option value, typically organization, e.g. agency
+
+  ##  Create a dataframe with elements unique_key, zipcode,and organization for rows where duration <0.
+  result <- data.frame( unique_key =   character(),
+                        zipcode =      numeric(),
+                        organization = character() )
+  
+  tempFile <- data.frame( tempZipcode = character() )
+  
+  rowCount <- nrow( dataset )         ##  Value used to control stepping through the data set
+  ##  Step through the 311 dataframe to build a new dataframe containing invalid zipcodes.
+  
+  for ( row in 1:rowCount )  {
+#        cat("Row: ", row, "Values: ", dataset[row,data1Position], dataset[row,data2Position], dataset[row,data3Position], "\n")
+#        cat("Is the zipcode missing or blank?: ", dataset[row, data2Position] == "", dataset[row, data2Position], "\n")  
+    
+        if ( dataset[row, data2Position] == "" ) { 
+#          cat("#2 Is the zipcode missing or blank?: ", dataset[row, data2Position] == "", dataset[row, data2Position], "\n\n")  
+          next
+        } else {
+#        cat( "Row#: ", row, "is zip code ", dataset[row, data2Position], "in tempFile db?", dataset[row, data2Position] %in% tempFile$tempZipcode, "\n" )
+        if (dataset[row, data2Position] %in% tempFile$tempZipcode ){
+#          cat("it's a hit! With zipcode -", dataset[row, data2Position],"\n" )  
+          newRow <- data.frame(     unique_key =   dataset[row, data1Position], 
+                                      zipcode =      dataset[row, data2Position], 
+                                      organization = dataset[row, data3Position] )
+            result <- rbind( result, newRow )
+        } else {  
+        if ( dataset[row, data2Position] %in% zipcodeReference ) {
+#            cat("Is the zip code", dataset[row, data2Position], "in the USPS file?", dataset[row, data2Position] %in% zipcodeReference, "\n\n" )
+#              cat("Not a hit, but valid", dataset[row, data2Position])  
+          next
+          } else {
+#              cat("Not a hit, but INVALID **************************************", dataset[row, data2Position], "\n")  
+            
+              newRow <- data.frame(   unique_key =   dataset[row, data1Position], 
+                                      zipcode =      dataset[row, data2Position], 
+                                      organization = dataset[row, data3Position] )
+              result <- rbind( result, newRow )
+              newTempRow <- data.frame( tempZipcode = dataset[row, data2Position]  )
+              tempFile <- rbind(tempFile, newTempRow )
+            }
+        }
+#          print(tempFile)
+            
+        }
+        
+  ## return the new dataframe (result) containing the unique_key (identifying the row), created_date,  closed_date, and duration.  
+  }
+  
+ # cat("\nending")
+#  print(tempFile)
+#  print(result)
+  return( result )              
+}
+##
 
 #######################################################################################################
-## import the data and clean the column names
 
-dataFile <- file.path("C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "Test_Sample.csv") 
+##  Create the path to the file containing the 311 Service Request data.
+
+data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "311_Q1_2023.csv") 
+data2File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "USPS_zipcodes.csv") 
 
 ##  The file contains column names in the "header" line.
-##  The R function "read.csv" uses a "." to replace the spaces in column names. This makes the column names
-##    into legal variables, but that "." can cause problems elsewhere. The function "makeColNamesUserFriendly"
-##    by replacing the "." with an underscore "_". thus simplifying the field names. Example "Created.date"
-##    becomes "Created_date". The function also removes any additional spaces between column names and trailing spaces.
+##  The R "read.csv" function uses a "." to replace the spaces in column names. This makes the column names
+##    into legal variables, but the "." can cause problems elsewhere. The function "makeColNamesUserFriendly"
+##    replaces the "." with an underscore "_". thus simplifying the field names. Example "Created.date"
+##    becomes "Created_date". The function also removes any additional and trailing spaces between column names.
 ##
-##  Additionally, the field names are converted to all lower case with the "tolower" function. Thus "Create_date"
+##  Additionally, the field names are converted to lower case with the "tolower" function. Thus "Create_date"
 ##    becomes "create_date".
 ##
 ##  These corrections are applied to the column names using the "names" data field created from the header of the file.
 ##  The new field names, with the "_" character and lower case replace the current field names.
 ##
-d311 <- read.csv( dataFile, header = TRUE, colClasses = rep( "character", ncol( read.csv( dataFile ))))
+
+d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 d311 <- makeColNamesUserFriendly( d311 )
+numRows <- nrow(d311)
+cat("\nNumber of rows:", format( numRows, big.mark = ",", scientific = FALSE), "\n\n" )
 
-# get the number of rows in the dataframe
-num_rows <- nrow(d311)
+# Load the USPS zipcode file
+USPSzipcodes <- read.csv(data2File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data2File ))))
+USPSzipcodes <- makeColNamesUserFriendly( USPSzipcodes )
+zipCodesOnly <- USPSzipcodes$delivery_zipcode
+zipRows <- nrow( USPSzipcodes )
+cat( "\nNumber of valid US zipcodes:", format( zipRows, big.mark = ",", scientific = FALSE), "\n\n" )
 
-# Print the number of rows
-cat("Number of rows:", num_rows, "\n")
+badZipcodes1 <- findBadZipcodes( d311, zipCodesOnly, 
+                                                which( colnames( d311 ) == "unique_key" ),
+                                                which( colnames( d311 ) == "incident_zip" ),
+                                                which( colnames( d311 ) == "agency" ))
+cat("\n# of bad zip codes in 'incident_zip' field is", nrow(badZipcodes1), "which is", 
+                                                percent( nrow(badZipcodes1)/numRows, accuracy = 0.0001 ), 
+                                                "of the overall data.\n\n")
 
-##  Change the various date fields to date-time objects and reformat dates.
+badZipcodes2 <- findBadZipcodes( d311, zipCodesOnly, 
+                                                which( colnames( d311 ) == "unique_key" ),
+                                                which( colnames( d311 ) == "zip_codes" ),
+                                                which( colnames( d311 ) == "agency" ))
+cat("\nNumber of bad zip codes in 'zip_codes' (a computed field:", format( nrow(badZipcodes2), 
+                                                             big.mark = ",", scientific = FALSE), 
+                                                            "which is", percent( nrow(badZipcodes2)/numRows, accuracy = 0.0001), 
+                                                            "fraction of the overall data.\n\n")
+
+##  Count the number of blanks in each column using the countColumnBlanks function and also the percentage.
+##  Put these values into a new dataframe "blanksPerColumn". 
+##  Display the count of blanks per column to the console, sorted by the percentage.
+
+blanksPerColumn <- countColumnBlanks( d311 )
+cat("\nNumber and fraction of blank values in each column, sorted descending\n\n")
+print(blanksPerColumn[ order( -blanksPerColumn$fractionBlank ), ])
+
+
+##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
 d311$created_date <- convertToDateObject( d311$created_date )
 d311$closed_date  <- convertToDateObject( d311$closed_date )
 d311$due_date     <- convertToDateObject( d311$due_date )
-
 d311$resolution_action_updated_date <- convertToDateObject( d311$resolution_action_updated_date )
 
-# Change the lat/long and state_plane numeric fields into type "number"
+##  Compute and store "duration" in a new additional column for the dataframe "d311".
+##  Duration is the time between created_date and closed_date, although due to data errors the value may be negative.
+d311$duration <- as.numeric(difftime(d311$closed_date, d311$created_date, units = c("mins")  ))
+
+## Change the lat/long and state_plane fields into type "numeric".
 d311$x_coordinate_state_plane <- as.numeric( d311$x_coordinate_state_plane )
 d311$y_coordinate_state_plane <- as.numeric (d311$y_coordinate_state_plane )
 d311$latitude <- as.numeric( d311$latitude )
 d311$longitude <- as.numeric( d311$longitude )
 
+##  Identify the Service Records that were closed before they were create, i.e. bad dates.
+closedBeforOpened <- findBadDates( d311,
+                                  which( colnames(d311) == "unique_key" ), 
+                                  which( colnames(d311) == "created_date" ), 
+                                  which( colnames(d311) == "closed_date" ), 
+                                  which( colnames(d311) == "duration" ),
+                                  which( colnames(d311) == "agency") )
 
-##  Store "duration" in a new additional column for  the dataframe "d311"
-d311$duration <- as.numeric(d311$closed_date - d311$created_date)
+cat( "\nNumber of SRs 'closed' before 'opened': ", format( nrow(closedBeforOpened), big.mark = ",", scientific = FALSE), "\n\n" )
+##
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
+##################################################################################
 
+##
 # use colSums() function to check which columns have no values
 #blank_cols <- colSums(is.na(d311) | d311 == "") == nrow(d311)
 
