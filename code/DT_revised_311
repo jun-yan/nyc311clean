@@ -188,7 +188,7 @@ findBadZipcodes <- function( dataset, zipcodeReference, data1Position, data2Posi
 
 ##  Create the path to the file containing the 311 Service Request data.
 
-data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "311_Q1_2023.csv") 
+data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "311_data.csv") 
 data2File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "USPS_zipcodes.csv") 
 
 ##  The file contains column names in the "header" line.
@@ -228,7 +228,7 @@ badZipcodes2 <- findBadZipcodes( d311, zipCodesOnly,
                                                 which( colnames( d311 ) == "unique_key" ),
                                                 which( colnames( d311 ) == "zip_codes" ),
                                                 which( colnames( d311 ) == "agency" ))
-cat("\nNumber of bad zip codes in 'zip_codes' (a computed field:", format( nrow(badZipcodes2), 
+cat("\nNumber of bad zip codes in 'zip_codes' (a computed field):", format( nrow(badZipcodes2), 
                                                              big.mark = ",", scientific = FALSE), 
                                                             "which is", percent( nrow(badZipcodes2)/numRows, accuracy = 0.0001), 
                                                             "fraction of the overall data.\n\n")
