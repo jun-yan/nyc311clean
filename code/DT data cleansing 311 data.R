@@ -116,6 +116,7 @@ findBadDates <- function( dataset, data1Position, data2Position, data3Position, 
       rowCount <- nrow( dataset )         ##  Value used to control stepping through the data set
   
 ##  Step through the 311 dataframe to build a new dataframe containing created, closed, and duration values <0.
+
       for ( row in 1:rowCount )  {
         if ( !is.na(dataset[row, data4Position] ) ) {     ##  Exclude durations == "NA" which exist if there is no closed_date, i.e. SR is still open.
           if ( dataset[row, data4Position] < 0 ) {      ##  Look for durations that are <0, indicated closed before created.
@@ -124,7 +125,6 @@ findBadDates <- function( dataset, data1Position, data2Position, data3Position, 
                                           closed_date =  dataset[row, data3Position], 
                                           duration =      dataset[row, data4Position],
                                           agency = dataset[row, data5position] )
-              if ( dataset[row, data1Position] == 56913080 ) { print(newRow)}
               results <- rbind( results, newRow )
       }
     }
@@ -218,7 +218,6 @@ findMismatchedFields <- function( dataset, data1Position, data2Positon, data3Pos
 }
 #
 
-
 #########################################################################
 findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data2Position, data3Position ) { 
   ##	data1Position is the column # in the dataset array containing the uniqueID, aka the "key"
@@ -241,8 +240,10 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
   
   referenceZipcodes <- referenceZipcodes[ order( referenceZipcodes[, 1] ), ]
   referenceZipcodes <- data.frame( referenceZipcodes, stringsAsFactors = FALSE )
-  uniqueZipcodes <- sort( unique(  dataset[ , data2Position ], na.rm = TRUE ) )
-  uniqueZipcodes <- data.frame( uniqueZipcodes, stringsAsFactors = FALSE )
+  uniqueZipcodes <- unique(  dataset[ , data2Position ], na.rm = TRUE )
+  noBlanks <- uniqueZipcodes[uniqueZipcodes !=""]
+  sortedZipcodes <- sort( noBlanks )
+  uniqueZipcodes <- data.frame( sortedZipcodes, stringsAsFactors = FALSE )
 #  cat("\n# of entries in the zip code field", nrow( dataset ) )
 #  cat("\n# of non-blank zip codes in data", sum( !is.na( dataset[, data2Position] ) & dataset[, data2Position] != "" ) )
 #  cat("\n# of uniqueZipCodes in the data", nrow( uniqueZipcodes ))
@@ -282,7 +283,6 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
             tempInvalid <- data.frame ( dataset[ row, data3Position ], 
                                         dataset[ row, data2Position ], 
                                         dataset[ row, data1Position ] ) 
-#            results <- rbind( results, tempInvalid[1,] )
             results2[rowIndex, ] <- tempInvalid
             rowIndex <- rowIndex + 1
         } else{
@@ -291,14 +291,8 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
         }
       }
   stopTime <- as.POSIXct( Sys.time() )
-#  cat("\n Number of rows in results2", nrow(results2 ) )
   results2 <- results2[ seq_len( rowIndex -1 ), ]# Trim empty rows from the 'results2' dataframe
-#  cat("\n Number of rows in results2 after trim", nrow(results2 ) )
-  cat("\n")
-#  cat("\nResults2 data")
-#  print( head( results2 ) )
   stopTimeFormatted <- format( stopTime, "%H:%M:%S" )
-#  cat( "\nEnd lookup of all zipcodes in invalidZipcodes:", stopTimeFormatted )
   duration <- sprintf( "%.2f", difftime( stopTime, startTime, units = "secs"))
   
   cat( "\n\nTime spent in lookup of ALL dataset zipcodes %in% invalidZipcodes: ", duration, "seconds." ) 
@@ -315,6 +309,12 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
 
 areAllDates <- function ( dateField ) {
   allDates <- suppressWarnings( !is.na( as.Date( dateField[dateField != ""],format = "%m/%d/%Y %I:%M:%S %p"  ) ) )
+  if( !all( allDates ) ) {
+    # find indices of values that are not dates
+    not_date_indices <- which(is.na(as.Date(dateField[dateField], format="%m/%d/%Y %I:%M:%S %p")))
+    cat("Values that are not dates:")
+    print( dateField[not_date_indices] )
+  }
   return ( all( allDates ) )
  }  
 
@@ -324,8 +324,30 @@ areAllDates <- function ( dateField ) {
 
 areAllNumbers <- function ( numberField ){
   allNumbers <- suppressWarnings( !is.na( as.numeric( numberField[numberField != ""] ) ) )
+  if( !all( allNumbers ) ) {
+    # find indices of values that are not numeric
+    not_numeric_indices <- which(!grepl("^\\d+\\.?\\d*$", numberField[numberField]) | is.na(as.numeric(numberField[numberField])))
+    cat("\nValues that are not numeric:")
+    print( numberField[not_numeric_indices] )
+  }
   return ( all( allNumbers ) )
   }
+
+#########################################################################
+
+#Validate that zipcodes are 5 digits in length
+
+areFiveDigits <- function ( zipcodes ){
+  zipcode_pattern <- "^\\d{5}$"
+  is_valid_zipcode <- all(grepl(zipcode_pattern, data$zipcode))
+
+  if( !is_valid_zipcode){
+    not_valid_zipcode_indices <- grep(zipcode_pattern, zipcodes[zipcodes], invert = TRUE)
+    cat("\nZipcodes that are not 5 digits:")
+    print(  zipcode[not_valid_zipcode_indices] )
+  }
+  return ( is_valid_zipcode )
+}
 
 #########################################################################
 
@@ -334,13 +356,19 @@ areAllNumbers <- function ( numberField ){
 areInList <- function ( dataset, listValidValues ){
   dataset <- dataset[dataset != ""]
   inList <- ( dataset %in% listValidValues )
+  if( !all( inList ) ) {
+    # find indices of zipcodes that are not in the validUSPSzipcodes list
+    not_valid_zipcode_indices <- which( !dataset[dataset] %in% listValidValues )
+    cat("\nValues that are not in the list of allowable valuest:")
+    print( dataset[not_valid_zipcode_indices] )..
+  }
   return ( all( inList ) )
 }
 #########################################################################
 
 ##  Create the path to the file containing the 311 Service Request data.
 
-data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "test_sample5.csv") 
+data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "311_Q1_2023.csv") 
 data2File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "USPS_zipcodes.csv") 
 data3File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "NYPDPrecincts2023.csv") 
 data4File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "NYCCityCouncil2023.csv") 
@@ -396,18 +424,21 @@ cat("\nNumber of rows in the 311 SR data set:", format( numRows, big.mark = ",",
 
 cat( "Are all the values in the 'created_date' field dates?", areAllDates( d311$created_date ) )
 cat( "Are all the values in the 'closed_date' field dates?", areAllDates( d311$closed_date ) )
-cat( "Are all the values in the 'due_date' field dates?", areAllDates( d311$due_date ) )
+cat( "\nAre all the values in the 'due_date' field dates?", areAllDates( d311$due_date ) )
 cat( "Are all the values in the 'resolution_action_updated_date' field dates?", areAllDates( d311$resolution_action_updated_date ) )
 
 #########################################################################
 
 cat( "Are all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
-cat( "Are all the values in the 'x_coordinate_state_plane' field numbers?", areAllNumbers( d311$x_coordinate_state_plane ) )
+cat( "Are all the zipcodes in the 'incident_zip' field 5 digitis?", areFiveDigits( d311$incident_zip ) )
+cat( "\nAre all the values in the 'x_coordinate_state_plane' field numbers?", areAllNumbers( d311$x_coordinate_state_plane ) )
 cat( "Are all the values in the 'y_coordinate_state_plane' field numbers?", areAllNumbers( d311$y_coordinate_state_plane ) )
-cat( "Are all the values in the 'latitude' field numbers?", areAllNumbers( d311$latitude ) )
+cat( "\nAre all the values in the 'latitude' field numbers?", areAllNumbers( d311$latitude ) )
 cat( "Are all the values in the 'longitude' field numbers?", areAllNumbers( d311$longitude ) )
+cat( "\nAre all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
 cat( "Are all the values in the 'zip_codes' field numbers?", areAllNumbers( d311$zip_codes ) )
-cat( "Are all the values in the 'community_districts' field numbers?", areAllNumbers( d311$community_districts ) )
+cat( "Are all the zipcodes in the 'zip_codes' field 5 digitis?", areFiveDigits( d311$zip_codes ) )
+cat( "n\Are all the values in the 'community_districts' field numbers?", areAllNumbers( d311$community_districts ) )
 cat( "Are all the values in the 'borough_boundaries' field numbers?", areAllNumbers( d311$borough_boundaries ) )
 cat( "Are all the values in the 'city_council_district' field numbers?", areAllNumbers( d311$city_council_districts ) )
 cat( "Are all the values in the 'police_precincts' field numbers?", areAllNumbers( d311$police_precincts ) )
@@ -417,9 +448,9 @@ cat( "Are all the values in the 'police_precincts' field numbers?", areAllNumber
 cat( "Are all the values in the 'borough' field valid?", areInList( d311$borough,  c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
 cat( "Are all the values in the 'borough_boundaries' field valid?", areInList( d311$borough_boundaries,  c("1", "2", "3", "4", "5") ) )
 cat( "Are all the values in the 'park_borough' field valid?", areInList( d311$park_borough,  c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
-cat( "Are all the values in the 'open_data_channel_type'valid?", areInList( d311$open_data_channel_type,  c("UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER") ) )
-cat( "Are all the values in the 'police_precinct valid?", areInList( d311$police_precincts, precinctsNYPD$nypd_precinct ) )
-cat( "Are all the values in the 'city_council_district valid?", areInList( d311$city_council_districts,  cityCouncilNYC$nyc_city_council ) )
+cat( "\nAre all the values in the 'open_data_channel_type'valid?", areInList( d311$open_data_channel_type,  c("UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER") ) )
+cat( "\nAre all the values in the 'police_precinct valid?", areInList( d311$police_precincts, precinctsNYPD$nypd_precinct ) )
+cat( "\nAre all the values in the 'city_council_district valid?", areInList( d311$city_council_districts,  cityCouncilNYC$nyc_city_council ) )
 
 #########################################################################
 
@@ -444,26 +475,22 @@ if ( nrow( badZipcodes1 ) > 0 ) {
   print( head( badZipcodes1,15 ) )
   sortedData <- as.data.frame(table(badZipcodes1$agency))
   sortedData <- sortedData[order(-sortedData$Freq),]
+  cat("\nSorted by Agency:\n")
   print(sortedData)
 }
 
 # Look for invalid zipcodes in the 'zip_codes' field, Expect a large # 
-#badZipcodes2 <- findInvalidZipcodes( USPSzipcodesOnly, d311,
-#                                     which( colnames( d311 ) == "unique_key" ),
-#                                     which( colnames( d311 ) == "zip_codes" ),
-#                                     which( colnames( d311 ) == "agency" ) )
-
-#stopTime <- as.POSIXct( Sys.time() )
-#stopTimeFormatted <- format( stopTime, "%H:%M:%S" )
-#cat( "\nEnds at", stopTimeFormatted )
-#cat( "\nTime spent in the findBadZipcodes function is: ", sprintf( "%.2f", difftime( stopTime, startTime, units = "mins")), "minutes." ) 
-
+badZipcodes2 <- findInvalidZipcodes( USPSzipcodesOnly, d311,
+                                     which( colnames( d311 ) == "unique_key" ),
+                                     which( colnames( d311 ) == "zip_codes" ),
+                                     which( colnames( d311 ) == "agency" ) )
 numBlankzip_codes <- subset(missingDataPerColumn, field == "zip_codes")$'#blanks'
 cat( "The number of bad zip codes in 'zip_codes' field is", format( nrow( badZipcodes2 ), big.mark = ",", scientific = FALSE ), "representing", 
-                percent( nrow( badZipcodes2 )/numRows, accuracy = 0.01 ), 
-                "of non-blank data." )
+     percent( nrow( badZipcodes2 )/numRows, accuracy = 0.01 ), 
+     "of non-blank data." )
 if ( nrow( badZipcodes2 ) > 0 ) {
   print( head( badZipcodes2, 15 ) )
+  cat("\nSorted by Agency:\n")
   sortedData <- as.data.frame(table(badZipcodes2$agency))
   sortedData <- sortedData[order(-sortedData$Freq),]
   print(sortedData)
@@ -477,7 +504,9 @@ cat( "\nThe number of non-matching boroughs between 'borough' and 'borough_bound
      "representing", percent( nrow( nonMatchingBouroughs )/( numRows - numBlankborough_boundaries ), accuracy = 0.01 ), 
      "of non-blank data." )
 if ( nrow( nonMatchingBouroughs ) > 0 ) { 
+  cat("\n Sample of non-mathcing boroughs\n")
   print(head( nonMatchingBouroughs,15 ) )
+  cat("\nSorted by Agency:\n")
   sortedData <- as.data.frame(table( nonMatchingBouroughs$agency))
   sortedData <- sortedData[order(-sortedData$Freq),]
   print(sortedData)
@@ -486,6 +515,7 @@ if ( nrow( nonMatchingBouroughs ) > 0 ) {
 #########################################################################
 
 ##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
+numBlankClosedDate <- sum(d311$closed_date =="")
 d311$created_date <- convertToDateObject( d311$created_date )
 d311$closed_date  <- convertToDateObject( d311$closed_date )
 d311$due_date     <- convertToDateObject( d311$due_date )
@@ -507,15 +537,20 @@ closedBeforeOpened <- findBadDates( d311,
 
 #########################################################################
 
-numBlankClosedDate <- subset(missingDataPerColumn, field == "closed_date")$'#blanks'
+numBlankClosedDate <- sum(is.na(d311$closed_date))
+
 cat( "The number of SRs 'closed' before 'opened'is ", format( nrow( closedBeforeOpened ), big.mark = ",", scientific = FALSE ), "representing",
      percent( nrow( closedBeforeOpened )/( numRows - numBlankClosedDate), accuracy = 0.01 ), 
      "of non-blank data." )
+
 if ( nrow( closedBeforeOpened ) > 0 ) {
-  print( head( closedBeforeOpened, 5 ) )
-  print( tail( closedBeforeOpened, 5))
-  print( as.data.frame( table( closedBeforeOpened$agency ) ) )
-  }
+  sortedClosed <- closedBeforeOpened[ order(closedBeforeOpened$duration),]
+  cat("\nLargest errors:\n")
+  print( head( sortedClosed, 10 ) )
+  cat("\nSmallest errors:\n")
+  print( tail( sortedClosed, 10))
+  print( as.data.frame( table( sortedClosed$agency ) ) )
+}
 
 #########################################################################
 
