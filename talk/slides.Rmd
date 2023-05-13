@@ -1,0 +1,88 @@
+---
+title: "Curation of NYC 311 Request Open Data"
+author: ""     # to be supplied through headers-includes below
+institute: ""  # to be supplied through headers-includes below
+output:
+  beamer_presentation:
+    theme: "AnnArbor"
+    colortheme: "dolphin"
+    slide_level: 2
+#    toc: true
+    number_sections: false
+classoption: "aspectratio=169"
+header-includes:
+  - \usepackage{amsmath, amsfonts, bm}
+  - \usepackage{hyperref}\hypersetup{colorlinks=true, citecolor=blue}
+  - \usepackage{caption}
+  - \usepackage{booktabs}
+  - \usepackage{multirow}
+  - \usepackage{adjustbox}
+  - \setbeamercolor{frametitle}{bg=white}
+  - \AtBeginSection[]
+    {
+    \begin{frame}<beamer>
+      \frametitle{Outline}
+      \tableofcontents[currentsection]
+    \end{frame}
+    }
+  - \AtBeginDocument
+    {
+    \title[NYC 311 Requests]{Curation of NYC 311 Request Open Data}
+    \author[Jun Yan]{David Tussey\inst{1} and Jun Yan\inst{2}}
+    \institute[University of Connecticut]{\inst{1} Independent Researcher\\
+    \inst{2} University of Connecticut}
+    }
+bibliography: ["../manuscript/ref.bib"]
+link-citations: true
+link-color: true
+# csl: apa.csl
+---
+
+# Introduction
+
+## NYC 311 Open Data
+
+- Open data is great ... trend ...
+- NYC is a forerunner in open data ...
+- 311 request data is one of the most popular open data at NYC Open Data
+- Found some issues from teaching ...
+
+# Issues with NYC 311 Requests Data
+
+## Data Structure
+
+Demonstration with data for the week of Januare 15, 2023, 
+downloaded on February 22, 2023.
+```{r read}
+d311 <- read.csv("../data/nyc311_011523-012123_by022023.csv", header = TRUE)
+names(d311) <- tolower(gsub("\\.", "_", names(d311)))
+
+names(d311)
+```
+
+
+## Invalid Created/Closed Date
+```{r date}
+t1 <- strptime(d311$closed_date, format = '%m/%d/%Y %I:%M:%S %p')
+t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
+tt <- as.numeric(difftime(t1, t0, units =  "secs"))
+sum(tt < 0, na.rm = TRUE)
+head(subset(d311, tt < 0, select = c("created_date", "closed_date")), 5)
+```
+
+
+## Invalid Zipcode
+
+
+
+
+## Inconsistent Data
+
+
+# Suggestions on Open Data Releasing Protocols
+
+
+
+
+# References {.allowframebreaks} 
+\scriptsize
