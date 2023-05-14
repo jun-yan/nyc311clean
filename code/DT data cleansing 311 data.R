@@ -240,8 +240,10 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
   
   referenceZipcodes <- referenceZipcodes[ order( referenceZipcodes[, 1] ), ]
   referenceZipcodes <- data.frame( referenceZipcodes, stringsAsFactors = FALSE )
+  
   uniqueZipcodes <- unique(  dataset[ , data2Position ], na.rm = TRUE )
-  noBlanks <- uniqueZipcodes[uniqueZipcodes !=""]
+  uniqueZipcodes <- na.omit(uniqueZipcodes)
+  noBlanks <- uniqueZipcodes[ uniqueZipcodes !="" & uniqueZipcodes != "N/A" & uniqueZipcodes != "na" ]
   sortedZipcodes <- sort( noBlanks )
   uniqueZipcodes <- data.frame( sortedZipcodes, stringsAsFactors = FALSE )
 #  cat("\n# of entries in the zip code field", nrow( dataset ) )
@@ -344,7 +346,7 @@ areAllNumbers <- function ( numberField ){
 areFiveDigits <- function ( zipcodes ){
   # Identify the non-blank values using nzchar()
   # Subset the vector to keep only the non-blank values
-  zipcodes <- subset(zipcodes, zipcodes !="N/A")
+  zipcodes <- subset(zipcodes, zipcodes !="")
   non_blank_indices <- which(nzchar(zipcodes))
   zipcodes <- zipcodes[non_blank_indices]
   
@@ -353,7 +355,7 @@ areFiveDigits <- function ( zipcodes ){
   is_valid_zipcode <- all(grepl(zipcode_pattern, zipcodes))
   if( !is_valid_zipcode){
     not_valid_zipcode_indices <- grep(zipcode_pattern, zipcodes, invert = TRUE)
-    cat("\nNon 5-digit or non-numeric zipcodes:", zipcodes[not_valid_zipcode_indices], "\n")
+    cat("\n\n*****Non 5-digit and/or non-numeric zipcodes found:", zipcodes[not_valid_zipcode_indices])
   }
   return ( is_valid_zipcode )
 }
@@ -385,7 +387,7 @@ areInList <- function ( dataset, listValidValues ){
 
 ##  Create the path to the file containing the 311 Service Request data.
 
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "test_sample5.csv" ) 
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "311_Mar_2023.csv" ) 
 data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
 data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
 data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
@@ -407,12 +409,6 @@ data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub
 # Load the USPS zipcode file
 USPSzipcodes <- read.csv( data2File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data2File ) ) ) )
 USPSzipcodes <- makeColNamesUserFriendly( USPSzipcodes )
-
-#########################################################################
-
-# Tailor the zipcodes to just those in NY, CT, and NJ
-desiredDistricts <- c( "CONNECTICUT", "NEW JERSEY", "NEW YORK 1", "NEW YORK 3", "NEW YORK 2", "PENNSYLVANIA 1", "DE-PA 2" )
-USPSzipcodes <- subset( USPSzipcodes, district_name %in% desiredDistricts)
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
 zipRows <- nrow( USPSzipcodesOnly )
 
@@ -434,7 +430,22 @@ numCityCouncil <- nrow( cityCouncilNYC )
 d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 d311 <- makeColNamesUserFriendly( d311 )
 numRows <- nrow( d311 )
-cat("\nNumber of rows in the 311 SR data set:", format( numRows, big.mark = ",", scientific = FALSE), "\n" )
+cat("\nRows in the 311 SR data set:", format( numRows, big.mark = ",", scientific = FALSE), 
+    "covering timeframe", min( d311$created_date, na.rm=TRUE ), "through", max(d311$created_date, na.rm = TRUE) )
+sortedData <- as.data.frame(table(d311$agency))
+sortedData <- sortedData[order(-sortedData$Freq),]
+names( sortedData) <- c("Agency", "no_of_SRs")
+sortedData$Percentage <- round( ( (sortedData$no_of_SRs/numRows )*100 ), 2)
+sortedData$no_of_SRs <- format( sortedData$no_of_SRs, big.mark = ",", scientific = FALSE)
+cat("\nSRs Sorted by Agency:\n")
+print(sortedData)
+
+#########################################################################
+
+missingDataPerColumn <- countColumnsMissingData( d311 )
+missingDataPerColumn[, sapply( missingDataPerColumn, is.numeric )] <- round( missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric )], 4)
+cat( "\n\nNumber and fraction of blank values in each column, sorted descending\n" )
+print( missingDataPerColumn[ order( -missingDataPerColumn[ , 2] ), ])
 
 #########################################################################
 
@@ -460,7 +471,7 @@ cat( "\nAre all the values in the 'city_council_district' field numbers?", areAl
 cat( "\nAre all the values in the 'police_precincts' field numbers?", areAllNumbers( d311$police_precincts )[1] )
 
 #########################################################################
-
+cat("\n\n########## Check for allowable values ##########\n")
 results <- areInList( d311$borough,  data.frame(values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
 cat( "\nAre all the values in the 'borough' field valid?", results$checkIt ) 
 if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
@@ -483,15 +494,19 @@ if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$no
 
 results <- areInList( d311$police_precincts, precinctsNYPD )
 cat( "\n\nAre all the values in the 'police_precinct valid?", results$checkIt )
-if (!results$checkIt) { cat("\nNumber of non-allowable value", 
-  format( length(results$non_allowable), big.mark = ",", scientific = FALSE ), "\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) ) }
+if (!results$checkIt) { 
+  numBlankpolice_precinct <- subset(missingDataPerColumn, field == "police_precincts")$'#blanks'
+  cat("\nInvalid values in the 'police_precincts' field number", format(length(results$non_allowable), big.mark = ",", scientific = FALSE ), 
+      "representing", percent( length(results$non_allowable)/(numRows - numBlankpolice_precinct), accuracy = 0.01 ), 
+      "of non-blank data.")
+  cat("\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) )
+  }
+#  cat("\nNumber of non-allowable value", 
+#                            format( length(results$non_allowable), big.mark = ",", scientific = FALSE ), "\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) ) }
 
-#########################################################################
+#if (!results$checkIt) { cat("\nNumber of non-allowable value", 
+#  format( length(results$non_allowable), big.mark = ",", scientific = FALSE ), "\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) ) }
 
-missingDataPerColumn <- countColumnsMissingData( d311 )
-missingDataPerColumn[, sapply( missingDataPerColumn, is.numeric )] <- round( missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric )], 4)
-cat( "\n\nNumber and fraction of blank values in each column, sorted descending\n" )
-print( missingDataPerColumn[ order( -missingDataPerColumn[ , 2] ), ])
 
 #########################################################################
 
@@ -502,7 +517,7 @@ badZipcodes1 <- findInvalidZipcodes( USPSzipcodesOnly, d311,
                                   which( colnames( d311 )  == "agency") )
 
 numBlankincident_zip <- subset(missingDataPerColumn, field == "incident_zip")$'#blanks'
-cat("\nInvalid zipcodes in the 'incident_zip' field number", format( nrow( badZipcodes1 ), big.mark = ",", scientific = FALSE ), "representing", 
+cat("\n\nInvalid zipcodes in the 'incident_zip' field number", format( nrow( badZipcodes1 ), big.mark = ",", scientific = FALSE ), "representing", 
                             percent( nrow( badZipcodes1 )/(numRows - numBlankincident_zip), accuracy = 0.01 ), 
                             "of non-blank data.\n")
 if ( nrow( badZipcodes1 ) > 0 ) {
@@ -549,7 +564,7 @@ if ( nrow( nonMatchingBouroughs ) > 0 ) {
 #########################################################################
 
 ##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
-numBlankClosedDate <- sum(d311$closed_date =="")
+#numBlankClosedDate <- sum(d311$closed_date =="")
 d311$created_date <- convertToDateObject( d311$created_date )
 d311$closed_date  <- convertToDateObject( d311$closed_date )
 d311$due_date     <- convertToDateObject( d311$due_date )
