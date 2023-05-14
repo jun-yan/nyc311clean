@@ -323,28 +323,37 @@ areAllDates <- function ( dateField ) {
 #Validate that number fields are all numeric
 
 areAllNumbers <- function ( numberField ){
+  # Identify the non-blank values using nzchar()
+  non_blank_indices <- which(nzchar(numberField))
+  # Subset the vector to keep only the non-blank values
+  numberField <- numberField[non_blank_indices]
+  
   allNumbers <- suppressWarnings( !is.na( as.numeric( numberField[numberField != ""] ) ) )
   if( !all( allNumbers ) ) {
     # find indices of values that are not numeric
-    not_numeric_indices <- which(!grepl("^\\d+\\.?\\d*$", numberField[numberField]) | is.na(as.numeric(numberField[numberField])))
-    cat("\nValues that are not numeric:")
-    print( numberField[not_numeric_indices] )
+    non_numeric_values <- numberField[grepl("[^[:digit:]]", numberField)]
+    cat("Non-numeric values in the vector:", non_numeric_values, "\n")
   }
   return ( all( allNumbers ) )
   }
 
 #########################################################################
 
-#Validate that zipcodes are 5 digits in length
+#Validate that zipcodes are 5 digits in length and also numeric
 
 areFiveDigits <- function ( zipcodes ){
+  # Identify the non-blank values using nzchar()
+  # Subset the vector to keep only the non-blank values
+  zipcodes <- subset(zipcodes !="N/A")
+  non_blank_indices <- which(nzchar(zipcodes))
+  zipcodes <- zipcodes[non_blank_indices]
+  
+  # Identify the 5-digit numeric values using a regular expression
   zipcode_pattern <- "^\\d{5}$"
-  is_valid_zipcode <- all(grepl(zipcode_pattern, data$zipcode))
-
+  is_valid_zipcode <- all(grepl(zipcode_pattern, zipcodes))
   if( !is_valid_zipcode){
-    not_valid_zipcode_indices <- grep(zipcode_pattern, zipcodes[zipcodes], invert = TRUE)
-    cat("\nZipcodes that are not 5 digits:")
-    print(  zipcode[not_valid_zipcode_indices] )
+    not_valid_zipcode_indices <- grep(zipcode_pattern, zipcodes, invert = TRUE)
+    cat("\nNon 5-digit or non-numeric zipcodes:", zipcodes[not_valid_zipcode_indices], "\n")
   }
   return ( is_valid_zipcode )
 }
@@ -354,24 +363,32 @@ areFiveDigits <- function ( zipcodes ){
 #Validate that all fields are in the list of allowable values
 
 areInList <- function ( dataset, listValidValues ){
-  dataset <- dataset[dataset != ""]
-  inList <- ( dataset %in% listValidValues )
+  # Identify the non-blank values using nzchar()
+  # Subset the vector to keep only the non-blank values
+  non_blank_indices <- which(nzchar(dataset))
+  dataset <- dataset[non_blank_indices]
+  dataset <- na.omit(dataset)
+  
+  inList <- ( dataset %in% listValidValues[, 1] )
+  notInList <- dataset[!inList]
+
   if( !all( inList ) ) {
-    # find indices of zipcodes that are not in the validUSPSzipcodes list
-    not_valid_zipcode_indices <- which( !dataset[dataset] %in% listValidValues )
-    cat("\nValues that are not in the list of allowable valuest:")
-    print( dataset[not_valid_zipcode_indices] )..
+    # Find values in dataset that are not in listValidValues
+#    not_in_list <- dataset[!(dataset %in% listValidValues[, 1])]
+#    cat("\nValues that are not in the list of allowable valuest:", notInList)
+#    browser()
   }
-  return ( all( inList ) )
+  results <- list( checkIt = all( inList ), non_allowable = notInList )
+  return ( results )
 }
 #########################################################################
 
 ##  Create the path to the file containing the 311 Service Request data.
 
-data1File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "311_Q1_2023.csv") 
-data2File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "USPS_zipcodes.csv") 
-data3File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "NYPDPrecincts2023.csv") 
-data4File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCleansingProject", "NYCCityCouncil2023.csv") 
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "311_data.csv" ) 
+data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
+data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
+data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
 
 ##  The file contains column names in the "header" line.
 ##  The R "read.csv" function uses a "." to replace the spaces in column names. This makes the column names
@@ -390,12 +407,11 @@ data4File <- file.path("C:", "Users", "david", "OneDrive", "Documents", "DataCle
 # Load the USPS zipcode file
 USPSzipcodes <- read.csv( data2File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data2File ) ) ) )
 USPSzipcodes <- makeColNamesUserFriendly( USPSzipcodes )
-#cat("\nNumber of zipcodes in the US", format( nrow( USPSzipcodes ), big.mark = ",", scientific = FALSE))
 
 #########################################################################
 
 # Tailor the zipcodes to just those in NY, CT, and NJ
-desiredDistricts <- c( "CONNECTICUT", "NEW JERSEY", "NEW YORK 1", "NEW YORK 3", "NEW YORK 2" )
+desiredDistricts <- c( "CONNECTICUT", "NEW JERSEY", "NEW YORK 1", "NEW YORK 3", "NEW YORK 2", "PENNSYLVANIA 1", "DE-PA 2" )
 USPSzipcodes <- subset( USPSzipcodes, district_name %in% desiredDistricts)
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
 zipRows <- nrow( USPSzipcodesOnly )
@@ -408,7 +424,7 @@ numPrecincts <- nrow( precinctsNYPD )
 
 #########################################################################
 
-cityCouncilNYC <- read.csv( data4File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data3File ))))
+cityCouncilNYC <- read.csv( data4File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data4File ))))
 cityCouncilNYC <- makeColNamesUserFriendly( cityCouncilNYC )
 numCityCouncil <- nrow( cityCouncilNYC )
 
@@ -429,28 +445,51 @@ cat( "Are all the values in the 'resolution_action_updated_date' field dates?", 
 
 #########################################################################
 
-cat( "Are all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
-cat( "Are all the zipcodes in the 'incident_zip' field 5 digitis?", areFiveDigits( d311$incident_zip ) )
+#cat( "Are all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
+cat( "Are all the zipcodes in the 'incident_zip' field 5 numeric digits?", areFiveDigits( d311$incident_zip ) )
+
 cat( "\nAre all the values in the 'x_coordinate_state_plane' field numbers?", areAllNumbers( d311$x_coordinate_state_plane ) )
 cat( "Are all the values in the 'y_coordinate_state_plane' field numbers?", areAllNumbers( d311$y_coordinate_state_plane ) )
+
 cat( "\nAre all the values in the 'latitude' field numbers?", areAllNumbers( d311$latitude ) )
 cat( "Are all the values in the 'longitude' field numbers?", areAllNumbers( d311$longitude ) )
-cat( "\nAre all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
-cat( "Are all the values in the 'zip_codes' field numbers?", areAllNumbers( d311$zip_codes ) )
-cat( "Are all the zipcodes in the 'zip_codes' field 5 digitis?", areFiveDigits( d311$zip_codes ) )
-cat( "n\Are all the values in the 'community_districts' field numbers?", areAllNumbers( d311$community_districts ) )
+#cat( "\nAre all the values in the 'incident_zip' field numbers?", areAllNumbers( d311$incident_zip ) )
+#cat( "Are all the values in the 'zip_codes' field numbers?", areAllNumbers( d311$zip_codes ) )
+
+cat( "Are all the zipcodes in the 'zip_codes' field 5 numeric digits?", areFiveDigits( d311$zip_codes ) )
+
+cat( "\nAre all the values in the 'community_districts' field numbers?", areAllNumbers( d311$community_districts )[1] )
 cat( "Are all the values in the 'borough_boundaries' field numbers?", areAllNumbers( d311$borough_boundaries ) )
 cat( "Are all the values in the 'city_council_district' field numbers?", areAllNumbers( d311$city_council_districts ) )
-cat( "Are all the values in the 'police_precincts' field numbers?", areAllNumbers( d311$police_precincts ) )
+
+cat( "Are all the values in the 'police_precincts' field numbers?", areAllNumbers( d311$police_precincts )[1] )
 
 #########################################################################
 
-cat( "Are all the values in the 'borough' field valid?", areInList( d311$borough,  c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
-cat( "Are all the values in the 'borough_boundaries' field valid?", areInList( d311$borough_boundaries,  c("1", "2", "3", "4", "5") ) )
-cat( "Are all the values in the 'park_borough' field valid?", areInList( d311$park_borough,  c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
-cat( "\nAre all the values in the 'open_data_channel_type'valid?", areInList( d311$open_data_channel_type,  c("UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER") ) )
-cat( "\nAre all the values in the 'police_precinct valid?", areInList( d311$police_precincts, precinctsNYPD$nypd_precinct ) )
-cat( "\nAre all the values in the 'city_council_district valid?", areInList( d311$city_council_districts,  cityCouncilNYC$nyc_city_council ) )
+results <- areInList( d311$borough,  data.frame(values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
+cat( "Are all the values in the 'borough' field valid?", results$checkIt ) 
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
+results <- areInList( d311$borough_boundaries,  data.frame(values = c("1", "2", "3", "4", "5") ))
+cat( "Are all the values in the 'borough_boundaries' field valid?", results$checkIt )
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
+results <- areInList( d311$park_borough,  data.frame( values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
+cat( "Are all the values in the 'park_borough' field valid?", results$checkIt )
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
+results <- areInList( d311$open_data_channel_type, data.frame( values = c( "UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER" ) ) )
+cat( "\nAre all the values in the 'open_data_channel_type'valid?", results$checkIt )
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
+results <- areInList( d311$police_precincts, precinctsNYPD )
+cat( "\nAre all the values in the 'police_precinct valid?", results$checkIt )
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
+results <- areInList( d311$city_council_districts, cityCouncilNYC )
+cat( "\nAre all the values in the 'city_council_district valid?", results$checkIt )
+if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+
 
 #########################################################################
 
