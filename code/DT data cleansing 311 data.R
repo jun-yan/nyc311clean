@@ -69,27 +69,27 @@ countColumnsMissingData <- function( dataset ) {
                         fractionUnknown = numeric() )
 
   rowCount <- nrow( dataset )    ## Count the number of rows to step through. Used to compute % blank.
-  
+#  cat("\nNumber of rows passed to function", rowCount)
   ##  Step through the 311 dataframe to build the new dataframe containing column blank counts
   for ( col in names( dataset ) ) {
-    numberOfBlanks <- sum( is.na( dataset[col]) | dataset[col] == "" ) 
+    numberOfBlanks <- sum( dataset[col] == "" ) 
     
-    numberOfUnspecifieds <- sum( is.na( dataset[col]) | dataset[col] == "Unspecified" ) 
+    numberOfUnspecifieds <- sum( dataset[col] == "Unspecified" ) 
 
-    numberOfUnknowns <- sum( is.na( dataset[col] ) | dataset[col] == "UNKNOWN" | dataset[col] == "OTHER"  ) 
+    numberOfUnknowns <- sum( dataset[col] == "UNKNOWN"  ) 
+#    cat("\nvalues", col, numberOfBlanks, numberOfUnspecifieds, numberOfUnknowns)
     newRow <- data.frame( columnName =    col, 
                           blankCount =    numberOfBlanks, 
-                          fractionBlank = round(numberOfBlanks / rowCount, 6),
+                          fractionBlank = round(numberOfBlanks / rowCount, 4),
                           unspecifiedCount =    numberOfUnspecifieds, 
-                          fractionUnspecified = round(numberOfUnspecifieds / rowCount, 6),
+                          fractionUnspecified = round(numberOfUnspecifieds / rowCount, 4),
                           unknownCount =    numberOfUnknowns, 
-                          fractionUnknown = round(numberOfUnknowns / rowCount, 6))
+                          fractionUnknown = round(numberOfUnknowns / rowCount, 4))
     results <- rbind( results, newRow )
   }
   
-  
   ## return the newly created dataframe with the column blank counts.   
-  if (nrow(results) > 0) {names (results) <- c( "field", "#blanks","%blank", "#unspecified", "%unspecified", "#unknowns", "%Unknown") }
+  if (nrow(results) > 0) {names (results) <- c( "field", "blanks","pctBlank", "Unspecified", "pctUnspecified", "unknowns", "pctUnknown") }
   return( results )              
 }
 ##
@@ -157,7 +157,7 @@ mismatchedBoroughs <- function( dataset ) {
         if (boroughData[row,2] == "" || boroughData[row,2] == "Unspecified" ) {
           next                        
         } else {
-            if ( boroughData[row,2] != boroughData[row, 3] ) { 
+            if ( boroughData[row, 3] != boroughData[row,2] ) { 
               newRow <- data.frame( unique_key =   boroughData[row, 1],
                                   boroughData[row, 2],
                                   boroughData[row, 3],
@@ -168,8 +168,6 @@ mismatchedBoroughs <- function( dataset ) {
          }
         }
       
-#  cat("\n class of results", class( results))
-#  print( results )
   if ( nrow( results ) > 0 ) { names( results ) <- c( "key","borough", "borough_boundaries", "agency" ) }
   if ( nrow( results ) > 0 ) { results <- results[ order( results$agency, results$borough, results$key ), ] }
   return( results )      
@@ -387,7 +385,7 @@ areInList <- function ( dataset, listValidValues ){
 
 ##  Create the path to the file containing the 311 Service Request data.
 
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "311_Mar_2023.csv" ) 
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "311_Mar_2023.csv")
 data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
 data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
 data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
@@ -443,8 +441,11 @@ print(sortedData)
 #########################################################################
 
 missingDataPerColumn <- countColumnsMissingData( d311 )
-missingDataPerColumn[, sapply( missingDataPerColumn, is.numeric )] <- round( missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric )], 4)
-cat( "\n\nNumber and fraction of blank values in each column, sorted descending\n" )
+missingDataPerColumn[, sapply( missingDataPerColumn, is.numeric )] <- missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric )]
+cat( "\n\nNumber and percentage of blank values in each column, sorted descending\n" )
+missingDataPerColumn$pctBlank <- missingDataPerColumn$pctBlank * 100
+missingDataPerColumn$pctUnspecified <- missingDataPerColumn$pctUnspecified * 100
+missingDataPerColumn$pctUnknown <- missingDataPerColumn$pctUnknown * 100
 print( missingDataPerColumn[ order( -missingDataPerColumn[ , 2] ), ])
 
 #########################################################################
@@ -495,11 +496,11 @@ if (!results$checkIt) { cat("\nNumber of non-allowable value", length(results$no
 results <- areInList( d311$police_precincts, precinctsNYPD )
 cat( "\n\nAre all the values in the 'police_precinct valid?", results$checkIt )
 if (!results$checkIt) { 
-  numBlankpolice_precinct <- subset(missingDataPerColumn, field == "police_precincts")$'#blanks'
+  numBlankpolice_precinct <- missingDataPerColumn[missingDataPerColumn$field == "police_precincts", "blanks"]
   cat("\nInvalid values in the 'police_precincts' field number", format(length(results$non_allowable), big.mark = ",", scientific = FALSE ), 
       "representing", percent( length(results$non_allowable)/(numRows - numBlankpolice_precinct), accuracy = 0.01 ), 
       "of non-blank data.")
-  cat("\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) )
+  cat("\nSampling of non-allowable Police Precinct values:", head(unique(results$non_allowable), 10), sep = "\n")
   }
 #  cat("\nNumber of non-allowable value", 
 #                            format( length(results$non_allowable), big.mark = ",", scientific = FALSE ), "\nSampling of non-allowable Police Precinct values:\n", head(results$non_allowable, 10) ) }
@@ -516,7 +517,7 @@ badZipcodes1 <- findInvalidZipcodes( USPSzipcodesOnly, d311,
                                   which( colnames( d311 ) == "incident_zip" ),
                                   which( colnames( d311 )  == "agency") )
 
-numBlankincident_zip <- subset(missingDataPerColumn, field == "incident_zip")$'#blanks'
+numBlankincident_zip <- missingDataPerColumn[missingDataPerColumn$field == "incident_zip", "blanks"]
 cat("\n\nInvalid zipcodes in the 'incident_zip' field number", format( nrow( badZipcodes1 ), big.mark = ",", scientific = FALSE ), "representing", 
                             percent( nrow( badZipcodes1 )/(numRows - numBlankincident_zip), accuracy = 0.01 ), 
                             "of non-blank data.\n")
@@ -533,7 +534,7 @@ badZipcodes2 <- findInvalidZipcodes( USPSzipcodesOnly, d311,
                                      which( colnames( d311 ) == "unique_key" ),
                                      which( colnames( d311 ) == "zip_codes" ),
                                      which( colnames( d311 ) == "agency" ) )
-numBlankzip_codes <- subset(missingDataPerColumn, field == "zip_codes")$'#blanks'
+numBlankzip_codes <- missingDataPerColumn[missingDataPerColumn$field == "zip_codes", "blanks"]
 cat( "\nInvalid zipcodes in the 'zip_codes' field number", format( nrow( badZipcodes2 ), big.mark = ",", scientific = FALSE ), "representing", 
      percent( nrow( badZipcodes2 )/numRows, accuracy = 0.01 ), 
      "of non-blank data.\n" )
@@ -548,10 +549,10 @@ if ( nrow( badZipcodes2 ) > 0 ) {
 #########################################################################
 
 nonMatchingBouroughs <- mismatchedBoroughs( d311 )
-numBlankborough_boundaries <- subset(missingDataPerColumn, field == "borough_boundaries")$'#blanks'
+numBlankborough_boundaries <- missingDataPerColumn[missingDataPerColumn$field == "borough_boundaries", "blanks"]
 cat( "\nNon-matches between the 'borough' and 'borough_boundaries fields number", format( nrow( nonMatchingBouroughs ), big.mark = ",", scientific = FALSE ), 
      "representing", percent( nrow( nonMatchingBouroughs )/( numRows - numBlankborough_boundaries ), accuracy = 0.01 ), 
-     "of non-blank data.\n" )
+     "of non-blank/unspecified data\n" )
 if ( nrow( nonMatchingBouroughs ) > 0 ) { 
   cat( "\n Sample of non-matching boroughs\n" )
   print(head( nonMatchingBouroughs, 15 ) )
@@ -586,7 +587,7 @@ closedBeforeOpened <- findBadDates( d311,
 
 #########################################################################
 
-numBlankClosedDate <- sum(is.na(d311$closed_date))
+numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
 cat( "\nSRs 'closed' before they were 'opened' numnber", format( nrow( closedBeforeOpened ), big.mark = ",", scientific = FALSE ), "representing",
      percent( nrow( closedBeforeOpened )/( numRows - numBlankClosedDate), accuracy = 0.01 ), 
