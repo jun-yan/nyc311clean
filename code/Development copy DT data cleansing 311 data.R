@@ -304,10 +304,10 @@ areInList <- function ( dataset, listValidValues ){
 
 #########################################################################
 ##  Create the path to the file containing the 311 Service Request data.
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "test_sample5.csv")
-data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
-data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
-data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "test_sample3.csv")
+data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
+data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
+data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
 
 ##  The file contains column names in the "header" line.
 ##  The R "read.csv" function uses a "." to replace the spaces in column names. This makes the column names
