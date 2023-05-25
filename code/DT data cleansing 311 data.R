@@ -1,7 +1,7 @@
 #########################################################################
 ##  Install necessary packages
-install.packages( "scales" )
-install.packages( "stringr" )
+install.packages( "scales",  repos = "https://mirrors.nics.utk.edu/cran/")
+install.packages( "stringr", repos = "https://mirrors.nics.utk.edu/cran/")
 library( scales )
 library( stringr )
 
@@ -304,7 +304,7 @@ areInList <- function ( dataset, listValidValues ){
 
 #########################################################################
 ##  Create the path to the file containing the 311 Service Request data.
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "311_Mar_2023.csv")
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "test_sample5.csv")
 data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
 data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
 data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "GitHub", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
@@ -351,8 +351,9 @@ sortedData <- sortedData[order(-sortedData$Freq),]
 names( sortedData) <- c("Agency", "no_of_SRs")
 sortedData$Percentage <- round( ( (sortedData$no_of_SRs/numRows )*100 ), 2)
 sortedData$no_of_SRs <- format( sortedData$no_of_SRs, big.mark = ",", scientific = FALSE)
+SRbyAgency <-sortedData
 cat("\nSRs Sorted by Agency:\n")
-print(sortedData)
+print(SRbyAgency)
 
 #########################################################################
 missingDataPerColumn <- countColumnsMissingData( d311 )
@@ -432,7 +433,8 @@ if ( nrow( badZipcodes1 ) > 0 ) {
   sortedData <- as.data.frame(table(badZipcodes1$agency))
   sortedData <- sortedData[order(-sortedData$Freq),]
   cat("\nSorted by Agency:\n")
-  print(sortedData)
+  zip1byAgency <- sortedData
+  print(zip1byAgency)
 }
 
 # Look for invalid zipcodes in the 'zip_codes' field, Expect a large # 
@@ -449,7 +451,8 @@ if ( nrow( badZipcodes2 ) > 0 ) {
   cat("\nOccurrence by Agency:\n")
   sortedData <- as.data.frame(table(badZipcodes2$agency))
   sortedData <- sortedData[order(-sortedData$Freq),]
-  print(sortedData)
+  zip2byAgency <- sortedData
+  print(zip2byAgency)
 }
 
 #########################################################################
@@ -471,7 +474,8 @@ if ( nrow( nonMatchingFields ) > 0 ) {
   cat( "\nSorted by Agency:\n" )
   sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
   sortedData <- sortedData[order(-sortedData$Freq),]
-  print(sortedData)
+  nonMatch1byAgency <- sortedData
+  print(nonMatch1byAgency)
 }
 
 #########################################################################
@@ -492,7 +496,8 @@ if ( nrow( nonMatchingFields ) > 0 ) {
   cat( "\nSorted by Agency:\n" )
   sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
   sortedData <- sortedData[order(-sortedData$Freq),]
-  print(sortedData)
+  nonMatch2byAgency <- sortedData
+  print(nonMatch2byAgency)
 }
 
 #########################################################################
@@ -568,4 +573,5 @@ cat("\nAre all the 'unique_key' fields truely unique?", uniqueKeys)
 cat("\n\n\n END OF PROGRAM")
 
 #########################################################################
+
 
