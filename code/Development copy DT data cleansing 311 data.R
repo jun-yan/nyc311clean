@@ -501,8 +501,55 @@ if ( nrow( nonMatchingFields ) > 0 ) {
 }
 
 #########################################################################
+d311$cross_street_1 <- gsub("\\s+", " ", d311$cross_street_1)
+d311$intersection_street_1 <- gsub("\\s+", " ", d311$intersection_street_1)
+nonMatchingFields <- findMismatchedFields( d311, 
+                                           which( colnames(d311) == "unique_key" ), 
+                                           which( colnames(d311) == "cross_street_1" ), 
+                                           which( colnames(d311) == "intersection_street_1" ), 
+                                           which( colnames(d311) == "agency") )
+
+numBlankcross_street_1 <- missingDataPerColumn[missingDataPerColumn$field == "cross_street_1", "blanks"]
+
+cat( "\nNon-matches between the 'cross_street_1' and 'intersection_1' fields number", format( nrow( nonMatchingFields ), big.mark = ",", scientific = FALSE ), 
+     "representing", percent( nrow( nonMatchingFields )/( numRows - numBlankcross_street_1), accuracy = 0.01 ), 
+     "of non-blank/unspecified data\n" )
+if ( nrow( nonMatchingFields ) > 0 ) { 
+  cat( "\n Sample of non-matching intersection_street_1\n" )
+  print(head( nonMatchingFields, 10 ) )
+  cat( "\nSorted by Agency:\n" )
+  sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
+  sortedData <- sortedData[order(-sortedData$Freq),]
+  nonMatch3byAgency <- sortedData
+  print(nonMatch3byAgency)
+}
+
+#########################################################################
+d311$cross_street_2 <- gsub("\\s+", " ", d311$cross_street_2)
+d311$intersection_street_2 <- gsub("\\s+", " ", d311$intersection_street_2)
+nonMatchingFields <- findMismatchedFields( d311, 
+                                           which( colnames(d311) == "unique_key" ), 
+                                           which( colnames(d311) == "cross_street_2" ), 
+                                           which( colnames(d311) == "intersection_street_2" ), 
+                                           which( colnames(d311) == "agency") )
+
+numBlankcross_street_2 <- missingDataPerColumn[missingDataPerColumn$field == "cross_street_2", "blanks"]
+
+cat( "\nNon-matches between the 'cross_street_2' and 'intersection_2' fields number", format( nrow( nonMatchingFields ), big.mark = ",", scientific = FALSE ), 
+     "representing", percent( nrow( nonMatchingFields )/( numRows - numBlankcross_street_2), accuracy = 0.01 ), 
+     "of non-blank/unspecified data\n" )
+if ( nrow( nonMatchingFields ) > 0 ) { 
+  cat( "\n Sample of non-matching intersection_street_2\n" )
+  print(head( nonMatchingFields, 10 ) )
+  cat( "\nSorted by Agency:\n" )
+  sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
+  sortedData <- sortedData[order(-sortedData$Freq),]
+  nonMatch4byAgency <- sortedData
+  print(nonMatch4byAgency)
+}
+
+#########################################################################
 ##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
-#numBlankClosedDate <- sum(d311$closed_date =="")
 d311$created_date <- convertToDateObject( d311$created_date )
 d311$closed_date  <- convertToDateObject( d311$closed_date )
 d311$due_date     <- convertToDateObject( d311$due_date )
@@ -521,7 +568,6 @@ closedBeforeOpened <- findBadDates( d311,
                                   which( colnames(d311) == "duration" ),
                                   which( colnames(d311) == "agency") )
 
-#########################################################################
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
 cat( "\nSRs 'closed' before they were 'opened' numnber", format( nrow( closedBeforeOpened ), big.mark = ",", scientific = FALSE ), "representing",
@@ -570,7 +616,7 @@ uniqueKeys <- length( unique(d311$unique_key)) == nrow(d311 )
 cat("\nAre all the 'unique_key' fields truely unique?", uniqueKeys)
 
 #########################################################################
-cat("\n\n\n END OF PROGRAM")
+cat("\n\n\n **********END OF PROGRAM**********")
 
 #########################################################################
 
