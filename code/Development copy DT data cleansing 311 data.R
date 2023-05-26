@@ -152,8 +152,15 @@ findMismatchedFields <- function( dataset, data1Position, data2Position, data3Po
     }
   }
   #
-  if ( nrow( results ) > 0 ){ names( results ) <- c( "key","borough", "borough_boundaries", "agency" ) }
-  if ( nrow( results ) > 0 ) { results <- results[ order( results$agency, results$borough, results$key ), ] }
+  if ( nrow( results ) > 0 ){ 
+    colnames(results)[2] <- colnames(dataset)[data2Position]
+    colnames(results)[3] <- colnames(dataset)[data3Position]
+    colnames(results)[4] <- colnames(dataset)[data4Position]
+    
+#    names( results ) <- c( "key","borough", "borough_boundaries", "agency" ) }
+#  if ( nrow( results ) > 0 ) { results <- results[ order( results$agency, results$borough, results$key ), ] 
+    results <- results[ order( results[, 4], results[, 2], results$uniqueKey ), ] 
+  }
   return( results )      
 }
 
@@ -304,7 +311,7 @@ areInList <- function ( dataset, listValidValues ){
 
 #########################################################################
 ##  Create the path to the file containing the 311 Service Request data.
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "test_sample3.csv")
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "311_Feb_2023.csv")
 data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
 data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
 data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
@@ -456,11 +463,11 @@ if ( nrow( badZipcodes2 ) > 0 ) {
 }
 
 #########################################################################
-d311$translatedborough_boundaries <- str_replace_all(d311$borough_boundaries, c("1" = "STATEN ISLAND", "2"= "BROOKLYN", "3" = "QUEENS", "4"="MANHATTAN", "5"= "BRONX"))
+d311$translatedbb <- str_replace_all(d311$borough_boundaries, c("1" = "STATEN ISLAND", "2"= "BROOKLYN", "3" = "QUEENS", "4"="MANHATTAN", "5"= "BRONX"))
 nonMatchingFields <- findMismatchedFields( d311, 
                                            which( colnames(d311) == "unique_key" ), 
                                            which( colnames(d311) == "borough" ), 
-                                           which( colnames(d311) == "translatedborough_boundaries" ), 
+                                           which( colnames(d311) == "translatedbb" ), 
                                            which( colnames(d311) == "agency") )
 
 numBlankborough_boundaries <- missingDataPerColumn[missingDataPerColumn$field == "borough_boundaries", "blanks"]
