@@ -152,15 +152,8 @@ findMismatchedFields <- function( dataset, data1Position, data2Position, data3Po
     }
   }
   #
-  if ( nrow( results ) > 0 ){ 
-    colnames(results)[2] <- colnames(dataset)[data2Position]
-    colnames(results)[3] <- colnames(dataset)[data3Position]
-    colnames(results)[4] <- colnames(dataset)[data4Position]
-    
-#    names( results ) <- c( "key","borough", "borough_boundaries", "agency" ) }
-#  if ( nrow( results ) > 0 ) { results <- results[ order( results$agency, results$borough, results$key ), ] 
-    results <- results[ order( results[, 4], results[, 2], results$uniqueKey ), ] 
-  }
+  if ( nrow( results ) > 0 ){ names( results ) <- c( "key","borough", "borough_boundaries", "agency" ) }
+  if ( nrow( results ) > 0 ) { results <- results[ order( results$agency, results$borough, results$key ), ] }
   return( results )      
 }
 
@@ -170,6 +163,7 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
   ##	data2Position is the column# in the dataset array containing the zipcode to be evaluated 
   ##	data3Position is the organization involved, e.g. the “agency” 
 
+  startTime <- as.POSIXct( Sys.time() )
   maxRows <- nrow( dataset ) 
   # Preallocate the size of the results dataframe to allow for row insertion in lieu of row creation with rbind
   results <- data.frame( badZipcode = character(maxRows),
@@ -239,6 +233,11 @@ findInvalidZipcodes <- function( referenceZipcodes, dataset, data1Position, data
   } else{
     results <- results[FALSE, ]
   }
+  stopTime <- as.POSIXct( Sys.time() )
+  #  stopTimeFormatted <- format( stopTime, "%H:%M:%S" )
+  duration <- sprintf( "%.2f", difftime( stopTime, startTime, units = "secs"))
+  cat( "\n\nTime spent in lookup of ALL dataset zipcodes %in% invalidZipcodes: ", duration, "seconds." ) 
+
   return( results )
 } 
 
@@ -311,7 +310,8 @@ areInList <- function ( dataset, listValidValues ){
 
 #########################################################################
 ##  Create the path to the file containing the 311 Service Request data.
-data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "311_Feb_2023.csv")
+programStart <- as.POSIXct( Sys.time() )
+data1File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "311_Q1_2023.csv")
 data2File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "USPS_zipcodes.csv" ) 
 data3File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYPDPrecincts2023.csv" ) 
 data4File <- file.path( "C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "data", "NYCCityCouncil2023.csv" ) 
@@ -463,11 +463,11 @@ if ( nrow( badZipcodes2 ) > 0 ) {
 }
 
 #########################################################################
-d311$translatedbb <- str_replace_all(d311$borough_boundaries, c("1" = "STATEN ISLAND", "2"= "BROOKLYN", "3" = "QUEENS", "4"="MANHATTAN", "5"= "BRONX"))
+d311$translatedborough_boundaries <- str_replace_all(d311$borough_boundaries, c("1" = "STATEN ISLAND", "2"= "BROOKLYN", "3" = "QUEENS", "4"="MANHATTAN", "5"= "BRONX"))
 nonMatchingFields <- findMismatchedFields( d311, 
                                            which( colnames(d311) == "unique_key" ), 
                                            which( colnames(d311) == "borough" ), 
-                                           which( colnames(d311) == "translatedbb" ), 
+                                           which( colnames(d311) == "translatedborough_boundaries" ), 
                                            which( colnames(d311) == "agency") )
 
 numBlankborough_boundaries <- missingDataPerColumn[missingDataPerColumn$field == "borough_boundaries", "blanks"]
@@ -508,55 +508,8 @@ if ( nrow( nonMatchingFields ) > 0 ) {
 }
 
 #########################################################################
-d311$cross_street_1 <- gsub("\\s+", " ", d311$cross_street_1)
-d311$intersection_street_1 <- gsub("\\s+", " ", d311$intersection_street_1)
-nonMatchingFields <- findMismatchedFields( d311, 
-                                           which( colnames(d311) == "unique_key" ), 
-                                           which( colnames(d311) == "cross_street_1" ), 
-                                           which( colnames(d311) == "intersection_street_1" ), 
-                                           which( colnames(d311) == "agency") )
-
-numBlankcross_street_1 <- missingDataPerColumn[missingDataPerColumn$field == "cross_street_1", "blanks"]
-
-cat( "\nNon-matches between the 'cross_street_1' and 'intersection_1' fields number", format( nrow( nonMatchingFields ), big.mark = ",", scientific = FALSE ), 
-     "representing", percent( nrow( nonMatchingFields )/( numRows - numBlankcross_street_1), accuracy = 0.01 ), 
-     "of non-blank/unspecified data\n" )
-if ( nrow( nonMatchingFields ) > 0 ) { 
-  cat( "\n Sample of non-matching intersection_street_1\n" )
-  print(head( nonMatchingFields, 10 ) )
-  cat( "\nSorted by Agency:\n" )
-  sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
-  sortedData <- sortedData[order(-sortedData$Freq),]
-  nonMatch3byAgency <- sortedData
-  print(nonMatch3byAgency)
-}
-
-#########################################################################
-d311$cross_street_2 <- gsub("\\s+", " ", d311$cross_street_2)
-d311$intersection_street_2 <- gsub("\\s+", " ", d311$intersection_street_2)
-nonMatchingFields <- findMismatchedFields( d311, 
-                                           which( colnames(d311) == "unique_key" ), 
-                                           which( colnames(d311) == "cross_street_2" ), 
-                                           which( colnames(d311) == "intersection_street_2" ), 
-                                           which( colnames(d311) == "agency") )
-
-numBlankcross_street_2 <- missingDataPerColumn[missingDataPerColumn$field == "cross_street_2", "blanks"]
-
-cat( "\nNon-matches between the 'cross_street_2' and 'intersection_2' fields number", format( nrow( nonMatchingFields ), big.mark = ",", scientific = FALSE ), 
-     "representing", percent( nrow( nonMatchingFields )/( numRows - numBlankcross_street_2), accuracy = 0.01 ), 
-     "of non-blank/unspecified data\n" )
-if ( nrow( nonMatchingFields ) > 0 ) { 
-  cat( "\n Sample of non-matching intersection_street_2\n" )
-  print(head( nonMatchingFields, 10 ) )
-  cat( "\nSorted by Agency:\n" )
-  sortedData <- as.data.frame( table( nonMatchingFields$agency ) )
-  sortedData <- sortedData[order(-sortedData$Freq),]
-  nonMatch4byAgency <- sortedData
-  print(nonMatch4byAgency)
-}
-
-#########################################################################
 ##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
+#numBlankClosedDate <- sum(d311$closed_date =="")
 d311$created_date <- convertToDateObject( d311$created_date )
 d311$closed_date  <- convertToDateObject( d311$closed_date )
 d311$due_date     <- convertToDateObject( d311$due_date )
@@ -575,6 +528,7 @@ closedBeforeOpened <- findBadDates( d311,
                                   which( colnames(d311) == "duration" ),
                                   which( colnames(d311) == "agency") )
 
+#########################################################################
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
 cat( "\nSRs 'closed' before they were 'opened' numnber", format( nrow( closedBeforeOpened ), big.mark = ",", scientific = FALSE ), "representing",
@@ -623,7 +577,11 @@ uniqueKeys <- length( unique(d311$unique_key)) == nrow(d311 )
 cat("\nAre all the 'unique_key' fields truely unique?", uniqueKeys)
 
 #########################################################################
-cat("\n\n\n **********END OF PROGRAM**********")
+programStop <- as.POSIXct( Sys.time() )
+duration <- sprintf( "%.2f", difftime( programStop, programStart, units = "secs"))
+cat( "\n\nTime spent in entire R program is: ", duration, "seconds.\n" ) 
+
+cat("\n\n\n END OF PROGRAM")
 
 #########################################################################
 
