@@ -105,8 +105,8 @@ sort(nMissingDataPerColumn, decreasing = TRUE)
 t1 <- strptime(d311$closed_date, format = '%m/%d/%Y %I:%M:%S %p')
 t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
 tt <- as.numeric(difftime(t1, t0, units =  "secs"))
-
-badTime <- subset(d311, tt <= 0, select = c("created_date", "closed_date", "agency"))
+badTime <- subset(d311, tt <= 0,
+                  select = c("created_date", "closed_date", "agency"))
 nrow(badTime)
 sum(tt == 0, na.rm = TRUE)
 summary(tt[tt < 0 & (!is.na(tt))])
@@ -135,7 +135,10 @@ validBorough <- c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND")
 badBorough <- subset(d311, ! borough %in% validBorough,
                      select = c("borough", "agency"))
 head(table(badBorough$agency))
+```
 
+## Invalid Data: Borough_boundaries and Park_borough
+```{r borough2}
 validBB <- c("1", "2", "3", "4", "5")
 badBB <- subset(d311, ! borough_boundaries %in% validBB,
                 select = c("borough_boundaries", "agency"))
@@ -155,11 +158,11 @@ head(table(badChannel_type$agency))
 ```
 
 ## Invalid Data: Police Precincts
-
 ```{r nypd}
 validPolice_precincts <- scan("../data/NYPDPrecincts2023.csv", skip = 1)
-badPolice_precincts <- subset(d311, ! police_precincts %in% validPolice_precincts,
-                              select = c("police_precincts", "agency"))
+badPolice_precincts <- subset(
+    d311, ! police_precincts %in% validPolice_precincts,
+    select = c("police_precincts", "agency"))
 sort(table(badPolice_precincts$agency), decreasing = TRUE)
 ```
 
@@ -167,7 +170,6 @@ sort(table(badPolice_precincts$agency), decreasing = TRUE)
 ```{r redundant_borough}
 ## 'borough' and 'park_borough' are identical
 any(d311$borough != d311$park_borough)
-
 
 ## 'borough' and 'borough_boundaries' are almost identical
 nonMatchingBorough <- subset(
