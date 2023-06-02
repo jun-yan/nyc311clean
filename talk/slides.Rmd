@@ -66,7 +66,7 @@ source("../code/functions.R")
     + The NYC-OD Team advised these were "computed" fields derived from other data.
 
 ```{r read}
-d311 <- read.csv("../data/test_sample4.csv", header = TRUE)
+d311 <- read.csv("../data/311_202303.csv", header = TRUE)
 names(d311) <- makeColNamesUserFriendly(names(d311))
 dim(d311)
 tail(names(d311))
@@ -75,7 +75,8 @@ tail(names(d311))
 ## Contributions by Agencies
 
 ```{r byAgency}
-sort(table(d311$agency), decreasing = TRUE)
+d311freq_agency <- table(d311$agency)
+sort(d311freq_agency, decreasing = TRUE)
 ```
 
 ## Missing data: Character columns
@@ -223,11 +224,11 @@ object.size(d311$borough)
 
 ## code agency by integer
 object.size(d311$agency)
-agency_code <- rep(1:14, table(d311$agency))
+agency_code <- rep(seq(length(d311freq_agency)), d311freq_agency)
 object.size(agency_code)
 ```
 
-# Suggestions on Open Data Releasing Protocols
+# Conclusion
 
 ## Suggestions on Data Curation
 
@@ -239,6 +240,11 @@ object.size(agency_code)
     - Eliminate redundant columns
     - Reduce storage with no information loss
 + Feedback: open review for open data
+
+## Discussion
+
++ something
++ something else
 
 
 # References {.allowframebreaks} 
