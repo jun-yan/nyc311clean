@@ -234,8 +234,10 @@ object.size(agency_code)
 
 + Validity check 
     - date (logical check)
-    - descriptive fields (drop-down menu)
+    - descriptive fields (drop-down menu, possibly multi-step)
+    - missing values
     - legitimate values
+    - computed fields in the dictionary
 + Efficiency
     - Eliminate redundant columns
     - Reduce storage with no information loss
