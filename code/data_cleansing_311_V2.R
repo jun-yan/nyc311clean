@@ -1,7 +1,9 @@
 #########################################################################
 ##  Install necessary packages
-install.packages( "scales",  repos = "https://mirrors.nics.utk.edu/cran/")
-install.packages( "stringr", repos = "https://mirrors.nics.utk.edu/cran/")
+if (require("scales"))
+    install.packages( "scales",  repos = "https://mirrors.nics.utk.edu/cran/")
+if (require("stringr"))
+    install.packages( "stringr", repos = "https://mirrors.nics.utk.edu/cran/")
 library( scales )
 library( stringr )
 

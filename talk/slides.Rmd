@@ -29,7 +29,7 @@ header-includes:
     {
     \title[NYC 311 Requests]{Curation of NYC 311 Request Open Data}
     \author[Jun Yan]{David Tussey\inst{1} and Jun Yan\inst{2}}
-    \institute[University of Connecticut]{\inst{1} Independent Researcher\\
+    \institute[University of Connecticut]{\inst{1} Former Executive Director, NYC DoITT\\
     \inst{2} University of Connecticut}
     }
 bibliography: ["../manuscript/ref.bib"]
@@ -38,50 +38,213 @@ link-color: true
 # csl: apa.csl
 ---
 
+```{r, echo = FALSE}
+library(stringr)
+source("../code/functions.R")
+## Load the 311 SR data file
+```
+
 # Introduction
 
-## NYC 311 Open Data
+## NYC 311 Open Data 
 
-- Open data is great ... trend ...
-- NYC is a forerunner in open data ...
-- 311 request data is one of the most popular open data at NYC Open Data
-- Found some issues from teaching ...
+- Open Data is viewed as a right for all.
+- Cities lead open data efforts wtih >50 cities with formal programs.
+- NYC is a forerunner with Open Data Law in 2012.
+- Today NYC Open Data has 3511 datasets from 98 Agencies, accesible online.
+- 311 Service Request data is the most viewed dataset at NYC Open Data.
+- Used in STAT 3255/5255 Introduction to Data Science at UConn
+- Exported 1-31 March 2023 311 SRs for analysis (~250K records).
 
 # Issues with NYC 311 Requests Data
 
-## Data Structure
+## Data Columns
+<!-- - Column names: Remove trailing "."s.  Remove extra "."s -->
+<!-- - Convert "." separator to "_".  Covert column names to lower cases -->
+- Tidied column names (lower cases; underscore delimited; no trailing spaces)
+- Last five columns not referenced in the Data Dictionary (not the case last year)
+    + The NYC-OD Team advised these were "computed" fields derived from other data.
 
-Demonstration with data for the week of Januare 15, 2023, 
-downloaded on February 22, 2023.
 ```{r read}
-d311 <- read.csv("../data/nyc311_011523-012123_by022023.csv", header = TRUE)
-names(d311) <- tolower(gsub("\\.", "_", names(d311)))
-
-names(d311)
+d311 <- read.csv("../data/311_202303.csv", header = TRUE)
+names(d311) <- makeColNamesUserFriendly(names(d311))
+dim(d311)
+tail(names(d311))
 ```
 
+## Contributions by Agencies
 
-## Invalid Created/Closed Date
+```{r byAgency}
+d311freq_agency <- table(d311$agency)
+sort(d311freq_agency, decreasing = TRUE)
+```
+
+## Missing data: Character columns
+- Various forms: "", "unspecified", and "unknown"
+- Results show 3 groupings: all blanks (>90%), a few blanks (12-44%), or nearly no blanks (1-5%)
+
+```{r blanks}
+cMissingDataPerColumn <- charColumnsMissingData(d311)
+cMissingDataPerColumn[order(-rowSums(cMissingDataPerColumn)), ]
+```
+
+## Missing data: Numeric Colummns
+
+```{r missing}
+nMissingDataPerColumn <- numColumnsMissingData(d311)
+sort(nMissingDataPerColumn, decreasing = TRUE)
+```
+
+<!-- ## Unspecified/Unknown data columns -->
+<!-- - Several columns have many "Unspecified" or "Unknown" values. These are deemed valid values. -->
+<!-- ```{r uknown} -->
+<!-- tail(missingDataPerColumn[ order( -missingDataPerColumn[ , 2] ), ], 4) -->
+<!-- ``` -->
+
+## Invalid Data: Created/Closed Date
 ```{r date}
 t1 <- strptime(d311$closed_date, format = '%m/%d/%Y %I:%M:%S %p')
 t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
 tt <- as.numeric(difftime(t1, t0, units =  "secs"))
-sum(tt < 0, na.rm = TRUE)
-head(subset(d311, tt < 0, select = c("created_date", "closed_date")), 5)
+badTime <- subset(d311, tt <= 0,
+                  select = c("created_date", "closed_date", "agency"))
+nrow(badTime)
+sum(tt == 0, na.rm = TRUE)
+summary(tt[tt < 0 & (!is.na(tt))])
+table(badTime$agency)
+```
+
+## Invalid Data: Incident Zipcodes
+```{r zip1}
+validZipcodes <- scan("../data/NYCzipcodes.csv") 
+
+badIncident_zip <- subset(d311, ! incident_zip %in% validZipcodes,
+                          select = c("incident_zip", "agency"))
+head(sort(table(badIncident_zip$incident_zip), decreasing = TRUE))
+```
+
+## Invalid Data: Zipcodes (One of the last 5 columns)
+```{r zip2}
+badZipcode  <- subset(d311, ! zip_codes %in% validZipcodes,
+                      select = c("zip_codes", "agency"))
+nrow(badZipcode)  # mostly invalid!
+```
+
+## Invalid Data: Borough
+```{r borough}
+validBorough <- c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND")
+badBorough <- subset(d311, ! borough %in% validBorough,
+                     select = c("borough", "agency"))
+head(table(badBorough$agency))
+```
+
+## Invalid Data: Borough_boundaries and Park_borough
+```{r borough2}
+validBB <- c("1", "2", "3", "4", "5")
+badBB <- subset(d311, ! borough_boundaries %in% validBB,
+                select = c("borough_boundaries", "agency"))
+head(table(badBB$agency))
+
+badPark_borough <- subset(d311, ! park_borough %in% validBorough,
+                          select = c("park_borough", "agency"))
+head(table(badPark_borough$agency))
+```
+
+## Invalid Data: Open Data Channel
+```{r channel}
+validChannel <- c("MOBILE", "ONLINE", "PHONE")
+badChannel_type <- subset(d311, ! open_data_channel_type %in% validChannel,
+                          select = c("open_data_channel_type", "agency"))
+head(table(badChannel_type$agency))
+```
+
+## Invalid Data: Police Precincts
+```{r nypd}
+validPolice_precincts <- scan("../data/NYPDPrecincts2023.csv", skip = 1)
+badPolice_precincts <- subset(
+    d311, ! police_precincts %in% validPolice_precincts,
+    select = c("police_precincts", "agency"))
+sort(table(badPolice_precincts$agency), decreasing = TRUE)
+```
+
+## Redundant Data: Borough
+```{r redundant_borough}
+## 'borough' and 'park_borough' are identical
+any(d311$borough != d311$park_borough)
+
+## 'borough' and 'borough_boundaries' are almost identical
+nonMatchingBorough <- subset(
+    d311, borough_boundaries !=
+          as.integer(str_replace_all(borough,
+                                     c("STATEN ISLAND" = "1",
+                                       "BROOKLYN"      = "2",
+                                       "QUEENS"        = "3",
+                                       "MANHATTAN"     = "4",
+                                       "BRONX"         = "5",
+                                       "UNSPECIFIED"   = NA))),
+    select = c("borough", "borough_boundaries", "agency"))
+nrow(nonMatchingBorough)
+```
+
+## Redundant Data: Latitude, Longitude, and Location
+```{r location}
+head(d311[, c("latitude", "longitude", "location")])
+```
+
+## Redundant Data: Cross Street and Intersection Street
+```{r cross_intersection}
+## one empty but the other not
+nrow(subset(d311, cross_street_1 == "" & intersection_street_1 != ""))
+nrow(subset(d311, cross_street_1 != "" & intersection_street_1 == ""))
+
+## if both not empty, they are almost the same
+head(subset(d311, cross_street_1 != "" & intersection_street_1 != "" &
+                  cross_street_1 != intersection_street_1,
+            select = c("cross_street_1", "intersection_street_1", "agency")))
+```
+
+## Redundant Data: Cross Street and Intersection Street (cont'd)
+```{r extra_space}
+## after removing extra spaces, most of them are the same
+dupXStreets <-subset(
+    d311, gsub(" ", "", cross_street_1) ==
+          gsub(" ", "", intersection_street_1),
+    select = c("cross_street_1", "intersection_street_1", "agency"))
+head(dupXStreets)
+table(dupXStreets$agency)
+head(subset(dupXStreets, cross_street_1 != intersection_street_1))
 ```
 
 
-## Invalid Zipcode
+## Less-Efficient Storage: Borough, Agency
+```{r storage}
+## code borough by integer
+object.size(d311$borough_boundaries)
+object.size(d311$borough)
 
+## code agency by integer
+object.size(d311$agency)
+agency_code <- rep(seq(length(d311freq_agency)), d311freq_agency)
+object.size(agency_code)
+```
 
+# Conclusion
 
+## Suggestions on Data Curation
 
-## Inconsistent Data
++ Validity check 
+    - date (logical check)
+    - descriptive fields (drop-down menu)
+    - legitimate values
++ Efficiency
+    - Eliminate redundant columns
+    - Reduce storage with no information loss
++ Feedback: open review for open data
 
+## Discussion
 
-# Suggestions on Open Data Releasing Protocols
-
-
++ something
++ something else
 
 
 # References {.allowframebreaks} 
