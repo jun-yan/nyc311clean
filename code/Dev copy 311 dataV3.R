@@ -349,18 +349,17 @@ cat( "\nAre all the values in the 'open_data_channel_type'valid?", open_data_cha
 if (!open_data_channelResults$checkIt) { 
   cat("\nNumber of non-allowable value", length(open_data_channelResults$non_allowable), "\nNon-allowable values:\n", head(open_data_channelResults$non_allowable, 10) ) }
 
-results <- areInList( d311$city_council_districts, cityCouncilNYC )
-cat( "\nAre all the values in the 'city_council_district valid?", results$checkIt )
-if (!results$checkIt) { 
-  cat("\nNumber of non-allowable value", length(results$non_allowable), "\nNon-allowable values:\n", head(results$non_allowable, 10) ) }
+city_councilResults <- areInList( d311$city_council_districts, cityCouncilNYC )
+cat( "\nAre all the values in the 'city_council_district valid?", city_councilResults$checkIt )
+if (!city_councilResults$checkIt) { 
+  cat("\nNumber of non-allowable value", length(city_councilResults$non_allowable), "\nNon-allowable values:\n", head(city_councilResults$non_allowable, 10) ) }
 
 police_precinctResults <- areInList( d311$police_precincts, precinctsNYPD )
-cat( "\n\nAre all the values in the 'police_precinct valid?", police_precinctResults$checkIt )
+cat( "\nAre all the values in the 'police_precinct valid?", police_precinctResults$checkIt )
 if (!police_precinctResults$checkIt) {
   numBlankpolice_precinct <- missingDataPerColumn[missingDataPerColumn$field == "police_precincts", "blanks"]
   cat("\nInvalid values in the 'police_precincts' field number", format(length(police_precinctResults$non_allowable), big.mark = "," ), 
-      "representing", percent( length(police_precinctResults$non_allowable)/(numRows - numBlankpolice_precinct), accuracy = 0.01 ), 
-      "of non-blank data.\n")
+      "representing", round((length(police_precinctResults$non_allowable)/(numRows - numBlankpolice_precinct)) * 100, 2), "% of non-blank data.\n")
   cat("Made up by", length(unique(police_precinctResults$non_allowable)), "'unique' police_precincts.\n")
   
   # Sort the table in descending order
@@ -413,7 +412,7 @@ row.names(agency_df1) <- NULL
 # Output the number of invalid zip codes
 numBlankzip_codes1 <- missingDataPerColumn[missingDataPerColumn$field == "incident_zip", "blanks"]
 sumInvalid1 <- sum(as.vector(agency_counts1))
-cat("\nThere are", format( sum(as.vector(agency_counts1)), big.mark = ","), "invalid d311$incident_zip entries representing", 
+cat("\n\nThere are", format( sum(as.vector(agency_counts1)), big.mark = ","), "invalid d311$incident_zip entries representing", 
     round(sumInvalid1/(nrow(d311) - numBlankzip_codes1)*100,2), "% of non-blank data.\n")
 cat("Made up by",length(invalid_zip_counts1) ,"unique 'incident_zip's.\n")
 
@@ -485,8 +484,7 @@ nonMatchingborough_boundaries <- d311[!is.na(d311$translatedborough_boundaries) 
 numBlankborough_boundaries <- missingDataPerColumn[missingDataPerColumn$field == "borough_boundaries", "blanks"]
 
 cat("\nNon-matches between the 'borough' and 'borough_boundaries' fields number", format(nrow(nonMatchingborough_boundaries), big.mark = ","),
-    "representing", percent(nrow(nonMatchingborough_boundaries) / (numRows - numBlankborough_boundaries), accuracy = 0.01),
-    "of non-blank data.\n")
+    "representing", round( nrow(nonMatchingborough_boundaries) / (numRows - numBlankborough_boundaries) * 100, 2), "% of non-blank data.\n")
 
 if (nrow(nonMatchingborough_boundaries) > 0) {
   cat("\n Sample of non-matching park_boroughs\n")#
@@ -507,8 +505,7 @@ nonMatchingpark_borough <- subset(d311, borough != park_borough & park_borough !
 numBlankpark_borough <- missingDataPerColumn[missingDataPerColumn$field == "park_borough", "blanks"]
 
 cat("\nNon-matches between the 'borough' and 'park_borough' fields number", format(nrow(nonMatchingpark_borough), big.mark = ","),
-    "representing", percent(nrow(nonMatchingpark_borough) / (numRows - numBlankpark_borough), accuracy = 0.01),
-    "of non-blank data\n")
+    "representing", round(nrow(nonMatchingpark_borough) / (numRows - numBlankpark_borough) *100, 2), "% of non-blank data\n")
 
 if (nrow(nonMatchingpark_borough) > 0) {
   cat("\n Sample of non-matching park_boroughs\n")
@@ -541,7 +538,7 @@ closedBeforeOpened <- d311[ d311$duration < 0 & !is.na(d311$duration), c("unique
 
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
-cat( "\n#SRs 'closed' before they were 'opened' (negative duration):", format( nrow( closedBeforeOpened ), big.mark = ","), "representing",
+cat( "\n\n#SRs 'closed' before they were 'opened' (negative duration):", format( nrow( closedBeforeOpened ), big.mark = ","), "representing",
      round( nrow( closedBeforeOpened )/( numRows - numBlankClosedDate)*100,2),"% of non-blank data.\n" )
 
 if ( nrow( closedBeforeOpened ) > 0 ) {
@@ -579,8 +576,7 @@ zeroDurations <- d311[!is.na(d311$duration) & d311$duration == 0, c("unique_key"
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
 cat( "\n#SRs that were 'closed' and 'opened' at the exact same time, to the second:", format( nrow( zeroDurations ), big.mark = ","), "representing",
-     percent( nrow( zeroDurations )/( numRows - numBlankClosedDate), accuracy = 0.01 ), 
-     "of non-blank data.\n" )
+     round(nrow( zeroDurations )/( numRows - numBlankClosedDate) *100, 2), "% of non-blank data.\n" )
 
 if (nrow(zeroDurations) > 0) {
   cat("\nSample of SRs closed the exact same time they are opened\n")
