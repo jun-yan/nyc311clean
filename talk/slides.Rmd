@@ -38,9 +38,15 @@ link-color: true
 # csl: apa.csl
 ---
 
-```{r, echo = FALSE}
+```{r setup, include = FALSE, echo = FALSE}
 library(stringr)
 source("../code/functions.R")
+
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  paste0("\n \\", "small","\n\n", x, "\n\n \\normalsize")
+})
 ## Load the 311 SR data file
 ```
 
@@ -108,10 +114,19 @@ t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
 tt <- as.numeric(difftime(t1, t0, units =  "secs"))
 badTime <- subset(d311, tt <= 0,
                   select = c("created_date", "closed_date", "agency"))
-nrow(badTime)
+
+## exactly the same created and closed date down to the second; a lot!
 sum(tt == 0, na.rm = TRUE)
+table(subset(badTime, created_date == closed_date, select = "agency"))
+```
+
+
+## Bad Closed Date
+```{r baddate}
+## quite some negative response times
+table(subset(badTime, created_date != closed_date, select = "agency"))
+
 summary(tt[tt < 0 & (!is.na(tt))])
-table(badTime$agency)
 ```
 
 ## Invalid Data: Incident Zipcodes
@@ -175,20 +190,17 @@ any(d311$borough != d311$park_borough)
 ## 'borough' and 'borough_boundaries' are almost identical
 nonMatchingBorough <- subset(
     d311, borough_boundaries !=
-          as.integer(str_replace_all(borough,
-                                     c("STATEN ISLAND" = "1",
-                                       "BROOKLYN"      = "2",
-                                       "QUEENS"        = "3",
-                                       "MANHATTAN"     = "4",
-                                       "BRONX"         = "5",
-                                       "UNSPECIFIED"   = NA))),
+          as.integer(str_replace_all(
+              borough, c("STATEN ISLAND" = "1",  "BROOKLYN"      = "2",
+                         "QUEENS"        = "3",  "MANHATTAN"     = "4",
+                         "BRONX"         = "5",  "Unspecified"   = NA))),
     select = c("borough", "borough_boundaries", "agency"))
 nrow(nonMatchingBorough)
 ```
 
 ## Redundant Data: Latitude, Longitude, and Location
 ```{r location}
-head(d311[, c("latitude", "longitude", "location")])
+print(head(d311[, c("latitude", "longitude", "location")]), digits = 16)
 ```
 
 ## Redundant Data: Cross Street and Intersection Street
@@ -203,7 +215,7 @@ head(subset(d311, cross_street_1 != "" & intersection_street_1 != "" &
             select = c("cross_street_1", "intersection_street_1", "agency")))
 ```
 
-## Redundant Data: Cross Street and Intersection Street (cont'd)
+##  Cross Street and Intersection Street (cont'd)
 ```{r extra_space}
 ## after removing extra spaces, most of them are the same
 dupXStreets <-subset(
@@ -211,12 +223,15 @@ dupXStreets <-subset(
           gsub(" ", "", intersection_street_1),
     select = c("cross_street_1", "intersection_street_1", "agency"))
 head(dupXStreets)
+```
+
+##  Cross Street and Intersection Street (cont'd) 
+```{r dup_streets}
 table(dupXStreets$agency)
 head(subset(dupXStreets, cross_street_1 != intersection_street_1))
 ```
 
-
-## Less-Efficient Storage: Borough, Agency
+## Less-Efficient Storage: Download File Size
 ```{r storage}
 ## code borough by integer
 object.size(d311$borough_boundaries)
@@ -230,16 +245,20 @@ object.size(agency_code)
 
 # Conclusion
 
-## Suggestions on Data Curation
+## Suggestions on Open Data Curation
 
 + Validity check 
     - date (logical check)
-    - descriptive fields (drop-down menu)
-    - legitimate values
+    - legitimate values 
+	- descriptive fields (drop-down menu, possibly multi-step)
+    - missing value: coding; validity
+    - computed fields in the dictionary
 + Efficiency
     - Eliminate redundant columns
     - Reduce storage with no information loss
-+ Feedback: open review for open data
++ Feedback: 
+    - open review for open data
+	- interaction with the maintenance team
 
 ## Discussion
 
