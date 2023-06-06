@@ -141,6 +141,10 @@ data2File <- file.path( "..", "data", "USPS_zipcodes.csv" )
 USPSzipcodes <- read.csv( data2File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data2File ) ) ) )
 USPSzipcodes <- makeColNamesUserFriendly( USPSzipcodes )
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
+
+# Filter and extract delivery_zipcode column
+#NYCzipcodes <- USPSzipcodes$delivery_zipcode[USPSzipcodes$district_name %in% c("CONNECTICUT", "NEW JERSEY", "NEW YORK 1", "NEW YORK 2", "NEW YORK 3", "PENNSYLVANIA 1", "DE-PA 2")]
+
 zipRows <- nrow( USPSzipcodesOnly )
 
 #########################################################################
