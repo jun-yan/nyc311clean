@@ -72,7 +72,7 @@ knitr::knit_hooks$set(chunk = function(x, options) {
     + The NYC-OD Team advised these were "computed" fields derived from other data.
 
 ```{r read}
-d311 <- read.csv("../data/311_202303.csv", header = TRUE)
+d311 <- read.csv("../data/311_202303by202305.csv", header = TRUE)
 names(d311) <- makeColNamesUserFriendly(names(d311))
 dim(d311)
 tail(names(d311))
@@ -111,7 +111,7 @@ sort(nMissingDataPerColumn, decreasing = TRUE)
 ```{r date}
 t1 <- strptime(d311$closed_date, format = '%m/%d/%Y %I:%M:%S %p')
 t0 <- strptime(d311$created_date, format = '%m/%d/%Y %I:%M:%S %p')
-tt <- as.numeric(difftime(t1, t0, units =  "secs"))
+tt <- as.numeric(difftime(t1, t0, units =  "day"))
 badTime <- subset(d311, tt <= 0,
                   select = c("created_date", "closed_date", "agency"))
 
@@ -147,10 +147,12 @@ nrow(badZipcode)  # mostly invalid!
 
 ## Invalid Data: Borough
 ```{r borough}
-validBorough <- c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND")
+validBorough <- c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND",
+                  "Unspecified")
 badBorough <- subset(d311, ! borough %in% validBorough,
                      select = c("borough", "agency"))
 head(table(badBorough$agency))
+head(table(subset(d311, borough == "Unspecified")$agency))
 ```
 
 ## Invalid Data: Borough_boundaries and Park_borough
@@ -167,10 +169,10 @@ head(table(badPark_borough$agency))
 
 ## Invalid Data: Open Data Channel
 ```{r channel}
-validChannel <- c("MOBILE", "ONLINE", "PHONE")
+validChannel <- c("MOBILE", "ONLINE", "PHONE", "OTHER")
 badChannel_type <- subset(d311, ! open_data_channel_type %in% validChannel,
                           select = c("open_data_channel_type", "agency"))
-head(table(badChannel_type$agency))
+head(table(badChannel_type$agency)) ## UNKNOWN
 ```
 
 ## Invalid Data: Police Precincts
@@ -218,10 +220,11 @@ head(subset(d311, cross_street_1 != "" & intersection_street_1 != "" &
 ##  Cross Street and Intersection Street (cont'd)
 ```{r extra_space}
 ## after removing extra spaces, most of them are the same
-dupXStreets <-subset(
+dupXStreets <- subset(
     d311, gsub(" ", "", cross_street_1) ==
           gsub(" ", "", intersection_street_1),
     select = c("cross_street_1", "intersection_street_1", "agency"))
+nrow(dupXStreets)
 head(dupXStreets)
 ```
 
@@ -231,7 +234,7 @@ table(dupXStreets$agency)
 head(subset(dupXStreets, cross_street_1 != intersection_street_1))
 ```
 
-## Less-Efficient Storage: Download File Size
+## Less-Efficient Storage: Memory
 ```{r storage}
 ## code borough by integer
 object.size(d311$borough_boundaries)
@@ -243,28 +246,39 @@ agency_code <- rep(seq(length(d311freq_agency)), d311freq_agency)
 object.size(agency_code)
 ```
 
+## Less-Efficient Storage: Disk
+```{r storage-disk}
+write.csv(subset(
+    d311, select = -c(park_borough, borough_boundaries, location,
+                      intersection_street_1, intersection_street_2,
+                      agency_name)),
+    quote=FALSE, row.names = FALSE,
+    file = "../data/311_202303_smaller.csv")
+
+(newsize <- file.size("../data/311_202303_smaller.csv"))
+(oldsize <- file.size("../data/311_202303by202305.csv"))
+(oldsize - newsize) / oldsize
+```
+
 # Conclusion
 
 ## Suggestions on Open Data Curation
 
-+ Validity check 
++ Improve dictionary
+    - Code categorical variables (e.g., agency) 
+	- Code descriptive fields (e.g., complain type; vehicle type)
+    - Make the descriptions informative (e.g., zip code)
++ Impose validity check
     - date (logical check)
     - legitimate values 
 	- descriptive fields (drop-down menu, possibly multi-step)
     - missing value: coding; validity
-    - computed fields in the dictionary
-+ Efficiency
++ Improve data storage/transportation efficiency
     - Eliminate redundant columns
     - Reduce storage with no information loss
 + Feedback: 
-    - open review for open data
-	- interaction with the maintenance team
-
-## Discussion
-
-+ something
-+ something else
-
+    - Open review for open data
+	- Interaction with the maintenance team
 
 # References {.allowframebreaks} 
 \scriptsize
