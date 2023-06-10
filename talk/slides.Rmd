@@ -57,8 +57,9 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 - Open Data is viewed as a right for all [@janssen2012benefits; @wang2016adoption].
 - Cities lead open data efforts wtih >50 cities with formal programs.
 - NYC is a forerunner with Open Data Law in 2012 [@zuiderwijk2014open].
-- Today NYC Open Data has 3511 datasets from 98 Agencies, accesible online.
-- Used in many research
+- Today NYC Open Data has 3511 datasets from 98 Agencies, accesible online 
+  (\url{https://opendata.cityofnewyork.us}).
+- Used by many researchers:
     + Health [@cantor2018facets, shankar2021data]
     + Smart city [@neves2020impacts]
     + Transportation [@gerte2019understanding]
@@ -68,9 +69,14 @@ knitr::knit_hooks$set(chunk = function(x, options) {
 ## NYC 311 Service Requests
 
 - 311 Service Request data is the most viewed dataset at NYC Open Data.
-- Used in STAT 3255/5255 Introduction to Data Science at UConn
+- NYC 311 is a unified frontline for all service requests to the NYC government agents.
+- The data was used in STAT 3255/5255 Introduction to Data Science at UConn, with student presentations at 2022/2023 NYC Open Data Week.
 - In this study, we exported 1-31 March 2023 311 SRs for analysis (~251K records).
-- Data curation is imporant issue for open data such as the 311 SRs [@witt2009constructing; @borgman2012conundrum; @mclure2014data; @barns2016mine; @hart2016ten; @beheshti2019datasynapse; @shankar2021data].
+- Data curation is critical for open data such as the 311 SRs [@witt2009constructing; @borgman2012conundrum; @mclure2014data; @barns2016mine; @hart2016ten; @beheshti2019datasynapse; @shankar2021data].
+- Issues
+    - Validity
+	- Efficiency
+
 
 # Issues with NYC 311 Requests Data
 
@@ -152,7 +158,7 @@ head(sort(table(badIncident_zip$incident_zip), decreasing = TRUE))
 ```{r zip2}
 badZipcode  <- subset(d311, ! zip_codes %in% validZipcodes,
                       select = c("zip_codes", "agency"))
-nrow(badZipcode)  # mostly invalid!
+nrow(badZipcode)  # mostly invalid! One possibility: debt collectors
 ```
 
 ## Invalid Data: Borough
@@ -178,6 +184,8 @@ head(table(badPark_borough$agency))
 ```
 
 ## Invalid Data: Open Data Channel
+"Due to pandemic call handling modifications, the ‘Open Data Channel Type’ values may not accurately indicate the channel the Service Request was submitted in for the period starting March 2020."
+
 ```{r channel}
 validChannel <- c("MOBILE", "ONLINE", "PHONE", "OTHER")
 badChannel_type <- subset(d311, ! open_data_channel_type %in% validChannel,
@@ -214,6 +222,13 @@ nrow(nonMatchingBorough)
 ```{r location}
 print(head(d311[, c("latitude", "longitude", "location")]), digits = 16)
 ```
+
+## Redundant Data: Agence, Agency Name, and Other Categorical Variables
+```{r agent}
+head(d311[, c("agency", "agency_name")])
+head(sort(table(d311$complaint_type), decreasing = TRUE)) # 174 types
+```
+
 
 ## Redundant Data: Cross Street and Intersection Street
 ```{r cross_intersection}
@@ -286,9 +301,16 @@ write.csv(subset(
 + Improve data storage/transportation efficiency
     - Eliminate redundant columns
     - Reduce storage with no information loss
-+ Feedback: 
-    - Open review for open data
-	- Interaction with the maintenance team
+	
+## Outlook
+
+- Open review for open data
+
+- Interaction with the maintenance team
+
+- Open data curation protocol
+
+- Open data analytic portal
 
 # References {.allowframebreaks} 
 \scriptsize
