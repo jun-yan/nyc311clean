@@ -1,8 +1,7 @@
 #########################################################################
-##  Install necessary packages
 
 #########################################################################
-##  This function makes standard column names even if there are multiple "."s and trailing "."s
+##  This function standardizes column names even if there are multiple "."s and trailing "."s
 ##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
 makeColNamesUserFriendly <- function( dataset) {
   
@@ -26,11 +25,15 @@ makeColNamesUserFriendly <- function( dataset) {
 #########################################################################
 #Validate that date fields are all dates
 areAllDates <- function ( dateField ) {
+  
+  # remove blank and NAs
   allDates <- suppressWarnings( !is.na( as.Date( dateField[dateField != ""],format = "%m/%d/%Y %I:%M:%S %p"  ) ) )
   
   if( !all( allDates ) ) {
+    
     # find indices of values that are not dates
     not_date_indices <- which(is.na(as.Date(dateField[dateField], format="%m/%d/%Y %I:%M:%S %p")))
+    
     cat("Values that are not dates:")
     print( dateField[not_date_indices] )
   }
@@ -47,10 +50,14 @@ areAllNumbers <- function ( numberField ){
   # Subset the vector to keep only the non-blank values
   numberField <- numberField[non_blank_indices]
   
+  # remove blank and NAs
   allNumbers <- suppressWarnings( !is.na( as.numeric( numberField[numberField != ""] ) ) )
+  
   if( !all( allNumbers ) ) {
+    
     # find indices of values that are not numeric
     non_numeric_values <- numberField[grepl("[^[:digit:]]", numberField)]
+    
     cat("Non-numeric values in the vector:", non_numeric_values, "\n")
   }
   return ( all( allNumbers ) )
@@ -64,6 +71,8 @@ areFiveDigits2 <- function(zipcodes) {
   
   # Identify non-numeric and non-5-digit zipcodes using regular expression
   zipcode_pattern <- "^\\d{5}$"
+  
+  # identify non-compliant zipcodes
   not_valid_zipcodes <- non_blank_zipcodes[!grepl(zipcode_pattern, non_blank_zipcodes)]
   
   if (length(not_valid_zipcodes) > 0) {
@@ -76,17 +85,19 @@ areFiveDigits2 <- function(zipcodes) {
 #########################################################################
 #Validate that all fields are in the list of allowable values
 areInList <- function ( dataset, listValidValues ){
+  
   # Identify the non-blank values using nzchar()
   # Subset the vector to keep only the non-blank values
   non_blank_indices <- which(nzchar(dataset))
   dataset <- dataset[non_blank_indices]
   dataset <- na.omit(dataset)
   
+  # determine valid zipcodes
   inList <- ( dataset %in% listValidValues[, 1] )
   notInList <- dataset[!inList]
   
-  if( !all( inList ) ) {
-  }
+  
+  # return non-allowable values & a Boolean variable indicating result of non-allowable test
   results <- list( checkIt = all( inList ), non_allowable = notInList )
   return ( results )
 }
@@ -94,8 +105,8 @@ areInList <- function ( dataset, listValidValues ){
 #########################################################################
 ## Function to count the number of blanks in each column of the 311 dataframe
 countColumnsMissingData <- function( dataset ) {
-  ## Create a dataframe to store the column name, the number of blank rows, and the percentage of rows that are blank.
   
+  # create a dataframe to store the column name, the number of blank rows, and the percentage of rows that are blank.
   results <- data.frame( columnName =    character(),
                          blankCount =    integer(),
                          fractionBlank = numeric(),
@@ -104,12 +115,21 @@ countColumnsMissingData <- function( dataset ) {
                          unknownCount = integer(),
                          fractionUnknown = numeric() )
   
-  rowCount <- nrow( dataset )    ## Count the number of rows to step through. Used to compute % blank.
+  ## Count the number of rows to step through. Used to compute % blank.
+  rowCount <- nrow( dataset )
+  
   for ( col in names( dataset ) ) {
+    
+    # count the number of blanks and NAs in each column
     numberOfBlanks <- sum(dataset[col] == "" | is.na(dataset[col]))
+    
+    # count the number of "Unspecified" in each column
     numberOfUnspecifieds <- sum( dataset[col] == "Unspecified" ) 
     
-    numberOfUnknowns <- sum( dataset[col] == "UNKNOWN"  ) 
+    # count the number of "UNKNOWN" in each column
+    numberOfUnknowns <- sum( dataset[col] == "UNKNOWN"  )
+    
+    # build new dataframe with the results. Compute the %
     newRow <- data.frame( columnName =    col, 
                           blankCount =    numberOfBlanks, 
                           fractionBlank = round(numberOfBlanks / rowCount, 4),
@@ -117,78 +137,82 @@ countColumnsMissingData <- function( dataset ) {
                           fractionUnspecified = round(numberOfUnspecifieds / rowCount, 4),
                           unknownCount =    numberOfUnknowns, 
                           fractionUnknown = round(numberOfUnknowns / rowCount, 4))
+    
+    # build the result matrix
     results <- rbind( results, newRow )
   }
   
+  # clean up column names
   if (nrow(results) > 0) {names (results) <- c( "field", "blanks","pctBlank", "Unspecified", "pctUnspecified", "unknowns", "pctUnknown") }
+  
   return( results )              
 }
 
 #########################################################################
-##  The file contains column names in the "header" line.
-##  The R "read.csv" function uses a "." to replace the spaces in column names. This makes the column names
-##    into legal variables, but the "." can cause problems elsewhere. The function "makeColNamesUserFriendly"
-##    replaces the "." with an underscore "_". thus simplifying the field names.
-##  Additionally, the field names are converted to lower case with the "tolower" function. 
+#  File contains column names in the "header" line.
+#  The R "read.csv" function uses a "." to replace the spaces in column names. This makes the column names
+#    into legal variables, but the "." can cause problems elsewhere. The function "makeColNamesUserFriendly"
+#    replaces the "." with an underscore "_". thus simplifying the field names.
+#  Additionally, the field names are converted to lower case with the "tolower" function. 
 #########################################################################
 programStart <- as.POSIXct( Sys.time() )
+
 # Set the working directory to the "nyc311clean/code" directory to enable relative codes.
-#Alter this line of code to match your particular machine.
+# Alter this line of code to match your particular machine.
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
 
+#########################################################################
 # Load the USPS zipcode file
 data2File <- file.path( "..", "data", "USPS_zipcodes.csv" ) 
 USPSzipcodes <- read.csv( data2File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data2File ) ) ) )
 USPSzipcodes <- makeColNamesUserFriendly( USPSzipcodes )
+
+# extract the 'delivery_zipcode' field
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
-
-# Filter and extract delivery_zipcode column
-#NYCzipcodes <- USPSzipcodes$delivery_zipcode[USPSzipcodes$district_name %in% c("CONNECTICUT", "NEW JERSEY", "NEW YORK 1", "NEW YORK 2", "NEW YORK 3", "PENNSYLVANIA 1", "DE-PA 2")]
-
 zipRows <- nrow( USPSzipcodesOnly )
 
 #########################################################################
+# Load the Police Precinct reference file
 data3File <- file.path( "..", "data", "NYPDPrecincts2023.csv" ) 
 precinctsNYPD <- read.csv( data3File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data3File ))))
 precinctsNYPD <- makeColNamesUserFriendly( precinctsNYPD )
 numPrecincts <- nrow( precinctsNYPD )
 
 #########################################################################
+# Load the NYC City Council file
 data4File <- file.path( "..", "data", "NYCCityCouncil2023.csv" ) 
 cityCouncilNYC <- read.csv( data4File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data4File ))))
 cityCouncilNYC <- makeColNamesUserFriendly( cityCouncilNYC )
 numCityCouncil <- nrow( cityCouncilNYC )
 
 #########################################################################
-# Load the 311 SR data file
-data1File <- file.path( "..","data", "311_Mar_2023.csv")
+# Load the main 311 SR data file
+data1File <- file.path( "..","data", "311_202303.csv")
 d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 
-#Remove any totally empty rows
+#Remove any totally empty rows. Observed in the 2022 dataset
 d311 <- d311[complete.cases(d311), ]
 
 d311 <- makeColNamesUserFriendly( d311 )
 numRows <- nrow( d311 )
 
-#Remove rows with value 01/01/1900
+#Remove rows with value 01/01/1900 (observed in the 2022 dataset)
 d311$closed_date <- ifelse(d311$closed_date == "01/01/1900 12:00:00 AM", "", d311$closed_date)
 
-cat("\nRows in the 311 SR data set:", format( numRows, big.mark = ","))
+cat("\n# of rows in the 311 SR data set:", format( numRows, big.mark = ","))
 
+# build table of agency and count of SRs by agency
 sortedAllData <- as.data.frame(table(d311$agency))
 sortedAllData <- sortedAllData[order(-sortedAllData$Freq),]
+sortedAllData$percentage <- round(prop.table(sortedAllData$Freq)*100, 2)
 
-sortedAllData$percentage <- round((sortedAllData$Freq / sum(sortedAllData$Freq)) * 100, 2)
-
-sortedAllData$Freq <- format(sortedAllData$Freq, big.mark = ",")
-SRsbyAgency <- sortedAllData
-
-cat("\nSRs by Agency:\n")
-print(SRsbyAgency)
+# print frequency and 
+cat("\n\nSRs by Agency:\n")
+print(sortedAllData)
 
 #########################################################################
+# calculate the number of blank, Unspecified, and Unknown data entires
 missingDataPerColumn <- countColumnsMissingData(d311)
-missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric)] <- missingDataPerColumn[, sapply(missingDataPerColumn, is.numeric)]
 
 # Multiply the percentage columns by 100
 percentage_columns <- c("pctBlank", "pctUnspecified", "pctUnknown")
@@ -197,39 +221,39 @@ missingDataPerColumn[, percentage_columns] <- missingDataPerColumn[, percentage_
 # Sort the data frame by the second column in descending order
 missingDataPerColumn <- missingDataPerColumn[order(-missingDataPerColumn[, 2]), ]
 
-missingDataPerColumn$blanks <- format(missingDataPerColumn$blanks, big.mark = ",")
-missingDataPerColumn$Unspecified <- format(missingDataPerColumn$Unspecified, big.mark = ",")
-missingDataPerColumn$unknowns <- format(missingDataPerColumn$unknowns, big.mark = ",")
-
-cat("\n\nNumber and % of blanks(incl 'NA'), Unspecified, and Unknown values in each data field\n")
+cat("\n\nNumber and % of blanks (incl 'NA'), Unspecified, and Unknown values per column\n")
 print(missingDataPerColumn)
 
-# Revert fields back from the format with the thousand's ","
-missingDataPerColumn$blanks <- as.numeric(gsub(",", "", missingDataPerColumn$blanks))
-missingDataPerColumn$Unspecified <- as.numeric(gsub(",", "", missingDataPerColumn$Unspecified))
-missingDataPerColumn$unknowns <- as.numeric(gsub(",", "", missingDataPerColumn$unknowns))
-
 #########################################################################
+# determine if field values correspond to their data 'type', i.e. numeric, date, etc.
+
+# check to see if date fields are all dates.
 created_dateDates <- areAllDates( d311$created_date )
 closed_dateDates <- areAllDates( d311$closed_date )
 due_dateDates <- areAllDates( d311$due_date )
 resolution_action_updated_dateDates <-  areAllDates( d311$resolution_action_updated_date )
 
+# print out results to the console
 cat( "\nAre all the values in the 'closed_date' field dates?", closed_dateDates )
 cat( "\nAre all the values in the 'due_date' field dates?", due_dateDates )
 cat( "\nAre all the values in the 'created_date' field dates?", created_dateDates )
 cat( "\nAre all the values in the 'resolution_action_updated_date' field dates?", resolution_action_updated_dateDates )
 
 #########################################################################
+# determine if the unique_key is in fact unique
 uniqueKeys <- length( unique(d311$unique_key)) == nrow(d311 )
 cat("\nAre all the 'unique_key' fields truely unique?", uniqueKeys)
 
 #########################################################################
+# determine if the incident_zip and zip_codes fields contain 5 numeric digits
 incident_zip5Digits <- areFiveDigits2( d311$incident_zip )
 cat( "\nAre all the zipcodes in the 'incident_zip' field 5 numeric digits?", incident_zip5Digits  )
 
 zip_codes5Digits <- areFiveDigits2( d311$zip_codes )
 cat( "\nAre all the zipcodes in the 'zip_codes' field 5 numeric digits?", zip_codes5Digits )
+
+#########################################################################
+# determine if various fields are numeric values
 
 x_coordinateNum <- areAllNumbers( d311$x_coordinate_state_plane )
 cat( "\nAre all the values in the 'x_coordinate_state_plane' field numbers?", x_coordinateNum )
@@ -256,7 +280,7 @@ police_precinctsNum <- areAllNumbers( d311$police_precincts )
 cat( "\nAre all the values in the 'police_precincts' field numbers?", police_precinctsNum )
 
 #########################################################################
-## Change the lat/long and state_plane fields into type "numeric".
+## Change the lat/long and state_plane fields into type "numeric" to enable comparison.
 d311$x_coordinate_state_plane <- as.numeric( d311$x_coordinate_state_plane )
 d311$y_coordinate_state_plane <- as.numeric (d311$y_coordinate_state_plane )
 
@@ -313,11 +337,6 @@ for (i in seq_along(parsed_values)) {
 latitude_match <- (!is.na(d311$latitude) | d311$latitude != "" |  !is.na(lat)) & round(d311$latitude, 5) == round(lat, 5)
 longitude_match <- (!is.na(d311$longitude) | d311$latitude != "" | !is.na(long)) & round(d311$longitude, 5) == round(long, 5)
 
-#Check if "location" is a concatenation of "latitude" and "longitude"
-# Get the rows where latitude or longitude does not match
-#latitude_match <- round(d311$latitude, 5) == round(lat, 5)
-#longitude_match <- round(d311$longitude, 5) == round(long, 5)
-
 # Get the rows where latitude or longitude does not match
 mismatched_rows <- d311[!latitude_match | !longitude_match, ]
 mismatched_rows <- mismatched_rows[complete.cases(mismatched_rows[, c("latitude", "longitude", "location")]), ]
@@ -332,7 +351,184 @@ if (nrow(mismatched_rows) > 0) {
 }
 
 #########################################################################
+# check to see if cross_street1 and intersection_street_1 are the same value
+
+####################
+# find rows where cross_street_1 is blank, but intersection_street_1 is not blank. Use later.
+crossStreet1Blank1 <- subset(d311, d311$cross_street_1 == "" & d311$intersection_street_1 != "", select = c("cross_street_1", "intersection_street_1", "agency"))
+
+# find rows where intersection_street is blank, but cross_street is not blank
+intersectionStreet1Blank1 <- subset(d311, d311$cross_street_1 != "" & d311$intersection_street_1 == "", select = c("cross_street_1", "intersection_street_1", "agency"))
+
+# find rows where both cross_street_1 and intersection_street_1 are blank
+bothBlank1 <- subset(d311, d311$cross_street_1 == "" & d311$intersection_street_1 == "", select = c("cross_street_1", "intersection_street_1", "agency"))
+
+####################
+# Matching cross_street_1 and intersection_street_1
+# remove extra spaces and blanks to perform checks
+dupXStreets1 <- subset(d311,
+                      gsub("\\s+", " ", cross_street_1) == gsub("\\s+", " ", intersection_street_1), 
+                      select = c("cross_street_1", "intersection_street_1", "agency"))
+
+cat("\n\n# of matching cross_street_1 & intersection_street_1 is", nrow(dupXStreets1),"representing", round(nrow(dupXStreets1)/nrow(d311)*100,2),"% of total rows.")
+cat("\n\nSample of matching cross_street_1 & intersection_street_1\n")
+print(head(dupXStreets1, 15))
+
+cat("\nAgencies with matches\n")
+agency_match_counts1 <- table(dupXStreets1$agency)
+agency_match1 <- data.frame(agency = names(agency_match_counts1), count = as.numeric(agency_match_counts1))
+agency_match1$percentage <- round(prop.table(agency_match1$count)*100,2)
+agency_match1 <- agency_match1[order(agency_match1$count, decreasing = TRUE) ,]
+print(agency_match1)
+
+####################
+# non-matching cross_street1 and intersection_1
+nondupXStreets1 <- subset( d311,
+                          gsub("\\s+", " ", cross_street_1) != gsub("\\s+", " ", intersection_street_1), 
+                          select = c("cross_street_1", "intersection_street_1", "agency"))
+
+cat("\n# of non-matching cross_street_1 & intersection_1 is", nrow(nondupXStreets1),"representing", round(nrow(nondupXStreets1)/nrow(d311)*100,2),"% of total rows")
+cat("\nSample of non-matching cross_street_1 and intersection_street_1\n")
+print(head(nondupXStreets1, 15))
+cat("\nAgencies with non-matches\n")
+agency_nonmatch_counts1 <- table(nondupXStreets1$agency)
+agency_nonmatch1 <- data.frame(agency = names(agency_nonmatch_counts1), count = as.numeric(agency_nonmatch_counts1))
+agency_nonmatch1$percentage <- round(prop.table(agency_nonmatch1$count)*100, 2)
+agency_nonmatch1 <- agency_nonmatch1[order(agency_nonmatch1$count, decreasing = TRUE) ,]
+print(agency_nonmatch1)
+
+####################
+# cross_street_1 is blank, but intersection_street_1 is not blank
+cat("\n\nNumber of ocurrences where cross_street_1 is blank, but intersection_street_1 is not blank is", nrow(crossStreet1Blank1),"representing", round(nrow(crossStreet1Blank1)/nrow(d311)*100,2),"% of total rows") 
+cat("\n\nSample of cross_street_1 matching intersection_street_1\n")
+print(head(crossStreet1Blank1, 10))
+
+# Count by agency
+cat("\nAgencies\n")
+agency_countsXStreet1 <- table(crossStreet1Blank1$agency)
+
+# Calculate the agency percentage column
+agency_XStreetBlank1 <- data.frame(agency = names(agency_countsXStreet1), count = as.numeric(agency_countsXStreet1))
+agency_XStreetBlank1$percentage <- round(prop.table(agency_XStreetBlank1$count)*100, 2)
+agency_XStreetBlank1 <- agency_XStreetBlank1[order(agency_XStreetBlank1$count, decreasing = TRUE) ,]
+print(agency_XStreetBlank1)
+
+####################
+# Intersection_street_1 is blank, but cross_street_1 is not blank
+cat("\nNumber of ocurrences where intersection_street_1 is blank, but cross_street_1 is not blank", nrow(intersectionStreet1Blank1),"representing", round(nrow(intersectionStreet1Blank1)/nrow(d311)*100,2),"% of total rows") 
+cat("\n\nSample of cross_street_1 matching intersection_street_1\n")
+print(head(intersectionStreet1Blank1, 10))
+
+# Count by agency
+cat("\nAgencies\n")
+agency_inter1_counts1 <- table( intersectionStreet1Blank1$agency)
+
+# Calculate the agency percentage column
+agency_inter_StreetBlank1 <- data.frame(agency = names(agency_inter1_counts1), count = as.numeric(agency_inter1_counts1))
+agency_inter_StreetBlank1$percentage <- round(prop.table(agency_inter_StreetBlank1$count)*100, 2)
+agency_inter_StreetBlank1 <- agency_inter_StreetBlank1[order(agency_inter_StreetBlank1$count, decreasing = TRUE) ,]
+print(agency_inter_StreetBlank1)
+
+####################
+# summary of cross_street_1 and intersection_street_1 columns
+summaryXstreet1 <- data.frame(category = c("matching", "non-matching", "Xstreet1Blank", "interstreet1Blank" ), 
+                              count = c(nrow(dupXStreets1), nrow(nondupXStreets1), nrow(crossStreet1Blank1), nrow(intersectionStreet1Blank1)))
+summaryXstreet1$percentage <- round(prop.table(summaryXstreet1$count)*100, 2)
+cat("\nSummary of cross_street_1 and intersection_street_1\n")
+print(summaryXstreet1)
+
+#########################################################################
+# check to see if cross_street2 and intersection_2 are the same value
+
+####################
+# find rows where cross_street_2 is blank, but intersection_street_2 is not blank. Use later.
+crossStreet2Blank2 <- subset(d311, d311$cross_street_2 == "" & d311$intersection_street_2 != "", select = c("cross_street_2", "intersection_street_2", "agency"))
+
+# find rows where intersection_street_2 is blank, but cross_street_2 is not blank
+intersectionStreet2Blank2 <- subset(d311, d311$cross_street_2 != "" & d311$intersection_street_2 == "", select = c("cross_street_2", "intersection_street_2", "agency"))
+
+# find rows where both cross_street_2 and intersection_street_2 are blank
+bothBlank2 <- subset(d311, d311$cross_street_2 == "" & d311$intersection_street_2 == "", select = c("cross_street_2", "intersection_street_2", "agency"))
+
+####################
+# Matching cross_street_2 and intersection_street_2
+# remove extra spaces and blanks to perform checks
+dupXStreets2 <- subset(d311,
+                       gsub("\\s+", " ", cross_street_2) == gsub("\\s+", " ", intersection_street_2), 
+                       select = c("cross_street_2", "intersection_street_2", "agency"))
+
+cat("\n\n# of matching cross_street_2 & intersection_2 is", nrow(dupXStreets2),"representing", round(nrow(dupXStreets2)/nrow(d311)*100,2),"% of total rows.")
+cat("\n\nSample of matching cross_street_2 & intersection_street_2\n")
+print(head(dupXStreets2, 15))
+
+cat("\nAgencies with matches\n")
+agency_match_counts2 <- table(dupXStreets2$agency)
+agency_match2 <- data.frame(agency = names(agency_match_counts2), count = as.numeric(agency_match_counts2))
+agency_match2$percentage <- round(prop.table(agency_match2$count)*100,2)
+agency_match2 <- agency_match2[order(agency_match2$count, decreasing = TRUE) ,]
+print(agency_match2)
+
+####################
+# non-matching cross_street1 and intersection_1
+nondupXStreets2 <- subset( d311,
+                           gsub("\\s+", " ", cross_street_2) != gsub("\\s+", " ", intersection_street_2), 
+                           select = c("cross_street_2", "intersection_street_2", "agency"))
+
+cat("\n# of non-matching cross_street_2 & intersection_street_2 is", nrow(nondupXStreets2),"representing", round(nrow(nondupXStreets2)/nrow(d311)*100,2),"% of total rows")
+cat("\nSample of non-matching cross_street_2 and intersection_street_2\n")
+print(head(nondupXStreets2, 15))
+cat("\nAgencies with non-matches\n")
+agency_nonmatch_counts2 <- table(nondupXStreets2$agency)
+agency_nonmatch2 <- data.frame(agency = names(agency_nonmatch_counts2), count = as.numeric(agency_nonmatch_counts2))
+agency_nonmatch2$percentage <- round(prop.table(agency_nonmatch2$count)*100, 2)
+agency_nonmatch2 <- agency_nonmatch2[order(agency_nonmatch2$count, decreasing = TRUE) ,]
+print(agency_nonmatch2)
+
+####################
+# cross_street_2 is blank, but intersection_street_2 is not blank
+cat("\n\nNumber of ocurrences where cross_street_2 is blank, but intersection_street_2 is not blank is", nrow(crossStreet2Blank2),"representing", round(nrow(crossStreet2Blank2)/nrow(d311)*100,2),"% of total rows") 
+cat("\n\nSample of cross_street_2 matching intersection_street_2\n")
+print(head(crossStreet2Blank2, 10))
+
+# Count by agency
+cat("\nAgencies\n")
+agency_countsXStreet2 <- table(crossStreet2Blank2$agency)
+
+# Calculate the agency percentage column
+agency_XStreetBlank2 <- data.frame(agency = names(agency_countsXStreet2), count = as.numeric(agency_countsXStreet2))
+agency_XStreetBlank2$percentage <- round(prop.table(agency_XStreetBlank2$count)*100, 2)
+agency_XStreetBlank2 <- agency_XStreetBlank2[order(agency_XStreetBlank2$count, decreasing = TRUE) ,]
+print(agency_XStreetBlank2)
+
+####################
+# Intersection_1 is blank, but cross_street_1 is not blank
+cat("\nNumber of ocurrences where intersection_street_2 is blank, but cross_street_2 is not blank", nrow(intersectionStreet2Blank2),"representing", round(nrow(intersectionStreet2Blank2)/nrow(d311)*100,2),"% of total rows") 
+cat("\n\nSample of cross_street_2 matching intersection_street_2\n")
+print(head(intersectionStreet2Blank2, 10))
+
+# Count by agency
+cat("\nAgencies\n")
+agency_inter2_counts2 <- table( intersectionStreet2Blank2$agency)
+
+# Calculate the agency percentage column
+agency_inter_StreetBlank2 <- data.frame(agency = names(agency_inter2_counts2), count = as.numeric(agency_inter2_counts2))
+agency_inter_StreetBlank2$percentage <- round(prop.table(agency_inter_StreetBlank2$count)*100, 2)
+agency_inter_StreetBlank2 <- agency_inter_StreetBlank2[order(agency_inter_StreetBlank2$count, decreasing = TRUE) ,]
+print(agency_inter_StreetBlank2)
+
+####################
+# summary of cross_street_2 and intersection_street_2 columns
+summaryXstreet2 <- data.frame(category = c("matching", "non-matching", "XstreetBlank", "interstreetBlank" ), 
+                              count = c(nrow(dupXStreets2), nrow(nondupXStreets2), nrow(crossStreet2Blank2), nrow(intersectionStreet2Blank2)))
+summaryXstreet2$percentage <- round(prop.table(summaryXstreet2$count)*100, 2)
+cat("\nSummary of cross_street_2 and intersection_street_2\n")
+print(summaryXstreet2)
+
+
+#########################################################################
 cat("\n\n########## Check for allowable values ##########")
+#########################################################################
+# check if borough, borough_boundaries, and park_borough contain only allowable values
 boroughResults <- areInList( d311$borough,  data.frame(values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "Unspecified") ) )
 cat( "\nAre all the values in the 'borough' field valid?", boroughResults$checkIt ) 
 if (!boroughResults$checkIt) { 
@@ -348,6 +544,8 @@ cat( "\nAre all the values in the 'park_borough' field valid?", park_boroughResu
 if (!park_boroughResults$checkIt) { 
   cat("\nNumber of non-allowable value", length(park_boroughResults$non_allowable), "\nNon-allowable values:\n", head(park_boroughResults$non_allowable, 10) ) }
 
+#########################################################################
+# check to see if other fields contain the allowable values
 open_data_channelResults <- areInList( d311$open_data_channel_type, data.frame( values = c( "UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER" ) ) )
 cat( "\nAre all the values in the 'open_data_channel_type'valid?", open_data_channelResults$checkIt )
 if (!open_data_channelResults$checkIt) { 
@@ -361,25 +559,24 @@ if (!city_councilResults$checkIt) {
 police_precinctResults <- areInList( d311$police_precincts, precinctsNYPD )
 cat( "\nAre all the values in the 'police_precinct valid?", police_precinctResults$checkIt )
 if (!police_precinctResults$checkIt) {
+  
+  # retrieve the number of blank fields for calculation purposes
   numBlankpolice_precinct <- missingDataPerColumn[missingDataPerColumn$field == "police_precincts", "blanks"]
-  cat("\nInvalid values in the 'police_precincts' field number", format(length(police_precinctResults$non_allowable), big.mark = "," ), 
+  
+  cat("\n\nInvalid values in the 'police_precincts' field number", format(length(police_precinctResults$non_allowable), big.mark = "," ), 
       "representing", round((length(police_precinctResults$non_allowable)/(numRows - numBlankpolice_precinct)) * 100, 2), "% of non-blank data.\n")
   cat("Made up by", length(unique(police_precinctResults$non_allowable)), "'unique' police_precincts.\n")
   
   # Sort the table in descending order
-  sorted_table <- sort(table(police_precinctResults$non_allowable), decreasing = TRUE)
+  sorted_pp_table <- sort(table(police_precinctResults$non_allowable), decreasing = TRUE)
   
   # Convert the table to a data frame and calculate the percentage column
-  df <- data.frame(Precinct = names(sorted_table), Count = as.numeric(sorted_table))
-  total_count <- sum(df$Count)
-  df$Percentage <- round((df$Count / total_count) * 100, 2)
-  
-  # Format the Count column with thousand separators
-  df$Count <- format(df$Count, big.mark = ",")
+  pp_df <- data.frame(precinct = names(sorted_pp_table), count = as.numeric(sorted_pp_table))
+  pp_df$percentage <- round(prop.table(pp_df$count)*100, 2)
   
   # Print the top 10 values vertically
   cat("\nTop Ten Invalid Precincts:\n")
-  print(df[1:10, ])
+  print(pp_df[1:10, ])
 }
 
 #########################################################################
@@ -392,30 +589,29 @@ invalid_zip_counts1 <- table(invalid_zips1$incident_zip)
 # Calculate the total count
 total_invalid_count1 <- sum(invalid_zip_counts1)
 
-# Calculate the percentage column
+# Calculate the overall percentage column
 invalid_zip_df1 <- data.frame(zip_code = names(invalid_zip_counts1), count = as.numeric(invalid_zip_counts1))
-invalid_zip_df1$percentage <- round((invalid_zip_df1$count / total_invalid_count1) * 100, 2)
+invalid_zip_df1$percentage <- round(prop.table(invalid_zip_df1$count)*100, 2)
 
 # Count by agency
 agency_counts1 <- table(invalid_zips1$agency)
 
-# Calculate the percentage column
+# Calculate the agency percentage column
 agency_df1 <- data.frame(agency = names(agency_counts1), count = as.numeric(agency_counts1))
-agency_df1$percentage <- round((agency_counts1 / sum(agency_counts1)) * 100, 2)
-
-# Create a dataframe for agency counts and percentages
+agency_df1$percentage <- round(prop.table(agency_counts1)*100, 2)
 
 # Sort the dataframes
 invalid_zip_df1 <- invalid_zip_df1[order(invalid_zip_df1$count, decreasing = TRUE), ]
 agency_df1 <- agency_df1[order(agency_df1$count, agency_df1$agency, decreasing = TRUE), ]
 
 # Reset row names
-row.names(invalid_zip_df1) <- NULL
-row.names(agency_df1) <- NULL
+#row.names(invalid_zip_df1) <- NULL
+#row.names(agency_df1) <- NULL
 
 # Output the number of invalid zip codes
 numBlankzip_codes1 <- missingDataPerColumn[missingDataPerColumn$field == "incident_zip", "blanks"]
 sumInvalid1 <- sum(as.vector(agency_counts1))
+
 cat("\n\nThere are", format( sum(as.vector(agency_counts1)), big.mark = ","), "invalid d311$incident_zip entries representing", 
     round(sumInvalid1/(nrow(d311) - numBlankzip_codes1)*100,2), "% of non-blank data.\n")
 cat("Made up by",length(invalid_zip_counts1) ,"unique 'incident_zip's.\n")
@@ -425,7 +621,7 @@ cat("\nInvalid Zip Code Counts (sample):\n")
 print(head(invalid_zip_df1,10))
 
 cat("\nAgency Counts and Percentages:\n")
-agency_df1$count <- format(agency_df1$count, big.mark = ",")
+#agency_df1$count <- format(agency_df1$count, big.mark = ",")
 print(agency_df1)
 
 #########################################################################
@@ -438,44 +634,42 @@ invalid_zip_counts2 <- table(invalid_zips2$zip_codes )
 # Calculate the total count
 total_invalid_count2 <- sum(invalid_zip_counts2)
 
-# Calculate the percentage column
+# Calculate the overall percentage column
 invalid_zip_df2 <- data.frame(zip_code = names(invalid_zip_counts2), count = as.numeric(invalid_zip_counts2))
-invalid_zip_df2$percentage <- round((invalid_zip_df2$count / total_invalid_count2) * 100, 2)
+invalid_zip_df2$percentage <- round(prop.table(invalid_zip_df2$count)*100, 2)
 
 # Count by agency
 agency_counts2 <- table(invalid_zips2$agency)
 
-# Create a dataframe for agency counts and percentages
+# Calculate the agency percentage column
 agency_df2 <- data.frame(agency = names(agency_counts2), count = as.numeric(agency_counts2))
-
-# Calculate the percentage column
-agency_df2$percentage <- round((agency_counts2 / sum(agency_counts2)) * 100, 2)
+agency_df2$percentage <- round(prop.table(agency_counts2)*100, 2)
 
 # Sort the dataframes
 invalid_zip_df2 <- invalid_zip_df2[order(invalid_zip_df2$count, decreasing = TRUE), ]
 agency_df2 <- agency_df2[order(agency_df2$count, agency_df2$agency, decreasing = TRUE), ]
 
 # Reset row names
-row.names(invalid_zip_df2) <- NULL
-row.names(agency_df2) <- NULL
+#row.names(invalid_zip_df2) <- NULL
+#row.names(agency_df2) <- NULL
 
 # Output the number of invalid zip codes
 numBlankzip_codes2 <- missingDataPerColumn[missingDataPerColumn$field == "zip_codes", "blanks"]
 sumInvalid2 <- sum(as.vector(agency_counts2))
+
 cat("\nThere are", format( sum(as.vector(agency_counts2)), big.mark = ","), "invalid d311$zip_codes representing", 
     round(sumInvalid2/(nrow(d311) - numBlankzip_codes2)*100,2), "% of non-blank data.\n")
 cat("Made up by",length(invalid_zip_counts2) ,"unique 'zip_codes's.\n")
 
 # Print the results
 cat("\nInvalid Zip Code Counts (sample):\n")
-invalid_zip_df2$count <- format(invalid_zip_df2$count, big.mark = ",")
 print(head(invalid_zip_df2,10))
 
 cat("\nAgency Counts and Percentages:\n")
-agency_df2$count <- format(agency_df2$count, big.mark = ",")
 print(agency_df2)
 
 #########################################################################
+# check the encoded borough_boundaries field for allowable values
 d311$translatedborough_boundaries <- ifelse(d311$borough_boundaries == "2", "BROOKLYN",
                                             ifelse(d311$borough_boundaries == "3", "QUEENS",
                                                    ifelse(d311$borough_boundaries == "4", "MANHATTAN",
@@ -492,20 +686,22 @@ cat("\nNon-matches between the 'borough' and 'borough_boundaries' fields number"
 
 if (nrow(nonMatchingborough_boundaries) > 0) {
   cat("\n Sample of non-matching park_boroughs\n")#
-#  colnames(nonMatchingFields) <- c("unique_key", "borough","borough_boundaries", "Agency") 
   print(head(nonMatchingborough_boundaries, 10))
   
   cat("\nSorted by Agency:\n")
   sortedDataborough_boundaries <- as.data.frame(table(nonMatchingborough_boundaries$agency))
-  sortedDataborough_boundaries$Percentage <- round((sortedDataborough_boundaries$Freq / sum(sortedDataborough_boundaries$Freq)) * 100, 2)  # Calculate the percentage column
+  sortedDataborough_boundaries$Percentage <- round(prop.table(sortedDataborough_boundaries$Freq)*100, 2)
   sortedDataborough_boundaries <- sortedDataborough_boundaries[order(-sortedDataborough_boundaries$Freq), ]
-#  colnames(sortedDataborough_boundaries) <- c("Agency", "# mismatches", "Pct")
+
   print(sortedDataborough_boundaries)
 }
 
 #########################################################################
+# check to see if there are any mis-matches between 'borough' and 'park_borough'
 nonMatchingpark_borough <- subset(d311, borough != park_borough & park_borough != "", 
                             select = c("unique_key", "borough", "park_borough", "agency"))
+
+# retrieve # of blanks for calculations
 numBlankpark_borough <- missingDataPerColumn[missingDataPerColumn$field == "park_borough", "blanks"]
 
 cat("\nNon-matches between the 'borough' and 'park_borough' fields number", format(nrow(nonMatchingpark_borough), big.mark = ","),
@@ -517,7 +713,7 @@ if (nrow(nonMatchingpark_borough) > 0) {
   
   cat("\nSorted by Agency:\n")
   sortedDatapark_borough <- as.data.frame(table(nonMatchingpark_borough$agency))
-  sortedDatapark_borough$Percentage <- round((sortedDatapark_borough$Freq / sum(sortedDatapark_borough$Freq)) * 100, 2)  # Calculate the percentage column
+  sortedDatapark_borough$Percentage <- round( prop.table(sortedDatapark_borough$Freq)*100, 2)  # Calculate the percentage column
   
   sortedDatapark_borough <- sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
   sortedDatapark_borough <- sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
@@ -525,19 +721,19 @@ if (nrow(nonMatchingpark_borough) > 0) {
 }
 
 #########################################################################
-##  Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
+# Change the various date fields to date-time objects and reformat dates.There are four date fields in the 311 data.
 d311$created_date <- strptime(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "EST")
 d311$closed_date <- strptime(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "EST")
 d311$due_date <- strptime(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "EST")
 d311$resolution_action_updated_date <- strptime(d311$resolution_action_updated_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "EST")
 
-##  Duration is the time between created_date and closed_date, although due to data errors the value may be negative.
-##  Identify the Service Records that were closed before they were create, i.e. bad dates.
-##  Compute and store "duration" in a new additional column for the dataframe "d311".
+# Duration is the time between created_date and closed_date
+# Compute and store "duration" in a new additional column for the dataframe "d311".
 d311$duration <- as.numeric( difftime( d311$closed_date, d311$created_date, units = "days"))
 
 #########################################################################
-# Find SRs with a negative duration
+# Identify the SRs with negative duration (closed before they were created)
+
 closedBeforeOpened <- d311[ d311$duration < 0 & !is.na(d311$duration), c("unique_key", "created_date", "closed_date", "duration", "agency")]
 
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
@@ -555,27 +751,25 @@ if ( nrow( closedBeforeOpened ) > 0 ) {
   print( tail( sortedClosed, 5))
   cat("\nBy Agency\n")
 
-    # Calculate the count by agency
+  # Calculate the count by agency
   count_by_agency <- table(sortedClosed$agency)
   
   # Create a dataframe from the count
   summary_df <- data.frame(agency = names(count_by_agency), count = as.numeric(count_by_agency))
   
   # Calculate the percentage column
-  summary_df$percentage <- (summary_df$count / nrow(sortedClosed)) * 100
+  summary_df$percentage <- round(prop.table(summary_df$count)*100,2)
   
   # Sort the dataframe by count in descending order
   summary_df <- summary_df[order(summary_df$count, decreasing = TRUE), ]
   
   # Reset row names
   row.names(summary_df) <- NULL
-  colnames(summary_df) <- c("Agency", "Count", "Pct")
-  summary_df$Pct <- round(summary_df$Pct, 2)
-  # View the summary dataframe
   print(summary_df)
 }
 
 #########################################################################
+# count SRs that have a zero duration, i.e. closed and opened at the exact same time
 zeroDurations <- d311[!is.na(d311$duration) & d311$duration == 0, c("unique_key", "created_date", "closed_date", "duration", "agency")]
 numBlankClosedDate <- missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
 
@@ -593,14 +787,8 @@ if (nrow(zeroDurations) > 0) {
   ordered_temp_df <- data.frame(Agency = names(ordered_temp), no_of_SRs = ordered_temp)
   ordered_temp_df <- ordered_temp_df[, c(1, 3)]
 
-  #Calculate the total countAgency
-  totalSRs <- sum(as.numeric(temp))
-  
   # Add the percentage column to the dataframe
-  ordered_temp_df$percentage <- round((ordered_temp_df$no_of_SRs.Freq / totalSRs * 100),2)
-  
-  ordered_temp_df$no_of_SRs.Freq <- format( ordered_temp_df$no_of_SRs.Freq, big.mark = ",")
-  colnames(ordered_temp_df) <- c("Agency", "Count", "Pct")
+  ordered_temp_df$percentage <- round(prop.table(ordered_temp_df$no_of_SRs.Freq)*100,2)
   print(ordered_temp_df)
 }
 
