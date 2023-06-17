@@ -44,7 +44,7 @@ Note that the character on the right of the title bar for callout blocks like th
 
 
 We now have enough information, such as the date-time format used, to do an initial conversion of the CSV file to a `DataFrame`, using several optional arguments to customize the process.
-(Details about each of these optional arguments are given callout blocks below.)
+(Details about each of these optional arguments are given in callout blocks below.)
 
 ```{julia}
 df = CSV.read(
@@ -99,7 +99,7 @@ A type name that ends in `?` indicates that missing values are present in the co
 Thus the `Unique_Key` is stored as 32-bit signed integers with no missing values.
 The `Created_Date` is a `DateTime` with no missing values but the `Closed_Date`, which is also a `DateTime`, does have missing values.
 
-Some columns are given are `String` whereas others are given as `String7` or `String15`.
+Some columns are described as `String` whereas others are described as `String7` or `String15`.
 These are storage-saving representations used when the whole column consists of short character strings.
 There is an anomaly in these short strings for the `Agency` column.
 The `Agency` acronyms should be 4 or 5 characters at most but at least one (it happens to be `NYC311-PRD`) must be greater than 7 characters to force `String15` storage.
@@ -116,7 +116,7 @@ unique(select(df, :Agency, :Agency_Name))
 
 At this point we would need to check with the data providers to determine why two different `Agency` designations are used for the "Department of Environmental Protection".
 
-The other problem shown in the types is that the `Incident_Zip` column is stored as strings when they should be integers.
+The other problem shown in the types is that the values in the `Incident_Zip` column are stored as strings when they should be integers or missing.
 
 ```{julia}
 levels(df.Incident_Zip)
@@ -280,7 +280,8 @@ $ Police_Precincts               <int> 39, 11, 24, 23, 65, 59, NA, 69, 38, 34,â€
 The R `arrow` package appears to read the DateTime values as if they are in given in UTC then prints them in the local time zone.
 :::
 
-or Python (note that this format is called `feather` in the `pyarrow` package)
+or Python (note that the Arrow IPC format is called `feather` in the `pyarrow` package) or in [Polars](https://pola.rs)
+
 ```python
 >>> import pyarrow.feather as fea
 >>> fea.read_table("./data/311_half_March_2023.arrow")
