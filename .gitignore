@@ -55,3 +55,5 @@ babel/
 /nyc311clean_files/
 Manifest.toml
 _publish.yml
+/.jupyter_cache/
+/_freeze/
