@@ -54,3 +54,4 @@ babel/
 *.html
 /nyc311clean_files/
 Manifest.toml
+_publish.yml
