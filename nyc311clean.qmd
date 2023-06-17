@@ -1,0 +1,355 @@
+---
+title: "Creating an Arrow IPC file from the NYC 311 data"
+author: 
+  - name: Jun Yan
+    affiliation: University of Connecticut
+  - name: Douglas Bates
+    affiliation: University of Wisconsin - Madison
+---
+
+## Abstract {.unnumbered}
+
+We show conversion of a CSV file containing data on 311 service calls during March, 2023 in New York City to the [Arrow](https://arrow.apache.org) IPC (Inter-Process Communications) file format (also called the Feather V2 format) which can be read quickly and easily into many different data science environments.
+This conversion is done in [Julia](https://julialang.org) but it could equally well have been done in a number of different languages, whichever is most convenient for the person doing the conversion.
+
+# Reading the CSV file as a DataFrame
+
+First we attach the packages to be used,
+
+```{julia}
+#| output: false
+using Arrow, CSV, Dates, DataFrames
+```
+
+The first two lines of the CSV file are
+
+```{julia}
+#| panel: fill
+open("./data/311_half_Mar_2023.csv", "r") do io
+    println(readline(io))
+    println(readline(io))
+    seekstart(io)
+end;
+```
+
+::: {.callout-note collapse="false"}
+### Need to scroll right to see the entire line
+
+The output from this code block has very long lines.
+You will need to scroll right in the output to read it all.
+
+Note that the character on the right of the title bar for callout blocks like this is a toggle to show or hide the contents of the block.
+:::
+
+
+
+We now have enough information, such as the date-time format used, to do an initial conversion of the CSV file to a `DataFrame`, using several optional arguments to customize the process.
+(Details about each of these optional arguments are given callout blocks below.)
+
+```{julia}
+df = CSV.read(
+    "./data/311_half_Mar_2023.csv",  # file name
+    DataFrame;                       # output table type
+    normalizenames=true, # convert column names to valid symbols
+    missingstring=[      # strings that are used to indicate missing vals
+        "",
+        "Unspecified",
+        "unspecified",
+        "Unknown",
+        "unknown",
+        "NA",
+    ],
+    dateformat=dateformat"m/d/Y I:M:S p", # DateTimes look like this
+    downcast=true,       # use smallest type of Int that can represent the column 
+    stripwhitespace=true # strip leading and trailing whitespace 
+)
+```
+
+:::{.callout-note collapse="true"}
+### normalize names
+Convert the column names in the first row of the CSV file into a form suitable as a `Symbol` in `Julia`.
+In particular, strip whitespace at the beginning and end of the name and replace embedded blanks or `.` characters by underscores.
+:::
+
+:::{.callout-note collapse="true"}
+### missingstring
+Enumerate the various forms of missing data indicators used in the file.
+Completing this list is often a process of trial-and-error.
+:::
+
+:::{.callout-note collapse="true"}
+### dateformat
+Provide a `Dates.DateFormat` object that will be applied to text columns if they match the pattern, converting to `DateTime` values.
+
+The construction `dateformat"..."` is a call to a "string macro" in Julia.
+That is, it is just a shorthand for replacing the string with the `Dates.DateFormat` object created from the string.
+:::
+
+:::{.callout-note collapse="true"}
+### downcast
+For columns of integer values, choose the smallest type that can represent all the values in the column.
+:::
+
+# Validity checking
+
+## Review the storage type for each column
+
+In the output (you must scroll horizontally to see it all) under the column name is an indicator of the type.
+A type name that ends in `?` indicates that missing values are present in the column.
+Thus the `Unique_Key` is stored as 32-bit signed integers with no missing values.
+The `Created_Date` is a `DateTime` with no missing values but the `Closed_Date`, which is also a `DateTime`, does have missing values.
+
+Some columns are given are `String` whereas others are given as `String7` or `String15`.
+These are storage-saving representations used when the whole column consists of short character strings.
+There is an anomaly in these short strings for the `Agency` column.
+The `Agency` acronyms should be 4 or 5 characters at most but at least one (it happens to be `NYC311-PRD`) must be greater than 7 characters to force `String15` storage.
+
+```{julia}
+show(unique(df.Agency))
+```
+
+The `Agency` and `Agency_Name` columns should be in one-to-one correspondence but they are not.
+
+```{julia}
+unique(select(df, :Agency, :Agency_Name))
+```
+
+At this point we would need to check with the data providers to determine why two different `Agency` designations are used for the "Department of Environmental Protection".
+
+The other problem shown in the types is that the `Incident_Zip` column is stored as strings when they should be integers.
+
+```{julia}
+levels(df.Incident_Zip)
+```
+
+and, of course, the problem is that someone got creative and used `na` as missing value indicator.
+
+Recreate the DataFrame with `"na"` in the `missingstring` vector
+
+```{julia}
+df = CSV.read(
+    "./data/311_half_Mar_2023.csv",  # file name
+    DataFrame;                       # output table type
+    normalizenames=true, # convert column names to valid symbols
+    missingstring=[      # strings that are used to indicate missing vals
+        "",
+        "Unspecified",
+        "unspecified",
+        "Unknown",
+        "unknown",
+        "NA",
+        "na",
+    ],
+    dateformat=dateformat"m/d/Y I:M:S p", # DateTimes look like this
+    downcast=true,       # use smallest type of Int that can represent the column 
+    stripwhitespace=true # strip leading and trailing whitespace 
+)
+```
+
+## Further checks
+
+### Are the `Unique_Key` values unique?
+```{julia}
+length(unique(df.Unique_Key)) == nrow(df)
+```
+
+### Are the `Created_Date` values in the specified range?
+
+```{julia}
+extrema(df.Created_Date)
+```
+
+### Are the `Closed_Date` values in the expected range?
+
+```{julia}
+extrema(skipmissing(df.Closed_Date))
+```
+
+:::{.callout-note collapse="true"}
+### use of skipmissing
+There are missing values in the `Closed_Date` column which must be skipped when evaluating the extremes.
+:::
+
+Now we can see a problem with the record giving the earliest `Closed_Date` because it is before the `Created_Date` range.
+
+These rows can be isolated for manual checking
+
+```{julia}
+earlyclosing = (!ismissing).(df.Closed_Date) .&& (df.Closed_Date .< df.Created_Date)
+immediateclosing = (!ismissing).(df.Closed_Date) .&& (df.Closed_Date .== df.Created_Date)
+(early = count(earlyclosing), immediate = count(immediateclosing))
+```
+
+:::{.callout-note collapse="true"}
+### What are all those dots for?
+Julia provides "syntactic sugar" to vectorize a scalar operation with a `.` following a function name (e.g. `(!ismissing).`) or preceding an operator (e.g. `.<`)
+:::
+
+If we want to examine the rows with these characteristics we index the rows with the `BitVector` created from the logical expression.
+To see the first 3 rows with early closings
+
+```{julia}
+first(df[earlyclosing, :], 3)
+```
+
+:::{.callout-note collapse="true"}
+### Use of `:` as an index indicates all values for that index
+In this case the use of `:` as the second index indicates that all the columns should be included in the subset.
+:::
+
+## Is Location redundant if Latitude and Longitude are given?
+
+This is a tricky question because the values of `Latitude` and `Longitude` are stored to 17 significant digits, which is much more accuracy than could possibly be measured.
+To check for consistency we need to convert the `Location` to a `Latitude-Longitude` pair then compare these values to the recorded `Latitude` and `Longitude` with some tolerance.
+
+# Saving the dataset as an Arrow IPC file
+
+We use `Arrow.write` to write the dataframe in the Arrow IPC format.
+
+```{julia}
+#| output: false
+fn = Arrow.write("./data/311_half_March_2023.arrow", df)
+```
+
+The Arrow file is less than half the size of the original CSV file but contains much more specificity about the data types and representations.
+Furthermore it can be read into other data science environments without needing to tinker with optional arguments.
+
+The Arrow IPC format and the `Arrow.write` function in the Julia package allow for optional compression of the contents using `lz4` or `zstd` if further reduction of the file size is desired.
+The trade-off is that the uncompressed file can be memory-mapped by some systems to make for extremely fast input.
+
+This file can be read into Julia
+
+```{julia}
+tbl = Arrow.Table(fn)
+```
+
+or R
+```r
+> tibble::glimpse(arrow::read_ipc_file("./data/311_half_March_2023.arrow"))
+Rows: 125,826
+Columns: 46
+$ Unique_Key                     <int> 57000688, 56993837, 57049479, 57056381,…
+$ Created_Date                   <dttm> 2023-03-09 09:05:25, 2023-03-08 15:27:…
+$ Closed_Date                    <dttm> 2023-03-13 03:21:11, 2023-05-03 02:17:…
+$ Agency                         <fct> DOE, TLC, HPD, NYPD, DOB, DPR, DOT, NYP…
+$ Agency_Name                    <fct> Department of Education, Taxi and Limou…
+$ Complaint_Type                 <fct> School Maintenance, For Hire Vehicle Co…
+$ Descriptor                     <chr> "Other School Condition", "Driver Compl…
+$ Location_Type                  <fct> School, Street, RESIDENTIAL BUILDING, S…
+$ Incident_Zip                   <int> NA, 10075, 10459, 10455, 11365, 11691, …
+$ Incident_Address               <chr> NA, "995 MADISON AVENUE", "1010 BRYANT …
+$ Street_Name                    <chr> NA, "MADISON AVENUE", "BRYANT AVENUE", …
+$ Cross_Street_1                 <chr> NA, "EAST   77 STREET", NA, "EAST  147 …
+$ Cross_Street_2                 <chr> NA, "EAST   78 STREET", NA, "EAST  149 …
+$ Intersection_Street_1          <chr> NA, "EAST   77 STREET", NA, "EAST  147 …
+$ Intersection_Street_2          <chr> NA, "EAST   78 STREET", NA, "EAST  149 …
+$ Address_Type                   <fct> NA, ADDRESS, ADDRESS, ADDRESS, ADDRESS,…
+$ City                           <fct> NA, NEW YORK, BRONX, BRONX, FRESH MEADO…
+$ Landmark                       <chr> NA, "MADISON AVENUE", NA, "UNION AVENUE…
+$ Facility_Type                  <fct> NA, NA, NA, NA, NA, NA, N/A, NA, NA, NA…
+$ Status                         <fct> Closed, Closed, Closed, Closed, Assigne…
+$ Due_Date                       <dttm> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+$ Resolution_Description         <fct> "The Department of Education determined…
+$ Resolution_Action_Updated_Date <dttm> 2023-03-13 03:21:17, 2023-05-03 02:17:…
+$ Community_Board                <fct> Unspecified BROOKLYN, 08 MANHATTAN, 02 …
+$ BBL                            <int64> NA, 1013927501, 2027560001, 202582004…
+$ Borough                        <fct> BROOKLYN, MANHATTAN, BRONX, BRONX, QUEE…
+$ X_Coordinate_State_Plane_      <int> 989013, 994507, 1015090, 1010420, 10388…
+$ Y_Coordinate_State_Plane_      <int> 173052, 221687, 239359, 235260, 206195,…
+$ Open_Data_Channel_Type         <fct> PHONE, ONLINE, PHONE, MOBILE, UNKNOWN, …
+$ Park_Facility_Name             <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Park_Borough                   <fct> BROOKLYN, MANHATTAN, BRONX, BRONX, QUEE…
+$ Vehicle_Type                   <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Taxi_Company_Borough           <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Taxi_Pick_Up_Location          <chr> NA, "995 MADISON AVENUE, MANHATTAN (NEW…
+$ Bridge_Highway_Name            <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Bridge_Highway_Direction       <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Road_Ramp                      <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Bridge_Highway_Segment         <fct> NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,…
+$ Latitude                       <dbl> 40.64166, 40.77515, 40.82361, 40.81237,…
+$ Longitude                      <dbl> -73.98284, -73.96297, -73.88857, -73.90…
+$ Location                       <chr> "(40.641663101476226, -73.9828374867858…
+$ Zip_Codes                      <int> 17620, 10092, 10937, 10933, 14507, 2052…
+$ Community_Districts            <int> 2, 23, 8, 49, 25, 51, NA, 26, 5, 24, 47…
+$ Borough_Boundaries             <int> 2, 4, 5, 5, 3, 3, NA, 3, 2, 5, 4, 5, 3,…
+$ City_Council_Districts         <int> 27, 51, 43, 35, 24, 47, NA, 16, 8, 29, …
+$ Police_Precincts               <int> 39, 11, 24, 23, 65, 59, NA, 69, 38, 34,…
+```
+:::{.callout-note collapse="true"}
+### R applies a time zone to the datetime values
+The R `arrow` package appears to read the DateTime values as if they are in given in UTC then prints them in the local time zone.
+:::
+
+or Python (not that this format is called `feather` in the `pyarrow` package)
+```python
+>>> import pyarrow.feather as fea
+>>> fea.read_table("./data/311_half_March_2023.arrow")
+pyarrow.Table
+Unique_Key: int32 not null
+Created_Date: timestamp[ms] not null
+Closed_Date: timestamp[ms]
+Agency: dictionary<values=string, indices=int8, ordered=0> not null
+Agency_Name: dictionary<values=string, indices=int8, ordered=0> not null
+Complaint_Type: dictionary<values=string, indices=int16, ordered=0> not null
+Descriptor: string
+Location_Type: dictionary<values=string, indices=int8, ordered=0>
+Incident_Zip: int32
+Incident_Address: string
+Street_Name: string
+Cross_Street_1: string
+Cross_Street_2: string
+Intersection_Street_1: string
+Intersection_Street_2: string
+Address_Type: dictionary<values=string, indices=int8, ordered=0>
+City: dictionary<values=string, indices=int8, ordered=0>
+Landmark: string
+Facility_Type: dictionary<values=string, indices=int8, ordered=0>
+Status: dictionary<values=string, indices=int8, ordered=0>
+Due_Date: timestamp[ms]
+Resolution_Description: dictionary<values=string, indices=int16, ordered=0>
+Resolution_Action_Updated_Date: timestamp[ms]
+Community_Board: dictionary<values=string, indices=int8, ordered=0> not null
+BBL: int64
+Borough: dictionary<values=string, indices=int8, ordered=0>
+X_Coordinate_State_Plane_: int32
+Y_Coordinate_State_Plane_: int32
+Open_Data_Channel_Type: dictionary<values=string, indices=int8, ordered=0> not null
+Park_Facility_Name: dictionary<values=string, indices=int16, ordered=0>
+Park_Borough: dictionary<values=string, indices=int8, ordered=0>
+Vehicle_Type: dictionary<values=string, indices=int8, ordered=0>
+Taxi_Company_Borough: dictionary<values=string, indices=int8, ordered=0>
+Taxi_Pick_Up_Location: string
+Bridge_Highway_Name: dictionary<values=string, indices=int8, ordered=0>
+Bridge_Highway_Direction: dictionary<values=string, indices=int8, ordered=0>
+Road_Ramp: dictionary<values=string, indices=int8, ordered=0>
+Bridge_Highway_Segment: dictionary<values=string, indices=int16, ordered=0>
+Latitude: double
+Longitude: double
+Location: string
+Zip_Codes: int16
+Community_Districts: int8
+Borough_Boundaries: int8
+City_Council_Districts: int8
+Police_Precincts: int8
+----
+Unique_Key: [[57000688,56993837,57049479,57056381,57023097,...,57116487,56954525,57132547,57102740,56950149]]
+Created_Date: [[2023-03-09 15:05:25.000,2023-03-08 21:27:34.000,2023-03-15 19:26:41.000,2023-03-16 23:58:53.000,2023-03-12 15:15:54.000,...,2023-03-22 17:47:08.000,2023-03-04 16:23:00.000,2023-03-24 21:57:44.000,2023-03-21 05:10:12.000,2023-03-04 00:27:00.000]]
+Closed_Date: [[2023-03-13 08:21:11.000,2023-05-03 07:17:20.000,2023-03-21 21:16:53.000,2023-03-17 02:44:31.000,2023-04-19 00:00:00.000,...,null,2023-03-08 10:50:00.000,2023-03-24 23:18:11.000,2023-03-21 05:16:30.000,2023-03-04 10:15:00.000]]
+Agency: [  -- dictionary:
+["DOE","TLC","HPD","NYPD","DOB",...,"DHS","EDC","DCA","NYC311-PRD","OTI"]  -- indices:
+[0,1,2,3,4,...,5,7,3,3,6]]
+Agency_Name: [  -- dictionary:
+["Department of Education","Taxi and Limousine Commission","Department of Housing Preservation and Development","New York City Police Department","Department of Buildings",...,"Department of Sanitation","Department of Homeless Services","Economic Development Corporation","Department of Consumer Affairs","Office of Technology and Innovation"]  -- indices:
+[0,1,2,3,4,...,5,7,3,3,6]]
+Complaint_Type: [  -- dictionary:
+["School Maintenance","For Hire Vehicle Complaint","UNSANITARY CONDITION","Illegal Parking","Building/Use",...,"Building Drinking Water Tank","Taxi Licensee Complaint","Peeling Paint","Green Taxi Report","Bus Stop Shelter Placement"]  -- indices:
+[0,1,2,3,4,...,30,80,3,7,16]]
+Descriptor: [["Other School Condition","Driver Complaint - Non Passenger","PESTS","Posted Parking Sign Violation","Illegal Conversion Of Residential Building/Space",...,"For One Address","Lead Kit Request (Residential) (L10)","Commercial Overnight Parking","Loud Music/Party","Post"]]
+Location_Type: [  -- dictionary:
+["School","Street","RESIDENTIAL BUILDING","Street/Sidewalk",null,...,"Building Entrance","Public Stairs","Cafeteria - Public School","Commercial","Speed Reducer"]  -- indices:
+[0,1,2,3,null,...,1,null,3,6,null]]
+Incident_Zip: [[null,10075,10459,10455,11365,...,null,null,null,null,null]]
+Incident_Address: [[null,"995 MADISON AVENUE","1010 BRYANT AVENUE","541 UNION AVENUE","69-35 166 STREET",...,"209 WEST   93 STREET","220 WEST   16 STREET","38 STERLING AVENUE","243 HENRY STREET",null]]
+...
+>>>
+```

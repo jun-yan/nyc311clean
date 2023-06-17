@@ -49,3 +49,8 @@ babel/
 \#*\#
 *.*~
 *~
+
+/.quarto/
+*.html
+/nyc311clean_files/
+Manifest.toml
