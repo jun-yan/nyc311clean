@@ -13,8 +13,8 @@ execute:
 
 ## Abstract {.unnumbered}
 
-We show conversion of a CSV file containing data on 311 service calls during March, 2023 in New York City to the [Arrow](https://arrow.apache.org) IPC (Inter-Process Communications) file format (also called the Feather V2 format) which can be read quickly and easily into many different data science environments.
-This conversion is done in [Julia](https://julialang.org) but it could equally well have been done in a number of different languages, whichever is most convenient for the person doing the conversion.
+We show conversion of a CSV file containing data on 311 service calls in New York City during March, 2023 to the [Arrow](https://arrow.apache.org) IPC (Inter-Process Communication) file format (also called the Feather V2 format), which can be read quickly and easily into several different data science environments.
+This conversion is done in [Julia](https://julialang.org) but it could equally well have been done in a different language, if that is more convenient for the person doing the conversion.
 
 # Reading the CSV file as a DataFrame
 
@@ -29,20 +29,22 @@ The first two lines of the CSV file are
 
 ```{julia}
 #| panel: fill
-open("./data/311_half_Mar_2023.csv", "r") do io
-    println(readline(io))
-    println(readline(io))
-    seekstart(io)
-end;
+open("./data/311_half_Mar_2023.csv", "r") do io # open the file
+    println(readline(io))     # read and print the first line
+    println(readline(io))     # read and print the next line
+end;  # this open/do/end construction automatically closes the file when done
 ```
 
 ::: {.callout-note collapse="false"}
-### Need to scroll right to see all of the output lines
+### Need to scroll right to see the whole output line
 
 The output from this code block has very long lines.
 You will need to scroll right in the output to read it all.
 
-Note that the character on the right of the title bar for callout blocks like this is a toggle to show or hide the contents of the block.
+Note that the character on the right of the title bar for callout blocks like this, currently a `v`-shape for this block, is a toggle to show or collapse the contents of the block.
+Try clicking on that character to collapse the contents of the block.
+
+In what follows the callout blocks are initially collapsed and you must click on the `>` character on the right end of the title bar to show the contents.
 :::
 
 
@@ -53,9 +55,9 @@ We now have enough information, such as the date-time format used, to do an init
 ```{julia}
 df = CSV.read(
     "./data/311_half_Mar_2023.csv",  # file name
-    DataFrame;                       # output table type
+    DataFrame,           # output table type
     normalizenames=true, # convert column names to valid symbols
-    missingstring=[      # strings that are used to indicate missing vals
+    missingstring=[      # strings that are used to indicate missing values
         "",
         "Unspecified",
         "unspecified",
@@ -70,9 +72,15 @@ df = CSV.read(
 ```
 
 :::{.callout-note collapse="true"}
-### normalize names
-Convert the column names in the first row of the CSV file into a form suitable as a `Symbol` in `Julia`.
+### normalizenames
+Convert the column names from the CSV file into a form that can be parsed as a `Symbol` in `Julia`.
 In particular, strip whitespace at the beginning and end of the name and replace embedded blanks or `.` characters by underscores.
+
+Columns of a DataFrame (and other type of tables) are usually extracted as "properties" of the table, either as, e.g. `getproperty(df, :Unique_Key)`, or, more commonly, with the dot operator as, e.g. `df.Unique_Key`.
+The expression `:Unique_Key` or the right operand of `df.Unique_Key` evaluates to a Symbol.
+If the column name has an embedded blank or `.` this form cannot be used and the name must be quoted, either as `Symbol("Unique.Key")` or `var"Unique.Key"`.
+
+Thus it is an advantage to rewrite the column names so that each name can be used "as is" with the dot operator.
 :::
 
 :::{.callout-note collapse="true"}
@@ -91,49 +99,50 @@ That is, it is just a shorthand for replacing the string with the `Dates.DateFor
 
 :::{.callout-note collapse="true"}
 ### downcast
-For columns of integer values, choose the smallest type that can represent all the values in the column.
+For columns of integer values, choose the smallest integer type, such as `Int8`, `Int16`, etc., that can represent all the values in the column.
 :::
 
 # Validity checking
 
 ## Review the storage type for each column
 
-In the output (you must scroll horizontally to see it all) under the column name is an indicator of the type.
+In the output (remember, you must scroll horizontally to see it all) there is a description of the type of the elements of the column directly under the column name.
 A type name that ends in `?` indicates that missing values are present in the column.
-Thus the `Unique_Key` is stored as 32-bit signed integers with no missing values.
-The `Created_Date` is a `DateTime` with no missing values but the `Closed_Date`, which is also a `DateTime`, does have missing values.
+Thus, for example, the `Unique_Key` is designated `Int32` meaning the values are stored as 32-bit signed integers with no missing values.
+The `Created_Date` column, designated `DateTime`, is a `DateTime` column with no missing values but the `Closed_Date`, designated `DateTime?`, is also a `DateTime`, but can (and does) have missing values.
 
-Some columns are described as `String` whereas others are described as `String7` or `String15`.
+Some columns are designated as `String` whereas others are designated as `String7` or `String15`.
 These are storage-saving representations used when the whole column consists of short character strings.
+
 There is an anomaly in these short strings for the `Agency` column.
-The `Agency` acronyms should be 4 or 5 characters at most but at least one (it happens to be `NYC311-PRD`) must be greater than 7 characters to force `String15` storage.
+The `Agency` acronyms should be 5 characters at most, which would be stored as `String7`, but they are stored as `String15`.
 
-```{julia}
-show(unique(df.Agency))
-```
-
-The `Agency` and `Agency_Name` columns should be in one-to-one correspondence but they are not.
+To see why, we check the unique combinations of the `Agency` and `Agency_Name` columns
 
 ```{julia}
 unique(select(df, :Agency, :Agency_Name))
 ```
 
+These columns should be in one-to-one correspondence but they are not.
+
 At this point we would need to check with the data providers to determine why two different `Agency` designations are used for the "Department of Environmental Protection".
 
-The other problem shown in the types is that the values in the `Incident_Zip` column are stored as strings when they should be integers or missing.
+The other problem shown in the types is that the values in the `Incident_Zip` column are stored as `String7?` when they should be `Int32?`.
+
+Checking the unique values
 
 ```{julia}
-levels(df.Incident_Zip)
+sort(unique(df.Incident_Zip))
 ```
 
-and, of course, the problem is that someone got creative and used `na` as a missing value indicator.
+shows the problem is that someone got creative and used `na` as a missing value indicator.
 
 Recreate the DataFrame with `"na"` in the `missingstring` vector
 
 ```{julia}
 df = CSV.read(
     "./data/311_half_Mar_2023.csv",  # file name
-    DataFrame;                       # output table type
+    DataFrame,           # output table type
     normalizenames=true, # convert column names to valid symbols
     missingstring=[      # strings that are used to indicate missing vals
         "",
@@ -157,7 +166,7 @@ df = CSV.read(
 length(unique(df.Unique_Key)) == nrow(df)
 ```
 
-### Are the `Created_Date` values in the specified range?
+### Are the `Created_Date` values all from March, 2023?
 
 ```{julia}
 extrema(df.Created_Date)
@@ -179,14 +188,16 @@ Now we can see a problem with the record giving the earliest `Closed_Date` becau
 We save the indicators of rows with early closing or immediate closing for later manual checking.
 
 ```{julia}
-earlyclosing = (!ismissing).(df.Closed_Date) .&& (df.Closed_Date .< df.Created_Date)
-immediateclosing = (!ismissing).(df.Closed_Date) .&& (df.Closed_Date .== df.Created_Date)
+earlyclosing = @. !ismissing(df.Closed_Date) && (df.Closed_Date < df.Created_Date)
+immediateclosing = @. !ismissing(df.Closed_Date) && (df.Closed_Date == df.Created_Date)
 (early = count(earlyclosing), immediate = count(immediateclosing))
 ```
 
 :::{.callout-note collapse="true"}
-### What are all those dots for?
-Julia provides "syntactic sugar" to vectorize a scalar operation with a `.` following a function name (e.g. `(!ismissing).`) or preceding an operator (e.g. `.<`)
+### What does `@.` do?
+
+[Dot vectorization](https://docs.julialang.org/en/v1/manual/functions/#man-vectorized) in Julia provides "syntactic sugar" to vectorize a scalar operation.
+Prefacing an expression with `@.` applies dot vectorization to all the function calls and operators in the expression. 
 :::
 
 If we want to examine the rows with these characteristics we index the rows with the `BitVector` created from the logical expression.
@@ -198,7 +209,7 @@ first(earlyfrm, 3)
 ```
 
 :::{.callout-note collapse="true"}
-### Use of `:` as an index indicates all values for that index
+### Use of `:` as an index indicates all values for that axis
 In this case the use of `:` as the second index indicates that all the columns should be included in the subset.
 :::
 
@@ -210,8 +221,9 @@ unique(select(earlyfrm, :Agency, :Agency_Name))
 
 ## Is Location redundant if Latitude and Longitude are given?
 
-This is a tricky question because the values of `Latitude` and `Longitude` are stored to 17 significant digits, which is much more accuracy than could possibly be measured.
-To check for consistency we need to convert the `Location` to a `Latitude-Longitude` pair then compare these values to the recorded `Latitude` and `Longitude` by employing a tolerance in the comparison of floating-point values.
+This is a tricky question because the values of `Latitude` and `Longitude` are stored to 17 significant digits, which is much more accuracy than could possibly be measured, but equality comparisons, either as floating-point numbers or as strings with 17 significant digits, would require an exact match.
+
+To check for consistency we need to convert the `Location` to a `Latitude-Longitude` pair of floating point numbers then check for approximate equality of these values to the recorded `Latitude` and `Longitude`.
 We'll leave that as an exercise for the reader and just assure you that the `Location` column is redundant and can be dropped.
 
 # Saving the dataset as an Arrow IPC file
@@ -220,7 +232,7 @@ We use `Arrow.write` to write the dataframe in the Arrow IPC format.
 
 ```{julia}
 #| output: false
-fn = Arrow.write(
+fn = Arrow.write(    # returns the file name
     "./data/311_half_Mar_2023.arrow",
     select(df, Not(:Location)),
 )
@@ -403,6 +415,9 @@ shape: (125_826, 45)
 └──────────┴────────────┴───────────┴────────┴───┴────────────┴────────────┴────────────┴────────────┘
 ```
 
-The columns that are described as `<fct>` in the `glimpse` output from R are characterized as `dictionary` in the output from `fea.read_table` and listed as `cat` (for "categorical") in the Polars data frame.
-The conversion of a column of character strings, many of which are repetitions, to a combination of a vector of the unique values and a small-sized integer index into that vector, can result in considerable storage saving, at the expense of a trivial amount of processing.
+The columns that are described as `<fct>` in the `glimpse` output from R (and `dictionary` in the output from `fea.read_table` and `cat` (for "categorical") in the Polars data frame) are `factor` representations, consisting of a (short) vector of the unique values, called the `levels` of the factor, and an integer vector of indices into the levels.
+The conversion of a column of character strings, many of which are repetitions, to a
+factor or "dictionary encoded" representation, can result in considerable storage saving, at the expense of a trivial amount of processing.
 For example, storing the `Agency_Name` as a vector of strings takes about 34 MB but, after dictionary encoding, it takes up about 1/8 MB.
+
+The output from `fea.read_table` is often the most informative representation of the structure of the table.
