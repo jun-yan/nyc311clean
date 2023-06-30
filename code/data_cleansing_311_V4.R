@@ -767,7 +767,7 @@ if(nrow(match_1 >0)) {
   cat("\nThere are", nrow(match_1), "near-matches between 'cross_street_1' & 'intersection_street_1'. Here is a sample\n")
   print(head(match_1,10))
 }else{
-  cat("\nThere are no near-matches between 'cross_street_1' & 'intersection_street_1'")
+  cat("\nThere are no near-matches between 'cross_street_1' & 'intersection_street_1'\n")
 }
 
 ####################
@@ -794,7 +794,7 @@ if(nrow(match_2 >0)) {
   cat("\nThere are", nrow(match_2), "near-matches between 'cross_street_2' & 'intersection_street_2'. Here is a sample\n")
   print(head(match_2,10))
 }else{
-  cat("\nThere are no near-matches between 'cross_street_2' & 'intersection_street_2'")
+  cat("\nThere are no near-matches between 'cross_street_2' & 'intersection_street_2'\n")
 }
 
 #########################################################################
