@@ -1,33 +1,62 @@
-source := $(wildcard *.tex)
-bib := $(wildcard *.bib)
-out := $(patsubst %.tex,%.pdf,$(source))
-latest := $(shell git log -1 --pretty=format:"%h")
-rev := $(latest)
+################################################################################
+all:pdf  # default rule DO NOT EDIT
+################################################################################
+MAINFILE  := main
+RNWFILES  := 
+RFILES    := 
+TEXFILES  := 
+CACHEDIR  := cache
+FIGUREDIR := figures
+LATEXMK_FLAGS := 
+##### Explicit Dependencies #####
+################################################################################
+RNWTEX = $(RNWFILES:.Rnw=.tex)
+ROUTFILES = $(RFILES:.R=.Rout)
+RDATAFILES= $(RFILES:.R=.Rdata)
+MAINTEX = $(MAINFILE:=.tex)
+MAINPDF = $(MAINFILE:=.pdf)
+ALLTEX = $(MAINTEX) $(RNWTEX) $(TEXFILES)
 
-.PHONY: all
-all: $(out)
+# Dependencies
+$(RNWTEX): $(RDATAFILES)
+$(MAINTEX): $(RNWTEX) $(TEXFILES)
+$(MAINPDF): $(MAINTEX) $(ALLTEX) 
 
-%.pdf: %.tex $(bib)
-	@latexmk -halt-on-error -pdf $<
+.PHONY:pdf tex clean clearcache cleanall
+pdf: $(MAINPDF)
+tex: $(RDATAFILES) $(ALLTEX) 
 
-full: main.tex $(bib)
-	sed "s|BLINDCODE|0|" main.tex > main-full.tex
+$(CACHEDIR):
+	mkdir $(CACHEDIR)
 
-blind: main.tex $(bib)
-	sed "s|BLINDCODE|1|" main.tex > main-blind.tex
+$(FIGUREDIR):
+	mkdir $(FIGUREDIR)
 
-##	@latexmk -c
+%.tex:%.Rnw
+	Rscript \
+	  -e "library(knitr)" \
+	  -e "knitr::opts_chunk[['set']](fig.path='$(FIGUREDIR)/$*-')" \
+	  -e "knitr::opts_chunk[['set']](cache.path='$(CACHEDIR)/$*-')" \
+	  -e "knitr::knit('$<','$@')"
 
-## compare modification with the latest version checked into git
-## for comparison of specific commits:
-##	latexdiff-vc --git -r old_githash -r new_githash --pdf source.tex
-diff:
-	latexdiff-vc --git --pdf --force $(source) -r $(rev)
 
-log:
-	@git log -5 --pretty=format:"%h by %an at %ar: %s" $(source)
+%.R:%.Rnw
+	Rscript -e "Sweave('$^', driver=Rtangle())"
 
-.PNONY: clean
+%.Rout:%.R
+	R CMD BATCH "$^" "$@"
+
+%.pdf: %.tex 
+	latexmk -pdf $<
+
 clean:
-	rm -rf $(out) *~ .*~ .\#* .Rhistory *.aux *.bbl *.blg *.dvi *.out *.log *.toc \
-	*.fff *.fdb_latexmk *.fls *.ttt *diff* *oldtmp* .blb
+	-latexmk -c -quiet $(MAINFILE).tex
+	-rm -f $(MAINTEX) $(RNWTEX)
+	-rm -rf $(FIGUREDIR)
+	-rm *tikzDictionary
+	-rm $(MAINPDF)
+
+clearcache:
+	-rm -rf cache
+
+cleanall: clean clearcache

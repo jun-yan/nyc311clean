@@ -8,6 +8,8 @@ library(stringr)
 #########################################################################
 ##  This function standardizes column names even if there are multiple "."s and trailing "."s
 ##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
+
+## ---- makeColNamesUserFriendly
 makeColNamesUserFriendly <- function( dataset) {
   
   ## Convert any number of consecutive "."s to an underscore.
@@ -27,8 +29,8 @@ makeColNamesUserFriendly <- function( dataset) {
   return( dataset )
 }
 
-#########################################################################
-#Validate that date fields are all dates
+## ---- areAllDates
+## Validate that date fields are all dates
 areAllDates <- function ( dateField ) {
   
   # remove blank and NAs

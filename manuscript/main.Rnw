@@ -1,32 +1,14 @@
 \documentclass[12pt, titlepage]{article}
 
-%% Make sure every package in preamble is used
-\usepackage{siunitx} % for unit
-\usepackage[margin=1in]{geometry}
+\usepackage[margin = 1in]{geometry}
 \usepackage{amsmath}
-\numberwithin{equation}{section}
-\usepackage{graphicx}
-\usepackage{natbib}
-\usepackage{underscore}
-\usepackage{physics}
-\usepackage[ruled,vlined]{algorithm2e}
-\usepackage{algpseudocode}
-\usepackage{booktabs}
-\usepackage{amsfonts}
-\usepackage{bm}
-\usepackage{threeparttable}
-\usepackage{setspace}
-\usepackage[width=.95\textwidth, skip=0.1\baselineskip]{caption}
-
 \allowdisplaybreaks
+\usepackage{authblk}
+\usepackage{setspace}
+\usepackage{natbib}
+\usepackage{hyperref}\hypersetup{colorlinks=true, citecolor=blue}
 
-% \usepackage{adjustbox}
-\usepackage[colorlinks, citecolor=blue,  urlcolor=blue,
-linkcolor=blue]{hyperref}
-\usepackage{xcolor}
 
-
-% \usepackage[pagewise]{lineno}
 \usepackage[]{lineno}
 \linenumbers*[1]
 %% patches to make lineno work better with amsmath
@@ -50,7 +32,6 @@ linkcolor=blue]{hyperref}
 	\patchBothAmsMathEnvironmentsForLineno{multline}%
 }
 
-
 % control floats
 \renewcommand\floatpagefraction{.9}
 \renewcommand\topfraction{.9}
@@ -60,21 +41,13 @@ linkcolor=blue]{hyperref}
 \setcounter{topnumber}{50}
 \setcounter{bottomnumber}{50}
 
-\allowdisplaybreaks % \usepackage{rotating}
 
 \newcommand{\jy}[1]{\textcolor{orange}{JY: (#1)}}
 \newcommand{\yh}[1]{\textcolor{purple}{YH: (#1)}}
 \newcommand{\yx}[1]{\textcolor{cyan}{YX: (#1)}}
 \let\proglang=\textsf
-\newcommand{\pkg}[1]{{\fontseries{m}\selectfont #1}}
-\newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
-
-\usepackage{multirow, makecell}
-\usepackage{booktabs,array}
-\usepackage[affil-it]{authblk}
-\renewcommand\Authfont{\fontsize{12}{14.4}\selectfont}
-\renewcommand\Affilfont{\fontsize{12}{10.8}\itshape}
-% \AddToHook{cmd/section/before}{\clearpage} % will remove
+%% \newcommand{\pkg}[1]{{\fontseries{m}\selectfont #1}}
+%% \newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
 
 
 
@@ -109,11 +82,23 @@ quality control
 \end{abstract}
 
 
-\doublespacing
+% \doublespacing
+
+<<prep, echo=FALSE, cache=FALSE>>=
+library(knitr)
+## set font size
+def.chunk.hook  <- knitr::knit_hooks$get("chunk")
+knitr::knit_hooks$set(chunk = function(x, options) {
+  x <- def.chunk.hook(x, options)
+  paste0("\n \\", "small","\n\n", x, "\n\n \\normalsize")
+})
+## read in all the chunks; so only need to maintain one place
+read_chunk("../code/data_cleansing_311_V4.R")
+@ 
 
 \section{Introduction} \label{sec:intro}
 
-Open data is the trend ... many kinds \citep[e.g.,][]{cdc2022} ...
+Open data is the trend ... many kinds \citep{barns2016mine}
 
 
 NYC is a forerunner in open data ... The 311 requests data is one of the most
@@ -136,6 +121,10 @@ A discussion concludes in Section~\ref{sec:disc}
 
 \section{NYC 311 Requests Data} \label{sec:data}
 
+We need to make the variable names user friendly:
+<<makeColNamesUserFriendly>>=
+
+@
 
 
 \section{Potential Issues} \label{sec:issues}
