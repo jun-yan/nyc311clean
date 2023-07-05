@@ -1,7 +1,9 @@
 #########################################################################
 install.packages("campfin")
+install.packages("stringr")
 
 library(campfin)
+library(stringr)
 
 #########################################################################
 ##  This function standardizes column names even if there are multiple "."s and trailing "."s
@@ -163,6 +165,17 @@ is_close_match <- function(value1, value2, threshold) {
 }
 
 #########################################################################
+# Function to perform the replacement using word pairs
+replace_misspelled <- function(x, word_pairs) {
+  for (i in seq_len(nrow(word_pairs))) {
+    misspelled_word <- word_pairs$misspelled[i]
+    replacement_word <- word_pairs$correct[i]
+    x <- str_replace_all(x, misspelled_word, replacement_word)
+  }
+  x
+}
+
+#########################################################################
   # File contains column names in the "header" line.
   # The R "read.csv" function uses a "." to replace the spaces in column names. 
   # This makes the column names into legal variables, but the "." can cause problems elsewhere. 
@@ -189,7 +202,7 @@ zipRows <- nrow( USPSzipcodesOnly )
 
 #########################################################################
 # Load USPS official street abbreviations
-data5File <- file.path( "..", "data", "USPS_abbreviations.csv" ) 
+data5File <- file.path( "..", "data", "USPSabb.csv" ) 
 USPSabbreviations <- read.csv(data5File, stringsAsFactors=FALSE, header=TRUE, colClasses=rep("character", ncol(read.csv(data5File))))
 USPSabbreviations <- makeColNamesUserFriendly( USPSabbreviations )
 names(USPSabbreviations) <- c("full", "abb")
@@ -211,14 +224,11 @@ numCityCouncil <- nrow( cityCouncilNYC )
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-data1File <- file.path( "..","data", "311_Mar_2023.csv")
-writeFilePath <- file.path( "..","data", "311_Mar_2023_smaller.csv")
+data1File <- file.path( "..","data", "311_APR_2023.csv")
+writeFilePath <- file.path( "..","data", "311_APR_2023_smaller.csv")
 d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 #d311 <- read_csv_arrow( data1File, col_names = TRUE, as_data_frame = TRUE, skip_empty_rows = TRUE)
 #d311 <- as.data.frame(d311)
-
-#Remove any totally empty rows. Observed in the 2022 dataset
-#d311 <- d311[complete.cases(d311), ]
 
 # make columns names user friendly
 d311 <- makeColNamesUserFriendly( d311 )
@@ -229,6 +239,7 @@ d311 <- d311[rowSums(!is.na(d311)) > 0, ]
 d311$closed_date <- ifelse(d311$closed_date == "01/01/1900 12:00:00 AM", "", d311$closed_date)
 numRows <- nrow( d311 )
 
+#########################################################################
 # Convert character fields to upper case to facilitate comparisons
 columns_to_upper <- c("agency", 
                       "agency_name", 
@@ -265,6 +276,7 @@ d311[, columns_to_upper] <- lapply(d311[, columns_to_upper], toupper)
 
 cat("\n# of rows in the 311 SR data set:", format( numRows, big.mark = ","))
 
+#########################################################################
 # build table of agency and count of SRs by agency
 sortedAllData <- as.data.frame(table(d311$agency))
 sortedAllData <- sortedAllData[order(-sortedAllData$Freq),]
@@ -275,11 +287,39 @@ cat("\n\nSRs by Agency:\n")
 print(sortedAllData)
 
 #########################################################################
+# Dictionary with misspelled word pairs and their correct replacements
+word_pairs_city <- data.frame(
+  misspelled = c("TENESSE", "MELLVILLE", "FT. WASHIGTON", "FLUSHING AVE", "NEW YORK CITY", "FAMINGDALE", "LOUIEVILLE", "BAYOUN",
+                 "STATEN ISLAND NEW YORK", "FLUSHING AVE", "DEDHAM, MA"),
+  correct = c("TENNESSEE", "MELVILLE",  "FT. WASHINGTON", "FLUSHING", "NEW YORK", "FARMINGDALE", "LOUISVILLE", "BAYONNE",
+              "STATEN ISLAND", "FLUSHING", "DEDHAM" ),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "city" column
+d311$city <- replace_misspelled(d311$city, word_pairs_city)
+
+# Perform the replacement using regular expressions with word boundaries
+d311$city <- gsub("\\bQUEEN\\b", "QUEENS", d311$city)
+d311$city <- gsub("\\bNASSAU$", "NASSAU COUNTY", d311$city)
+d311$city <- gsub("\\bNA$", "", d311$city)
+
+word_pairs_zipcode <- data.frame(
+  misspelled = c("na", "N/A"),
+  correct = c("", "" ),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "incident_zip" column to remove invalid values
+d311$incident_zip <- replace_misspelled(d311$incident_zip, word_pairs_zipcode)
+
+#########################################################################
 complaintData <- as.data.frame(table(d311$complaint_type))
 complaintData <- complaintData[order(-complaintData$Freq), ]
 complaintData$percentage <- round(prop.table(complaintData$Freq)*100,4)
 
-cat("\nSample of Complaint type (>1% occurrence)")
+
+cat("\nSample of Complaint type (>1% occurrence)\n")
 samplecomplaintData <- complaintData[complaintData$percentage > 1,]
 print(head(samplecomplaintData, 10))
 
@@ -468,7 +508,7 @@ address_fields <- c("cross_street_1", "cross_street_2", "intersection_street_1",
 
 # Identify rows with affected fields using regular expressions
 # Loop through each address field and replace the matching values with blanks
-exceptions <- c("AVE W", "AVENUE W", "CENTRAL PARK W", "CENTRAL PARK DR W", "PROSPECT PARK W", "SHEA STADIUM GATE E")
+exceptions <- c("AVE W", "AVENUE W", "CENTRAL PARK W", "CENTRAL PARK DR W", "CPW", "PROSPECT PARK W", "SHEA STADIUM GATE E")
 pattern <- paste(exceptions, collapse = "|")
 affected_rows1 <- apply(xcloned311[address_fields], 1, function(row) any(grepl(" E$", row) & !grepl(pattern, row)))
 affected_rows3 <- apply(xcloned311[address_fields], 1, function(row) any(grepl(" W$", row) & !grepl(pattern, row)))
@@ -663,7 +703,7 @@ dupXStreets2 <- subset(xcloned311,
                         
 cat("\n\n# of matching cross_street_2 & intersection_2 is", format(nrow(dupXStreets2), big.mark = ","),
         "representing", round(nrow(dupXStreets2)/nrow(d311)*100,2),"% of total rows.")
-cat("\n\nSample of matching cross_street_2 & intersection_street_2")
+cat("\n\nSample of matching cross_street_2 & intersection_street_2\n")
 print(head(dupXStreets2, 15))
 
 cat("\nAgencies with matches\n")
@@ -682,7 +722,7 @@ nondupXStreets2 <- subset( xcloned311,
 
 cat("\n# of non-matching cross_street_2 & intersection_street_2 is", format(nrow(nondupXStreets2), big.mark = ","),
         "representing", round(nrow(nondupXStreets2)/nrow(d311)*100,2),"% of total rows")
-cat("\n\nSample of non-matching cross_street_2 and intersection_street_2")
+cat("\n\nSample of non-matching cross_street_2 and intersection_street_2\n")
 non_blank_rows_non_match2 <- nondupXStreets2[nondupXStreets2$cross_street_2 !="" & nondupXStreets2$intersection_street_2 != "", ]
 print(head(nondupXStreets2[nondupXStreets2$cross_street_2 !="" & nondupXStreets2$intersection_street_2 != "", ], 15))
 
@@ -697,7 +737,7 @@ print(agency_nonmatch2)
 # cross_street_2 is blank, but intersection_street_2 is not blank
 cat("\n\nNumber of ocurrences where cross_street_2 is blank, but intersection_street_2 is not blank is", format(nrow(crossStreet2Blank2), big.mark = ","),
       "representing", round(nrow(crossStreet2Blank2)/nrow(d311)*100,2),"% of total rows") 
-cat("\n\nSample of cross_street_2 is blank intersection_street_2 is not blank.")
+cat("\n\nSample of cross_street_2 is blank intersection_street_2 is not blank.\n")
 print(head(crossStreet2Blank2, 10))
 
 # Count by agency
@@ -714,7 +754,7 @@ print(agency_XStreetBlank2)
 # Intersection_1 is blank, but cross_street_1 is not blank
 cat("\nNumber of ocurrences where intersection_street_2 is blank, but cross_street_2 is not blank", format(nrow(intersectionStreet2Blank2), big.mark = ","),
         "representing", round(nrow(intersectionStreet2Blank2)/nrow(d311)*100,2),"% of total rows") 
-cat("\n\nSample of cross_street_2 is not blank and intersection_street_2 is blank.")
+cat("\n\nSample of cross_street_2 is not blank and intersection_street_2 is blank.\n")
 print(head(intersectionStreet2Blank2, 10))
 
 # Count by agency
@@ -745,17 +785,18 @@ print(summaryXstreet2)
 almost_match_1 <- subset(nondupXStreets1, nondupXStreets1$cross_street_1 !="" & nondupXStreets1$intersection_street_1 != "")
 # Loop through the columns
 # Initialize an empty dataframe to store the matches
-match_1 <- data.frame(cross_street_1 = character(), intersection_street_1 = character())
+match_1 <- data.frame(cross_street_1 = character(), intersection_street_1 = character(), agency = character())
 
 # Loop through the columns
 for (i in 1:nrow(almost_match_1)) {
   cross_street <- almost_match_1$cross_street_1[i]
   intersection_street <- almost_match_1$intersection_street_1[i]
+  Xagency1 <- almost_match_1$agency[i]
   
   # Check if it's a close match
   if (is_close_match(cross_street, intersection_street, 2)) {
     # Create a new row with the matching values
-    new_row <- data.frame(cross_street_1 = cross_street, intersection_street_1 = intersection_street)
+    new_row <- data.frame(cross_street_1 = cross_street, intersection_street_1 = intersection_street, agency = Xagency1)
     
     # Append the row to the match_df dataframe
     match_1 <- rbind(match_1, new_row)
@@ -764,25 +805,26 @@ for (i in 1:nrow(almost_match_1)) {
 
 # Print the resulting dataframe
 if(nrow(match_1 >0)) {
-  cat("\nThere are", nrow(match_1), "near-matches between 'cross_street_1' & 'intersection_street_1'. Here is a sample\n")
+  cat("\n\nThere are", nrow(match_1), "near-matches between 'cross_street_1' & 'intersection_street_1'. Here is a sample\n")
   print(head(match_1,10))
 }else{
-  cat("\nThere are no near-matches between 'cross_street_1' & 'intersection_street_1'\n")
+  cat("\n\nThere are no near-matches between 'cross_street_1' & 'intersection_street_1'\n")
 }
 
 ####################
 almost_match_2 <- subset(nondupXStreets2, nondupXStreets2$cross_street_2  !="" & nondupXStreets2$intersection_street_2 != "")
-match_2 <- data.frame(cross_street_2 = character(), intersection_street_2 = character())
+match_2 <- data.frame(cross_street_2 = character(), intersection_street_2 = character(), agency = character())
 
 # Loop through the columns
 for (i in 1:nrow(almost_match_2)) {
   cross_street <- almost_match_2$cross_street_2[i]
   intersection_street <- almost_match_2$intersection_street_2[i]
+  Xagency2 <- almost_match_2$agency[i]
   
   # Check if it's a close match
   if (is_close_match(cross_street, intersection_street, 2)) {
     # Create a new row with the matching values
-    new_row <- data.frame(cross_street_2 = cross_street, intersection_street_2 = intersection_street)
+    new_row <- data.frame(cross_street_2 = cross_street, intersection_street_2 = intersection_street, agency = Xagency2)
     
     # Append the row to the match_df dataframe
     match_2 <- rbind(match_2, new_row)
@@ -800,7 +842,17 @@ if(nrow(match_2 >0)) {
 #########################################################################
 cat("\n\n########## Check for allowable values ##########")
 
-# check if borough, borough_boundaries, and park_borough contain only allowable values
+addresss_typeResults <- areInList( d311$address_type,  data.frame(values = c("ADDRESS", "BLOCKFACE", "INTERSECTION", "PLACENAME", "UNRECOGNIZED") ) )
+cat( "\nAre all the values in the 'address_type' field valid?", addresss_typeResults$checkIt ) 
+if (!addresss_typeResults$checkIt) { 
+  cat("\nNumber of non-allowable value", length(addresss_typeResults$non_allowable), "\nNon-allowable values:\n", head(addresss_typeResults$non_allowable, 10) ) }
+
+statusResults <- areInList( d311$status,  data.frame(values = c("ASSIGNED", "CLOSED", "IN PROGRESS", "OPEN", "PENDING", "STARTED", "UNSPECIFIED") ) )
+cat( "\nAre all the values in the 'status' field valid?", statusResults$checkIt ) 
+if (!statusResults$checkIt) { 
+  cat("\nNumber of non-allowable value", length(statusResults$non_allowable), "\nNon-allowable values:\n", head(statusResults$non_allowable, 10) ) }
+
+# check if borough, borough_boundaries, taxi_company_borough, and park_borough contain only allowable values
 boroughResults <- areInList( d311$borough,  data.frame(values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND", "UNSPECIFIED") ) )
 cat( "\nAre all the values in the 'borough' field valid?", boroughResults$checkIt ) 
 if (!boroughResults$checkIt) { 
@@ -816,10 +868,20 @@ cat( "\nAre all the values in the 'park_borough' field valid?", park_boroughResu
 if (!park_boroughResults$checkIt) { 
   cat("\nNumber of non-allowable value", length(park_boroughResults$non_allowable), "\nNon-allowable values:\n", head(park_boroughResults$non_allowable, 10) ) }
 
+taxi_company_boroughResults <- areInList( d311$taxi_company_borough, data.frame( values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND") ) )
+cat( "\nAre all the values in the 'taxi_company_borough' field valid?", taxi_company_boroughResults$checkIt )
+if (!taxi_company_boroughResults$checkIt) { 
+  cat("\nNumber of non-allowable value", length(taxi_company_boroughResults$non_allowable), "\nNon-allowable values:\n", head(taxi_company_boroughResults$non_allowable, 10) ) }
+
 open_data_channelResults <- areInList( d311$open_data_channel_type, data.frame( values = c( "UNKNOWN", "MOBILE", "ONLINE", "PHONE", "OTHER" ) ) )
 cat( "\nAre all the values in the 'open_data_channel_type'valid?", open_data_channelResults$checkIt )
 if (!open_data_channelResults$checkIt) { 
   cat("\nNumber of non-allowable value", length(open_data_channelResults$non_allowable), "\nNon-allowable values:\n", head(open_data_channelResults$non_allowable, 10) ) }
+
+vehcile_typeResults <- areInList( d311$vehcile_typeResults, data.frame( values = c( "AMBULETTE/PARATRANSIT", "CAR SERVICE", "COMMUTER VAN", "GREEN TAXI") ) )
+cat( "\nAre all the values in the 'vehcile_type' valid?", vehcile_typeResults$checkIt )
+if (!vehcile_typeResults$checkIt) { 
+  cat("\nNumber of non-allowable value", length(vehcile_typeResults$non_allowable), "\nNon-allowable values:\n", head(vehcile_typeResults$non_allowable, 10) ) }
 
 city_councilResults <- areInList( d311$city_council_districts, cityCouncilNYC )
 cat( "\nAre all the values in the 'city_council_district valid?", city_councilResults$checkIt )
@@ -848,6 +910,57 @@ if (!police_precinctResults$checkIt) {
   cat("\nTop Ten Invalid Precincts:\n")
   print(pp_df[1:10, ])
 }
+
+#########################################################################
+# check for allowable values in the 'community_board' field
+cbValues <- c("01 BRONX",	"01 BROOKLYN",	"01 MANHATTAN",	"01 QUEENS",	"01 STATEN ISLAND",	
+            "02 BRONX",	"02 BROOKLYN", "02 MANHATTAN",	"02 QUEENS",	"02 STATEN ISLAND",	
+            "03 BRONX",	"03 BROOKLYN",	"03 MANHATTAN",	"03 QUEENS",	"03 STATEN ISLAND",	
+            "04 BRONX",	"04 BROOKLYN",	"04 MANHATTAN",	"04 QUEENS",	
+            "05 BRONX",	"05 BROOKLYN",	"05 MANHATTAN",	"05 QUEENS",	
+            "06 BRONX",	"06 BROOKLYN",	"06 MANHATTAN",	"06 QUEENS",	
+            "07 BRONX",	"07 BROOKLYN",	"07 MANHATTAN",	"07 QUEENS",	
+            "08 BRONX",	"08 BROOKLYN",	"08 MANHATTAN",	"08 QUEENS",	
+            "09 BRONX",	"09 BROOKLYN",	"09 MANHATTAN",	"09 QUEENS",	
+            "10 BRONX",	"10 BROOKLYN",	"10 MANHATTAN",	"10 QUEENS",	
+            "11 BRONX",	"11 BROOKLYN",	"11 MANHATTAN",	"11 QUEENS",	
+            "12 BRONX",	"12 BROOKLYN",	"12 MANHATTAN",	"12 QUEENS",	
+            "13 BROOKLYN",	"13 QUEENS",	
+            "14 BROOKLYN",	"14 QUEENS",	
+            "15 BROOKLYN",	
+            "16 BROOKLYN",	
+            "17 BROOKLYN",	
+            "18 BROOKLYN",
+            "UNSPECIFIED BRONX", "UNSPECIFIED BROOKLYN", "UNSPECIFIED MANHATTAN", "UNSPECIFIED QUEENS", "UNSPECIFIED STATEN ISLAND",
+            "0 UNSPECIFIED")
+
+invalid_cb <- subset(d311, ! community_board %in% cbValues)
+invalid_cb_count <- table(invalid_cb$community_board)
+total_invalid_cb_count <- sum(invalid_cb_count)
+
+invalid_cb_df <- data.frame(community_board = names(invalid_cb_count), count = as.numeric(invalid_cb_count))
+invalid_cb_df$percentage <- round(prop.table(invalid_cb_df$count)*100, 2)
+
+agency_counts_cb <- table(invalid_cb$agency)
+agency_cb_df <- data.frame(agency = names(agency_counts_cb), count = as.numeric(agency_counts_cb))
+agency_cb_df$percentage <- round(prop.table(agency_cb_df$count)*100, 2)
+
+invalid_cb_df <- invalid_cb_df[order(invalid_cb_df$count, decreasing = TRUE),]
+agency_cb_df <- agency_cb_df[order(agency_cb_df$count, decreasing =  TRUE),]
+
+numBlank_cb <- missingDataPerColumn[missingDataPerColumn$field == "community_board", "blanks"]
+sumInvalid_cb <- sum(as.vector(agency_counts_cb))
+
+cat("\n\nThere are", format( sum(as.vector(agency_counts_cb)), big.mark = ","), "invalid 'community_board' entries representing", 
+    round(sumInvalid_cb/(nrow(d311) - numBlank_cb)*100,2), "% of non-blank data.\n")
+cat("Made up by",length(invalid_cb_count) ,"unique 'community_board' entires.\n")
+
+# Print the results
+cat("\nInvalid community_board counts (sample):\n")
+print(head(invalid_cb_df,10))
+
+cat("\nAgency Counts and Percentages:\n")
+print(agency_cb_df)
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
@@ -945,23 +1058,30 @@ Matchingborough_boundaries <- subset(d311, subset = borough == translatedborough
 nonMatchingborough_boundaries <- subset(d311, subset =! d311$unique_key %in% Matchingborough_boundaries$unique_key,
                                         select = c("unique_key", "borough", "translatedborough_boundaries", "agency"))
 
-cat("\n\nNon-matches between the 'borough' and 'borough_boundaries' fields number", format(nrow(nonMatchingborough_boundaries), big.mark = ","),
+cat("\n\nTotal Non-matches between the 'borough' and 'borough_boundaries' fields are", format(nrow(nonMatchingborough_boundaries), big.mark = ","),
     "representing", round( nrow(nonMatchingborough_boundaries) / (numRows) * 100, 2), "% of data.\n")
 
 if (nrow(nonMatchingborough_boundaries) > 0) {
-  cat("\n\nSample of non-matching park_boroughs\n")#
-  print(head(nonMatchingborough_boundaries, 10))
+  
+  nonMatchingborough_boundaries_blank <- subset(nonMatchingborough_boundaries, is.na(nonMatchingborough_boundaries$translatedborough_boundaries))
+  cat("\n\nSample of the", nrow(nonMatchingborough_boundaries_blank),"non-matching borough_boundaries (where borough_boundaries is blank)\n")
+  print(head(nonMatchingborough_boundaries_blank, 10))
+  
+  nonMatchingborough_boundaries_non_blank <- subset(nonMatchingborough_boundaries, !is.na(nonMatchingborough_boundaries$translatedborough_boundaries))
+  cat("\n\nSample of the", nrow(nonMatchingborough_boundaries_non_blank),"non-matching borough_boundaries (where borough_boundaries is NOT blank)\n")
+  print(head(nonMatchingborough_boundaries_non_blank, 10))
   
   cat("\nSorted by Agency:\n")
   sortedDataborough_boundaries <- as.data.frame(table(nonMatchingborough_boundaries$agency))
   sortedDataborough_boundaries$Percentage <- round(prop.table(sortedDataborough_boundaries$Freq)*100, 2)
   sortedDataborough_boundaries <- sortedDataborough_boundaries[order(-sortedDataborough_boundaries$Freq), ]
 
-  print(sortedDataborough_boundaries)
+  cat("\nAgencies associted with non-matching 'borough' $ 'borough_boundaries'\n")
+    print(sortedDataborough_boundaries)
 }
 
 #########################################################################
-# check to see if there are any mis-matches between 'borough' and 'park_borough'
+# check to see if there are any non-matches between 'borough' and 'park_borough'
 nonMatchingpark_borough <- subset(d311, borough != park_borough , 
                             select = c("unique_key", "borough", "park_borough", "agency"))
 
@@ -982,6 +1102,30 @@ if (nrow(nonMatchingpark_borough) > 0) {
   sortedDatapark_borough <- sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
   sortedDatapark_borough <- sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
   print(sortedDatapark_borough)
+}
+
+#########################################################################
+# check to see if there are any mis-matches between 'borough' and 'taxi_company_borough'
+nonMatchingtaxi_company_borough <- subset(d311, borough != taxi_company_borough & taxi_company_borough != "", 
+                                  select = c("unique_key", "borough", "taxi_company_borough", "agency"))
+
+# retrieve # of blanks for calculations
+numBlanktaxi_company_borough <- missingDataPerColumn[missingDataPerColumn$field == "taxi_company_borough", "blanks"]
+
+cat("\n\nNon-matches between the 'borough' and 'taxi_company_borough' fields (excluding blanks) number", format(nrow(nonMatchingtaxi_company_borough), big.mark = ","),
+    "representing", round(nrow(nonMatchingtaxi_company_borough) / (numRows - numBlanktaxi_company_borough) *100, 2), "% of non-blank data\n")
+
+if (nrow(nonMatchingtaxi_company_borough) > 0) {
+  cat("\nSample of non-matching taxi_company_borough (exluding blanks in taxi_company_borough).\n")
+  print(head(nonMatchingtaxi_company_borough, 5))
+  
+  cat("\nSorted by Agency:\n")
+  sortedDatataxi_company_borough <- as.data.frame(table(nonMatchingtaxi_company_borough$agency))
+  sortedDatataxi_company_borough$Percentage <- round( prop.table(sortedDatataxi_company_borough$Freq)*100, 2)  # Calculate the percentage column
+  
+  sortedDatataxi_company_borough <- sortedDatataxi_company_borough[order(-sortedDatataxi_company_borough$Freq), ]
+  sortedDatataxi_company_borough <- sortedDatataxi_company_borough[order(-sortedDatataxi_company_borough$Freq), ]
+  print(sortedDatataxi_company_borough)
 }
 
 #########################################################################
