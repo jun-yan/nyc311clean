@@ -95,7 +95,7 @@ areInList <- function ( dataset, listValidValues ){
   non_blank_indices <- which(nzchar(dataset))
   dataset <- dataset[non_blank_indices]
   dataset <- na.omit(dataset)
-  
+
   # determine valid zipcodes
   inList <- ( dataset %in% listValidValues[, 1] )
   notInList <- dataset[!inList]
@@ -154,7 +154,7 @@ countColumnsMissingData <- function( dataset ) {
 }
 
 #########################################################################
-# evaluate street addresses for close match (<=2 characters different)
+# compute the Hamming distance between two strings. Determine if it meets the threshold.
 is_close_match <- function(value1, value2, threshold) {
   if (nchar(value1) != nchar(value2)) {
     return(FALSE)  # Values have different lengths, not a close match
@@ -227,8 +227,8 @@ numCityCouncil <- nrow( cityCouncilNYC )
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-data1File <- file.path( "..","data", "311_2022.csv")
-writeFilePath <- file.path( "..","data", "311_2022_smaller.csv")
+data1File <- file.path( "..","data", "311_JUL_2022_JUN_2023.csv")
+writeFilePath <- file.path( "..","data", "311_JUL_2022_JUN_2023_smaller.csv")
 d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 #d311 <- read_csv_arrow( data1File, col_names = TRUE, as_data_frame = TRUE, skip_empty_rows = TRUE)
 #d311 <- as.data.frame(d311)
@@ -332,8 +332,8 @@ print(head(samplecomplaintData, 10))
 #cat("\n**********DATA SPELLING CORRECTION AND INVALID DATA REPLACEMENT**********\n")
 
 #########################################################################
-#########################################################################
 # Dictionary with misspelled word pairs and their correct replacements
+# replace 'city' words
 word_pairs_city <- data.frame(
   misspelled = c("TENESSE", "MELLVILLE", "FT. WASHIGTON", "FLUSHING AVE", "NEW YORK CITY", "FAMINGDALE", "LOUIEVILLE", "BAYOUN",
                  "STATEN ISLAND NEW YORK", "FLUSHING AVE", "DEDHAM, MA"),
@@ -350,6 +350,7 @@ d311$city <- gsub("\\bQUEEN\\b", "QUEENS", d311$city)
 d311$city <- gsub("\\bNASSAU$", "NASSAU COUNTY", d311$city)
 d311$city <- gsub("\\bNA$", "", d311$city)
 
+# replace 'incident_zip" incorrect data
 word_pairs_zipcode <- data.frame(
   misspelled = c("na", "N/A", "NA"),
   correct = c("", "", "" ),
@@ -359,11 +360,30 @@ word_pairs_zipcode <- data.frame(
 # Apply the replacement function to the "incident_zip" column to remove invalid values
 d311$incident_zip <- replace_misspelled(d311$incident_zip, word_pairs_zipcode)
 
+# replace words in the 'descriptor'column
+word_pairs_descriptor <- data.frame(
+  misspelled = c("VEH", "SGNL", "SCAFFORD", "BEEKEPER", "COMPLAINCE", "SGN", "ZTESTINT", "MESAGE", "CONDULET"),
+  correct = c("VEHICLE", "SIGNAL", "SCAFFOLD", "BEEKEEPER", "COMPLIANCE", "SIGN", "", "MESSAGE", "CONDUIT" ),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "incident_zip" column to remove invalid values
+d311$descriptor <- replace_misspelled(d311$descriptor, word_pairs_descriptor)
+
+# replace words in the 'location_type'column
+word_pairs_location_type <- data.frame(
+  misspelled = c("COMERICAL", "COMERCIAL"),
+  correct = c("COMMERICAL", "COMMERCIAL"),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "incident_zip" column to remove invalid values
+d311$location_type <- replace_misspelled(d311$location_type, word_pairs_location_type)
+
 #########################################################################
 
 cat("\n**********CALCULATE BLANK, UNSPECIFIED, AND UNKNOWN ENTRIES**********")
 
-#########################################################################
 #########################################################################
 # calculate the number of blank, Unspecified, and Unknown data entires
 missingDataPerColumn <- countColumnsMissingData(d311)
@@ -382,7 +402,6 @@ print(missingDataPerColumn)
 
 cat("\n**********VALIDATE DATA TYPES**********\n")
 
-#########################################################################
 #########################################################################
 # determine if field values correspond to their data 'type', i.e. numeric, date, etc.
 
@@ -441,8 +460,6 @@ cat( "\nAre all values in 'police_precincts' numbers?", police_precinctsNum )
 #########################################################################
 
 cat("\n\n**********CHECKING FOR ALLOWABLE, VALID, & LEGAL VALUES**********\n")
-
-#########################################################################
 
 #########################################################################
 ## Change the lat/long and state_plane fields into type "numeric" to enable comparison.
@@ -757,7 +774,6 @@ if (nrow(zeroDurations) > 0) {
 cat("\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
 
 #########################################################################
-#########################################################################
 # Check if "location" is a concatenation of "latitude" and "longitude"
 # Create empty vectors to store latitude and longitude values
 lat <- numeric(length(d311$location))
@@ -881,23 +897,40 @@ if (nrow(nonMatchingtaxi_company_borough) > 0) {
 # check to see if cross_street1 and intersection_street_1 are the same value
 
 ####################
-# Matching cross_street_1 and intersection_street_1
 # conduct replacements on a copy of original data
 xcloned311 <- d311
 
 ####################
 # Clean up street types and replace with standard USPS abbreviations
-# Replace multiple blank spaces with a single space in address fields
-# Apply the function to each address column in xcloned311
-xcloned311$cross_street_1 <- normal_address(xcloned311$cross_street_1, abbs = USPSabbreviations, na=NULL, punct = "", abb_end = TRUE)
-xcloned311$cross_street_2 <- normal_address(xcloned311$cross_street_2, abbs = USPSabbreviations, na=NULL, punct = "", abb_end = TRUE)
-xcloned311$intersection_street_1 <- normal_address(xcloned311$intersection_street_1, abbs = USPSabbreviations, na=NULL, punct = "", abb_end = TRUE)
-xcloned311$intersection_street_2 <- normal_address(xcloned311$intersection_street_2, abbs = USPSabbreviations, na=NULL, punct = "", abb_end = TRUE)
+# Replace "EAST" or "WEST" with "E" or "W"
+# Columns to replace
+address_fields <- c("incident_address", "street_name", 
+                        "cross_street_1", "intersection_street_1",
+                        "cross_street_2", "intersection_street_2")
+# Pattern to replace
+pattern <- "\\b(EAST|WEST|NORTH|SOUTH)\\b"
+# Replacement string
+replacement <- "\\U\\1"
+
+# Iterate over columns
+for (col in address_fields) {
+  xcloned311[[col]] <- gsub(pattern, replacement, xcloned311[[col]], perl = TRUE)
+}
+
+####################
+# Columns to normalize
+columns_to_normalize <- c("cross_street_1", "cross_street_2", 
+                          "intersection_street_1", "intersection_street_2", 
+                          "incident_address", "street_name")
+
+# Loop over columns and apply normalization function
+for (col in columns_to_normalize) {
+  xcloned311[[col]] <- normal_address(xcloned311[[col]], abbs = USPSabbreviations,
+                                      na = NULL, punct = "", abb_end = TRUE)
+}
 
 ####################
 # convert address fields that contain the values "NONAME" and "UNNAMED" to blanks. 
-# Define the address fields
-address_fields <- c("cross_street_1", "cross_street_2", "intersection_street_1", "intersection_street_2")
 
 # Identify rows with affected fields using regular expressions
 affected_rows1 <- apply(xcloned311[address_fields], 1, function(row) any(grepl("UNNAMED|NONAME", row)))
@@ -916,7 +949,6 @@ affected_rows_after1 <- xcloned311[affected_rows1, ]
 
 ####################
 # fix street addresses that end in "E" or "W", and replace that to the front of the street address
-address_fields <- c("cross_street_1", "cross_street_2", "intersection_street_1", "intersection_street_2")
 
 # Identify rows with affected fields using regular expressions
 # Loop through each address field and replace the matching values with blanks
@@ -937,65 +969,49 @@ for (field in address_fields) {
   
   xcloned311[affected_rows3, field] <- ifelse(grepl(" W$", xcloned311[affected_rows3, field]), 
                                               paste0("W ", gsub(" W$", "", xcloned311[affected_rows3, field])),
-                                              xcloned311[affected_rows3, field])  
+                                              xcloned311[affected_rows3, field])
+  
+  xcloned311[affected_rows3, field] <- ifelse(grepl(" N$", xcloned311[affected_rows3, field]), 
+                                              paste0("N ", gsub(" N$", "", xcloned311[affected_rows3, field])),
+                                              xcloned311[affected_rows3, field]) 
+  
+  xcloned311[affected_rows3, field] <- ifelse(grepl(" S$", xcloned311[affected_rows3, field]), 
+                                              paste0("S ", gsub(" S$", "", xcloned311[affected_rows3, field])),
+                                              xcloned311[affected_rows3, field]) 
 }
+
 # Identify the modified dataframe
 affected_rows_after2E <- xcloned311[affected_rows1, ]
 affected_rows_after2W <- xcloned311[affected_rows3, ]
 
 ####################
-# Replace "EAST" with "E" for the selected columns and rows
-logical_vector <- grepl("^EAST ", d311$cross_street_1)
-columns_to_replace <- c("cross_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^EAST ", "E ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
+# Replace "EAST" with "E" for the selected columns and rows. Similarly for WEST, NORTH, and SOUTH
+patterns <- c("^EAST ", "^WEST ", "^NORTH ", "^SOUTH ")
+replacements <- c("E ", "W ", "N ", "S ")
 
-logical_vector <- grepl("^EAST ", d311$cross_street_2)
-columns_to_replace <- c("cross_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^EAST ", "E ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^EAST ", d311$intersection_street_2)
-columns_to_replace <- c("intersection_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^EAST ", "E ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^EAST ", d311$intersection_street_1)
-columns_to_replace <- c("intersection_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^EAST ", "E ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-####################
-# Replace "WEST" with "W" for the selected columns and rows
-logical_vector <- grepl("^WEST ", d311$cross_street_1)
-columns_to_replace <- c("cross_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^WEST ", "W ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^WEST ", d311$cross_street_2)
-columns_to_replace <- c("cross_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^WEST ", "W ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^WEST ", d311$intersection_street_2)
-columns_to_replace <- c("intersection_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^WEST ", "W ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^WEST ", d311$intersection_street_1)
-columns_to_replace <- c("intersection_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^WEST ", "W ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
+# Loop over patterns and replacements
+for (i in seq_along(patterns)) {
+  pattern <- patterns[i]
+  replacement <- replacements[i]
+  
+  # Loop over columns and apply replacement
+  for (col in address_fields) {
+    logical_vector <- grepl(pattern, d311[[col]])
+    xcloned311[, col] <- ifelse(logical_vector, gsub(pattern, replacement, xcloned311[, col]), xcloned311[, col])
+  }
+}
 
 ####################
 # Replace "AVE " with "AVENUE" for the selected columns and rows
-logical_vector <- grepl("^AVE ", d311$cross_street_1)
-columns_to_replace <- c("cross_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
+# Columns to check and replace
+#columns_to_check_replace <- c("cross_street_1", "cross_street_2", 
+#                              "intersection_street_1", "intersection_street_2")
 
-logical_vector <- grepl("^AVE ", d311$cross_street_2)
-columns_to_replace <- c("cross_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^AVE ", d311$intersection_street_2)
-columns_to_replace <- c("intersection_street_2")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
-
-logical_vector <- grepl("^AVE ", d311$intersection_street_1)
-columns_to_replace <- c("intersection_street_1")
-xcloned311[, columns_to_replace] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, columns_to_replace]), xcloned311[, columns_to_replace])
+# Loop over columns and apply replacement
+for (col in address_fields) {
+  logical_vector <- grepl("^AVE ", d311[[col]])
+  xcloned311[, col] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, col]), xcloned311[, col])
+}
 
 ####################
 # find rows where cross_street_1 is blank, but intersection_street_1 is not blank. Use later.
@@ -1110,7 +1126,6 @@ bothBlank2 <- subset(xcloned311, xcloned311$cross_street_2 == "" & xcloned311$in
 # Matching cross_street_2 and intersection_street_2
 # remove extra spaces and blanks to perform checks
 dupXStreets2 <- subset(xcloned311,
-                       #                       gsub("\\s+", " ", cross_street_2) == gsub("\\s+", " ", intersection_street_2), 
                        cross_street_2 == intersection_street_2,                       
                        select = c("cross_street_2", "intersection_street_2", "agency"))
 
@@ -1195,11 +1210,32 @@ cat("\nSummary of 'cross_street_2' and 'intersection_street_2':\n")
 print(summaryXstreet2)
 
 #########################################################################
+#library(stringdist)
+
+# Set a threshold for similarity
+#similarity_threshold <- 0.8
+
+# Loop through incident_address vector
+#for (i in seq_along(incident_address)) {
+  # Calculate string distances between incident_address and NYC_streets
+#  distances <- stringdist::stringdist(incident_address[i], NYC_streets, method = "lv")
+  
+  # Find the index of the closest match
+#  closest_match_index <- which.min(distances)
+  
+  # Check if the closest match has sufficient similarity
+#  if (distances[closest_match_index] <= similarity_threshold) {
+    # Replace incident_address with the closest match from NYC_streets
+#    incident_address[i] <- NYC_streets[closest_match_index]
+#  }
+#}
+
+#########################################################################
 almost_match_1 <- subset(nondupXStreets1, nondupXStreets1$cross_street_1 !="" & nondupXStreets1$intersection_street_1 != "")
 # Loop through the columns
 # Initialize an empty dataframe to store the matches
-nzDelta1 <= 2
-cat ("\zNear-matches occur when the two addresses have no more than", nzDelta1,"characters different.")
+nzDelta1 <- 2
+cat ("\nA near-match is when the two addresses have no more than", nzDelta1,"characters different.")
 
 match_1 <- data.frame(cross_street_1 = character(), intersection_street_1 = character(), agency = character())
 
@@ -1236,7 +1272,6 @@ near_match_1_counts <- data.frame(agency = names(counts_near_match_1), count = a
 near_match_1_counts$percentage <- round(prop.table(near_match_1_counts$count)*100, 2)
 near_match_1_counts <- near_match_1_counts[order(near_match_1_counts$count, decreasing = TRUE) ,]
 print(near_match_1_counts)
-
 
 ####################
 almost_match_2 <- subset(nondupXStreets2, nondupXStreets2$cross_street_2  !="" & nondupXStreets2$intersection_street_2 != "")
@@ -1282,7 +1317,6 @@ print(near_match_2_counts)
 cat("\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
 
 #########################################################################
-#########################################################################
 # remove redundant columns to reduce file size
 
 cat("\nShrinking file size by deleting redundant fields:")
@@ -1299,7 +1333,7 @@ write.csv(subset( cloned311, select = -c(park_borough, borough_boundaries, locat
 
 # convert size to KB
 newsize <- round(file.size(writeFilePath)/1024,0)
-cat("\Revised file size: '", basename(writeFilePath), "' is size", format(newsize, big.mark = ","), "KB")
+cat("\nRevised file size: '", basename(writeFilePath), "' is size", format(newsize, big.mark = ","), "KB")
 
 # determine magnitude of file size reduction
 cat("\nReduction in file size:", format((newsize- oldsize),big.mark = ","), "KB or", round(((newsize- oldsize) / oldsize )*100, 2), "%")
@@ -1311,7 +1345,6 @@ cat( "\n\nProgram run-time: ", duration, "seconds.\n" )
 
 #########################################################################
 cat("\n *****END OF PROGRAM*****")
-#########################################################################
 #########################################################################
 
 
