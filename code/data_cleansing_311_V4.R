@@ -1,9 +1,11 @@
 #########################################################################
 install.packages("campfin")
 install.packages("stringr")
+install.packages("stringdist")
 
 library(campfin)
 library(stringr)
+library(stringdist)
 
 #########################################################################
 ##  This function standardizes column names even if there are multiple "."s and trailing "."s
@@ -226,9 +228,16 @@ cityCouncilNYC <- makeColNamesUserFriendly( cityCouncilNYC )
 numCityCouncil <- nrow( cityCouncilNYC )
 
 #########################################################################
+# Load the NYC Streets file
+data4File <- file.path( "..", "data", "NYC_streets.csv" )
+NYC_streets <- read.csv( data4File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data4File ))))
+NYC_streets <- makeColNamesUserFriendly( NYC_streets )
+numNYC_streets <- nrow( NYC_streets )
+
+#########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-data1File <- file.path( "..","data", "311_JUL_2022_JUN_2023.csv")
-writeFilePath <- file.path( "..","data", "311_JUL_2022_JUN_2023_smaller.csv")
+data1File <- file.path( "..","data", "311_JUN_2023.csv")
+writeFilePath <- file.path( "..","data", "311_JUN_2023_smaller.csv")
 d311 <- read.csv( data1File, header = TRUE, colClasses = rep( "character", ncol( read.csv( data1File ))))
 #d311 <- read_csv_arrow( data1File, col_names = TRUE, as_data_frame = TRUE, skip_empty_rows = TRUE)
 #d311 <- as.data.frame(d311)
@@ -329,7 +338,7 @@ print(head(samplecomplaintData, 10))
 
 #########################################################################
 
-#cat("\n**********DATA SPELLING CORRECTION AND INVALID DATA REPLACEMENT**********\n")
+#cat("\n\n**********DATA SPELLING CORRECTION AND INVALID DATA REPLACEMENT**********\n")
 
 #########################################################################
 # Dictionary with misspelled word pairs and their correct replacements
@@ -382,7 +391,7 @@ d311$location_type <- replace_misspelled(d311$location_type, word_pairs_location
 
 #########################################################################
 
-cat("\n**********CALCULATE BLANK, UNSPECIFIED, AND UNKNOWN ENTRIES**********")
+cat("\n\n**********CALCULATE BLANK, UNSPECIFIED, AND UNKNOWN ENTRIES**********")
 
 #########################################################################
 # calculate the number of blank, Unspecified, and Unknown data entires
@@ -400,7 +409,7 @@ print(missingDataPerColumn)
 
 #########################################################################
 
-cat("\n**********VALIDATE DATA TYPES**********\n")
+cat("\n\n**********VALIDATE DATA TYPES**********\n")
 
 #########################################################################
 # determine if field values correspond to their data 'type', i.e. numeric, date, etc.
@@ -901,7 +910,6 @@ if (nrow(nonMatchingtaxi_company_borough) > 0) {
 xcloned311 <- d311
 
 ####################
-# Clean up street types and replace with standard USPS abbreviations
 # Replace "EAST" or "WEST" with "E" or "W"
 # Columns to replace
 address_fields <- c("incident_address", "street_name", 
@@ -918,13 +926,9 @@ for (col in address_fields) {
 }
 
 ####################
-# Columns to normalize
-columns_to_normalize <- c("cross_street_1", "cross_street_2", 
-                          "intersection_street_1", "intersection_street_2", 
-                          "incident_address", "street_name")
-
+# Clean up street types and replace with standard USPS abbreviations
 # Loop over columns and apply normalization function
-for (col in columns_to_normalize) {
+for (col in address_fields) {
   xcloned311[[col]] <- normal_address(xcloned311[[col]], abbs = USPSabbreviations,
                                       na = NULL, punct = "", abb_end = TRUE)
 }
@@ -951,7 +955,6 @@ affected_rows_after1 <- xcloned311[affected_rows1, ]
 # fix street addresses that end in "E" or "W", and replace that to the front of the street address
 
 # Identify rows with affected fields using regular expressions
-# Loop through each address field and replace the matching values with blanks
 exceptions <- c("AVE W", "AVENUE W", "CENTRAL PARK W", "CENTRAL PARK DR W", "CPW", "PROSPECT PARK W", "SHEA STADIUM GATE E")
 pattern <- paste(exceptions, collapse = "|")
 affected_rows1 <- apply(xcloned311[address_fields], 1, function(row) any(grepl(" E$", row) & !grepl(pattern, row)))
@@ -1003,14 +1006,23 @@ for (i in seq_along(patterns)) {
 
 ####################
 # Replace "AVE " with "AVENUE" for the selected columns and rows
-# Columns to check and replace
-#columns_to_check_replace <- c("cross_street_1", "cross_street_2", 
-#                              "intersection_street_1", "intersection_street_2")
-
 # Loop over columns and apply replacement
 for (col in address_fields) {
+
   logical_vector <- grepl("^AVE ", d311[[col]])
   xcloned311[, col] <- ifelse(logical_vector, gsub("^AVE ", "AVENUE ", xcloned311[, col]), xcloned311[, col])
+
+# clean up 'WEST END AVE' and 'EAST END AVE'  
+  logical_vector <- grepl("^E END AVE$", xcloned311[[col]])
+  xcloned311[, col] <- ifelse(logical_vector, gsub("^E END AVE$", "EAST END AVE", xcloned311[, col]), xcloned311[, col])
+  
+  logical_vector <- grepl("^W END AVE$", xcloned311[[col]])
+  xcloned311[, col] <- ifelse(logical_vector, gsub("^W END AVE$", "WEST END AVE", xcloned311[, col]), xcloned311[, col])
+  
+  # Update addresses
+  xcloned311[, col] <- gsub("^(\\d+) (\\w+) (\\w+)$", "\\3 \\1 \\2", xcloned311[,col])
+  
+  
 }
 
 ####################
@@ -1210,15 +1222,13 @@ cat("\nSummary of 'cross_street_2' and 'intersection_street_2':\n")
 print(summaryXstreet2)
 
 #########################################################################
-#library(stringdist)
-
 # Set a threshold for similarity
 #similarity_threshold <- 0.8
 
 # Loop through incident_address vector
-#for (i in seq_along(incident_address)) {
-  # Calculate string distances between incident_address and NYC_streets
-#  distances <- stringdist::stringdist(incident_address[i], NYC_streets, method = "lv")
+#for (i in seq_along(xcloned311$incident_address)) {
+# Calculate string distances between incident_address and NYC_streets
+#  distances <- stringdist::stringdist(xcloned311$incident_address[i], NYC_streets, method = "lv")
   
   # Find the index of the closest match
 #  closest_match_index <- which.min(distances)
@@ -1346,5 +1356,3 @@ cat( "\n\nProgram run-time: ", duration, "seconds.\n" )
 #########################################################################
 cat("\n *****END OF PROGRAM*****")
 #########################################################################
-
-
