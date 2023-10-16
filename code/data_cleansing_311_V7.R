@@ -14,7 +14,7 @@ library(dplyr)
 library(scales)
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "311_Q1_2023.csv")
+data1File <- file.path("..", "data", "311_FY_2020_FY2023.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2023-10-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
@@ -1750,7 +1750,7 @@ d311$duration <-
   as.numeric(difftime(d311$closed_date, d311$created_date, units = "days"))
 
 positiveDurations <- d311[d311$duration > 0 & !is.na(d311$duration), ]
-zeroDurations < - d311[d311$duration = 0 & !is.na(d311$duration), ]
+zeroDurations <- d311[d311$duration == 0 & !is.na(d311$duration), ]
 negativeDurations <- d311[d311$duration < 0 & !is.na(d311$duration), ]
 
 negativeDurationSRs<- boxplot(negativeDurations$duration , 
