@@ -14,31 +14,37 @@ library(dplyr)
 library(scales)
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "311_JUL_2019_JUN_2023_AS_OF-10-18-2023.csv")
+data1File <- file.path("..", "data", "311_Q1_Q3_2023_AS_OF_10-20-2023.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2023-10-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+max_closed_date <- as.POSIXct("2023-10-20 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 writeFilePath <- file.path("..", "data", "test_sample5_smaller.csv")
-
 
 #########################################################################
 calculate_values <- function(max_count) {
-  
   if (max_count <= 100) {
     starting_value <- 0
     increment <- 20
     scaling_factor <- 1
-  } else if (max_count <= 500) {
+  } else if (max_count <= 250) {
     starting_value <- 50
     increment <- 50
+    scaling_factor <- 1
+  } else if (max_count <= 500) {
+    starting_value <- 100
+    increment <- 100
     scaling_factor <- 1
   } else if (max_count <= 1000) {
     starting_value <- 100
     increment <- 200
     scaling_factor <- 1
-  } else if (max_count <= 5000) {
+  } else if (max_count <= 2500) {
     starting_value <- 500
-    increment <- 500
+    increment <- 250
+    scaling_factor <- 1
+  } else if (max_count <= 5000) {
+    starting_value <- 1000
+    increment <- 1000
     scaling_factor <- 1
   } else if (max_count <= 10000) {
     starting_value <- 1000
@@ -46,7 +52,7 @@ calculate_values <- function(max_count) {
     scaling_factor <- 1000
   } else if (max_count <= 25000) {
     starting_value <- 2000
-    increment <- 2000
+    increment <- 5000
     scaling_factor <- 1000
   } else if (max_count <= 50000) {
     starting_value <- 5000
@@ -57,17 +63,21 @@ calculate_values <- function(max_count) {
     increment <- 20000
     scaling_factor <- 1000
   } else if (max_count <= 500000) {
-    starting_value <- 50000
-    increment <- 50000
-    scaling_factor <- 100000
+    starting_value <- 100000
+    increment <- 100000
+    scaling_factor <- 1000
   } else if (max_count <= 1000000) {
     starting_value <- 100000
-    increment <- 200000
-    scaling_factor <- 100000
+    increment <- 100000
+    scaling_factor <- 1000
+  } else if (max_count <= 2500000) {
+    starting_value <- 250000
+    increment <- 250000
+    scaling_factor <- 1000
   } else if (max_count <= 5000000) {
     starting_value <- 500000
     increment <- 500000
-    scaling_factor <- 1000000
+    scaling_factor <- 1000
   } else if (max_count <= 10000000) {
     starting_value <- 1000000
     increment <- 2000000
@@ -81,7 +91,7 @@ calculate_values <- function(max_count) {
     increment <- 20000000
     scaling_factor <- 1000000
   }
- # Return the calculated values as a named list
+  # Return the calculated values as a named list
   result <- list(starting_value = starting_value, increment = increment, scaling_factor = scaling_factor)
   return(result)
 }
@@ -90,18 +100,18 @@ calculate_values <- function(max_count) {
 # Define a function to replace suffixes
 replace_suffix <- function(address, abbreviations_df) {
   last_word <- str_extract(address, "\\b\\w+$")
-#  if(!is.na(last_word) & last_word != "") { cat("\nlast_word", last_word)}
+  #  if(!is.na(last_word) & last_word != "") { cat("\nlast_word", last_word)}
   if (!is.na(last_word)) {
     replacement <- abbreviations_df$abb[match(last_word, abbreviations_df$full)]
-#    cat("\nreplacement=", replacement)
+    #    cat("\nreplacement=", replacement)
     if (!is.na(replacement)) {
       address <- str_replace(address, paste0("\\b", last_word, "$"), replacement)
-#      cat("\naddress", address, "\n")
+      #      cat("\naddress", address, "\n")
     }
   }
   return(address)
 }
-  
+
 #########################################################################
 # Function to filter rows with non-numeric or non-5-digit zip codes for a specific field
 filter_invalid_zipcodes <- function(df, zip_field) {
@@ -289,6 +299,7 @@ countColumnsMissingData <- function(dataset) {
 
   return(results)
 }
+
 #########################################################################
 # compute the Hamming distance between two strings. Determine if it meets the threshold.
 is_close_match <- function(value1, value2, threshold) {
@@ -406,7 +417,7 @@ full_name <- c(
   "WALKS", "WELL", "WELLS", "WEST", "WY",
   "LA", "APPROACH", "APP", "BOUNDARY", "BDN", "BNDY", "CONCOURSE", "GRANDCONCOURSE",
   "PROMENADE", "THRUWAY", "AMERICA", "APR", "CNCRSE", "CRSE", "XTN",
-  "PARKWA", "UNP","TENNIS CT"
+  "PARKWA", "UNP", "TENNIS CT"
 )
 
 abb_name <- c(
@@ -474,7 +485,6 @@ precinct_names <- c(
   "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
   "50", "51"
 )
-
 precinctsNYPD <- data.frame(nypd_precinct <- precinct_names)
 precinctsNYPD <- makeColNamesUserFriendly(precinctsNYPD)
 numPrecincts <- nrow(precinctsNYPD)
@@ -507,10 +517,10 @@ numNYC_streets <- nrow(NYC_streets)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-#data1File <- file.path("..", "data", "311_2022.csv")
+# data1File <- file.path("..", "data", "311_2022.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-#max_closed_date <- as.POSIXct("2023-10-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+# max_closed_date <- as.POSIXct("2023-10-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
 chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "charts")
 writeFilePath <- file.path("..", "data", "test_sample5_smaller.csv")
@@ -527,14 +537,14 @@ d311 <- makeColNamesUserFriendly(d311)
 d311 <- d311[rowSums(!is.na(d311)) > 0, ]
 
 # Remove rows with value 01/01/1900 (observed in the 2022 dataset)
-#d311$closed_date <-
+# d311$closed_date <-
 #  ifelse(d311$closed_date == "01/01/1900 12:00:00 AM",
 #    "",
 #    d311$closed_date
 #  )
 
 # Remove rows with value 12/31/1899 (observed in the 2022 dataset)
-#d311$closed_date <-
+# d311$closed_date <-
 #  ifelse(d311$closed_date == "12/31/1899 07:00:00 PM",
 #    "",
 #    d311$closed_date
@@ -606,6 +616,7 @@ colnames(date_df) <- c("MonthYear", "Count")
 # Sort the data frame in calendar order
 date_df$MonthYear <- factor(date_df$MonthYear, levels = unique(date_df$MonthYear))
 date_df <- date_df[order(date_df$MonthYear), ]
+
 cat("\nSRs by month-year\n")
 print(date_df, row.names = FALSE, right = FALSE)
 
@@ -622,6 +633,8 @@ cat("\nAverage monthly count is", average_count, "with a standard deviation of",
 date_df$MonthYear <- as.Date(paste0(date_df$MonthYear, "-01"), format = "%Y-%m-%d")
 
 max_count <- max(date_df$Count)
+total_count <- sum(date_df$Count)
+
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
@@ -633,33 +646,32 @@ SR_monthly <- ggplot(date_df, aes(x = MonthYear, y = Count)) +
   geom_bar(stat = "identity", fill = "cadetblue") +
   labs(x = "YR-Month", y = paste("# of SRs scaled by: ", scaling_factor_str)) +
   scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_text(vjust = 0, size = 11),
-        axis.title.y = element_text(vjust = 1, size = 11),
-        plot.title = element_text(hjust = 0.5, size = 13),
-        panel.background = element_rect(fill = "gray91", color = "gray91"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face="bold"),
-        axis.text.y = element_text(face="bold")) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y = element_text(vjust = 1, size = 11),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9),
+    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
+    axis.text.y = element_text(face = "bold")
+  ) +
   scale_x_date(labels = date_format("%Y-%m")) + # Format X-axis labels as "YYYY-MM"
-  geom_text(aes(x = MonthYear, y = Count, label = scales::comma(round(Count/scaling_factor, 1)), vjust = -0.5)) + 
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-        linetype = "dotted", color = "gray21") +
+  geom_text(aes(x = MonthYear, y = Count, label = scales::comma(round(Count / scaling_factor, 1)), vjust = -0.5)) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "gray21"
+  ) +
   ggtitle("Monthly SR count (w/trendline)",
-        subtitle = paste("(", earliest_title, "--", latest_title, ")"))
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
+  )
 
-if ( nrow(date_df) > 3 & nrow(date_df) < 13 ) {
-    SR_monthly <- SR_monthly + 
-      geom_smooth( method = "lm", span = 1, se = FALSE,
-              color = "firebrick3", linetype = "dotted", linewidth = 1.25)
-} else  if (nrow(date_df) > 12 ){
-  SR_monthly <- SR_monthly + 
-    geom_point(color = "transparent") + 
-    geom_smooth( method = "auto", span = 1, se = FALSE,
-              color = "firebrick3", linetype = "dotted", linewidth = 1.25)
-  }
+SR_monthly <- SR_monthly +
+  geom_point(color = "transparent") +
+  geom_smooth(method = "auto", span = 1, se = FALSE, color = "firebrick3", linetype = "dotted", linewidth = 1.25)
 
 # Print the bar chart
 suppressMessages(print(SR_monthly))
-#chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "charts")
+# chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "charts")
 chart_path <- file.path(chart_directory_path, "MonthYear.png")
 suppressMessages(ggsave(chart_path, plot = SR_monthly, width = 10, height = 8))
 
@@ -684,24 +696,24 @@ d311$agency[d311$agency == "NYC311-PRD"] <- "OTI"
 # build table of agency and count of SRs by agency
 sortedAllData <- as.data.frame(table(d311$agency))
 sortedAllData <- sortedAllData[order(-sortedAllData$Freq), ]
-sortedAllData$percentage <-
-  round(prop.table(sortedAllData$Freq) * 100, 2)
+sortedAllData$percentage <- round(prop.table(sortedAllData$Freq) * 100, 2)
+sortedAllData$cumulative_percentage <- cumsum(sortedAllData$percentage)
 
 # print frequency and
 cat("\n\nSRs by Agency\n")
-colnames(sortedAllData) <- c("agency", "count", "percentage")
+colnames(sortedAllData) <- c("agency", "count", "percentage", "cumulative_percentage")
 print(sortedAllData, row.names = FALSE, right = FALSE)
 
 # Sort the data by 'count' in descending order
-sortedAllData <- sortedAllData %>% arrange(desc(percentage))
+#sortedAllData <- sortedAllData %>% arrange(desc(percentage))
 
-sortedAllData$cumulative_percentage <- cumsum(sortedAllData$percentage)
-sortedAllData$percentage <- sortedAllData$percentage/100
-sortedAllData$cumulative_percentage <- sortedAllData$cumulative_percentage/100
+sortedAllData$percentage <- sortedAllData$percentage / 100
+sortedAllData$cumulative_percentage <- sortedAllData$cumulative_percentage / 100
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(sortedAllData$cumulative_percentage)
+#max_cumulative_percentage <- max(sortedAllData$cumulative_percentage)
 max_count <- max(sortedAllData$count)
+total_count <- sum(sortedAllData$count)
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
@@ -712,35 +724,46 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 # Create a combination chart
 SR_by_agency <- ggplot(sortedAllData) +
   geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = scales::comma(round(count/scaling_factor, 2)), x = reorder(agency, cumulative_percentage), y = count), 
-          colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), y=max_count*cumulative_percentage), 
-            colour="black", hjust=0.5, vjust=1.75) +
-  
-  labs(x = "Agency", y = paste("# of SRs scaled by:",scaling_factor_str )) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
-  ggtitle("SR count by Agency and cumulative percentage", 
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black"
+  ) +
+  geom_text(aes(label = scales::comma(round(count / scaling_factor, 2)), x = reorder(agency, cumulative_percentage), y = count),
+    colour = "sienna3", hjust = 0.5, vjust = -0.5
+  ) +
+  geom_text(aes(label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage), y = max_count * cumulative_percentage),
+    colour = "black", hjust = 0.5, vjust = 1.75
+  ) +
+  labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
+  ggtitle("SR count by Agency and cumulative percentage",
+    subtitle = paste(
+      "(", earliest_title, "--", latest_title, ")",
+      " total=", total_count
+    )
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
 print(SR_by_agency)
 
 chart_path <- file.path(chart_directory_path, "SR_by_Agency.png")
@@ -802,16 +825,16 @@ colnames(sortedComplaints) <- c("complaint_type", "count", "percentage", "agency
 sortedComplaints <- sortedComplaints %>% arrange(desc(percentage))
 sortedComplaints$cumulative_percentage <- cumsum(sortedComplaints$percentage)
 
-sortedComplaints$percentage <- sortedComplaints$percentage/100
-sortedComplaints$cumulative_percentage <- sortedComplaints$cumulative_percentage/100
-sortedComplaints <- sortedComplaints[sortedComplaints$percentage >= 0.01, ]
+sortedComplaints$percentage <- sortedComplaints$percentage / 100
+sortedComplaints$cumulative_percentage <- sortedComplaints$cumulative_percentage / 100
+sortedComplaints <- head(sortedComplaints, 20)
 
 # Find the maximum value of count
 max_count <- max(sortedComplaints$count)
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(sortedAllData$cumulative_percentage)
-
+#max_cumulative_percentage <- max(sortedAllData$cumulative_percentage)
+total_count <- sum(sortedAllData$count)
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
@@ -820,38 +843,40 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create a combination chart
 complaintDataChart <- ggplot(sortedComplaints) +
-  geom_bar(aes(x = reorder(complaint_type, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(complaint_type, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(complaint_type, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = round((count/scaling_factor), 3), x = reorder(complaint_type, cumulative_percentage), 
-            y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,1), x= reorder(complaint_type, cumulative_percentage), 
-            y=max_count*cumulative_percentage), 
-            colour="black", hjust=0.5, vjust=1.75) +
-  
+  geom_bar(aes(x = reorder(complaint_type, cumulative_percentage), y = count), 
+     stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_line(aes(x = reorder(complaint_type, cumulative_percentage), 
+     y = cumulative_percentage * max_count, group = 1), color = "black", 
+      linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(complaint_type, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black") +
+  geom_text(aes(
+    label = round((count / scaling_factor), 1), x = reorder(complaint_type, cumulative_percentage),
+    y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(label = round(cumulative_percentage, 1), x = reorder(complaint_type, cumulative_percentage),
+      y = max_count * cumulative_percentage), colour = "black", hjust = 0.5, vjust = 1.75) +
   labs(x = "Complaint Type", y = paste("# of SRs scaled by:", scaling_factor_str)) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
-  ggtitle("SR count by Top Complaint type and cumulative percentage",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
+  ggtitle("Top 20 by Complaint Type and cumulative percentage",
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)) +
   geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
-  
+     linetype = "dotted", color = "black") +
+
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
 
 print(complaintDataChart)
 chart_path <- file.path(chart_directory_path, "SR_by_Complaint_Type.png")
@@ -864,107 +889,12 @@ sortedStatus <- as.data.frame(table(d311$status))
 sortedStatus <- sortedStatus[order(-sortedStatus$Freq), ]
 sortedStatus$percentage <-
   round(prop.table(sortedStatus$Freq) * 100, 2)
+sortedStatus$cumulative_percentage <- cumsum(sortedStatus$percentage)
 
 # print status results
 cat("\nSRs by Status\n")
-colnames(sortedStatus) <- c("status", "count", "percentage")
+colnames(sortedStatus) <- c("status", "count", "percentage", "cumulative_percentage")
 print(sortedStatus, row.names = FALSE, right = FALSE)
-
-#########################################################################
-
-cat("\n\n**********CORRECTING COMMON SPELLING ERRORS**********\n")
-
-#########################################################################
-# Dictionary with misspelled word pairs and their correct replacements
-# replace 'city' words
-word_pairs_city <- data.frame(
-  misspelled = c(
-    "AMITTYVILLE", "BAYOUN", "BELLMOURE", "BRIARGLISS MANOR",
-    "CEDERHURST", "CLOINAL COURT", "DEERPARK", "FAMINGDALE",
-    "FARMINGDE", "FT. WASHIGTON", "GERTZVILLE", "HAPPAUGE",
-    "LOUIEVILLE", "MASSAPEKUA PARK", "MELLVILLE", "MINROE",
-    "PATCHOGUW", "SESTERVILLE TREVOSE", "STOKANE VALLEY",
-    "SYOSSE", "TENESSE", "WANTAUGH", "FLUSHING AVE",
-    "NEW YORK CITY", "STATEN ISLAND NEW YORK", "DEDHAM, MA",
-    "YORK TOWN HEIGHTS", "LONG IS CITY", "QUEEN", "NASSAU"
-  ),
-  correct = c(
-    "AMITYVILLE", "BAYONNE", "BELLMORE", "BRIARCLIFF MANOR",
-    "CEDARHURST", "COLONIAL COURT", "DEER PARK", "FARMINGDALE",
-    "FARMINGDALE", "FORT WASHINGTON", "GETSVILLE",
-    "HAUPPAUGE", "LOUISVILLE", "MASSAPEQUA PARK", "MELVILLE",
-    "MONROE", "PATCHOGUE", "FEASTERVILLE-TREVOSE",
-    "SPOKANE VALLEY", "SYOSSET", "TENNESSEE", "WANTAGH",
-    "FLUSHING", "NEW YORK", "STATEN ISLAND", "DEDHAM",
-    "YORKTOWN HEIGHTS", "LONG ISLAND CITY",
-    "QUEENS", "NASSAU COUNTY"
-  ),
-  stringAsFactors = FALSE
-)
-
-# Apply the replacement function to the "city" column
-d311$city <- replace_misspelled(d311$city, word_pairs_city)
-d311$city <- gsub("\\bNA $", "", d311$city)
-
-# replace 'incident_zip" incorrect data
-word_pairs_zipcode <- data.frame(
-  misspelled = c(
-    "na", "N/A", "NA"
-  ),
-  correct = c(
-    "", "", ""
-  ),
-  stringAsFactors = FALSE
-)
-
-# Apply replacement function to "incident_zip" and "zip_codes" columns and remove invalid values
-d311$incident_zip <-
-  replace_misspelled(d311$incident_zip, word_pairs_zipcode)
-
-d311$zip_codes <-
-  replace_misspelled(d311$zip_codes, word_pairs_zipcode)
-
-# replace words in the 'descriptor' column
-word_pairs_descriptor <- data.frame(
-  misspelled = c(
-    "VEH",
-    "SGNL",
-    "SCAFFORD",
-    "BEEKEPER",
-    "COMPLAINCE",
-    "SGN",
-    "ZTESTINT",
-    "MESAGE",
-    "CONDULET"
-  ),
-  correct = c(
-    "VEHICLE",
-    "SIGNAL",
-    "SCAFFOLD",
-    "BEEKEEPER",
-    "COMPLIANCE",
-    "SIGN",
-    "",
-    "MESSAGE",
-    "CONDUIT"
-  ),
-  stringAsFactors = FALSE
-)
-
-# Apply the replacement function to the "descriptor" column to remove invalid values
-d311$descriptor <-
-  replace_misspelled(d311$descriptor, word_pairs_descriptor)
-
-# replace words in the 'location_type' column
-word_pairs_location_type <- data.frame(
-  misspelled = c("COMERICAL", "COMERCIAL"),
-  correct = c("COMMERCIAL", "COMMERCIAL"),
-  stringAsFactors = FALSE
-)
-
-# Apply the replacement function to the "location_type" column to remove invalid values
-d311$location_type <-
-  replace_misspelled(d311$location_type, word_pairs_location_type)
 
 #########################################################################
 
@@ -983,12 +913,10 @@ missingDataPerColumn <-
   missingDataPerColumn[order(-missingDataPerColumn[, 2]), ]
 
 cat("\n\nNumber and % blanks (incl 'NA'), UNSPECIFIED, and UNKNOWN entries per column:\n")
-print(missingDataPerColumn, row.names = FALSE, right=FALSE)
+print(missingDataPerColumn, row.names = FALSE, right = FALSE)
 
 missingDataChart <- missingDataPerColumn
-missingDataChart$pctBlank <- missingDataPerColumn$pctBlank/100
-#missingDataChart$pctUnspecified <- missingDataPerColumn$pctUnspecified/100
-#missingDataChart$pctUnknown <- missingDataPerColumn$pctUnknown/100
+missingDataChart$pctBlank <- missingDataPerColumn$pctBlank / 100
 missingDataChart <- missingDataChart[missingDataChart$pctBlank >= .01, ]
 
 max_count <- max(missingDataPerColumn$blanks)
@@ -1004,23 +932,25 @@ blank_chart <- ggplot(missingDataChart, aes(x = reorder(field, -blanks), y = bla
   geom_bar(stat = "identity", fill = "cadetblue") +
   labs(x = "Field", y = "# of blank entires") +
   scale_y_continuous(labels = scales::comma) +
-  theme(axis.title.x = element_text(vjust = 0, size = 11),
-        axis.title.y = element_text(vjust = 1, size = 11),
-        plot.title = element_text(hjust = 0.5, size = 13),
-        panel.background = element_rect(fill = "gray91", color = "gray91"),
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, face="bold"),
-        axis.text.y = element_text(face="bold")) +
-  geom_text(aes(x = field, y = blanks, label = scales::percent(round(pctBlank,2)),
-        angle = -70)) + 
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "gray21") +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y = element_text(vjust = 1, size = 11),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9),
+    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, face = "bold"),
+    axis.text.y = element_text(face = "bold")) +
+  geom_text(aes(x = field, y = blanks, label = scales::comma(round(pctBlank, 2)),
+    angle = -70)) +
+  geom_hline(yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "gray21") +
   ggtitle("# of blank datafields and % (w/> 1%)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")"))
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", numRows))
 
 # Print the bar chart
 print(blank_chart)
 
-#chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "charts")
+# chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", "Documents", "nyc311clean", "charts")
 chart_path <- file.path(chart_directory_path, "BlankFields.png")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
 
@@ -1045,11 +975,11 @@ invalid_incident_zip_rows <- filter_invalid_zipcodes(d311, "incident_zip")
 
 if (nrow(invalid_incident_zip_rows) == 0) {
   cat("\n\nAll 'incident_zip' entires are 5 numeric digits\n.")
-  } else {
+} else {
   cat("\n\nThere are", nrow(invalid_incident_zip_rows), "non-numeric, non-5-digit 'incident_zip' entries.\n")
-    
+
   selected_columns <- invalid_incident_zip_rows %>%
-      select(unique_key, incident_zip, agency)
+    select(unique_key, incident_zip, agency)
   print(head(selected_columns, 10), row.names = FALSE, right = FALSE)
 
   # Group by agency and calculate counts and percentages
@@ -1058,18 +988,18 @@ if (nrow(invalid_incident_zip_rows) == 0) {
     summarise(count = n()) %>%
     mutate(percentage = count / sum(count) * 100) %>%
     arrange(desc(percentage))
-  
+
   # Create a new DataFrame with the desired columns
   summary_dataframe <- data.frame(
     agency = agency_summary$agency,
     count = agency_summary$count,
     percentage = round(agency_summary$percentage, 2)
   )
-  
+
   cat("\nRanked by Agency\n")
   names(summary_dataframe)[1:3] <- c("agency", "count", "percentage")
-  print(head(summary_dataframe, 10), row.names = FALSE, right = FALSE )
-  }
+  print(head(summary_dataframe, 10), row.names = FALSE, right = FALSE)
+}
 
 # Call the function for "zip_codes" field
 invalid_zip_codes_rows <- filter_invalid_zipcodes(d311, "zip_codes")
@@ -1078,28 +1008,28 @@ if (nrow(invalid_zip_codes_rows) == 0) {
   cat("\nAll 'zip_codes' entires are 5 numeric digits.")
 } else {
   cat("\nThere are", nrow(invalid_zip_codes_rows), "non-numeric, non-5 digit 'incident_zip' entries.")
-  
+
   selected_columns <- invalid_zip_codes_rows %>%
     select(unique_key, incident_zip, agency)
   print(head(selected_columns, 10), row.names = FALSE, right = FALSE)
-  
+
   # Group by agency and calculate counts and percentages
   agency_summary <- selected_columns %>%
     group_by(agency) %>%
     summarise(count = n()) %>%
     mutate(percentage = count / sum(count) * 100) %>%
     arrange(desc(percentage))
-  
+
   # Create a new DataFrame with the desired columns
   summary_dataframe <- data.frame(
     agency = agency_summary$agency,
     count = agency_summary$count,
     percentage = agency_summary$percentage
   )
-  
+
   cat("\nRanked by Agency\n")
   names(summary_dataframe)[1:3] <- c("agency", "count", "percentage")
-  print(head(summary_dataframe, 10), row.names = FALSE, right = FALSE )
+  print(head(summary_dataframe, 10), row.names = FALSE, right = FALSE)
 }
 
 #########################################################################
@@ -1333,7 +1263,7 @@ if (!taxi_company_boroughResults$checkIt) {
     "\nThere are",
     length(taxi_company_boroughResults$non_allowable),
     "non-allowable values including:\n"
-    )
+  )
   writeLines(as.character(taxi_company_boroughResults$non_allowable))
 }
 
@@ -1432,12 +1362,13 @@ if (!police_precinctResults$checkIt) {
       count = as.numeric(sorted_pp_table)
     )
   pp_df$percentage <- round(prop.table(pp_df$count) * 100, 2)
+  pp_df <- pp_df[order(pp_df$percentage, pp_df$precinct, decreasing = TRUE), ]
+  pp_df$cumulative_percentage <- cumsum(pp_df$percentage)
 
   # Print the top 10 values
-  cat("\nTop Ten invalid 'police_precinct's:\n")
+  cat("\nTop 10 invalid 'police_precinct's:\n")
   print(head(pp_df, 10), right = FALSE)
 }
-
 #########################################################################
 # check for allowable values in the 'community_board' field
 cbValues <-
@@ -1474,8 +1405,9 @@ invalid_cb_df <-
     community_board = names(invalid_cb_count),
     count = as.numeric(invalid_cb_count)
   )
-invalid_cb_df$percentage <-
-  round(prop.table(invalid_cb_df$count) * 100, 2)
+invalid_cb_df$percentage <- round(prop.table(invalid_cb_df$count) * 100, 2)
+invalid_cb_df <- invalid_cb_df[order(invalid_cb_df$count, invalid_cb_df$community_board, decreasing = TRUE), ]
+invalid_cb_df$cumlative_percentage <- cumsum(invalid_cb_df$percentage)
 
 agency_counts_cb <- table(invalid_cb$agency)
 agency_cb_df <-
@@ -1483,13 +1415,10 @@ agency_cb_df <-
     agency = names(agency_counts_cb),
     count = as.numeric(agency_counts_cb)
   )
-agency_cb_df$percentage <-
-  round(prop.table(agency_cb_df$count) * 100, 2)
 
-invalid_cb_df <-
-  invalid_cb_df[order(invalid_cb_df$count, decreasing = TRUE), ]
-agency_cb_df <-
-  agency_cb_df[order(agency_cb_df$count, decreasing = TRUE), ]
+agency_cb_df$percentage <- round(prop.table(agency_cb_df$count) * 100, 2)
+agency_cb_df <- agency_cb_df[order(agency_cb_df$count, agency_cb_df$agency, decreasing = TRUE), ]
+agency_cb_df$cumulative_percentage <- cumsum(agency_cb_df$percentage)
 
 numBlank_cb <-
   missingDataPerColumn[missingDataPerColumn$field == "community_board", "blanks"]
@@ -1515,16 +1444,15 @@ print(head(invalid_cb_df, 10), row.names = FALSE, right = FALSE)
 cat("\nRanked by Agency\n")
 print(head(agency_cb_df, 10), row.names = FALSE, right = FALSE)
 
-agency_cb_df$cumulative_percentage <- cumsum(agency_cb_df$percentage)
-agency_cb_df$cumulative_percentage <- agency_cb_df$cumulative_percentage/100
-agency_cb_df$percentage <- agency_cb_df$percentage/100
-#agency_cb_df <- agency_cb_df[agency_cb_df$percentage >= .01, ]
+agency_cb_df$cumulative_percentage <- agency_cb_df$cumulative_percentage / 100
+agency_cb_df$percentage <- agency_cb_df$percentage / 100
 
 # Find the maximum value of count
 max_count <- max(agency_cb_df$count)
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(agency_cb_df$cumulative_percentage)
+#max_cumulative_percentage <- max(agency_cb_df$cumulative_percentage)
+total_count <- sum(agency_cb_df$count)
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
@@ -1535,41 +1463,53 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 # Create a combination chart
 communityBoardChart <- ggplot(agency_cb_df) +
   geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = round((count/scaling_factor), 1), x = reorder(agency, cumulative_percentage), 
-                y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-                y=max_count*cumulative_percentage), 
-            colour="black", hjust=0.5, vjust=1.75) +
-  
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 1), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(
+    aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ),
+    colour = "black", hjust = 0.5, vjust = 1.75
+  ) +
   labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
   ggtitle("Invalid Community Board by Agency & cumulative percentage",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
-  
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
+
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
 
 print(communityBoardChart)
 chart_path <- file.path(chart_directory_path, "invalid_community_board.png")
-ggsave(chart_path, plot = communityBoardChart, width = 10, height = 8 )
+ggsave(chart_path, plot = communityBoardChart, width = 10, height = 8)
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
@@ -1590,8 +1530,10 @@ invalid_zip_df1 <-
     incident_zip = names(invalid_zip_counts1),
     count = as.numeric(invalid_zip_counts1)
   )
-invalid_zip_df1$percentage <-
-  round(prop.table(invalid_zip_df1$count) * 100, 2)
+invalid_zip_df1$percentage <- round(prop.table(invalid_zip_df1$count) * 100, 2)
+invalid_zip_df1 <- 
+  invalid_zip_df1[order(invalid_zip_df1$count, invalid_zip_df1$incident_zip,  decreasing = TRUE), ]
+invalid_zip_df1$cumlative_percentage <- cumsum(invalid_zip_df1$percentage)
 
 # Count by agency
 agency_counts1 <- table(invalid_zips1$agency)
@@ -1603,12 +1545,8 @@ agency_df1 <-
     count = as.numeric(agency_counts1)
   )
 agency_df1$percentage <- round(prop.table(agency_counts1) * 100, 2)
-
-# Sort the dataframes
-invalid_zip_df1 <-
-  invalid_zip_df1[order(invalid_zip_df1$count, decreasing = TRUE), ]
-agency_df1 <-
-  agency_df1[order(agency_df1$count, agency_df1$agency, decreasing = TRUE), ]
+agency_df1 <- agency_df1[order(agency_df1$count, agency_df1$agency, decreasing = TRUE), ]
+agency_df1$cumulative_percentage <- cumsum(agency_df1$percentage)
 
 # Output the number of invalid zip codes
 numBlankzip_codes1 <-
@@ -1635,13 +1573,15 @@ print(head(invalid_zip_df1, 10), row.names = FALSE, right = FALSE)
 cat("\nTop 10 by Agency\n")
 print(head(agency_df1, 10), row.names = FALSE, right = FALSE)
 
-#Create combo chart for bad incident_zip by Agency
-agency_df1$percentage <- agency_df1$percentage/100
-agency_df1$cumulative_percentage <- cumsum(agency_df1$percentage)
+# Create combo chart for bad incident_zip by Agency
+agency_df1$percentage <- agency_df1$percentage / 100
+agency_df1$cumulative_percentage <-agency_df1$cumulative_percentage / 100
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(agency_df1$cumulative_percentage)
+#max_cumulative_percentage <- max(agency_df1$cumulative_percentage)
 max_count <- max(agency_df1$count)
+total_count <- sum(agency_df1$count)
+
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
@@ -1651,35 +1591,45 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 # Create a combination chart
 incident_zipChart <- ggplot(agency_df1) +
   geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = round((count/scaling_factor),2), x = reorder(agency, cumulative_percentage), 
-                y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-               y=max_count*cumulative_percentage), colour="black", hjust=0.5, vjust=1.75) +
-  
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(
+    label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+    y = max_count * cumulative_percentage
+  ), colour = "black", hjust = 0.5, vjust = 1.75) +
   labs(x = "Agency", y = paste("# of bad 'incident_zip's scaled by:", scaling_factor_str)) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
   ggtitle("Invalid 'incident_zip's by Agency & cumulative percentage",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
 
 print(incident_zipChart)
 chart_path <- file.path(chart_directory_path, "invalid_incident_zip_by_agency.png")
@@ -1705,6 +1655,9 @@ invalid_zip_df2 <-
   )
 invalid_zip_df2$percentage <-
   round(prop.table(invalid_zip_df2$count) * 100, 2)
+invalid_zip_df2 <-
+  invalid_zip_df2[order(invalid_zip_df2$count, invalid_zip_df2$zip_code, decreasing = TRUE), ]
+invalid_zip_df2$cumulative_percentage <- cumsum(invalid_zip_df2$percentage)
 
 # Count by agency
 agency_counts2 <- table(invalid_zips2$agency)
@@ -1716,12 +1669,9 @@ agency_df2 <-
     count = as.numeric(agency_counts2)
   )
 agency_df2$percentage <- round(prop.table(agency_counts2) * 100, 2)
-
-# Sort the dataframes
-invalid_zip_df2 <-
-  invalid_zip_df2[order(invalid_zip_df2$count, decreasing = TRUE), ]
 agency_df2 <-
   agency_df2[order(agency_df2$count, agency_df2$agency, decreasing = TRUE), ]
+agency_df2$cumulative_percentage <- cumsum(agency_df2$percentage)
 
 # Output the number of invalid zip codes
 numBlankzip_codes2 <-
@@ -1748,13 +1698,14 @@ print(head(invalid_zip_df2, 10), row.names = FALSE, right = FALSE)
 cat("\nTop 10 by Agency\n")
 print(head(agency_df2, 10), row.names = FALSE, right = FALSE)
 
-#Create combo chart for bad incident_zip by Agency
-agency_df2$percentage <- agency_df2$percentage/100
-agency_df2$cumulative_percentage <- cumsum(agency_df2$percentage)
+# Create combo chart for bad incident_zip by Agency
+agency_df2$percentage <- agency_df2$percentage / 100
+agency_df2$cumulative_percentage <- agency_df2$cumulative_percentage / 100
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(agency_df2$cumulative_percentage)
+#max_cumulative_percentage <- max(agency_df2$cumulative_percentage)
 max_count <- max(agency_df2$count)
+total_count <- sum(agency_df2$count)
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
@@ -1765,35 +1716,45 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 # Create a combination chart
 zip_codesChart <- ggplot(agency_df2) +
   geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = round((count/scaling_factor),2), x = reorder(agency, cumulative_percentage), 
-                y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-                y=max_count*cumulative_percentage), colour="black", hjust=0.5, vjust=1.75) +
-  
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(
+    label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+    y = max_count * cumulative_percentage
+  ), colour = "black", hjust = 0.5, vjust = 1.75) +
   labs(x = "Agency", y = paste("# of bad 'zip_codes' scaled by:", scaling_factor_str)) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
   ggtitle("Invalid 'zip_codes' by Agency & cumulative percentage",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
 
 print(zip_codesChart)
 chart_path <- file.path(chart_directory_path, "Invalid_zip_codes_by_Agency.png")
@@ -1824,14 +1785,16 @@ negativeDurations <- d311[d311$duration < 0 & !is.na(d311$duration), ]
 # Identify SRs with negative duration (closed before they were created)
 # Exclude the really ridiculous "clFosed dates" of 01/01/1999 (i.e. -40,000 days)
 closedBeforeOpened <-
-  d311[d311$duration < 0 & d311$duration > -40000 & !is.na(d311$duration),
-       c( 
-    "unique_key",
-    "created_date",
-    "closed_date",
-    "duration",
-    "agency"
-  )]
+  d311[
+    d311$duration < 0 & !is.na(d311$duration),
+    c(
+      "unique_key",
+      "created_date",
+      "closed_date",
+      "duration",
+      "agency"
+    )
+  ]
 
 numBlankClosedDate <-
   missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
@@ -1840,25 +1803,31 @@ if (nrow(closedBeforeOpened) > 0) {
   cat(
     "\n\nThere are",
     format(nrow(closedBeforeOpened), big.mark = ","),
-    "SRs 'closed' before they were 'created' (i.e., negative duration) \nrepresenting",
-    round( nrow(closedBeforeOpened) / (numRows - numBlankClosedDate) * 100, 2 ),
+    "SRs 'closed' before they were 'created' (negative duration) \nrepresenting",
+    round(nrow(closedBeforeOpened) / (numRows - numBlankClosedDate) * 100, 2),
     "% of non-blank data.\n"
   )
-  
+
   sortedClosed <-
     closedBeforeOpened[order(closedBeforeOpened$duration), ]
   sortedClosed$duration <- round(sortedClosed$duration, 6)
 
-  exclude_large_neg <- sortedClosed[!sortedClosed$duration < -1000, ]
-  cat("\nLargest errors excluding the very large negative values (days):\n")
+  exclude_large_neg <- sortedClosed[!sortedClosed$duration <= -30000, ] 
+  
+  cat("\nLargest errors (days) *excluding very large negative values:\n")
   print(head(exclude_large_neg, 5), row.names = FALSE, right = FALSE)
 
-  large_neg_duration <- d311[d311$duration < -1000 & !is.na(d311$duration),  ] # < -1000
-  cat("\nThere are", nrow(large_neg_duration), "with very large negative durations (< -1000 days)")
-  
+  large_neg_duration <- new_dataframe <- anti_join(sortedClosed, exclude_large_neg, by = "unique_key")
+
   cat("\nSmallest errors (days):\n")
   print(tail(sortedClosed, 5), row.names = FALSE, right = FALSE)
 
+  if (nrow(large_neg_duration) >0 ) {
+    cat("\nThere are", nrow(large_neg_duration), "SRs with large negative durations (< -30000 days). Sample:\n\n")
+    random_sample <- large_neg_duration %>% sample_n(min(nrow(large_neg_duration), 5)) # random sample
+    print(random_sample, row.names = FALSE, right = FALSE)
+  }
+  
   # Calculate the count by agency
   count_by_agency <- table(sortedClosed$agency)
 
@@ -1876,47 +1845,51 @@ if (nrow(closedBeforeOpened) > 0) {
   summary_df <-
     summary_df[order(summary_df$count, decreasing = TRUE), ]
 
-  # Reset row names
-#  row.names(summary_df) <- NULL
-  
   cat("\nRanked by Agency\n")
   print(summary_df, row.names = FALSE, right = FALSE)
-  
-  negativeDurationViolin <- ggplot(data = closedBeforeOpened, aes(x = duration, y = factor(1))) +
-    geom_violin(linewidth = 1.1, fill = "snow") +
-    geom_boxplot(width = 0.1, fill = "sienna3", color = "black", outlier.shape = NA) +
+
+  negativeDurationViolin <- ggplot(data = exclude_large_neg, aes(x = duration, y = factor(1))) +
+    geom_violin(linewidth = 1.25, fill = "snow") +
+    geom_jitter(width = 0.2, alpha = 0.4, color = "dodgerblue3", size = 1.9, shape = 17) +
+    geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
     scale_x_reverse() +
-    geom_jitter(width = 0.2, alpha = 0.5, color = "dodgerblue4", size = 3, shape = 16) +
-    labs(title = "Closed before Created (negative duration)- *excluding 1900/01/01",
-         x = "Negative duration",
-         y = "",
-         subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-    theme(plot.title = element_text(size = 16, hjust = 0.5))
-  
-  print(negativeDurationViolin) 
+    labs(
+      title = "Closed before Created (negative duration) *excluding < -1000 days",
+      x = "Negative duration",
+      y = "",
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(closedBeforeOpened))
+    ) +
+    theme(
+      plot.title = element_text(size = 13, hjust = 0.5),
+      plot.subtitle = element_text(size = 9)
+    )
+
+  print(negativeDurationViolin)
   chart_path <- file.path(chart_directory_path, "negative_duration_violin.png")
   ggsave(chart_path, plot = negativeDurationViolin, width = 10, height = 8)
-  
-  # Create boxplot of the (negative) duration values  
-  negativeDurationChart <- ggplot(data = closedBeforeOpened, 
-            aes(x = duration, y = factor(1) )) +
-    geom_boxplot(outlier.colour="black", outlier.shape=16, linewidth = 0.7,
-            outlier.size=2, fill = "sienna3", size = 1,
-            outlier.color = "red", outlier.alpha = 0.5, color = "black") +
-    theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+
+  # Create boxplot of the (negative) duration values
+  negativeDurationChart <- ggplot(
+    data = exclude_large_neg, aes(x = duration, y = factor(1))
+  ) +
+    geom_jitter(color = "dodgerblue3", alpha = 0.4, size = 1.9, shape = 17) +
+    geom_boxplot(width = 0.1, fill = "sienna3", alpha = 0.75, color = "black") +
+    theme(
+      legend.position = "none", plot.title = element_text(hjust = 0.5),
+      plot.subtitle = element_text(size = 9)
+    ) +
     scale_x_reverse() +
-    geom_jitter(width = 0.2, color = 'blue') +
-    labs( title = "SRs closed before they were created (negative duration)",   
-          x = "Duration (negative)" ,
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")
+    labs(
+      title = "SRs closed before they were created (negative duration) *excluding < -10000",
+      x = "Duration (negative)",
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(closedBeforeOpened))
     )
-  
-  print(negativeDurationChart) 
+
+  print(negativeDurationChart)
   chart_path <- file.path(chart_directory_path, "negative_duration_SR.png")
   ggsave(chart_path, plot = negativeDurationChart, width = 10, height = 8)
-  
 } else {
-  cat("\n\nThere are no SRs 'closed' before they were 'created.\n")
+  cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
 }
 
 #########################################################################
@@ -1941,15 +1914,13 @@ if (nrow(zeroDurations) > 0) {
     round(nrow(zeroDurations) / (numRows - numBlankClosedDate) * 100, 2),
     "% of non-blank data."
   )
-  
+
   cat("\n\nSample of SRs 'closed' at the exact same time they are 'created':\n")
   random_sample <- zeroDurations %>% sample_n(min(nrow(zeroDurations), 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
 
-#  zeroDurations$duration <- round(zeroDurations$duration, 4)
-#  zeroDurations <- zeroDurations[order(zeroDurations$duration), ]
   temp <- table(zeroDurations$agency)
-  
+
   ordered_temp <- sort(temp, decreasing = TRUE)
   ordered_temp_df <-
     data.frame(agency = names(ordered_temp), no_of_SRs = ordered_temp)
@@ -1958,7 +1929,8 @@ if (nrow(zeroDurations) > 0) {
   # Add the percentage column to the dataframe
   ordered_temp_df$percentage <-
     round(prop.table(ordered_temp_df$no_of_SRs.Freq) * 100, 2)
-  
+  ordered_temp_df$cumulative_percentage <- cumsum(ordered_temp_df$percentage)
+
   cat("\nRanked by Agency\n")
   names(ordered_temp_df)[2] <- "count"
   print(ordered_temp_df, row.names = FALSE, right = FALSE)
@@ -1966,13 +1938,14 @@ if (nrow(zeroDurations) > 0) {
   cat("\n\nThere are no SRs with a 'created_date' == 'closed_date'.\n")
 }
 
-#Create combo chart for bad incident_zip by Agency
-ordered_temp_df$percentage <- ordered_temp_df$percentage/100
+# Create combo chart for bad incident_zip by Agency
+ordered_temp_df$percentage <- ordered_temp_df$percentage / 100
 ordered_temp_df$cumulative_percentage <- cumsum(ordered_temp_df$percentage)
 
 # Find the maximum value of cumulative_percentage and count
-max_cumulative_percentage <- max(ordered_temp_df$cumulative_percentage)
+#max_cumulative_percentage <- max(ordered_temp_df$cumulative_percentage)
 max_count <- max(ordered_temp_df$count)
+total_count <- sum(ordered_temp_df$count)
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
@@ -1983,36 +1956,46 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 # Create a combination chart
 zerodurationChart <- ggplot(ordered_temp_df) +
   geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-  
-  geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                group = 1), color = "black", linewidth = 1, linetype="dotted") +
-  
-  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-             color = "black") +
-  
-  geom_text(aes(label = round((count/scaling_factor),2), x = reorder(agency, cumulative_percentage), 
-                y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-  
-  geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-                y=max_count*cumulative_percentage), colour="black", hjust=0.5, vjust=1.75) +
-  
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+    color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(
+    label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+    y = max_count * cumulative_percentage
+  ), colour = "black", hjust = 0.5, vjust = 1.75) +
   labs(x = "Agency", y = paste("zero duration SRs scaled by:", scaling_factor_str)) +
-  theme(    axis.title.x = element_text(vjust = 0, size = 11),
-            axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-            axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-            axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-            axis.text.y.right = element_text(color = "black", face = "bold"),
-            axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-            plot.title = element_text(hjust = 0.5, size = 13)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
   ggtitle("zero duration SRs by Agency & cumulative percentage",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-  geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-             linetype = "dotted", color = "black") +
+    subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
   # Add a secondary Y-axix
-  scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                     labels = scales::comma,
-                     sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage")) 
-print(zerodurationChart) 
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
+print(zerodurationChart)
 chart_path <- file.path(chart_directory_path, "zero_duration_SR.png")
 ggsave(chart_path, plot = zerodurationChart, width = 10, height = 8)
 
@@ -2032,7 +2015,10 @@ closedinFuture <-
   ]
 
 # Compute the # of days into the future the SR is closed, based on the max_created_date + 1 day
-closedinFuture$future_days <- round(as.numeric(difftime(closedinFuture$closed_date, max_closed_date, units = "days")), 4)
+closedinFuture$future_days <- round(as.numeric(difftime(closedinFuture$closed_date,
+  max_closed_date,
+  units = "days"
+)), 4)
 
 numBlankClosedDate <-
   missingDataPerColumn[missingDataPerColumn$field == "closed_date", "blanks"]
@@ -2045,46 +2031,51 @@ if (nrow(closedinFuture) > 0) {
     round(nrow(closedinFuture) / (numRows - numBlankClosedDate) * 100, 2),
     "% of non-blank data.\n"
   )
-  
+
   cat("\nSample of SRs with a 'closed_date' in the future:\n")
   closedinFuture$future_days <- round(closedinFuture$future_days, 4)
   closedinFuture$duration <- round(closedinFuture$duration, 4)
   random_sample <- closedinFuture %>% sample_n(min(nrow(closedinFuture), 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
-  
+
   sortedClosed <- closedinFuture[order(closedinFuture$future_days), ]
   temp <- table(sortedClosed$agency)
   ordered_temp <- sort(temp, decreasing = TRUE)
   ordered_temp_df <-
     data.frame(agency = names(ordered_temp), no_of_SRs = ordered_temp)
   ordered_temp_df <- ordered_temp_df[, c(1, 3)]
-  
+
   # Add the percentage column to the dataframe
   ordered_temp_df$percentage <-
     round(prop.table(ordered_temp_df$no_of_SRs.Freq) * 100, 2)
-  
+
   cat("\nRanked by Agency\n")
   names(ordered_temp_df)[2] <- "count"
   print(ordered_temp_df, row.names = FALSE, right = FALSE)
-  
-  # Creat boxplot of the (negative) duration values  
-  closedinFutureChart <- ggplot(data = closedinFuture, 
-                                aes(x = future_days, y = factor(1) )) +
-    geom_boxplot(outlier.colour="black", outlier.shape=16, linewidth = 0.7,
-                 outlier.size=2, fill = "sienna3", size = 1,
-                 outlier.color = "red", outlier.alpha = 0.5, color = "black") +
-    theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
+
+  # Create boxplot of the (negative) duration values
+  closedinFutureChart <- ggplot(
+    data = closedinFuture,
+    aes(x = future_days, y = factor(1))) +
+    geom_jitter(color = "blue", size = 3.5, shape = 17) +
+      geom_boxplot(outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
+      fill = "sienna3", size = 1, color = "black"
+    ) +
+    theme(
+      legend.position = "none",
+      plot.title = element_text(hjust = 0.5, size = 13),
+      plot.subtitle = element_text(size = 9)
+    ) +
     #    scale_x_reverse() +
-    geom_jitter(width = 0.2, color = 'blue') +
-    labs( title = "SRs closed in the future",   
-          x = "Days closed in the future",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")")
+    labs(
+      title = "SRs closed in the future",
+      x = "Days closed in the future",
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(closedinFuture))
     )
-  
-  print(closedinFutureChart) 
+
+  print(closedinFutureChart)
   chart_path <- file.path(chart_directory_path, "future_closed.png")
   ggsave(chart_path, plot = closedinFutureChart, width = 10, height = 8)
-  
 } else {
   cat("\n\nThere are no SRs with a 'closed_date' in the future.\n")
 }
@@ -2092,7 +2083,7 @@ if (nrow(closedinFuture) > 0) {
 #########################################################################
 # Identify SRs with a 'due_date' that is before the 'created_date'
 dueinPast <-
-  d311[ !is.na(d311$due_date), c("unique_key", "created_date", "due_date", "agency") ]
+  d311[!is.na(d311$due_date), c("unique_key", "created_date", "due_date", "agency")]
 
 # Compute the # of days in the past the SR is due before created.
 dueinPast$due_duration <- round(as.numeric(difftime(dueinPast$created_date, dueinPast$due_date, units = "days")), 4)
@@ -2145,11 +2136,13 @@ d311 <- d311 %>%
 
 d311$postClosedUpdateDuration <- round(d311$postClosedUpdateDuration, 2)
 
-resoultion_action_threshold = 30
-updatedLate <- d311[d311$postClosedUpdateDuration  >= resoultion_action_threshold &
-                      d311$postClosedUpdateDuration < 40000
-                    & !is.na(d311$postClosedUpdateDuration), 
-                    c("unique_key", "closed_date", "resolution_action_updated_date", "postClosedUpdateDuration", "agency")]
+resoultion_action_threshold <- 30
+updatedLate <- d311[
+  d311$postClosedUpdateDuration >= resoultion_action_threshold &
+    d311$postClosedUpdateDuration < 40000 &
+    !is.na(d311$postClosedUpdateDuration),
+  c("unique_key", "closed_date", "resolution_action_updated_date", "postClosedUpdateDuration", "agency")
+]
 
 updatedLate <- updatedLate %>% arrange(desc(postClosedUpdateDuration))
 
@@ -2164,104 +2157,114 @@ if (nrow(updatedLate) > 0) {
     round(nrow(updatedLate) / (numRows - numBlankResolutionDate) * 100, 2),
     "% of non-blank data.\n"
   )
-  
+
   cat("\nSample of SRs with a 'resolution_action_update_date' >= 30 days after 'closed_date':\n")
   random_sample_due <- updatedLate %>% sample_n(min(nrow(updatedLate), 5)) # random sample
   print(random_sample_due, row.names = FALSE, right = FALSE)
- 
+
   temp <- table(updatedLate$agency)
   temp <- sort(temp, decreasing = TRUE)
   ordered_temp_df <- data.frame(agency = names(temp), no_of_SRs = temp)
-  
+
   # Add the percentage column to the dataframe
   ordered_temp_df <- ordered_temp_df[, c(1, 3)]
   ordered_temp_df$percentage <-
     round(prop.table(ordered_temp_df$no_of_SRs.Freq) * 100, 2)
- 
+  ordered_temp_df$cumulative_percentage <- cumsum(ordered_temp_df$percentage)
+
   cat("\nRanked by Agency\n")
   names(ordered_temp_df)[2] <- "count"
   print(ordered_temp_df, row.names = FALSE, right = FALSE)
 
   postClosedViolin <- ggplot(data = updatedLate, aes(x = postClosedUpdateDuration, y = factor(1))) +
-    geom_violin(linewidth = 1.1, fill = "snow") +
-    geom_boxplot(width = 0.1, fill = "sienna3", color = "black", outlier.shape = NA) +
-    geom_jitter(width = 0.2, alpha = 0.5, color = "dodgerblue4", size = 3, shape = 16) +
-    labs(title = "Days post-closed when SR updated",
-         x = "Post-closed update days",
-         y = "", 
-         subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
+    geom_violin(linewidth = 1.25, fill = "snow") +
+    geom_jitter(width = 0.2, alpha = 0.4, color = "dodgerblue3", size = 1.9, shape = 17) +
+    geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
+    labs(
+      title = "Days post-closed when SR updated",
+      x = "Post-closed update days",
+      y = "",
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(updatedLate))) +
     theme(plot.title = element_text(size = 16, hjust = 0.5))
-  
-  print(postClosedViolin) 
+
+  print(postClosedViolin)
   chart_path <- file.path(chart_directory_path, "post_closed_violin.png")
   ggsave(chart_path, plot = postClosedViolin, width = 10, height = 8)
-    
-  postClosedUpdateChart <- ggplot(data = updatedLate, 
-                                  aes(x = postClosedUpdateDuration, y = factor(1) )) +
-    geom_boxplot(outlier.colour="black", outlier.shape=16, linewidth = 0.7,
-                 outlier.size=2, fill = "sienna3", size = 1,
-                 outlier.color = "red", outlier.alpha = 0.5, color = "black") +
+
+  postClosedUpdateChart <- ggplot( data = updatedLate, aes(x = postClosedUpdateDuration, y = factor(1))) +
+    geom_jitter(width = 0.2, alpha = 0.4, color = "dodgerblue3", size = 1.9, shape = 17) +
+    geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
     theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
-    geom_jitter(width = 0.2, color = 'blue') +
-    labs( title = "Post-Closed Updates to SRs",   
-          x = "Post_closed Update (days)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")"))
-  
-  print(postClosedUpdateChart) 
+    labs(
+      title = "Post-Closed Updates to SRs",
+      x = "Post_closed Update (days)",
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(updatedLate)))
+
+  print(postClosedUpdateChart)
   chart_path <- file.path(chart_directory_path, "post_closed_update.png")
   ggsave(chart_path, plot = postClosedUpdateChart, width = 10, height = 8)
-  
-  #Create combo chart for resolution Update duration by Agency
-  ordered_temp_df$percentage <- ordered_temp_df$percentage/100
-  ordered_temp_df$cumulative_percentage <- cumsum(ordered_temp_df$percentage)
-  
+
+  # Create combo chart for resolution Update duration by Agency
+  ordered_temp_df$percentage <- ordered_temp_df$percentage / 100
+  ordered_temp_df$cumulative_percentage <- ordered_temp_df$cumulative_percentage / 100
+
   # Find the maximum value of cumulative_percentage and count
-  max_cumulative_percentage <- max(ordered_temp_df$cumulative_percentage)
+#  max_cumulative_percentage <- max(ordered_temp_df$cumulative_percentage)
   max_count <- max(ordered_temp_df$count)
-  
+  total_count <- sum(ordered_temp_df$count)
+
   result <- calculate_values(max_count)
   starting_value <- result$starting_value
   increment <- result$increment
   scaling_factor <- result$scaling_factor
   scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-  
+
   # Create a combination chart
   postClosedBarChart <- ggplot(ordered_temp_df) +
     geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-    
-    geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                  group = 1), color = "black", linewidth = 1, linetype="dotted") +
-    
-    geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-               color = "black") +
-    
-    geom_text(aes(label = round((count/scaling_factor),2), x = reorder(agency, cumulative_percentage), 
-                  y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-    
-    geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-                  y=max_count*cumulative_percentage), colour="black", hjust=0.5, vjust=1.75) +
-    
+    geom_line(aes(
+      x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+      group = 1
+    ), color = "black", linewidth = 1, linetype = "dotted") +
+    geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+      color = "black"
+    ) +
+    geom_text(aes(
+      label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+      y = count
+    ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+    geom_text(aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ), colour = "black", hjust = 0.5, vjust = 1.75) +
     labs(x = "Agency", y = paste("post-closed duration SRs scaled by:", scaling_factor_str)) +
-    theme(    axis.title.x = element_text(vjust = 0, size = 11),
-              axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-              axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-              axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-              axis.text.y.right = element_text(color = "black", face = "bold"),
-              axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-              plot.title = element_text(hjust = 0.5, size = 13)) +
+    theme(
+      axis.title.x = element_text(vjust = 0, size = 11),
+      axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+      axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+      axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+      axis.text.y.right = element_text(color = "black", face = "bold"),
+      axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+      plot.title = element_text(hjust = 0.5, size = 13),
+      plot.subtitle = element_text(size = 9)
+    ) +
     ggtitle("Post-Closed Updates > 30 days by Agency & cumulative percentage",
-            subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-    geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-               linetype = "dotted", color = "black") +
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
+    ) +
+    geom_hline(
+      yintercept = seq(starting_value, max_count, by = increment),
+      linetype = "dotted", color = "black"
+    ) +
     # Add a secondary Y-axix
-    scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                       labels = scales::comma,
-                       sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage")) 
-  print(postClosedBarChart) 
+    scale_y_continuous(
+      breaks = seq(starting_value, max_count, by = increment),
+      labels = scales::comma,
+      sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+    )
+
+  print(postClosedBarChart)
   chart_path <- file.path(chart_directory_path, "postClosedBarChart.png")
   ggsave(chart_path, plot = postClosedBarChart, width = 10, height = 8)
-  
-  
 } else {
   cat("\n\nThere are no SRs with a 'resolution_action_updated_date' > 20 days after 'closed_date'.\n")
 }
@@ -2272,7 +2275,7 @@ cat("\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
 #########################################################################
 # Check if "location" is a concatenation of "latitude" and "longitude"
 
-cat("\n***Comparing Lat/Long and Location. Elapsed time:", round(Sys.time()-programStart,2 ))
+cat("\n***Comparing Lat/Long and Location. Elapsed time:", round(Sys.time() - programStart, 2))
 # Extract latitude and longitude using a regex pattern
 matches <- regmatches(d311$location, gregexpr("-?\\d+\\.\\d+", d311$location))
 lat <- as.numeric(sapply(matches, `[`, 1))
@@ -2342,7 +2345,6 @@ nonMatchingborough_boundaries <-
     )
   )
 
-
 if (nrow(nonMatchingborough_boundaries) > 0) {
   nonMatchingborough_boundaries_blank <-
     subset(
@@ -2351,7 +2353,7 @@ if (nrow(nonMatchingborough_boundaries) > 0) {
         nonMatchingborough_boundaries$translatedborough_boundaries
       )
     )
-  
+
   cat(
     "\n\nThere are",
     format(nrow(nonMatchingborough_boundaries), big.mark = ","),
@@ -2359,13 +2361,13 @@ if (nrow(nonMatchingborough_boundaries) > 0) {
     round(nrow(nonMatchingborough_boundaries) / (numRows) * 100, 2),
     "% of non-blank data.\n"
   )
-  
+
   cat(
     "\nSample of the",
     nrow(nonMatchingborough_boundaries_blank),
     "non-matching between 'borough' and 'borough_boundaries' (where 'borough_boundaries' is blank):\n"
   )
-  random_sample <- 
+  random_sample <-
     nonMatchingborough_boundaries_blank %>% sample_n(min(nrow(nonMatchingborough_boundaries_blank), 10))
   print(random_sample, row.names = FALSE, right = FALSE)
 
@@ -2381,80 +2383,95 @@ if (nrow(nonMatchingborough_boundaries) > 0) {
     nrow(nonMatchingborough_boundaries_non_blank),
     "non-matching between 'borough' and 'borough_boundaries' (where 'borough_boundaries' is NOT blank):\n"
   )
-  random_sample <- 
+  random_sample <-
     nonMatchingborough_boundaries_non_blank %>% sample_n(min(nrow(nonMatchingborough_boundaries_non_blank), 10))
   print(random_sample, row.names = FALSE, right = FALSE)
-
-  sortedDataborough_boundaries <-
-    as.data.frame(table(nonMatchingborough_boundaries$agency))
-  sortedDataborough_boundaries$Percentage <-
-    round(prop.table(sortedDataborough_boundaries$Freq) * 100, 2)
-  sortedDataborough_boundaries <-
-    sortedDataborough_boundaries[order(-sortedDataborough_boundaries$Freq), ]
-
-  cat("\nRanked by Agency\n")
-  names(sortedDataborough_boundaries)[1:3] <- c("agency", "count", "percentage")
-  print(sortedDataborough_boundaries, row.names = FALSE, right = FALSE)
   
+  # Create a dataframe from the count
+  temp_table <- table(nonMatchingborough_boundaries$agency)
+  sortedDataborough_boundaries <-
+    data.frame(
+      agency = names(temp_table),
+      count = as.numeric(temp_table)
+    )
   
-  #Create combo chart for bad incident_zip by Agency
-  sortedDataborough_boundaries$percentage <- sortedDataborough_boundaries$percentage/100
+#  sortedDataborough_boundaries <- as.data.frame(table(nonMatchingborough_boundaries$agency))
+  sortedDataborough_boundaries$percentage <-
+    round(sortedDataborough_boundaries$count/ sum(sortedDataborough_boundaries$count) * 100, 2)
+  sortedDataborough_boundaries <- 
+    sortedDataborough_boundaries[order(sortedDataborough_boundaries$count, sortedDataborough_boundaries$agency,
+     decreasing =  TRUE), ]
   sortedDataborough_boundaries$cumulative_percentage <- cumsum(sortedDataborough_boundaries$percentage)
   
-  # Find the maximum value of cumulative_percentage and count
-  max_cumulative_percentage <- max(sortedDataborough_boundaries$cumulative_percentage)
-  max_count <- max(sortedDataborough_boundaries$count)
+  cat("\nRanked by Agency\n")
+#  names(sortedDataborough_boundaries)[1:3] <- c("agency", "count", "percentage")
+  print(sortedDataborough_boundaries, row.names = FALSE, right = FALSE)
+
+  # Create combo chart for bad incident_zip by Agency
+  sortedDataborough_boundaries$percentage <- sortedDataborough_boundaries$percentage / 100
+  sortedDataborough_boundaries$cumulative_percentage <- 
+    sortedDataborough_boundaries$cumulative_percentage / 100
   
+  # Find the maximum value of cumulative_percentage and count
+#  max_cumulative_percentage <- max(sortedDataborough_boundaries$cumulative_percentage)
+  max_count <- max(sortedDataborough_boundaries$count)
+  total_count <- sum(sortedDataborough_boundaries$count)
+
   result <- calculate_values(max_count)
   starting_value <- result$starting_value
   increment <- result$increment
   scaling_factor <- result$scaling_factor
   scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-  
+
   # Create a combination chart
   nonmatchingboroughChart <- ggplot(sortedDataborough_boundaries) +
     geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
-    
-    geom_line(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count, 
-                  group = 1), color = "black", linewidth = 1, linetype="dotted") +
-    
-    geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count), 
-               color = "black") +
-    
-    geom_text(aes(label = round((count/scaling_factor),2), x = reorder(agency, cumulative_percentage), 
-                  y = count), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
-    
-    geom_text(aes(label=round(cumulative_percentage,2), x= reorder(agency, cumulative_percentage), 
-                  y=max_count*cumulative_percentage), colour="black", hjust=0.5, vjust=1.75) +
-    
+    geom_line(aes(
+      x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+      group = 1
+    ), color = "black", linewidth = 1, linetype = "dotted") +
+    geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+      color = "black"
+    ) +
+    geom_text(aes(
+      label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+      y = count
+    ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+    geom_text(aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ), colour = "black", hjust = 0.5, vjust = 1.75) +
     labs(x = "Agency", y = paste("non-matching borought boundaries scaled by:", scaling_factor_str)) +
-    theme(    axis.title.x = element_text(vjust = 0, size = 11),
-              axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
-              axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
-              axis.text.y.left = element_text(color = "sienna3", face = "bold"),
-              axis.text.y.right = element_text(color = "black", face = "bold"),
-              axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
-              plot.title = element_text(hjust = 0.5, size = 13)) +
+    theme(
+      axis.title.x = element_text(vjust = 0, size = 11),
+      axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+      axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+      axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+      axis.text.y.right = element_text(color = "black", face = "bold"),
+      axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+      plot.title = element_text(hjust = 0.5, size = 13),
+      plot.subtitle = element_text(size = 9)
+    ) +
     ggtitle("non-matching between 'borough' and 'borough_boundaries' by Agency & cumulative percentage",
-            subtitle = paste("(", earliest_title, "--", latest_title, ")")) +
-    geom_hline(yintercept = seq(starting_value, max_count, by = increment), 
-               linetype = "dotted", color = "black") +
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+    ) +
+    geom_hline(
+      yintercept = seq(starting_value, max_count, by = increment),
+      linetype = "dotted", color = "black"
+    ) +
     # Add a secondary Y-axix
-    scale_y_continuous(breaks = seq(starting_value, max_count, by = increment),
-                       labels = scales::comma,
-                       sec.axis = sec_axis(~. / max_count, name = "Cumulative Percentage"))
-  
+    scale_y_continuous(
+      breaks = seq(starting_value, max_count, by = increment),
+      labels = scales::comma,
+      sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+    )
+
   print(nonmatchingboroughChart)
   chart_path <- file.path(chart_directory_path, "non_matching_borough_boundaries_by_Agency.png")
   ggsave(chart_path, plot = nonmatchingboroughChart, width = 10, height = 8)
-  
-  
-} else{
-  cat("\n\nThere are non-matches between 'borough' and 'borough_boundaries' (where 'borough_boundaries' is NOT blank):\n"
-  )
+} else {
+  cat("\n\nThere are non-matches between 'borough' and 'borough_boundaries' (where 'borough_boundaries' is NOT blank):\n")
 }
-
-
 
 #########################################################################
 # check to see if there are any non-matches between 'borough' and 'park_borough'
@@ -2469,9 +2486,10 @@ numBlankpark_borough <-
   missingDataPerColumn[missingDataPerColumn$field == "park_borough", "blanks"]
 
 if (nrow(nonMatchingpark_borough) > 0) {
-  cat( "\n\nThere are", format(nrow(nonMatchingpark_borough), big.mark = ","),
+  cat(
+    "\n\nThere are", format(nrow(nonMatchingpark_borough), big.mark = ","),
     "Non-matches between the 'borough' and 'park_borough' fields number \nrepresenting",
-    round( nrow(nonMatchingpark_borough) / (numRows - numBlankpark_borough) * 100, 2),
+    round(nrow(nonMatchingpark_borough) / (numRows - numBlankpark_borough) * 100, 2),
     "% of non-blank data.\n"
   )
 } else {
@@ -2485,17 +2503,17 @@ if (nrow(nonMatchingpark_borough) > 0) {
   cat("\nRanked by Agency\n")
   sortedDatapark_borough <-
     as.data.frame(table(nonMatchingpark_borough$agency))
-  sortedDatapark_borough$Percentage <-
+  sortedDatapark_borough$percentage <-
     round(prop.table(sortedDatapark_borough$Freq) * 100, 2) # Calculate the percentage column
 
   sortedDatapark_borough <-
     sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
   sortedDatapark_borough <-
     sortedDatapark_borough[order(-sortedDatapark_borough$Freq), ]
-  
+
   names(sortedDatapark_borough)[1] <- "count"
   print(sortedDatapark_borough, row.names = FALSE, right = FALSE)
-} 
+}
 
 #########################################################################
 # check to see if there are any mis-matches between 'borough' and 'taxi_company_borough'
@@ -2526,7 +2544,7 @@ if (nrow(nonMatchingtaxi_company_borough) > 0) {
   #  print(head(nonMatchingtaxi_company_borough, 5))
   sortedDatataxi_company_borough <-
     as.data.frame(table(nonMatchingtaxi_company_borough$agency))
-  sortedDatataxi_company_borough$Percentage <-
+  sortedDatataxi_company_borough$percentage <-
     round(prop.table(sortedDatataxi_company_borough$Freq) * 100, 2) # Calculate the percentage column
 
   sortedDatataxi_company_borough <-
@@ -2538,6 +2556,102 @@ if (nrow(nonMatchingtaxi_company_borough) > 0) {
   names(sortedDatataxi_company_borough)[1:3] <- c("agency", "count", "percentage")
   print(head(sortedDatataxi_company_borough, 5), row.names = FALSE, right = FALSE)
 }
+
+#########################################################################
+
+cat("\n\n**********CORRECTING COMMON SPELLING ERRORS**********\n")
+
+#########################################################################
+# Dictionary with misspelled word pairs and their correct replacements
+# replace 'city' words
+word_pairs_city <- data.frame(
+  misspelled = c(
+    "AMITTYVILLE", "BAYOUN", "BELLMOURE", "BRIARGLISS MANOR",
+    "CEDERHURST", "CLOINAL COURT", "DEERPARK", "FAMINGDALE",
+    "FARMINGDE", "FT. WASHIGTON", "GERTZVILLE", "HAPPAUGE",
+    "LOUIEVILLE", "MASSAPEKUA PARK", "MELLVILLE", "MINROE",
+    "PATCHOGUW", "SESTERVILLE TREVOSE", "STOKANE VALLEY",
+    "SYOSSE", "TENESSE", "WANTAUGH", "FLUSHING AVE",
+    "NEW YORK CITY", "STATEN ISLAND NEW YORK", "DEDHAM, MA",
+    "YORK TOWN HEIGHTS", "LONG IS CITY", "QUEEN", "NASSAU"
+  ),
+  correct = c(
+    "AMITYVILLE", "BAYONNE", "BELLMORE", "BRIARCLIFF MANOR",
+    "CEDARHURST", "COLONIAL COURT", "DEER PARK", "FARMINGDALE",
+    "FARMINGDALE", "FORT WASHINGTON", "GETSVILLE",
+    "HAUPPAUGE", "LOUISVILLE", "MASSAPEQUA PARK", "MELVILLE",
+    "MONROE", "PATCHOGUE", "FEASTERVILLE-TREVOSE",
+    "SPOKANE VALLEY", "SYOSSET", "TENNESSEE", "WANTAGH",
+    "FLUSHING", "NEW YORK", "STATEN ISLAND", "DEDHAM",
+    "YORKTOWN HEIGHTS", "LONG ISLAND CITY",
+    "QUEENS", "NASSAU COUNTY"
+  ),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "city" column
+d311$city <- replace_misspelled(d311$city, word_pairs_city)
+d311$city <- gsub("\\bNA $", "", d311$city)
+
+# replace 'incident_zip" incorrect data
+word_pairs_zipcode <- data.frame(
+  misspelled = c(
+    "na", "N/A", "NA"
+  ),
+  correct = c(
+    "", "", ""
+  ),
+  stringAsFactors = FALSE
+)
+
+# Apply replacement function to "incident_zip" and "zip_codes" columns and remove invalid values
+d311$incident_zip <-
+  replace_misspelled(d311$incident_zip, word_pairs_zipcode)
+
+d311$zip_codes <-
+  replace_misspelled(d311$zip_codes, word_pairs_zipcode)
+
+# replace words in the 'descriptor' column
+word_pairs_descriptor <- data.frame(
+  misspelled = c(
+    "VEH",
+    "SGNL",
+    "SCAFFORD",
+    "BEEKEPER",
+    "COMPLAINCE",
+    "SGN",
+    "ZTESTINT",
+    "MESAGE",
+    "CONDULET"
+  ),
+  correct = c(
+    "VEHICLE",
+    "SIGNAL",
+    "SCAFFOLD",
+    "BEEKEEPER",
+    "COMPLIANCE",
+    "SIGN",
+    "",
+    "MESSAGE",
+    "CONDUIT"
+  ),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "descriptor" column to remove invalid values
+d311$descriptor <-
+  replace_misspelled(d311$descriptor, word_pairs_descriptor)
+
+# replace words in the 'location_type' column
+word_pairs_location_type <- data.frame(
+  misspelled = c("COMERICAL", "COMERCIAL"),
+  correct = c("COMMERCIAL", "COMMERCIAL"),
+  stringAsFactors = FALSE
+)
+
+# Apply the replacement function to the "location_type" column to remove invalid values
+d311$location_type <-
+  replace_misspelled(d311$location_type, word_pairs_location_type)
 
 #########################################################################
 # check to see if cross_street1 and intersection_street_1 are the same value
@@ -2571,7 +2685,7 @@ xcloned311[address_fields] <- lapply(xcloned311[address_fields], function(col) g
 # Loop over columns and apply normalization function
 # startup <- Sys.time()
 
-cat("\n***Normalizing street names. Elapsed time:", round(Sys.time()-programStart,2 ))
+cat("\n***Normalizing street names. Elapsed time:", round(Sys.time() - programStart, 2))
 for (col in address_fields) {
   xcloned311[[col]] <- normal_address(
     xcloned311[[col]],
@@ -2594,19 +2708,19 @@ xcloned311$intersection_street_2 <- sapply(xcloned311$intersection_street_2, rep
 ####################
 # startup <- Sys.time()
 
-cat("\n***Normalizing address fields. Elapsed time:", round(Sys.time()-programStart,2 ))
+cat("\n***Normalizing address fields. Elapsed time:", round(Sys.time() - programStart, 2))
 
 ## Identify affected rows with logical vectors
-#affected_rows1 <- rowSums(sapply(xcloned311[address_fields], function(col) grepl("UNNAMED|NONAME", col))) > 0
+# affected_rows1 <- rowSums(sapply(xcloned311[address_fields], function(col) grepl("UNNAMED|NONAME", col))) > 0
 
 # Replace "UNNAMED" or "NONAME" with empty strings in affected rows
-#xcloned311[affected_rows1, address_fields] <- lapply(xcloned311[affected_rows1, address_fields], function(col) gsub("UNNAMED|NONAME", "", col))
+# xcloned311[affected_rows1, address_fields] <- lapply(xcloned311[affected_rows1, address_fields], function(col) gsub("UNNAMED|NONAME", "", col))
 
 # Replace consecutive question marks with spaces in affected rows
-#xcloned311[affected_rows1, address_fields] <- lapply(xcloned311[affected_rows1, address_fields], function(col) gsub("\\?+", " ", col))
+# xcloned311[affected_rows1, address_fields] <- lapply(xcloned311[affected_rows1, address_fields], function(col) gsub("\\?+", " ", col))
 
 # Identify the modified dataframe
-#affected_rows_after1 <- xcloned311[affected_rows1, ]
+# affected_rows_after1 <- xcloned311[affected_rows1, ]
 
 ####################
 # fix street addresses that end in "E" or "W", and replace that to the front of the street address
@@ -2670,7 +2784,7 @@ for (field in address_fields) {
 patterns <- c("^EAST ", "^WEST ", "^NORTH ", "^SOUTH ")
 replacements <- c("E ", "W ", "N ", "S ")
 
-cat("\n***Additional corrections for directions in street names. Elapsed time:", round(Sys.time()-programStart,2 ))
+cat("\n***Additional corrections for directions in street names. Elapsed time:", round(Sys.time() - programStart, 2))
 logical_vectors <- lapply(patterns, function(pattern) {
   lapply(d311[address_fields], grepl, pattern = pattern)
 })
@@ -2768,14 +2882,82 @@ agency_match1 <-
     agency = names(agency_match_counts1),
     count = as.numeric(agency_match_counts1)
   )
-agency_match1$percentage <-
-  round(prop.table(agency_match1$count) * 100, 2)
-agency_match1 <-
-  agency_match1[order(agency_match1$count, decreasing = TRUE), ]
+agency_match1$percentage <- round(prop.table(agency_match1$count) * 100, 2)
+agency_match1 <- agency_match1[order(agency_match1$count, decreasing = TRUE), ]
+agency_match1$cumulative_percentage <- round(cumsum(agency_match1$percentage), 2)
+#agency_match1 <- agency_match1[order(agency_match1$cumulative_percentage, increasing = TRUE), ]
+
 cat("\nRanked by Agency\n")
 
-names(agency_match1)[1:3] <- c("agency", "count", "percentage")
+#names(agency_match1)[1:3] <- c("agency", "count", "percentage")
 print(agency_match1, row.names = FALSE, right = FALSE)
+
+# Find the maximum value of count
+max_count <- max(agency_match1$count)
+agency_match1$percentage <- agency_match1$percentage / 100
+agency_match1$cumulative_percentage <- agency_match1$cumulative_percentage / 100
+#agency_match1 <- order(agency_match1$cumulative_percentage)
+
+# Find the maximum value of cumulative_percentage and count
+#max_cumulative_percentage <- max(agency_match1$cumulative_percentage)
+total_count <- sum(agency_match1$count)
+
+result <- calculate_values(max_count)
+starting_value <- result$starting_value
+increment <- result$increment
+scaling_factor <- result$scaling_factor
+scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
+
+# Create a combination chart
+matchingX1I1 <- ggplot(agency_match1) +
+  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+             color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 1), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(
+    aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ),
+    colour = "black", hjust = 0.5, vjust = 1.75
+  ) +
+  labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
+  ggtitle("Matching 'cross_st_1' and 'intersect_st_1' by Agency & cumulative percentage",
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
+  
+  # Add a secondary Y-axix
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
+
+print(matchingX1I1)
+chart_path <- file.path(chart_directory_path, "matchingXstreet1Intstreet1.png")
+ggsave(chart_path, plot = matchingX1I1, width = 10, height = 8)
 
 ####################
 # non-matching cross_street1 and intersection_1
@@ -2806,13 +2988,65 @@ agency_nonmatch1 <-
     agency = names(agency_nonmatch_counts1),
     count = as.numeric(agency_nonmatch_counts1)
   )
-agency_nonmatch1$percentage <-
-  round(prop.table(agency_nonmatch1$count) * 100, 2)
-agency_nonmatch1 <-
-  agency_nonmatch1[order(agency_nonmatch1$count, decreasing = TRUE), ]
+agency_nonmatch1$percentage <- round(prop.table(agency_nonmatch1$count) * 100, 2)
+agency_nonmatch1 <- agency_nonmatch1[order(agency_nonmatch1$count, decreasing = TRUE), ]
+agency_nonmatch1$cumulative_percentage <- cumsum(agency_nonmatch1$percentage)
 
-names(agency_nonmatch1)[1:3] <- c("agency", "count", "percentage")
+#names(agency_nonmatch1)[1:3] <- c("agency", "count", "percentage")
 print(agency_nonmatch1, row.names = FALSE, right = FALSE)
+
+# Find the maximum value of count
+max_count <- max(agency_nonmatch1$count)
+agency_nonmatch1$percentage <- agency_nonmatch1$percentage / 100
+agency_nonmatch1$cumulative_percentage <- agency_nonmatch1$cumulative_percentage / 100
+
+# Find the maximum value of cumulative_percentage and count
+total_count <- sum(agency_nonmatch1$count)
+
+result <- calculate_values(max_count)
+starting_value <- result$starting_value
+increment <- result$increment
+scaling_factor <- result$scaling_factor
+scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
+
+# Create a combination chart
+nonmatchingX1I1 <- ggplot(agency_nonmatch1) +
+  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), 
+    stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_line(aes(x = reorder(agency, cumulative_percentage), 
+    y = cumulative_percentage * max_count, group = 1), 
+    color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), 
+    y = cumulative_percentage * max_count), color = "black") +
+  geom_text(aes(label = round((count / scaling_factor), 1), 
+    x = reorder(agency, cumulative_percentage), y = count), 
+    colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(label = round(cumulative_percentage, 2), 
+    x = reorder(agency, cumulative_percentage), y = max_count * cumulative_percentage), 
+    colour = "black", hjust = 0.5, vjust = 1.75) +
+  labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)) +
+  ggtitle("Non-Matching 'cross_st_1' and 'intersect_st_1' by Agency & cumulative percentage",
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)) +
+  geom_hline(yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black") +
+  # Add a secondary Y-axix
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage"))
+
+print(nonmatchingX1I1)
+chart_path <- file.path(chart_directory_path, "non-matchingXstreet1Intstreet1.png")
+ggsave(chart_path, plot = nonmatchingX1I1, width = 10, height = 8)
 
 ####################
 # cross_street_1 is blank, but intersection_street_1 is not blank
@@ -2970,14 +3204,79 @@ agency_match_counts2 <- table(dupXStreets2$agency)
 agency_match2 <-
   data.frame(
     agency = names(agency_match_counts2),
-    count = as.numeric(agency_match_counts2)
-  )
+    count = as.numeric(agency_match_counts2))
 agency_match2$percentage <-
   round(prop.table(agency_match2$count) * 100, 2)
 agency_match2 <-
   agency_match2[order(agency_match2$count, decreasing = TRUE), ]
-names(agency_match2)[1:3] <- c("agency", "count", "percentage")
+agency_match2$cumulative_percentage <- cumsum(agency_match2$percentage)
+
 print(agency_match2, row.names = FALSE, right = FALSE)
+
+# Find the maximum value of count
+max_count <- max(agency_match1$count)
+agency_match2$percentage <- agency_match2$percentage / 100
+agency_match2$cumulative_percentage <- agency_match2$cumulative_percentage / 100
+
+# Find the maximum value of cumulative_percentage and count
+total_count <- sum(agency_match2$count)
+
+result <- calculate_values(max_count)
+starting_value <- result$starting_value
+increment <- result$increment
+scaling_factor <- result$scaling_factor
+scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
+
+# Create a combination chart
+matchingX2I2 <- ggplot(agency_match2) +
+  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_line(aes(
+    x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+    group = 1
+  ), color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+             color = "black"
+  ) +
+  geom_text(aes(
+    label = round((count / scaling_factor), 1), x = reorder(agency, cumulative_percentage),
+    y = count
+  ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(
+    aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ),
+    colour = "black", hjust = 0.5, vjust = 1.75
+  ) +
+  labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)
+  ) +
+  ggtitle("Matching 'cross_st_2' and 'intersect_st_2' by Agency & cumulative percentage",
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+  ) +
+  geom_hline(
+    yintercept = seq(starting_value, max_count, by = increment),
+    linetype = "dotted", color = "black"
+  ) +
+  
+  # Add a secondary Y-axix
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+  )
+
+print(matchingX2I2)
+chart_path <- file.path(chart_directory_path, "matchingXstreet2Intstreet2.png")
+ggsave(chart_path, plot = matchingX2I2, width = 10, height = 8)
 
 ####################
 # non-matching cross_street1 and intersection_1
@@ -3013,12 +3312,65 @@ agency_nonmatch2 <-
     agency = names(agency_nonmatch_counts2),
     count = as.numeric(agency_nonmatch_counts2)
   )
-agency_nonmatch2$percentage <-
-  round(prop.table(agency_nonmatch2$count) * 100, 2)
-agency_nonmatch2 <-
-  agency_nonmatch2[order(agency_nonmatch2$count, decreasing = TRUE), ]
-names(agency_nonmatch2)[1:3] <- c("agency", "count", "percentage")
+agency_nonmatch2$percentage <- round(prop.table(agency_nonmatch2$count) * 100, 2)
+agency_nonmatch2 <- agency_nonmatch2[order(agency_nonmatch2$count, decreasing = TRUE), ]
+agency_nonmatch2$cumulative_percentage <- cumsum(agency_nonmatch2$percentage)
 print(agency_nonmatch2, row.names = FALSE, right = FALSE)
+
+
+
+# Find the maximum value of count
+max_count <- max(agency_nonmatch2$count)
+agency_nonmatch2$percentage <- agency_nonmatch2$percentage / 100
+agency_nonmatch2$cumulative_percentage <- agency_nonmatch2$cumulative_percentage / 100
+
+# Find the maximum value of cumulative_percentage and count
+total_count <- sum(agency_nonmatch2$count)
+
+result <- calculate_values(max_count)
+starting_value <- result$starting_value
+increment <- result$increment
+scaling_factor <- result$scaling_factor
+scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
+
+# Create a combination chart
+nonmatchingX2I2 <- ggplot(agency_nonmatch2) +
+  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), 
+           stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_line(aes(x = reorder(agency, cumulative_percentage), 
+                y = cumulative_percentage * max_count, group = 1), 
+            color = "black", linewidth = 1, linetype = "dotted") +
+  geom_point(aes(x = reorder(agency, cumulative_percentage), 
+                 y = cumulative_percentage * max_count), color = "black") +
+  geom_text(aes(label = round((count / scaling_factor), 1), 
+                x = reorder(agency, cumulative_percentage), y = count), 
+            colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+  geom_text(aes(label = round(cumulative_percentage, 2), 
+                x = reorder(agency, cumulative_percentage), y = max_count * cumulative_percentage), 
+            colour = "black", hjust = 0.5, vjust = 1.75) +
+  labs(x = "Agency", y = paste("# of SRs scaled by:", scaling_factor_str)) +
+  theme(
+    axis.title.x = element_text(vjust = 0, size = 11),
+    axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+    axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+    axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+    axis.text.y.right = element_text(color = "black", face = "bold"),
+    axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+    plot.title = element_text(hjust = 0.5, size = 13),
+    plot.subtitle = element_text(size = 9)) +
+  ggtitle("Non-Matching 'cross_st_2' and 'intersect_st_2' by Agency & cumulative percentage",
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)) +
+  geom_hline(yintercept = seq(starting_value, max_count, by = increment),
+             linetype = "dotted", color = "black") +
+  # Add a secondary Y-axix
+  scale_y_continuous(
+    breaks = seq(starting_value, max_count, by = increment),
+    labels = scales::comma,
+    sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage"))
+
+print(nonmatchingX2I2)
+chart_path <- file.path(chart_directory_path, "non-matchingXstreet2Intstreet2.png")
+ggsave(chart_path, plot = nonmatchingX2I2, width = 10, height = 8)
 
 ####################
 # cross_street_2 is blank, but intersection_street_2 is not blank
@@ -3298,38 +3650,38 @@ if (nrow(match_2 > 0)) {
 # )
 
 # convert size to KB
-# newsize <- round(file.size(writeFilePath) / 1024, 0)
-# cat(
-#  "\nRevised file size: '",
-#  basename(writeFilePath),
-#  "' is size",
-#  format(newsize, big.mark = ","),
-#  "KB"
-# )
+  # newsize <- round(file.size(writeFilePath) / 1024, 0)
+  # cat(
+  #  "\nRevised file size: '",
+  #  basename(writeFilePath),
+  #  "' is size",
+  #  format(newsize, big.mark = ","),
+  #  "KB"
+  # )
 
-# determine magnitude of file size reduction
-# cat(
-#  "\nReduction in file size:",
-#  format((newsize - oldsize), big.mark = ","),
-#  "KB or",
-#  round(((newsize - oldsize) / oldsize) * 100, 2),
-#  "%"
-# )
+  # determine magnitude of file size reduction
+  # cat(
+  #  "\nReduction in file size:",
+  #  format((newsize - oldsize), big.mark = ","),
+  #  "KB or",
+  #  round(((newsize - oldsize) / oldsize) * 100, 2),
+  #  "%"
+  # )
 
-#########################################################################
+  #########################################################################
 programStop <- as.POSIXct(Sys.time())
 duration <- difftime(programStop, programStart, units = "secs")
 
-if (duration > 3600) {
-  duration <- duration / 3600 # Convert to hours
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "hours\n")
-} else if (duration > 60) {
-  duration <- duration / 60 # Convert to minutes
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "minutes\n")
-} else {
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
-}
+ if (duration > 3600) {
+   duration <- duration / 3600 # Convert to hours
+   cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "hours\n")
+ } else if (duration > 60) {
+   duration <- duration / 60 # Convert to minutes
+   cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "minutes\n")
+ } else {
+   cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
+ }
 
-#########################################################################
-cat("\n *****END OF PROGRAM*****")
-#########################################################################
+ #########################################################################
+ cat("\n *****END OF PROGRAM*****")
+ #########################################################################
