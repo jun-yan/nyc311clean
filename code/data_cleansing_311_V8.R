@@ -17,7 +17,7 @@ setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
 data1File <- file.path("..", "data", "311_Q1_Q3_2023_AS_OF_10-20-2023.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2023-10-20 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+max_closed_date <- as.POSIXct("2023-10-18 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 writeFilePath <- file.path("..", "data", "test_sample5_smaller.csv")
 
 #########################################################################
@@ -965,7 +965,7 @@ cat("\nAll non-conforming date field values are represented as NA\n")
 #########################################################################
 # determine if the unique_key is in fact unique
 uniqueKeys <- length(unique(d311$unique_key)) == nrow(d311)
-cat("\nAre all 'unique_key' truely unique?", uniqueKeys)
+cat("\nAre all 'unique_key' truly unique?", uniqueKeys)
 
 #########################################################################
 # determine if the incident_zip and zip_codes fields contain 5 numeric digits
@@ -974,7 +974,7 @@ cat("\nAre all 'unique_key' truely unique?", uniqueKeys)
 invalid_incident_zip_rows <- filter_invalid_zipcodes(d311, "incident_zip")
 
 if (nrow(invalid_incident_zip_rows) == 0) {
-  cat("\n\nAll 'incident_zip' entires are 5 numeric digits\n.")
+  cat("\n\nAll 'incident_zip' entries are 5 numeric digits\n.")
 } else {
   cat("\n\nThere are", nrow(invalid_incident_zip_rows), "non-numeric, non-5-digit 'incident_zip' entries.\n")
 
@@ -1843,8 +1843,9 @@ if (nrow(closedBeforeOpened) > 0) {
 
   # Sort the dataframe by count in descending order
   summary_df <-
-    summary_df[order(summary_df$count, decreasing = TRUE), ]
-
+    summary_df[order(summary_df$count, summary_df$agency, decreasing = TRUE), ]
+  summary_df$cumulative_percentage <- cumsum(summary_df$percentage)
+  
   cat("\nRanked by Agency\n")
   print(summary_df, row.names = FALSE, right = FALSE)
 
@@ -1854,7 +1855,7 @@ if (nrow(closedBeforeOpened) > 0) {
     geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
     scale_x_reverse() +
     labs(
-      title = "Closed before Created (negative duration) *excluding < -1000 days",
+      title = "Closed before Created (negative duration) *excluding < -10000 days",
       x = "Negative duration",
       y = "",
       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(closedBeforeOpened))
@@ -1888,6 +1889,69 @@ if (nrow(closedBeforeOpened) > 0) {
   print(negativeDurationChart)
   chart_path <- file.path(chart_directory_path, "negative_duration_SR.png")
   ggsave(chart_path, plot = negativeDurationChart, width = 10, height = 8)
+   
+  # Create combo chart for negative duration by Agency
+  summary_df$percentage <- summary_df$percentage / 100
+  summary_df$cumulative_percentage <- summary_df$cumulative_percentage / 100
+  
+  # Find the maximum value of cumulative_percentage and count
+  #max_cumulative_percentage <- max(ordered_temp_df$cumulative_percentage)
+  max_count <- max(summary_df$count)
+  total_count <- sum(summary_df$count)
+  
+  result <- calculate_values(max_count)
+  starting_value <- result$starting_value
+  increment <- result$increment
+  scaling_factor <- result$scaling_factor
+  scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
+  
+  # Create a combination chart
+  negativedurationChart <- ggplot(summary_df) +
+    geom_bar(aes(x = reorder(agency, desc(count)), y = count), 
+             stat = "identity", fill = "sienna3", width = 0.5) +
+    geom_line(aes(
+      x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
+      group = 1
+    ), color = "black", linewidth = 1, linetype = "dotted") +
+    geom_point(aes(x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count),
+               color = "black"
+    ) +
+    geom_text(aes(
+      label = round((count / scaling_factor), 2), x = reorder(agency, cumulative_percentage),
+      y = count
+    ), colour = "sienna3", hjust = 0.5, vjust = -0.5) +
+    geom_text(aes(
+      label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+      y = max_count * cumulative_percentage
+    ), colour = "black", hjust = 0.5, vjust = 1.75) +
+    labs(x = "Agency", y = paste("zero duration SRs scaled by:", scaling_factor_str)) +
+    theme(
+      axis.title.x = element_text(vjust = 0, size = 11),
+      axis.title.y.right = element_text(vjust = 1, size = 11, color = "black", face = "bold"),
+      axis.title.y.left = element_text(vjust = 1, size = 11, color = "sienna3", face = "bold"),
+      axis.text.y.left = element_text(color = "sienna3", face = "bold"),
+      axis.text.y.right = element_text(color = "black", face = "bold"),
+      axis.text.x = element_text(angle = 90, vjust = -0.5, hjust = 1, face = "bold"),
+      plot.title = element_text(hjust = 0.5, size = 13),
+      plot.subtitle = element_text(size = 9)
+    ) +
+    ggtitle("negative duration SRs by Agency & cumulative percentage",
+            subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count)
+    ) +
+    geom_hline(
+      yintercept = seq(starting_value, max_count, by = increment),
+      linetype = "dotted", color = "black"
+    ) +
+    # Add a secondary Y-axix
+    scale_y_continuous(
+      breaks = seq(starting_value, max_count, by = increment),
+      labels = scales::comma,
+      sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
+    )
+  print(negativedurationChart)
+  chart_path <- file.path(chart_directory_path, "negative_duration_SR.png")
+  ggsave(chart_path, plot = negativedurationChart, width = 10, height = 8)
+  
 } else {
   cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
 }
@@ -1955,7 +2019,8 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create a combination chart
 zerodurationChart <- ggplot(ordered_temp_df) +
-  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), stat = "identity", fill = "sienna3", width = 0.5) +
+  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), 
+    stat = "identity", fill = "sienna3", width = 0.5) +
   geom_line(aes(
     x = reorder(agency, cumulative_percentage), y = cumulative_percentage * max_count,
     group = 1
@@ -2537,7 +2602,7 @@ cat(
 )
 
 if (nrow(nonMatchingtaxi_company_borough) > 0) {
-  cat("\nSample of non-matching 'taxi_company_borough' (exluding blanks):\n")
+  cat("\nSample of non-matching 'taxi_company_borough' (excluding blanks):\n")
   random_sample <- nonMatchingtaxi_company_borough %>% sample_n(min(nrow(nonMatchingtaxi_company_borough), 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
 
@@ -2974,8 +3039,7 @@ cat(
   "% of total rows."
 )
 cat("\n\nSample of non-matching 'cross_street_1' and 'intersection_street_1':\n")
-non_blank_rows_non_match1 <-
-  nondupXStreets1[nondupXStreets1$cross_street_1 != "" &
+non_blank_rows_non_match1 <- nondupXStreets1[nondupXStreets1$cross_street_1 != "" &
     nondupXStreets1$intersection_street_1 != "", ]
 
 random_sample <- non_blank_rows_non_match1 %>% sample_n(min(nrow(non_blank_rows_non_match1), 10)) # random sample
@@ -2989,7 +3053,7 @@ agency_nonmatch1 <-
     count = as.numeric(agency_nonmatch_counts1)
   )
 agency_nonmatch1$percentage <- round(prop.table(agency_nonmatch1$count) * 100, 2)
-agency_nonmatch1 <- agency_nonmatch1[order(agency_nonmatch1$count, decreasing = TRUE), ]
+agency_nonmatch1 <- agency_nonmatch1[order(agency_nonmatch1$count, agency_nonmatch1$agency, decreasing = TRUE), ]
 agency_nonmatch1$cumulative_percentage <- cumsum(agency_nonmatch1$percentage)
 
 #names(agency_nonmatch1)[1:3] <- c("agency", "count", "percentage")
@@ -3011,7 +3075,7 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create a combination chart
 nonmatchingX1I1 <- ggplot(agency_nonmatch1) +
-  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), 
+  geom_bar(aes(x = reorder(agency, desc(count)), y = count), 
     stat = "identity", fill = "sienna3", width = 0.5) +
   geom_line(aes(x = reorder(agency, cumulative_percentage), 
     y = cumulative_percentage * max_count, group = 1), 
@@ -3335,7 +3399,7 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create a combination chart
 nonmatchingX2I2 <- ggplot(agency_nonmatch2) +
-  geom_bar(aes(x = reorder(agency, cumulative_percentage), y = count), 
+  geom_bar(aes(x = reorder(agency, desc(count)), y = count), 
            stat = "identity", fill = "sienna3", width = 0.5) +
   geom_line(aes(x = reorder(agency, cumulative_percentage), 
                 y = cumulative_percentage * max_count, group = 1), 
