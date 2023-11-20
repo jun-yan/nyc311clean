@@ -28,7 +28,11 @@ header-includes:
     }
   - \AtBeginDocument
     {
+<<<<<<< Updated upstream
     \title[NYC 311 Requests]{On Principles for Government Open Data Curation:\\A Case Study with NYC 311 Servece Requests}
+=======
+    \title[NYC 311 Requests]{On Principles for Government Open Data Curation\\A Case Study with NYC 311 Service Requests}
+>>>>>>> Stashed changes
     \author[Jun Yan]{David Tussey\inst{1} and Jun Yan\inst{2}}
     \institute[University of Connecticut]{\inst{1} Former Executive Director, NYC DoITT\\
     \inst{2} University of Connecticut}
