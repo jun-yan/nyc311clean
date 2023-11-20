@@ -14,10 +14,10 @@ library(dplyr)
 library(scales)
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "311_Q1_Q3_2023_AS_OF_10-20-2023.csv")
+data1File <- file.path("..", "data", "311_JUL_2022_JUN_2023_AS_OF_10-3-2023.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2023-10-18 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+max_closed_date <- as.POSIXct("2023-10-03 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 writeFilePath <- file.path("..", "data", "test_sample5_smaller.csv")
 
 #########################################################################
@@ -1906,7 +1906,7 @@ if (nrow(closedBeforeOpened) > 0) {
   scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
   
   # Create a combination chart
-  negativedurationChart <- ggplot(summary_df) +
+  negativedurationBarChart <- ggplot(summary_df) +
     geom_bar(aes(x = reorder(agency, desc(count)), y = count), 
              stat = "identity", fill = "sienna3", width = 0.5) +
     geom_line(aes(
@@ -1948,9 +1948,9 @@ if (nrow(closedBeforeOpened) > 0) {
       labels = scales::comma,
       sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
     )
-  print(negativedurationChart)
-  chart_path <- file.path(chart_directory_path, "negative_duration_SR.png")
-  ggsave(chart_path, plot = negativedurationChart, width = 10, height = 8)
+  print(negativedurationBarChart)
+  chart_path <- file.path(chart_directory_path, "negative_duration_SR_barchart.png")
+  ggsave(chart_path, plot = negativedurationBarChart, width = 10, height = 8)
   
 } else {
   cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
@@ -2331,7 +2331,7 @@ if (nrow(updatedLate) > 0) {
   chart_path <- file.path(chart_directory_path, "postClosedBarChart.png")
   ggsave(chart_path, plot = postClosedBarChart, width = 10, height = 8)
 } else {
-  cat("\n\nThere are no SRs with a 'resolution_action_updated_date' > 20 days after 'closed_date'.\n")
+  cat("\n\nThere are no SRs with a 'resolution_action_updated_date' > 30 days after 'closed_date'.\n")
 }
 
 #########################################################################
@@ -2629,6 +2629,8 @@ cat("\n\n**********CORRECTING COMMON SPELLING ERRORS**********\n")
 #########################################################################
 # Dictionary with misspelled word pairs and their correct replacements
 # replace 'city' words
+start_time <- Sys.time()
+
 word_pairs_city <- data.frame(
   misspelled = c(
     "AMITTYVILLE", "BAYOUN", "BELLMOURE", "BRIARGLISS MANOR",
@@ -2655,10 +2657,15 @@ word_pairs_city <- data.frame(
 )
 
 # Apply the replacement function to the "city" column
+
 d311$city <- replace_misspelled(d311$city, word_pairs_city)
 d311$city <- gsub("\\bNA $", "", d311$city)
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting cities is:", as.numeric(elapsed_time), "minutes")
+
 # replace 'incident_zip" incorrect data
+start_time <- Sys.time()
 word_pairs_zipcode <- data.frame(
   misspelled = c(
     "na", "N/A", "NA"
@@ -2676,7 +2683,11 @@ d311$incident_zip <-
 d311$zip_codes <-
   replace_misspelled(d311$zip_codes, word_pairs_zipcode)
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting zipcodes is:", as.numeric(elapsed_time), "minutes")
+
 # replace words in the 'descriptor' column
+start_time <- Sys.time()
 word_pairs_descriptor <- data.frame(
   misspelled = c(
     "VEH",
@@ -2707,6 +2718,10 @@ word_pairs_descriptor <- data.frame(
 d311$descriptor <-
   replace_misspelled(d311$descriptor, word_pairs_descriptor)
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting misspelled descriptors is:", as.numeric(elapsed_time), "minutes")
+
+start_time <- Sys.time()
 # replace words in the 'location_type' column
 word_pairs_location_type <- data.frame(
   misspelled = c("COMERICAL", "COMERCIAL"),
@@ -2718,6 +2733,9 @@ word_pairs_location_type <- data.frame(
 d311$location_type <-
   replace_misspelled(d311$location_type, word_pairs_location_type)
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting misspelled location_types is:", as.numeric(elapsed_time), "minutes")
+
 #########################################################################
 # check to see if cross_street1 and intersection_street_1 are the same value
 
@@ -2725,13 +2743,13 @@ d311$location_type <-
 # conduct replacements on a copy of original data
 xcloned311 <- d311
 
-# startup <- Sys.time()
 ####################
-# Replace "EAST" or "WEST" with "E" or "W" Same for "NORTH" and "SOUTH"
+# Replace "EAST" or "WEST" with "E" or "W". Same for "NORTH" and "SOUTH"
 # Columns to replace
+start_time <- Sys.time()
 address_fields <- c(
-  "incident_address",
-  "street_name",
+#  "incident_address",
+#  "street_name",
   "cross_street_1",
   "intersection_street_1",
   "cross_street_2",
@@ -2745,35 +2763,38 @@ replacement <- "\\U\\1"
 # Use lapply and gsub for replacements across all columns
 xcloned311[address_fields] <- lapply(xcloned311[address_fields], function(col) gsub(pattern, replacement, col, perl = TRUE))
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting address fields E/W/N/S  is:", as.numeric(elapsed_time), "minutes")
+
 ####################
 # Clean up street types and replace with standard USPS abbreviations
 # Loop over columns and apply normalization function
-# startup <- Sys.time()
 
-cat("\n***Normalizing street names. Elapsed time:", round(Sys.time() - programStart, 2))
-for (col in address_fields) {
-  xcloned311[[col]] <- normal_address(
-    xcloned311[[col]],
-    abbs = USPSabbreviations,
-    na = NULL,
-    punct = "",
-    abb_end = TRUE
-  )
-}
+start_time <- Sys.time()
+#cat("\n***Normalizing street names. Elapsed time:", round(Sys.time() - programStart, 2))
+ for (col in address_fields) {
+   xcloned311[[col]] <- normal_address(
+     xcloned311[[col]],
+     abbs = USPSabbreviations,
+     na = NULL,
+     punct = "",
+     abb_end = TRUE
+   )
+ }
 
-# Apply the function to each column in the `xcloned311` dataframe
-xcloned311$cross_street_1 <- sapply(xcloned311$cross_street_1, replace_suffix, USPSabbreviations)
-xcloned311$cross_street_2 <- sapply(xcloned311$cross_street_2, replace_suffix, USPSabbreviations)
+# # Apply the function to each column in the `xcloned311` dataframe
+ xcloned311$cross_street_1 <- sapply(xcloned311$cross_street_1, replace_suffix, USPSabbreviations)
+ xcloned311$cross_street_2 <- sapply(xcloned311$cross_street_2, replace_suffix, USPSabbreviations)
 
-xcloned311$intersection_street_1 <- sapply(xcloned311$intersection_street_1, replace_suffix, USPSabbreviations)
-xcloned311$intersection_street_2 <- sapply(xcloned311$intersection_street_2, replace_suffix, USPSabbreviations)
+ xcloned311$intersection_street_1 <- sapply(xcloned311$intersection_street_1, replace_suffix, USPSabbreviations)
+ xcloned311$intersection_street_2 <- sapply(xcloned311$intersection_street_2, replace_suffix, USPSabbreviations)
 
-# print(Sys.time()-startup)
+ elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+
+#cat("\nTime in normalizing street addresses  is:", as.numeric(elapsed_time), "minutes")
 
 ####################
-# startup <- Sys.time()
 
-cat("\n***Normalizing address fields. Elapsed time:", round(Sys.time() - programStart, 2))
 
 ## Identify affected rows with logical vectors
 # affected_rows1 <- rowSums(sapply(xcloned311[address_fields], function(col) grepl("UNNAMED|NONAME", col))) > 0
@@ -2790,7 +2811,7 @@ cat("\n***Normalizing address fields. Elapsed time:", round(Sys.time() - program
 ####################
 # fix street addresses that end in "E" or "W", and replace that to the front of the street address
 # Identify rows with affected fields using regular expressions
-# startup <- Sys.time()
+start_time <- Sys.time()
 exceptions <-
   c(
     "AVE W",
@@ -2805,6 +2826,7 @@ exceptions <-
   )
 
 pattern <- paste(exceptions, collapse = "|")
+
 affected_rows1 <-
   apply(xcloned311[address_fields], 1, function(row) {
     any(grepl(" E$", row) & !grepl(pattern, row))
@@ -2814,13 +2836,13 @@ affected_rows2 <-
     any(grepl(" W$", row) & !grepl(pattern, row))
   })
 affected_rows3 <-
-  apply(xcloned311[address_fields], 1, function(row) {
-    any(grepl(" N$", row) & !grepl(pattern, row))
-  })
+   apply(xcloned311[address_fields], 1, function(row) {
+     any(grepl(" N$", row) & !grepl(pattern, row))
+   })
 affected_rows4 <-
-  apply(xcloned311[address_fields], 1, function(row) {
-    any(grepl(" S$", row) & !grepl(pattern, row))
-  })
+   apply(xcloned311[address_fields], 1, function(row) {
+     any(grepl(" S$", row) & !grepl(pattern, row))
+   })
 
 # Identify the affected rows before replacement
 affected_rows_before2E <- xcloned311[affected_rows1, ]
@@ -2842,14 +2864,17 @@ for (field in address_fields) {
   xcloned311[affected_rows4, field] <- replace_trailing_value(xcloned311[affected_rows4, field], " S$", "S ")
 }
 
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting trailing East/West/North/South is:", as.numeric(elapsed_time), "minutes")
+
 ####################
 # Replace "EAST" with "E" for the selected columns and rows. Similarly for WEST, NORTH, and SOUTH
-# startup <- Sys.time()
+start_time <- Sys.time()
 
 patterns <- c("^EAST ", "^WEST ", "^NORTH ", "^SOUTH ")
 replacements <- c("E ", "W ", "N ", "S ")
 
-cat("\n***Additional corrections for directions in street names. Elapsed time:", round(Sys.time() - programStart, 2))
+#cat("\n***Additional corrections for directions in street names. Elapsed time:", round(Sys.time() - programStart, 2))
 logical_vectors <- lapply(patterns, function(pattern) {
   lapply(d311[address_fields], grepl, pattern = pattern)
 })
@@ -2865,10 +2890,14 @@ for (i in seq_along(patterns)) {
       gsub(pattern, replacement, xcloned311[logical_vectors[[i]][[col]], col])
   }
 }
-# print(Sys.time() - startup)
+
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in additional E/W/N/S correction is:", as.numeric(elapsed_time), "minutes")
 
 ####################
 # Precompute logical vectors for each pattern
+start_time <- Sys.time()
+
 ave_logical <- lapply(d311[address_fields], grepl, pattern = "^AVE ")
 e_end_logical <- lapply(d311[address_fields], grepl, pattern = "^E END AVE$")
 w_end_logical <- lapply(d311[address_fields], grepl, pattern = "^W END AVE$")
@@ -2887,7 +2916,9 @@ for (j in seq_along(address_fields)) {
   xcloned311[, address_fields[j]] <-
     gsub("^(\\d+) (\\w+) (\\w+)$", "\\3 \\1 \\2", xcloned311[, address_fields[j]])
 }
-# print(Sys.time() - startup)
+
+elapsed_time <- difftime(Sys.time(), start_time, units = "mins")
+#cat("\nTime in correcting East/West End Ave is:", as.numeric(elapsed_time), "minutes")
 
 ####################
 # find rows where cross_street_1 is blank, but intersection_street_1 is not blank. Use later.
@@ -3541,7 +3572,7 @@ almost_match_1 <-
       nondupXStreets1$intersection_street_1 != ""
   )
 
-nzDelta1 <- 3
+nzDelta1 <- 2
 cat(
   "\n\n*****A near-match is when the two addresses have no more than",
   nzDelta1,
