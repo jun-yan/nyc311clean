@@ -14,10 +14,10 @@ library(dplyr)
 library(scales)
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "311_JUL_2022_JUN_2023_AS_OF_10-3-2023.csv")
+data1File <- file.path("..", "data", "311_NOV_2023_AS_OF_12-27-2023.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2023-10-03 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+max_closed_date <- as.POSIXct("2023-12-27 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 writeFilePath <- file.path("..", "data", "test_sample5_smaller.csv")
 
 #########################################################################
@@ -595,10 +595,14 @@ d311[, columns_to_upper] <-
 cat("\n\n**********DATA SUMMARY**********\n")
 
 #########################################################################
-earliest_date <- min(as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"))
+date_objects <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+# Remove rows with NA values
+date_objects <- na.omit(date_objects)
+
+earliest_date <- min(date_objects)
 earliest_date_formatted <- format(earliest_date, format = "%Y-%m-%d %H:%M:%S")
 
-latest_date <- max(as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"))
+latest_date <- max(date_objects)
 latest_date_formatted <- format(latest_date, format = "%Y-%m-%d %H:%M:%S")
 
 earliest_title <- format(as.Date(earliest_date_formatted), format = "%Y-%m-%d")
@@ -607,7 +611,7 @@ latest_title <- format(as.Date(latest_date_formatted), format = "%Y-%m-%d")
 temp_created_date <- d311$created_date
 temp_created_date <- as.POSIXct(temp_created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York", na.rm = TRUE)
 
-date_counts <- table(format(temp_created_date, "%Y-%m"))
+date_counts <- table(format(date_objects, "%Y-%m"))
 
 # Convert the table to a data frame
 date_df <- as.data.frame(date_counts)
@@ -1812,7 +1816,7 @@ if (nrow(closedBeforeOpened) > 0) {
     closedBeforeOpened[order(closedBeforeOpened$duration), ]
   sortedClosed$duration <- round(sortedClosed$duration, 6)
 
-  exclude_large_neg <- sortedClosed[!sortedClosed$duration <= -30000, ] 
+  exclude_large_neg <- sortedClosed[!sortedClosed$duration <= -3000000, ] 
   
   cat("\nLargest errors (days) *excluding very large negative values:\n")
   print(head(exclude_large_neg, 5), row.names = FALSE, right = FALSE)
@@ -1855,8 +1859,8 @@ if (nrow(closedBeforeOpened) > 0) {
     geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
     scale_x_reverse() +
     labs(
-      title = "Closed before Created (negative duration) *excluding < -10000 days",
-      x = "Negative duration",
+      title = "Closed before Created (negative duration days)",
+      x = "Negative duration (days)",
       y = "",
       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(closedBeforeOpened))
     ) +
@@ -2223,6 +2227,10 @@ if (nrow(updatedLate) > 0) {
     "% of non-blank data.\n"
   )
 
+  max_resolution_update <- max(updatedLate$postClosedUpdateDuration)
+  cat("\nMaximum value of 'resolution_update_date'post-closed duration (days):\n")
+  print(max_resolution_update, row.names = FALSE, right = FALSE)
+  
   cat("\nSample of SRs with a 'resolution_action_update_date' >= 30 days after 'closed_date':\n")
   random_sample_due <- updatedLate %>% sample_n(min(nrow(updatedLate), 5)) # random sample
   print(random_sample_due, row.names = FALSE, right = FALSE)
@@ -2247,7 +2255,7 @@ if (nrow(updatedLate) > 0) {
     geom_boxplot(width = 0.1, fill = "sienna3", color = "black", alpha = 0.75) +
     labs(
       title = "Days post-closed when SR updated",
-      x = "Post-closed update days",
+      x = "Post-closed update (days)",
       y = "",
       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(updatedLate))) +
     theme(plot.title = element_text(size = 16, hjust = 0.5))
@@ -3763,7 +3771,7 @@ if (nrow(match_2 > 0)) {
   #  "%"
   # )
 
-  #########################################################################
+#########################################################################
 programStop <- as.POSIXct(Sys.time())
 duration <- difftime(programStop, programStart, units = "secs")
 
