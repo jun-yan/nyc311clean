@@ -1,62 +1,26 @@
-################################################################################
-all:pdf  # default rule DO NOT EDIT
-################################################################################
-MAINFILE  := main
-RNWFILES  := 
-RFILES    := 
-TEXFILES  := 
-CACHEDIR  := cache
-FIGUREDIR := figures
-LATEXMK_FLAGS := 
-##### Explicit Dependencies #####
-################################################################################
-RNWTEX = $(RNWFILES:.Rnw=.tex)
-ROUTFILES = $(RFILES:.R=.Rout)
-RDATAFILES= $(RFILES:.R=.Rdata)
-MAINTEX = $(MAINFILE:=.tex)
-MAINPDF = $(MAINFILE:=.pdf)
-ALLTEX = $(MAINTEX) $(RNWTEX) $(TEXFILES)
+source := $(wildcard *.tex)
+out := $(patsubst %.tex,%.pdf,$(source))
+rev := 56a50ce
+bib := $(wildcard *.bib)
 
-# Dependencies
-$(RNWTEX): $(RDATAFILES)
-$(MAINTEX): $(RNWTEX) $(TEXFILES)
-$(MAINPDF): $(MAINTEX) $(ALLTEX) 
+.PHONY: all
+all: $(out)
 
-.PHONY:pdf tex clean clearcache cleanall
-pdf: $(MAINPDF)
-tex: $(RDATAFILES) $(ALLTEX) 
+%.pdf: %.tex $(bib)
+	@latexmk -pdf $<
+#	@latexmk -c
 
-$(CACHEDIR):
-	mkdir $(CACHEDIR)
+## compare modification with the latest version checked into git
+## for comparison of specific commits:
+##	latexdiff-vc --git -r old_githash -r new_githash --pdf source.tex
+diff:
+	latexdiff-vc --git --pdf --force $(source) -r $(rev)
 
-$(FIGUREDIR):
-	mkdir $(FIGUREDIR)
+log:
+	@git log --pretty=format:"%h by %an at %ar: %s" $(source) | head -n 15
 
-%.tex:%.Rnw
-	Rscript \
-	  -e "library(knitr)" \
-	  -e "knitr::opts_chunk[['set']](fig.path='$(FIGUREDIR)/$*-')" \
-	  -e "knitr::opts_chunk[['set']](cache.path='$(CACHEDIR)/$*-')" \
-	  -e "knitr::knit('$<','$@')"
-
-
-%.R:%.Rnw
-	Rscript -e "Sweave('$^', driver=Rtangle())"
-
-%.Rout:%.R
-	R CMD BATCH "$^" "$@"
-
-%.pdf: %.tex 
-	latexmk -pdf $<
-
+.PNONY: clean
 clean:
-	-latexmk -c -quiet $(MAINFILE).tex
-	-rm -f $(MAINTEX) $(RNWTEX)
-	-rm -rf $(FIGUREDIR)
-	-rm *tikzDictionary
-	-rm $(MAINPDF)
-
-clearcache:
-	-rm -rf cache
-
-cleanall: clean clearcache
+	rm -rf $(out)\
+	  *~ .*~ .\#* .Rhistory *.aux *.bbl *.blg *.out *.log *.toc\
+	  *.fff *.fdb_latexmk *.fls *.ttt *diff* *oldtmp*

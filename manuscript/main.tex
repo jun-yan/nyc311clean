@@ -84,18 +84,6 @@ quality control
 
 % \doublespacing
 
-<<prep, echo=FALSE, cache=FALSE>>=
-library(knitr)
-## set font size
-def.chunk.hook  <- knitr::knit_hooks$get("chunk")
-knitr::knit_hooks$set(chunk = function(x, options) {
-  x <- def.chunk.hook(x, options)
-  paste0("\n \\", "small","\n\n", x, "\n\n \\normalsize")
-})
-## read in all the chunks; so only need to maintain one place
-read_chunk("../code/data_cleansing_311_V4.R")
-@ 
-
 \section{Introduction} \label{sec:intro}
 
 Open data is the trend ... many kinds \citep{barns2016mine}
@@ -122,9 +110,6 @@ A discussion concludes in Section~\ref{sec:disc}
 \section{NYC 311 Requests Data} \label{sec:data}
 
 We need to make the variable names user friendly:
-<<makeColNamesUserFriendly>>=
-
-@
 
 
 \section{Potential Issues} \label{sec:issues}
