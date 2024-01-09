@@ -85,31 +85,146 @@ quality control
 
 \section{Introduction} \label{sec:intro}
 
-Open data is the trend ... many kinds \citep{barns2016mine}
+In the early 21st century, the open data movement began to take shape,
+driven by the fundamental belief that freely accessible data can
+transform societies. This movement champions the principles of
+transparency, innovation, and public engagement. A landmark in this
+journey was the launch of the United States'
+\href{https://www.data.gov}{Data.gov} portal in 2009, a pioneering
+platform in making government data widely accessible. Shortly after,
+the European Union followed suit, unveiling its
+\href{https://data.europa.eu/euodp}{Open Data Portal} in 2012, further
+cementing the movement's global reach. These initiatives represent
+significant strides in democratizing data, breaking barriers that once
+kept valuable information in silos. Furthermore, the World Bank's Open
+Data initiative, initiated in 2010, stands out as a comprehensive
+repository for global development data, available at
+\href{https://data.worldbank.org}{World Bank Open Data}. The
+collective impact of these platforms is profound, extending beyond
+mere data sharing to fostering a culture of openness that benefits
+individuals, communities, and economies worldwide
+\citep{janssen2012benefits, barns2016mine, wang2016adoption}.
 
 
-NYC is a forerunner in open data ... The 311 requests data is one of the most
-popular open data ...
+New York City (NYC) has emerged as a forerunner in the open data
+movement, marked by the enactment of the Open Data Law in 2012
+\citep{zuiderwijk2014open}. This landmark legislation led to the
+creation of the \href{https://opendata.cityofnewyork.us}{NYC Open Data
+  portal}, which today hosts an impressive array of 3,511 datasets
+from 98 different city agencies. This resource has become invaluable
+for researchers in various fields. In health, datasets have enabled
+significant studies on facets of health and healthcare delivery
+\citep{cantor2018facets, shankar2021data}. In the realm of urban
+development, data has been instrumental in advancing smart city
+initiatives \citep{neves2020impacts}. Additionally, transportation
+research has benefited greatly from this wealth of data, aiding in the
+understanding of urban mobility and infrastructure
+\citep{gerte2019understanding}. NYC's Open Data initiative not only
+exemplifies commitment to transparency and public engagement but also
+illustrates how open data can be a powerful tool in addressing complex
+urban challenges.
 
 
-A clean, efficiently designed data is important ...
+Data curation is fundamental in the open data ecosystem, ensuring the
+utility and reliability of datasets for diverse applications. Among
+the earliest discussions, \citet{witt2009constructing} focus on the
+development of data curation profiles tailored to specific contexts,
+setting a precedent for targeted data management
+strategies. Addressing broader challenges in data sharing and
+management, \citet{borgman2012conundrum} highlights the complexities
+of research data distribution, emphasizing the need for robust
+strategies. This is complemented by the work of \citet{hart2016ten},
+who outline essential principles for effective data management,
+particularly emphasizing the importance of meticulous curation
+practices. In the realm of collaborative data management,
+\citet{beheshti2019datasynapse} underscore the significance of
+cooperative environments for managing and sharing social data
+effectively. This aspect of data curation gains further relevance in
+the research by \citet{mclure2014data}, which delves into the specific
+practices and needs within data curation communities. The practical
+implications of data curation are vividly illustrated in the context
+of public health and global challenges. \citet{cantor2018facets}
+demonstrate the utility of curated open data in evaluating community
+health determinants. Furthermore, the COVID-19 pandemic serves as a
+real-world example, with \citet{shankar2021data} observing the
+critical role of collective data curation efforts in managing and
+responding to the crisis. Collectively, these studies not only
+highlight the multifaceted nature of data curation but also emphasize
+its indispensable role in enhancing the applicability and value of
+open data across various domains.
 
 
-The rest of the paper is organized as follows.
-Section~\ref{sec:data} presents the history and current status of the 311
-requests data. Section~\ref{sec:issues} lists potential issues on data quality
-and efficiency.
-Section~\ref{sec:improve} provides suggestions on how to remove or minimize the
-issues.
-Section~\ref{sec:protocol} summarizes a few general principals on open data
-release.
-A discussion concludes in Section~\ref{sec:disc}
+The contributions of this paper are twofold. Firstly, we delve into
+the specifics of data curation challenges using the NYC 311 Service
+Request Data as a case study. This renowned open dataset serves as a
+prime example for examining key issues in data curation, including
+data validity, consistency, and curation efficiency. We illustrate
+these points with live examples drawn from our processing of the 311
+data. Secondly, building upon insights gained from this case study, we
+propose a set of data curation principles tailored for
+government-released open data. These principles are designed to
+address the unique challenges and requirements observed in the
+curation of such datasets.
+
+
+The remainder of this paper is organized as
+follows. Section~\ref{sec:data} offers an in-depth review of the
+history and current status of the 311 requests data. In
+Section~\ref{sec:issues}, we identify and list potential issues
+impacting data quality and curation
+efficiency. Section~\ref{sec:improve} is dedicated to providing
+actionable suggestions for mitigating or resolving these identified
+issues. Following this, Section~\ref{sec:protocol} outlines a series
+of general principles for the release of open data, drawing from our
+findings. The paper concludes with a discussion in
+Section~\ref{sec:disc}, encapsulating the key insights and
+implications of our research.
 
 
 \section{NYC 311 Requests Data} \label{sec:data}
 
-We need to make the variable names user friendly:
+The NYC 311 service, a critical component of New York City's public
+engagement and service response framework, serves as a centralized hub
+for non-emergency inquiries and requests. Introduced in 2010, the NYC
+311 system was designed to streamline the city's response to
+non-emergency issues, ranging from noise complaints to street
+maintenance requests. The evolution of this system can be traced from
+its initial implementation as a simple inquiry channel to a
+comprehensive data management system that handles millions of requests
+annually. Key milestones in its development include [list any
+significant changes or technological upgrades].
 
+
+Today, the NYC 311 data system is a robust platform that manages a
+vast array of urban living-related inquiries. As of [current year or
+most recent data year], the system handles approximately [number]
+requests per year, covering categories like [list a few
+categories]. The data, managed through [describe the current data
+management system or software], is a valuable resource for city
+administration and policy-making. It is publicly accessible through
+[provide details of the data access platform, e.g., an online
+portal]. This open data initiative enables not only governmental
+transparency but also empowers researchers, civic developers, and the
+general public. Examples of its use include [cite specific projects or
+research that used this data].
+
+
+Despite its success, the system faces challenges such as [list
+challenges like data quality, privacy issues, or technological
+constraints]. For instance, issues with [specific challenge] have
+implications for [discuss the implications briefly].
+The impact of the NYC 311 data extends beyond operational efficiency;
+it has become instrumental in shaping city governance and community
+engagement. The data has been pivotal in [give examples of policy
+changes, community impacts, or improvements in city services].
+The NYC 311 service exemplifies the dynamic nature of urban data
+management and its critical role in modern governance. It provides an
+invaluable resource for data scientists to practice data science
+activities, including data curation.
+
+
+We extracted [give the data period; extraction time] for this case
+study. [justify the choices.]
 
 \section{Potential Issues} \label{sec:issues}
 
