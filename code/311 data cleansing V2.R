@@ -7,6 +7,7 @@ install.packages("dply(raw data")
 install.packages("styler")
 install.packages("ggpmisc")
 install.packages("lubridate")
+install.packages("data.table")
 
 library(ggplot2)
 library(campfin)
@@ -16,6 +17,7 @@ library(dplyr)
 library(scales)
 library(ggpmisc)
 library(lubridate)
+library(data.table)
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/console_output")
 sink("console_output.txt")
@@ -1093,6 +1095,8 @@ d311 <-
     colClasses = rep("character", ncol(read.csv(data1File)))
   )
 
+#d311 <- as.data.frame(d311)
+
 # make columns names user friendly
 d311 <- makeColNamesUserFriendly(d311)
 
@@ -1134,8 +1138,7 @@ columns_to_upper <- c(
 )
 
 # Convert selected columns to uppercase
-d311[, columns_to_upper] <-
-  lapply(d311[, columns_to_upper], toupper)
+d311[, columns_to_upper] <- lapply(d311[, columns_to_upper], toupper)
 
 #########################################################################
 
@@ -1292,7 +1295,7 @@ sorted_by_year <- d311 %>%
   arrange(desc(year))
 
 sorted_by_month <- d311 %>%
-  mutate(month = month(created_date, label = TRUE)) %>%
+  mutate(month = month(created_date)) %>%
   group_by(month) %>%
   summarize(count = n()) %>%
   arrange(match(month, month.abb))
@@ -2329,11 +2332,6 @@ d311 <- d311 %>%
 
 post_closed_positive <- d311[d311$postClosedUpdateDuration > 0 & !is.na(d311$postClosedUpdateDuration), ]
 
-#                          & d311$postClosedUpdateDuration < extremely_large_threshold, ]
-
-# post_closed_positive$postClosedUpdateDuration <- round(post_closed_positive$postClosedUpdateDuration, 2)
-
-
 resoultion_action_threshold <- 30 # One month
 too_large_threshold <- 730 # Two years
 
@@ -2712,31 +2710,29 @@ for (column in redundant_columns) {
   index <- index + 1
 }
 
-oldsize <- round(file.size(data1File) / 1024, 0)
-cat(
-  "\nCurrent file: '",
-  basename(data1File),
-  "' is size",
-  format(oldsize, big.mark = ","),
-  "KB"
-)
+# Read the data into a data table object
+d311 <- read.csv(data1File, header = TRUE, sep = ",")
 
-# Remove redundant columns and write out the smaller file
-write.csv(
-  d311[, !(names(d311) %in% redundant_columns)],
-  file = writeFilePath,
-  quote = TRUE, # Set quote = TRUE to enclose fields with commas in double quotes
-  row.names = FALSE
-)
+# make columns names user friendly
+d311 <- makeColNamesUserFriendly(d311)
 
-# convert size to KB
-newsize <- round(file.size(writeFilePath) / 1024, 0)
-# Print file size reduction information
-cat(
-  "\nReduction in file size for '", basename(writeFilePath), "':",
-  format((oldsize - newsize), big.mark = ","), "KB or",
-  round(((oldsize - newsize) / oldsize) * 100, 0), "%\n"
-)
+# Calculate the current size of the data table object
+original_size <- object.size(d311)
+
+# Delete the redundant columns
+d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
+
+# Calculate the size of the new data table object
+reduced_size <- object.size(d311_reduced)
+
+# Compute the difference in size
+size_reduction <- original_size - reduced_size
+
+# Print the results
+cat("Original size:", format(original_size, units = "auto"), "\n")
+cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
+cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
+    round(size_reduction/original_size * 100, 1),  "%")
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
