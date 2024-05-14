@@ -49,6 +49,7 @@ create_bar_chart <- function(
   # Find the row with the maximum count
   max_row <- dataset[which.max(dataset[[y_axis_title]]), ]
   max_count <- max_row[[y_axis_title]]
+  total_count <- sum(dataset[[y_axis_title]], na.rm = TRUE)
 
   # Find the row with the minimum count
   min_row <- dataset[which.min(dataset[[y_axis_title]]), ]
@@ -108,7 +109,7 @@ create_bar_chart <- function(
       linetype = "dotted", color = "gray41", linewidth = 0.4
     ) +
     ggtitle(chart_title,
-      subtitle = paste(sub_title, max_count, sep = "")
+      subtitle = paste(sub_title, total_count, sep = "")
     ) +
     labs(x = x_axis_title, y = NULL) +
 
@@ -1351,7 +1352,6 @@ sorted_by_closed_hour <- d311 %>%
   group_by(hour) %>%
   summarize(count = n()) %>%
   arrange(hour)
-
 
 # SRs created by month-year
 SR_monthly <- create_bar_chart(
