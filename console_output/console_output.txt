@@ -1,0 +1,888 @@
+
+Execution begins at: 2024-05-11 17:49:33
+
+**********DATA SUMMARY**********
+
+Number of rows removed:  1
+Number of rows in the 311 SR data set: 1,061,824
+
+Number of columns in the 311 SR data set: 47
+
+Data contains SRs created from 2024-01-01 00:00:00 through 2024-04-30 23:59:57 
+
+**********BLANK and NA ENTRIES BY COLUMN**********
+Number and % blanks and N/A (total empty) entries per column:
+ field                          total_empty pct_empty NA_count blanks_only
+ taxi_company_borough           1060979     99.92           0  1060979    
+ road_ramp                      1058692     99.71           0  1058692    
+ bridge_highway_direction       1057775     99.62           0  1057775    
+ due_date                       1055685     99.42     1055685        0    
+ bridge_highway_name            1054687     99.33           0  1054687    
+ bridge_highway_segment         1054686     99.33           0  1054686    
+ taxi_pick_up_location          1050250     98.91           0  1050250    
+ vehicle_type                   1009228     95.05           0  1009228    
+ facility_type                   978509     92.15           0   978509    
+ landmark                        477381     44.96           0   477381    
+ intersection_street_1           404638     38.11           0   404638    
+ intersection_street_2           404284     38.07           0   404284    
+ cross_street_2                  366302     34.50           0   366302    
+ cross_street_1                  366191     34.49           0   366191    
+ location_type                   133023     12.53           0   133023    
+ bbl                             115260     10.85           0   115260    
+ closed_date                      78184      7.36       78184        0    
+ city                             45462      4.28           1    45461    
+ street_name                      42504      4.00           1    42503    
+ incident_address                 42473      4.00           0    42473    
+ resolution_description           37561      3.54           0    37561    
+ resolution_action_updated_date   29284      2.76       29284        0    
+ zip_codes                        23229      2.19           0    23229    
+ community_districts              19996      1.88           0    19996    
+ city_council_districts           19996      1.88           0    19996    
+ police_precincts                 19996      1.88           0    19996    
+ borough_boundaries               19994      1.88           0    19994    
+ police_precinct                  19994      1.88           0    19994    
+ latitude                         19800      1.86           0    19800    
+ longitude                        19800      1.86           0    19800    
+ location                         19800      1.86           0    19800    
+ x_coordinate_state_plane         19787      1.86           0    19787    
+ y_coordinate_state_plane         19685      1.85           0    19685    
+ incident_zip                     12170      1.15           1    12169    
+ descriptor                        8563      0.81           0     8563    
+ address_type                      5043      0.47           0     5043    
+ unique_key                           0      0.00           0        0    
+ agency                               0      0.00           0        0    
+ agency_name                          0      0.00           0        0    
+ complaint_type                       0      0.00           0        0    
+ status                               0      0.00           0        0    
+ community_board                      0      0.00           0        0    
+ borough                              0      0.00           0        0    
+ open_data_channel_type               0      0.00           0        0    
+ park_facility_name                   0      0.00           0        0    
+ park_borough                         0      0.00           0        0    
+ created_date                         0      0.00           0        0    
+
+***Sort data by different date-time components.
+*** Monthly SRs***
+ Maximum monthly : 2024-01-01    Maximum monthly count: 287,176
+ Minimum monthly : 2024-02-01    Minimum monthly count:  240,451 
+
+ Average monthly : 265,456    Median monthly : 267,098 
+
+*** Daily SRs***
+ Maximum daily : 2024-04-15    Maximum daily count: 15,903
+ Minimum daily : 2024-02-17    Minimum daily count:  6,424 
+
+ Average daily : 8,775    Median daily : 8,854 
+
+*** Day_of_the_month SRs***
+ Maximum day_of_the_month : 15    Maximum day_of_the_month count: 42,450
+ Minimum day_of_the_month : 31    Minimum day_of_the_month count:  16,812 
+
+ Average day_of_the_month : 34,252    Median day_of_the_month : 34,987 
+
+*** Day_of_the_year SRs***
+ Maximum day_of_the_year : 106    Maximum day_of_the_year count: 15,903
+ Minimum day_of_the_year : 48    Minimum day_of_the_year count:  6,424 
+
+ Average day_of_the_year : 8,775    Median day_of_the_year : 8,854 
+
+*** Day_of_the_week SRs***
+ Maximum day_of_the_week : 1-Monday    Maximum day_of_the_week count: 171,167
+ Minimum day_of_the_week : 6-Saturday    Minimum day_of_the_week count:  127,248 
+
+ Average day_of_the_week : 151,689    Median day_of_the_week : 155,707 
+
+*** Hourly created SRs***
+ Maximum hourly created : 12    Maximum hourly created count: 78,721
+ Minimum hourly created : 4    Minimum hourly created count:  12,217 
+
+ Average hourly created : 44,243    Median hourly created : 48,206 
+
+*** Hourly closed SRs***
+ Maximum hourly closed : 12    Maximum hourly closed count: 66,856
+ Minimum hourly closed : 4    Minimum hourly closed count:  14,863 
+
+ Average hourly closed : 40,985    Median hourly closed : 44,100 
+
+Ranking by Agency
+ agency count  percent cumulative_percent
+ NYPD   434469 40.92    40.92            
+ HPD    280997 26.46    67.38            
+ DSNY    88845  8.37    75.75            
+ DOT     73309  6.90    82.65            
+ DEP     52253  4.92    87.57            
+ DOB     33517  3.16    90.73            
+ DPR     31924  3.01    93.74            
+ DOHMH   26719  2.52    96.26            
+ TLC     11737  1.11    97.37            
+ DHS     11286  1.06    98.43            
+ EDC      9716  0.92    99.35            
+ DCWP     6130  0.58    99.93            
+ OTI       471  0.04    99.97            
+ DOE       451  0.04   100.01            
+
+Top 10 'complaint_type's and responsible Agency:
+ complaint_type          count  percent cumulative_percent agency  
+ ILLEGAL PARKING         165800 15.61   15.61              NYPD    
+ HEAT/HOT WATER          122635 11.55   27.16              HPD     
+ NOISE - RESIDENTIAL      93759  8.83   35.99              NYPD    
+ BLOCKED DRIVEWAY         56112  5.28   41.27              NYPD    
+ UNSANITARY CONDITION     37002  3.48   44.75              HPD     
+ STREET CONDITION         27497  2.59   47.34              MULTIPLE
+ NOISE - STREET/SIDEWALK  25542  2.41   49.75              NYPD    
+ ABANDONED VEHICLE        23781  2.24   51.99              NYPD    
+ PLUMBING                 23491  2.21   54.20              MULTIPLE
+ PAINT/PLASTER            22662  2.13   56.33              HPD     
+
+Bottom 10 'complaint_type's and responsible Agency:
+ complaint_type                  count agency
+ OIL OR GAS SPILL                2     DSNY  
+ TAXI LICENSEE COMPLAINT         2     TLC   
+ TUNNEL CONDITION                2     DOT   
+ BUILDING MARSHALS OFFICE        1     DOB   
+ CONSTRUCTION SAFETY ENFORCEMENT 1     DOB   
+ DSNY INTERNAL                   1     DSNY  
+ EXECUTIVE INSPECTIONS           1     DOB   
+ PEELING PAINT                   1     DOHMH 
+ SUSTAINABILITY ENFORCEMENT      1     DOB   
+ TANNING                         1     DOHMH 
+
+There are 8 categories of Noise complaints:
+  complaint_type           count percent cumulative_percent agency
+1 NOISE - RESIDENTIAL      93759 8.83    35.99              NYPD  
+2 NOISE - STREET/SIDEWALK  25542 2.41    49.75              NYPD  
+3 NOISE - COMMERCIAL       21545 2.03    58.36              NYPD  
+4 NOISE                    18658 1.76    60.12              DEP   
+5 NOISE - VEHICLE          14616 1.38    69.33              NYPD  
+6 NOISE - HELICOPTER        9716 0.92    76.87              EDC   
+7 NOISE - PARK              1273 0.12    97.65              NYPD  
+8 NOISE - HOUSE OF WORSHIP   282 0.03    99.66              NYPD  
+
+Noise complaints of all types number 185,391 constituting 17 % of all SRs.
+
+
+SRs by Status
+ status      count   percentage cumulative_percentage
+ CLOSED      979,695 92.27       92.27               
+ IN PROGRESS  39,811  3.75       96.02               
+ OPEN         34,335  3.23       99.25               
+ ASSIGNED      5,408  0.51       99.76               
+ PENDING       1,591  0.15       99.91               
+ STARTED         969  0.09      100.00               
+ UNSPECIFIED      15  0.00      100.00               
+
+
+**********VALIDATING DATA TYPES**********
+
+All four date fields are in proper date format.
+
+All 'incident_zip' entries are 5 numeric digits
+.
+All 'zip_codes' entries are 5 numeric digits.
+
+Are all values in 'x_coordinate_state_plane' numbers? TRUE
+
+Are all values in 'y_coordinate_state_plane' numbers? TRUE
+
+Are all values in 'latitude' numbers? TRUE
+
+Are all values in 'longitude' numbers? TRUE
+
+Are all values in 'community_districts' numbers? TRUE
+
+Are all values in 'borough_boundaries' numbers? TRUE
+
+Are all values in 'city_council_district' numbers? TRUE
+
+Are all values in 'police_precincts' numbers? TRUE
+
+Are all values in '*police_precinct*' numbers? TRUE 
+
+
+**********CHECKING FOR ALLOWABLE AND VALID VALUES**********
+
+Are all 'unique_keys' truly unique? TRUE 
+
+The number of 'latitudes' outside the boundaries of NYC is: 0 
+
+The number of 'longitudes' outside the boundaries of NYC is: 0
+
+All values of ' address_type 'are valid.
+
+All values of ' status 'are valid.
+
+All values of ' borough 'are valid.
+
+All values of ' borough_boundaries 'are valid.
+
+All values of ' park_borough 'are valid.
+
+All values of ' taxi_company_borough 'are valid.
+
+All values of ' open_data_channel 'are valid.
+
+All values of ' vehicle_type 'are valid.
+
+All values of ' city_council_districts 'are valid.
+
+There are 358,896 invalid police_precincts entries 
+representing 34.45 % of non-blank data,
+comprised of 26 different police_precincts entries.
+
+Top Ten invalid ' police_precincts ':
+   invlaid_names count percentage cumulative_percentage
+1  72            27207 7.58        7.58                
+2  62            24450 6.81       14.39                
+3  67            20393 5.68       20.07                
+4  65            18372 5.12       25.19                
+5  60            18039 5.03       30.22                
+6  68            18027 5.02       35.24                
+7  64            17528 4.88       40.12                
+8  66            17491 4.87       44.99                
+9  73            16990 4.73       49.72                
+10 53            16308 4.54       54.26                
+
+Ranking by Agency
+ agency count  percent cumulative_percent
+ NYPD   171409 47.76    47.76            
+ HPD     55154 15.37    63.13            
+ DSNY    36894 10.28    73.41            
+ DOT     27049  7.54    80.95            
+ DEP     22542  6.28    87.23            
+ DPR     14505  4.04    91.27            
+ DOB     12456  3.47    94.74            
+ DOHMH    8648  2.41    97.15            
+ TLC      2751  0.77    97.92            
+ EDC      2745  0.76    98.68            
+ DHS      2204  0.61    99.29            
+ DCWP     2190  0.61    99.90            
+ DOE       178  0.05    99.95            
+ OTI       171  0.05   100.00            
+
+
+There are 358,871 invalid police_precinct entries 
+representing 34.45 % of non-blank data,
+comprised of 26 different police_precinct entries.
+
+Top Ten invalid ' police_precinct ':
+   invlaid_names count percentage cumulative_percentage
+1  72            27231 7.59        7.59                
+2  62            24451 6.81       14.40                
+3  67            20406 5.69       20.09                
+4  65            18369 5.12       25.21                
+5  68            18017 5.02       30.23                
+6  60            18013 5.02       35.25                
+7  64            17529 4.88       40.13                
+8  66            17468 4.87       45.00                
+9  73            16985 4.73       49.73                
+10 53            16315 4.55       54.28                
+
+Ranking by Agency
+ agency count  percent cumulative_percent
+ NYPD   171394 47.76    47.76            
+ HPD     55154 15.37    63.13            
+ DSNY    36893 10.28    73.41            
+ DOT     27044  7.54    80.95            
+ DEP     22540  6.28    87.23            
+ DPR     14505  4.04    91.27            
+ DOB     12456  3.47    94.74            
+ DOHMH    8648  2.41    97.15            
+ TLC      2751  0.77    97.92            
+ EDC      2745  0.76    98.68            
+ DHS      2204  0.61    99.29            
+ DCWP     2189  0.61    99.90            
+ DOE       178  0.05    99.95            
+ OTI       170  0.05   100.00            
+
+
+There are 3,788 invalid community_board entries 
+representing 0.36 % of non-blank data,
+comprised of 12 different community_board entries.
+
+Top Ten invalid ' community_board ':
+   invlaid_names    count percentage cumulative_percentage
+1  83 QUEENS        920   24.29      24.29                
+2  81 QUEENS        685   18.08      42.37                
+3  64 MANHATTAN     592   15.63      58.00                
+4  55 BROOKLYN      458   12.09      70.09                
+5  80 QUEENS        387   10.22      80.31                
+6  26 BRONX         254    6.71      87.02                
+7  82 QUEENS        176    4.65      91.67                
+8  28 BRONX         160    4.22      95.89                
+9  27 BRONX          66    1.74      97.63                
+10 95 STATEN ISLAND  50    1.32      98.95                
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ TLC    1296  34.21    34.21            
+ DPR     967  25.53    59.74            
+ NYPD    892  23.55    83.29            
+ DOT     424  11.19    94.48            
+ DSNY     84   2.22    96.70            
+ DOHMH    26   0.69    97.39            
+ DEP      22   0.58    97.97            
+ DHS      22   0.58    98.55            
+ EDC      22   0.58    99.13            
+ DCWP     17   0.45    99.58            
+ OTI       7   0.18    99.76            
+ DOB       5   0.13    99.89            
+ HPD       4   0.11   100.00            
+
+
+There are 637 invalid incident_zip entries 
+representing 0.06 % of non-blank data,
+comprised of 27 different incident_zip entries.
+
+Top Ten invalid ' incident_zip ':
+   invlaid_names count percentage cumulative_percentage
+1  10000         165   25.90      25.90                
+2  10121          77   12.09      37.99                
+3  10278          75   11.77      49.76                
+4  11359          59    9.26      59.02                
+5  10281          40    6.28      65.30                
+6  10271          39    6.12      71.42                
+7  11241          30    4.71      76.13                
+8  10103          22    3.45      79.58                
+9  10279          20    3.14      82.72                
+10 10120          19    2.98      85.70                
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ NYPD   249   39.09   39.09             
+ DOT    108   16.95   56.04             
+ TLC     95   14.91   70.95             
+ DSNY    76   11.93   82.88             
+ EDC     24    3.77   86.65             
+ DEP     19    2.98   89.63             
+ DPR     19    2.98   92.61             
+ DOHMH   13    2.04   94.65             
+ DOB     10    1.57   96.22             
+ DHS      9    1.41   97.63             
+ DCWP     8    1.26   98.89             
+ OTI      5    0.78   99.67             
+ HPD      2    0.31   99.98             
+
+
+There are 584,541 invalid zip_codes entries 
+representing 56.28 % of non-blank data,
+comprised of 138 different zip_codes entries.
+
+Top Ten invalid ' zip_codes ':
+   invlaid_names count percentage cumulative_percentage
+1  13510         16955 2.90        2.90                
+2  11605         16349 2.80        5.70                
+3  10935         15690 2.68        8.38                
+4  11606         15318 2.62       11.00                
+5  10934         14334 2.45       13.45                
+6  10936         13903 2.38       15.83                
+7  17613         12421 2.12       17.95                
+8  18181         10952 1.87       19.82                
+9  11271         10710 1.83       21.65                
+10 13513         10623 1.82       23.47                
+
+Ranking by Agency
+ agency count  percent cumulative_percent
+ NYPD   230295 39.40    39.40            
+ HPD    175903 30.09    69.49            
+ DSNY    49594  8.48    77.97            
+ DOT     33238  5.69    83.66            
+ DEP     29162  4.99    88.65            
+ DOB     19554  3.35    92.00            
+ DPR     18126  3.10    95.10            
+ DOHMH   14455  2.47    97.57            
+ DHS      5024  0.86    98.43            
+ TLC      4904  0.84    99.27            
+ DCWP     3151  0.54    99.81            
+ EDC       657  0.11    99.92            
+ DOE       253  0.04    99.96            
+ OTI       225  0.04   100.00            
+
+
+There are 506 SRs 'closed' before they were 'created' (negative duration) 
+representing 0.0514 % of non-blank data.
+
+Largest errors (days) *excluding extreme negative values:
+ unique_key created_date        closed_date         duration    agency
+ 60400480   2024-02-23 10:16:00 2023-02-22 10:15:00 -366.000694 DOT   
+ 60398146   2024-02-23 12:26:00 2023-02-22 12:26:00 -366.000000 DOT   
+ 60398145   2024-02-23 09:30:00 2023-05-03 09:30:00 -296.041667 DOT   
+ 60401675   2024-02-23 09:36:00 2023-05-04 09:36:00 -295.041667 DOT   
+ 60376944   2024-02-21 14:33:00 2023-05-02 14:33:00 -295.041667 DOT   
+
+Smallest errors (days):
+ unique_key created_date        closed_date         duration  agency
+ 59937924   2024-01-05 09:38:00 2024-01-04 09:37:00 -1.000694 DOT   
+ 59932581   2024-01-05 07:51:00 2024-01-04 07:50:00 -1.000694 DOT   
+ 59911536   2024-01-03 08:31:00 2024-01-02 08:30:00 -1.000694 DOT   
+ 61001262   2024-04-28 16:49:53 2024-04-28 07:30:00 -0.388808 DOT   
+ 60449938   2024-02-29 14:24:45 2024-02-29 11:40:00 -0.114410 DOT   
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOT    500   98.81    98.81            
+ OTI      6    1.19   100.00            
+
+
+There are 26,440 SRs that are 'closed' and 'created' at the exact same time, 
+to the second, representing 2.688 % of non-blank data and creating a zero duration.
+
+Sample of SRs 'closed' at the exact same time they are 'created':
+ unique_key created_date        closed_date         duration agency
+ 60621611   2024-03-19 16:10:50 2024-03-19 16:10:50 0        DOB   
+ 60570497   2024-03-13 12:00:00 2024-03-13 12:00:00 0        DSNY  
+ 60194249   2024-01-31 09:20:50 2024-01-31 09:20:50 0        DOT   
+ 60355564   2024-02-18 04:17:28 2024-02-18 04:17:28 0        DOHMH 
+ 60372822   2024-02-20 07:36:11 2024-02-20 07:36:11 0        DOHMH 
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOB    9845  37.24    37.24            
+ DOHMH  7048  26.66    63.90            
+ DSNY   4587  17.35    81.25            
+ DOT    3130  11.84    93.09            
+ DEP    1559   5.90    98.99            
+ HPD     264   1.00    99.99            
+ OTI       7   0.03   100.02            
+
+
+There are no SRs with a 'closed_date' in the future.
+
+
+There are 142 SRs that were 'created' at exactly midnight.
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOHMH  131   92.25   92.25             
+ DOT      9    6.34   98.59             
+ DOB      1    0.70   99.29             
+ NYPD     1    0.70   99.99             
+
+
+There 16,567 SRs that were 'created' exactly at noon.
+Ranking by Agency
+ agency count percent cumulative_percent
+ DSNY   16524 99.74    99.74            
+ DOT       30  0.18    99.92            
+ HPD        5  0.03    99.95            
+ NYPD       5  0.03    99.98            
+ DOHMH      1  0.01    99.99            
+ DPR        1  0.01   100.00            
+ TLC        1  0.01   100.01            
+
+
+There are 27,303 SRs that were 'closed' exactly at midnight.
+Ranking by Agency
+ agency count percent cumulative_percent
+ NYPD   11507 40.18    40.18            
+ HPD     7778 27.16    67.34            
+ DSNY    2457  8.58    75.92            
+ DOT     1947  6.80    82.72            
+ DEP     1464  5.11    87.83            
+ DOB      880  3.07    90.90            
+ DPR      817  2.85    93.75            
+ DOHMH    677  2.36    96.11            
+ TLC      326  1.14    97.25            
+ DHS      325  1.13    98.38            
+ EDC      256  0.89    99.27            
+ DCWP     182  0.64    99.91            
+ OTI       14  0.05    99.96            
+ DOE       12  0.04   100.00            
+
+
+There are 17,472 SRs that were 'closed' exactly at noon.
+Ranking by Agency
+ agency count percent cumulative_percent
+ DSNY   16524 99.74    99.74            
+ DOT       30  0.18    99.92            
+ HPD        5  0.03    99.95            
+ NYPD       5  0.03    99.98            
+ DOHMH      1  0.01    99.99            
+ DPR        1  0.01   100.00            
+ TLC        1  0.01   100.01            
+
+
+There are no SRs with a 'due_date' before 'created_date'.
+
+There are no SRs with extremely large (>730) post-closed updates.
+There are 32 SRs with large (> 30 but <= 730 days) 'resolution_action_updated_date(s)'
+
+Here is a sample:
+ unique_key agency closed_date         resolution_action_updated_date postClosedUpdateDuration
+ 60088606   TLC    2024-03-01 09:16:30 2024-04-04 14:07:02            34.160092592593         
+ 60186320   DOT    2024-02-09 19:54:00 2024-05-01 09:17:00            81.515972222222         
+ 60137303   TLC    2024-02-18 10:39:33 2024-04-19 15:47:19            61.172060185185         
+ 60432610   TLC    2024-03-18 10:52:56 2024-04-22 14:51:03            35.165358796296         
+ 59933478   TLC    2024-02-18 10:33:25 2024-04-15 08:02:49            56.853750000000         
+
+The median of late post-closed resolution updates > 30 is: 53.0328 days
+The average of late post-closed resolution updates > 30 is: 52.5034 days
+The std dev of late post-closed resolution updates > 30 is: 14.6704 days
+
+
+The mean of all post-closed resolution updates is: 0.0188 days [0.4514 hours]
+Ranking by Agency
+ agency count percent cumulative_percent
+ TLC    13    40.62   40.62             
+ DCWP    8    25.00   65.62             
+ DOT     6    18.75   84.37             
+ DSNY    2     6.25   90.62             
+ HPD     2     6.25   96.87             
+ DEP     1     3.12   99.99             
+
+
+**********CHECKING FOR DUPLICATE VALUES**********
+
+All values of 'latitude' & 'longitude' match the concatenation in the 'location' field.
+
+All values match between ' borough ' and ' park_borough '
+
+
+There are 1,040,744 matches between ' borough ' and ' translated_borough_boundaries '
+representing 98.01 % of data.
+
+There are 21,080 non-matches between ' borough ' and ' translated_borough_boundaries '
+representing 1.99 % of data.
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOT    13818 65.55   65.55             
+ NYPD    3144 14.91   80.46             
+ DSNY    2383 11.30   91.76             
+ DEP      626  2.97   94.73             
+ TLC      238  1.13   95.86             
+ DOB      222  1.05   96.91             
+ DOHMH    164  0.78   97.69             
+ DPR      161  0.76   98.45             
+ DHS      107  0.51   98.96             
+ DCWP      96  0.46   99.42             
+ HPD       70  0.33   99.75             
+ OTI       46  0.22   99.97             
+ DOE        4  0.02   99.99             
+ EDC        1  0.00   99.99             
+
+
+There are 751 matches between ' borough ' and ' taxi_company_borough '
+representing 0.07 % of data.
+
+There are 1,061,073 non-matches between ' borough ' and ' taxi_company_borough '
+representing 99.93 % of data.
+
+
+There are 1,061,233 matches between ' police_precincts ' and ' police_precinct '
+representing 99.94 % of data.
+
+There are 591 non-matches between ' police_precincts ' and ' police_precinct '
+representing 0.06 % of data.
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ NYPD   196   33.16    33.16            
+ DOT    143   24.20    57.36            
+ DSNY    89   15.06    72.42            
+ HPD     63   10.66    83.08            
+ DEP     38    6.43    89.51            
+ DOHMH   16    2.71    92.22            
+ DHS     14    2.37    94.59            
+ TLC     12    2.03    96.62            
+ DPR      8    1.35    97.97            
+ DOB      7    1.18    99.15            
+ DCWP     4    0.68    99.83            
+ OTI      1    0.17   100.00            
+
+
+There are 7,101 matches between ' incident_zip ' and ' zip_codes '
+representing 0.67 % of data.
+
+There are 1,054,723 non-matches between ' incident_zip ' and ' zip_codes '
+representing 99.33 % of data.
+
+Ranking by Agency
+ agency count  percent cumulative_percent
+ NYPD   434139 41.16    41.16            
+ HPD    280940 26.64    67.80            
+ DSNY    87148  8.26    76.06            
+ DOT     68950  6.54    82.60            
+ DEP     52216  4.95    87.55            
+ DOB     33314  3.16    90.71            
+ DPR     31906  3.03    93.74            
+ DOHMH   26658  2.53    96.27            
+ TLC     11524  1.09    97.36            
+ DHS     11207  1.06    98.42            
+ EDC      9716  0.92    99.34            
+ DCWP     6122  0.58    99.92            
+ DOE       449  0.04    99.96            
+ OTI       434  0.04   100.00            
+
+
+
+***Case study analyzing Homeless Person Assistance response times.***
+
+There are 2403 SRs characterized as Homeless Person Assistance
+
+Average response time (raw data) for 'HOMELESS PERSON ASSISTANCE': 0.1251 days
+Median response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   0.0125 days (0.3 hrs)
+
+There are no negative duration Homeless Person Assistance SRs to remove.
+
+***Case study analyzing noise complaints using the two different zip code fields***
+
+Top 10 Noise complaint zip codes using 'incident_zip' field, displaying validity.
+ incident_zip count valid
+ 10023        6495  TRUE 
+ 10456        3799  TRUE 
+ 10031        3230  TRUE 
+ 10468        3102  TRUE 
+ 11201        2926  TRUE 
+ 11221        2860  TRUE 
+ 11226        2857  TRUE 
+ 11207        2804  TRUE 
+ 10002        2682  TRUE 
+ 11368        2662  TRUE 
+
+Top 10 noise complaint zip codes  using 'zip_codes' field, displaying validity.
+ zip_codes count valid
+ 12420     6420   TRUE
+ 10934     3774  FALSE
+ 12428     3341   TRUE
+ 11606     3165  FALSE
+ 13510     2860  FALSE
+ 14510     2860   TRUE
+ 16865     2844   TRUE
+ 18181     2766  FALSE
+ 17613     2744  FALSE
+ 11723     2726  FALSE
+
+
+There are 948,266 matches between ' cross_street_1 ' and ' intersection_street_1 '
+representing 89.31 % of data.
+
+There are 113,558 non-matches between ' cross_street_1 ' and ' intersection_street_1 '
+representing 10.69 % of data.
+
+Sample of matching 'cross_street' & 'intersection_street':
+ cross_street_1     intersection_street_1 agency
+ EAST 163 ST        EAST 163 ST           NYPD  
+ GRAND ARMY PLZ     GRAND ARMY PLZ        DPR   
+ 79 AVE             79 AVE                NYPD  
+ GRAND AVE          GRAND AVE             NYPD  
+ BND                BND                   NYPD  
+ DAVID SHERIDAN PLZ DAVID SHERIDAN PLZ    NYPD  
+ EAST 33 ST         EAST 33 ST            DHS   
+ BARBEY ST          BARBEY ST             NYPD  
+ COTTAGE PL         COTTAGE PL            NYPD  
+ 35 ST              35 ST                 DSNY  
+
+Sample of non-matching 'cross_street' & 'intersection_street':
+ unique_key cross_street_1 intersection_street_1 agency
+ 59989510   14 AVE         115 ST                DOT   
+ 59953620   ELTON AVE      EAST 157 ST           DOT   
+ 60307292   11 ST W        KINGS HWY             DOT   
+ 60866583   FREEMAN ST     SIMPSON ST            DOT   
+ 60439462   ALLERTON AVE   COLDEN AVE            DOT   
+ 60120329   BERGEN ST      ST MARKS AVE          DOT   
+ 60404016   BEDFORD AVE    LAFAYETTE AVE         DOT   
+ 60045949   60 ST          56 RD                 DOT   
+ 59927287   199 ST E       GRAND CONCRS          DOT   
+ 60456021   165 AVE        CROSS BAY BLVD        DOT   
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DEP    52198 45.97    45.97            
+ DOT    44708 39.37    85.34            
+ DSNY   16521 14.55    99.89            
+ OTI      130  0.11   100.00            
+ DHS        1  0.00   100.00            
+
+
+There are 35,825 occurrences where' cross_street_1 'is blank, 
+but ' intersection_street_1 ' is not blank representing 3.37 % of total rows.
+
+Sample where ' cross_street_1 'is blank but ' intersection_street_1 'is not blank:
+ cross_street_1 intersection_street_1 agency
+                11 AVE                DOT   
+                MINETTA LN            DEP   
+                10 AVE                DEP   
+                JUNCTION BLVD         DOT   
+                94 ST                 DSNY  
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOT    28615 79.87    79.87            
+ DEP     5772 16.11    95.98            
+ DSNY    1367  3.82    99.80            
+ OTI       71  0.20   100.00            
+
+
+There are 74,264 occurrences where' intersection_street_1 'is blank, 
+but ' cross_street_1 ' is not blank representing 6.99 % of total rows.
+
+Sample where ' cross_street_1 ' is not blank but ' intersection_street_1 ' is blank:
+ cross_street_1  intersection_street_1 agency
+ COZINE AVE                            DSNY  
+ LONG ST                               DEP   
+ EAST 181 ST                           DSNY  
+ SCHENECTADY AVE                       DSNY  
+ KATONAH AVE                           DSNY  
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DEP    46424 62.51    62.51            
+ DSNY   15154 20.41    82.92            
+ DOT    12657 17.04    99.96            
+ OTI       29  0.04   100.00            
+
+
+A near-match is when two addresses have no more than 2 characters different (Hamming Distance).
+
+There are  28 near-matches between cross_street_1 and intersection_street_1
+
+Sample of near-matching ' cross_street_1 ' & ' intersection_street_1 (both non-blank):
+ cross_street_1 intersection_street_1 agency hamming_distance
+ 109 AVE        111 AVE               DOT    2               
+ 11 AVE         12 AVE                DOT    1               
+ 56 AVE         58 AVE                DOT    1               
+ 159 AVE        160 AVE               DOT    2               
+ 81 AVE         82 AVE                DOT    1               
+ 47 ST          48 ST                 DOT    1               
+ 63 DR          63 RD                 DOT    2               
+ 78 ST          79 ST                 DOT    1               
+ 90 AVE         91 AVE                DOT    1               
+ BRIGHTON 3 CT  BRIGHTON 4 ST         DOT    2               
+
+Summary of' cross_street_1 ' and ' intersection_street_1 ':
+ category                    count  percentage
+ Matching                    948266 89.31     
+ Both blank∈Matching         330374 31.11     
+ Non-matching                113558 10.69     
+ cross_street_1_blank         35825 N/A       
+ intersection_street_1_blank  74264 N/A       
+ Near-match                      28 0.002637  
+
+
+There are 949,848 matches between ' cross_street_2 ' and ' intersection_street_2 '
+representing 89.45 % of data.
+
+There are 111,976 non-matches between ' cross_street_2 ' and ' intersection_street_2 '
+representing 10.55 % of data.
+
+Sample of matching 'cross_street' & 'intersection_street':
+ cross_street_2              intersection_street_2       agency
+ BRIGHTON 8 ST               BRIGHTON 8 ST               DSNY  
+ CONEY ISLAND AVE            CONEY ISLAND AVE            NYPD  
+ BROADWAY                    BROADWAY                    NYPD  
+ EAST 9 ST                   EAST 9 ST                   DPR   
+ WEST 170 ST                 WEST 170 ST                 NYPD  
+ WEST 100 ST                 WEST 100 ST                 DSNY  
+ ADAM CLAYTON POWELL JR BLVD ADAM CLAYTON POWELL JR BLVD NYPD  
+ WALDRON ST                  WALDRON ST                  NYPD  
+ AVENUE L                    AVENUE L                    NYPD  
+ SURF AVE                    SURF AVE                    NYPD  
+
+Sample of non-matching 'cross_street' & 'intersection_street':
+ unique_key cross_street_2 intersection_street_2 agency
+ 60623354   117 ST         115 ST                DOT   
+ 60262768   UNNAMED ST     LATIMER AVE           DOT   
+ 60889423   GLENWOOD RD    FARRAGUT RD           DOT   
+ 60628139   CLIFF ST       BAY ST                DOT   
+ 60692361   RIDER AVE      CANAL PL              DOT   
+ 60338945   EAST 162 ST    EAST 161 ST           DOT   
+ 60679781   16 AVE         15 AVE                DOT   
+ 60726488   RIVERDALE AVE  NEWPORT ST            DOT   
+ 60194256   90 AVE         185 ST                OTI   
+ 60196803   BRONX PARK E   BARKER AVE            DOT   
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DEP    52202 46.62    46.62            
+ DOT    43188 38.57    85.19            
+ DSNY   16475 14.71    99.90            
+ OTI      109  0.10   100.00            
+ DHS        2  0.00   100.00            
+
+
+There are 35,885 occurrences where' cross_street_2 'is blank, 
+but ' intersection_street_2 ' is not blank representing 3.38 % of total rows.
+
+Sample where ' cross_street_2 'is blank but ' intersection_street_2 'is not blank:
+ cross_street_2 intersection_street_2 agency
+                EAST 172 ST           DOT   
+                LIBERTY AVE           DOT   
+                156 AVE               DOT   
+                LOGAN ST              DOT   
+                EAST WILLISTON AVE    DOT   
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DOT    28675 79.91    79.91            
+ DEP     5772 16.08    95.99            
+ DSNY    1367  3.81    99.80            
+ OTI       71  0.20   100.00            
+
+
+There are 73,862 occurrences where' intersection_street_2 'is blank, 
+but ' cross_street_2 ' is not blank representing 6.96 % of total rows.
+
+Sample where ' cross_street_2 ' is not blank but ' intersection_street_2 ' is blank:
+ cross_street_2 intersection_street_2 agency
+ 179 ST                               DEP   
+ 175 ST                               DEP   
+ EAST 167 ST                          DOT   
+ 21 ST                                DEP   
+ 113 ST                               DEP   
+
+Ranking by Agency
+ agency count percent cumulative_percent
+ DEP    46429 62.86    62.86            
+ DSNY   15108 20.45    83.31            
+ DOT    12304 16.66    99.97            
+ OTI       21  0.03   100.00            
+
+
+A near-match is when two addresses have no more than 2 characters different (Hamming Distance).
+
+There are  408 near-matches between cross_street_2 and intersection_street_2
+
+Sample of near-matching ' cross_street_2 ' & ' intersection_street_2 (both non-blank):
+ cross_street_2 intersection_street_2 agency hamming_distance
+ 14 AVE         11 AVE                DOT    1               
+ 92 ST          90 ST                 DOT    1               
+ 5 AVE          4 AVE                 DOT    1               
+ 7 AVE          6 AVE                 DOT    1               
+ 25 ST          23 ST                 DOT    1               
+ EAST 162 ST    EAST 161 ST           DOT    1               
+ 86 ST          84 ST                 DOT    1               
+ 21 ST          21 DR                 DOT    2               
+ 113 ST         112 ST                DOT    1               
+ 6 AVE          5 AVE                 DOT    1               
+
+Summary of' cross_street_2 ' and ' intersection_street_2 ':
+ category                    count  percentage
+ Matching                    949848 89.45     
+ Both blank∈Matching         330422 31.12     
+ Non-matching                111976 10.55     
+ cross_street_2_blank         35885 N/A       
+ intersection_street_2_blank  73862 N/A       
+ Near-match                     408 0.038424  
+
+
+**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********
+
+Shrinking file size by deleting these 10 redundant fields:
+     1 - agency_name 
+     2 - park_borough 
+     3 - borough_boundaries 
+     4 - location 
+     5 - intersection_street_1 
+     6 - intersection_street_2 
+     7 - police_precinct 
+     8 - duration 
+     9 - postClosedUpdateDuration 
+     10 - translated_borough_boundaries 
+
+Current file: ' JAN_APR_2024_AS_OF_2024_05_06.csv ' is size 626,451 KB
+Reduction in file size for ' smaller.csv ': 148,829 KB or 24 %
+
+
+Execution ends at: 2024-05-11 17:55:34
+Program run-time:  6.0192 minutes 
+ *****END OF PROGRAM*****
