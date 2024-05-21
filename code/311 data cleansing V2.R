@@ -23,7 +23,6 @@ setwd("C:/Users/david/OneDrive/Documents/nyc311clean/console_output")
 sink("console_output.txt")
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "311_2022-2023_AS_OF_01-31-2024.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-01-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
@@ -67,7 +66,7 @@ create_bar_chart <- function(
   sd_value <- round(sd(dataset[[y_axis_title]]), 0)
 
   # Print the date and count for maximum value
-  cat("\n***", print_out_title, "SRs***")
+  cat("\n\n***", print_out_title, "SRs***")
 
   # Change the first letter to lower case for print out purposes
   print_out_title <- substr(print_out_title, 1, 1) %>%
@@ -87,8 +86,9 @@ create_bar_chart <- function(
 
   # Print the date and count for minimum value
   cat(
-    "\n", paste("Average", print_out_title, ": "), format(mean_value, big.mark = ","), "  ",
-    paste("Median", print_out_title, ": "), format(median_value, big.mark = ","), "\n"
+    "\n", paste("Average", print_out_title, ":"), format(mean_value, big.mark = ","), "  ",
+    paste("Median", print_out_title, ":"), format(median_value, big.mark = ","),
+    paste("\nStd Dev", print_out_title, ":"), format(median_value, big.mark = ",")
   )
 
 
@@ -1401,7 +1401,7 @@ SR_day_of_the_month <- create_bar_chart(
 # SRs created by the day of the year (1-365)
 SR_day_of_the_year <- create_bar_chart(
   dataset = sorted_by_day_of_year,
-  x_col = "day_of_year",
+  x_col = "calendar_date",
   chart_title = "Day of the year SR count w/average",
   sub_title = chart_sub_title,
   x_axis_title = NULL,
@@ -1463,10 +1463,13 @@ SR_closed_hourly_ <- create_bar_chart(
 d311$agency[d311$agency == "DCA"] <- "DCWP"
 
 # Replace "DCA" with "DCWP" in the agency and agency_name columns
-d311$agency[d311$agency == "DEPARTMENT OF CONSUMER AND WORKER PROTECTION"] <-
-  "DCWP"
+d311$agency[d311$agency == "DEPARTMENT OF CONSUMER AND WORKER PROTECTION"] <- "DCWP"
+
 d311$agency[d311$agency_name == "Consumer Complaints Division"] <-
   "DEPARTMENT OF CONSUMER AND WORKER PROTECTION"
+
+# Replace "NYC311-PRD" with "OTI" in the agency column
+d311$agency[d311$agency == "NYC311-PRD"] <- "OTI"
 
 # Replace "DOITT" with "OTI" in the agency column
 d311$agency[d311$agency == "DOITT"] <- "OTI"
