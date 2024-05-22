@@ -15,6 +15,7 @@
 \usepackage{placeins}
 \usepackage{caption}  % For custom captions
 \usepackage{float}   % Required for the H specifier
+\usepackage{adjustbox}
 
 
 \usepackage[]{lineno}
@@ -63,8 +64,6 @@
 \let\proglang=\textsf
 %% \newcommand{\pkg}[1]{{\fontseries{m}\selectfont #1}}
 %% \newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
-
-
 
 \title{Principles for Open Data Curation: A Case Study with the New
   York City 311 Service Request Data}
@@ -266,7 +265,7 @@ Despite its success, the system faces many challenges such as:
 \end{itemize}
 
 These (and other) challenges are constantly being addressed by the various agency open data managers
-as well as the \href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology and Innovation} which
+as well as the \href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology and Innovation (OTI)} which
 provides the technology support for the open data system.  
 Many of the underlying datasets are updated daily, usually running 1-2 days behind from creation.
 However, a number of datasets are updates monthly (such as restaurant inspections), and some are
@@ -304,7 +303,8 @@ an API or custom code. These Agencies include:
 
 One result of these integrations, and other Agencies that use the 311 APIs, is that some of the data accuracies
 and data consistency checks inherent in the 311 system are not applied uniformly, and in some cases not at all.
-Errors often creep in from other Agency systems and are not easily corrected in the 311 application.
+Errors often creep in from other Agency systems and are not easily corrected in the 311 application itself,
+but rather require correction at the source Agency.
 
 One area that will almost certainly remain an ongoing challenge is the incorporation of new software, hardware,
 and cloud services which are constantly emerging.  Telephonic integration recently was reconfigured due to a new
@@ -345,9 +345,9 @@ We extracted  311 Service Request (SR) data from the period of CY 2022-2023, a d
 observation of some rarely seen events, data inaccuracies, and logical inconsistencies. It provides enough data to examine trends and data outlier analysis. 
 We query the data directly from the NYC Open Data Portal and then export the data in CSV format for analysis in a custom written R programs.
 
-Additionally, we extracted a 10-year dataset consisting of the years 2014-2023; some 27 million rows. Albeit with just a few columns, 
-this very large dataset allows for long-term trend observations and confirms that the analysis using the 
-2-year dataset used for the majority of the analysis.
+Additionally, we extracted two longer-term datasets, a 5-year look (2019-2023) and a 10-year look (2014-2023) ; some 14  and 27 million rows respectively, albeit with just a few columns. 
+These larger datasets afford an opportunity for long-term trend observations, confirming the analysis using the 2-year dataset. The 2022-2023 dataset
+was used exclusively for the detailed, field-level analysis that comprises the majority of this effort. 
 
 \section{10-year Analysis \& Trends} \label{sec:history}
 
@@ -358,7 +358,7 @@ During that time-frame, the number of 311 SRs grew 50\% as shown in the chart be
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.65]{Yearly.png}
+  \includegraphics[width=\textwidth]{Yearly.png}
   \caption{SR counts by year for a 10-year period}
   \label{fig:yearly-counts}
 \end{figure}
@@ -368,34 +368,34 @@ impact reached a peak in the July-September 2020 timeframe, accompanied by addit
 in the 2\textsuperscript{nd}half of 2021 as well. The all-time daily high for SRs occurred on Tuesday, 2020-08-04, with a spike of
 24,415 SRs, a full 9.8 \textsigma's from the mean. 
 
-This next chart shows the 10-year period by calendar month. Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
-of 2020 are ``below average'', while almost all the months after that period are ``above average'' months. And that trend of much higher usage
+This below chart shows the 10-year period by calendar month. Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
+of 2020 are ``below average'', while most of the months after that period are ``above average'' months. And that trend of higher usage
 of the 311 system has continued into the early months of 2024.
 
 \begin{figure}[htbp]
   \centering
-  \includegraphics[scale=0.65]{Monthly.png}
+  \includegraphics[width=\textwidth]{Monthly.png}
   \caption{SR counts by month for a 10-year period}
   \label{fig:monthly-counts}
 \end{figure}
 
-The daily tend over that same 10-year period is also interesting, as it shows both significant spikes
+A quick look at the corresponding  daily tend over that same 10-year period is also interesting, as it shows both significant spikes
 and significant dips; a noisy graph. While the spikes on 2020-08-04 (24,415 SRs) and 2020-08-05 (19,560 SRs) are COVID related, we are unable to 
 ascertain any reason for the significant spike on Saturday, 2023-09-29 where 17,962 SRs were created.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=0.35]{Daily.png}
+  \includegraphics[width=\textwidth]{Daily.png}
   \caption{SR counts by day for a 10-year period}
   \label{fig:daily-counts}
 \end{figure}
 
-Seasonal trends are also prevalent. The months of November-thru-April are ``below average'' months, while the months May-thru-October are ``above average''.
- This seasonal trend is observed throughout the 10-year period.
+Seasonal trends are also prevalent. The months of November-thru-April are ``below average'' months, while the months May-thru-October are ``above average''. 
+This seasonal trend is observed throughout the 10-year period.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-  \includegraphics[scale=0.65]{Calendar-Month.png}
+  \includegraphics[width=\textwidth]{Calendar-Month.png}
   \caption{SR counts by calendar month for a 10-year period}
   \label{fig:calendar-months-counts}
 \end{figure}
@@ -460,6 +460,7 @@ an increase in activity, as previously noted.
 
 \begin{table}[ht]
     \centering
+    \small
     \begin{tabular}{lS[table-format=7.0]S[table-format=6.0]} % 'l' for left-aligned, 'S' for siunitx number alignment
         \toprule
         \textbf{Month}     & \textbf{Count}   & \textbf{Count per Day} \\ 
@@ -484,7 +485,7 @@ an increase in activity, as previously noted.
 
 \FloatBarrier % Ensure all floats before this point are processed before moving on
 
-Two  areas that are important in this data cleansing analysis effort are the responsible NYC Agency, and the actual type of complaint.
+Two areas that are important in this data cleansing analysis effort are the responsible NYC Agency, and the actual type of complaint.
 Given both the size of the City of New York government, it's typically necessary to identify the responsible Agency as well as the type of complaint in order to 
 clarify the responsible area and assist in troubleshooting any discrepancy.
 
@@ -506,7 +507,7 @@ Although the 311 SRs involve 16 different agencies, there are the ``big six'' Ag
 
 \begin{figure}[htbp]
   \centering
-	  \includegraphics[scale=0.65]{SRs_by_Agency.png}
+	  \includegraphics[width=\textwidth]{SRs_by_Agency.png}
 	  \caption{SR counts by Agency and Cumulative Percentage}
 	  \label{fig:SR_counts_by_Agency}
 \end{figure}
@@ -515,7 +516,7 @@ It is also interesting to note the distribution of the type of complaints in the
 
 \begin{figure}[htbp]
   \centering
-	  \includegraphics[scale=0.65]{SRs_by_Complaint_Type.png}
+	  \includegraphics[width=\textwidth]{SRs_by_Complaint_Type.png}
 	  \caption{Top 20 SR Complaints and Cumulative Percentage}
 	  \label{fig:SR_complaints}
 \end{figure}
@@ -525,9 +526,14 @@ complaints total 1.435 million in the 2022-2023 dataset, a full 22\% of all comp
 second, followed by Heat/Hot Water.) Noise complaints are also handled by NYPD, as is Illegal Parking and Blocked Driveway complaints, which mostly
 accounts for the top ranking of 311 SRs being routed to the NYPD.
 
+There are also some rather curious and unusual Service Requests in the 311 data: 
+tanning, tattooing, trans fat, unsanitary pigeon condition, illegal animal kept as pet, harboring bees/wasps, and radioactive material. 
+New Yorkers certainly live interesting lives. 
+
 The NYC HPD handles about 49\% of what NYPD handles. For  non-NYC readers, 
 HPD is the City agency that manages the  177,569 NYC public housing units as well as monitoring all rental and leased apartment units. HPD collectively
 serves 528,105 people, a population larger than Atlanta or Miami. Hence the large number of Heat/Hot Water and Unsanitary complaints. 
+
 
 \section{Potential Issues} \label{sec:issues}
 
@@ -566,15 +572,16 @@ This paper will focus on a set of specific data cleansing areas:
 
 \begin{itemize}
 	\item Structural issues with the data. Is it in the expected format?
-	\item Missing/blank data
 	\item Data type correctness
+	\item Missing/blank data
 	\item Invalid values
 	\item Logical inconsistencies and inconsistent patterns in the data
 	\item Accuracy and precision
 	\item Redundant data  
 \end{itemize}
 
-\subsection{Structural Issues}
+
+\section{Structural Issues}
 
 Structural issues in the context of data cleansing refers to issues related to the how data is organized, formatted, or structured within a dataset. Structural issues 
 can make it difficult to analyze the data effectively. Some common structural concerns in this 311 SR 2022-2023 dataset include:
@@ -600,67 +607,66 @@ What are the characteristics of the 311 SR data set. Here are some insights:
 	\item One form tex fielt; resolution description, which supports 934 characters of input
 \end{itemize}
 
-In this dataset the writers discovered several structural issues.
 
-	\subsubsection{Fields not in the Data Dictionary}
-	The 311 SR \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}
-	 identifies 41 data columns (fields) along with some
-	related information for each column. However, when you either download the data or explore it via the online portal,
-	you will immediately note that there are 47 fields. The additional six fields are not addressed in the Data Dictionary, and show up on the Column Manager
-	page as ``@computed\_region\_xxxx\_xxxx''. To some extent one can infer what the these @computed\_fields are, but it is not possible to know
-	for certain. These fields are:
-	\begin{itemize}
-		\item zip\_codes
-		\item community\_districts
-		\item borough\_boundaries
-		\item city\_council\_districts
-		\item police\_precincts
-		\item police\_precinct 
-	\end{itemize}	
+\textbf{Fields not in the Data Dictionary} The 311 SR \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}
+ identifies 41 data columns (fields) along with some
+related information for each column. However, when you either download the data or explore it via the online portal,
+you will immediately note that there are 47 fields. The additional six fields are not addressed in the Data Dictionary, and show up on the Column Manager
+page as ``@computed\_region\_xxxx\_xxxx''. To some extent one can infer what the these @computed\_fields are, but it is not possible to know
+for certain. These fields are:
+\begin{itemize}
+	\item zip\_codes
+	\item community\_districts
+	\item borough\_boundaries
+	\item city\_council\_districts
+	\item police\_precincts
+	\item police\_precinct 
+\end{itemize}	
 
-	Here is a screenshot of the NYC Open Data Portal ``Column Manager'' page showing those columns:
+Here is a screenshot of the NYC Open Data Portal ``Column Manager'' page showing those columns:
 
-	\begin{figure}[htbp]
-	  \centering
-		  \includegraphics[scale=0.65]{computed_columns_screenshot.png}
-		  \caption{Screenshot of data portal showing the ``@computed'' columns}
-		  \label{fig:computed-columns}
-	\end{figure}
+\begin{figure}[htbp]
+  \centering
+	  \includegraphics[scale = 0.7]{computed_columns_screenshot.png}
+	  \caption{Screenshot of data portal showing the ``@computed'' columns}
+	  \label{fig:computed-columns}
+\end{figure}
 
-	This, of course, raises several questions:
-	\begin{itemize}
-		\item How are these fields computed? Using what source data? Using what computational method?
-		\item How can these fields be verified or cross-checked?
-		\item Why are their two fields that appear redundant ``Police Precinct'' and ``Police Precincts''?
-		\item What are ``borough boundaries''? Are these the regular NYC boroughs?
-		\item What are ``community districts''? Is this the same as the ``Community Boards'' that are part of the NYC government?
-		\item Can these fields be included in the official 311 SR Data Dictionary?
-		\item Can these fields be used for analytical purposes? 
-	\end{itemize}	
+This, of course, raises several questions:
+\begin{itemize}
+	\item How are these fields computed? Using what source data? Using what computational method?
+	\item How can these fields be verified or cross-checked?
+	\item Why are their two fields that appear redundant ``Police Precinct'' and ``Police Precincts''?
+	\item What are ``borough boundaries''? Are these the regular NYC boroughs?
+	\item What are ``community districts''? Is this the same as the ``Community Boards'' that are part of the NYC government?
+	\item Can these fields be included in the official 311 SR Data Dictionary?
+	\item Can these fields be used for analytical purposes? 
+\end{itemize}	
 
-	The last bullet point is the key here. Are these fields reliable and accurate, and can they be used for subsequent analysis? Unfortunately,
-	as of this date, those questions have not been fully addressed by the  NYC Open Data Team. This paper will address further issues with the
-	accuracy and subsequent analytical usage for these six @computed fields.
+The last bullet point is the key here. Are these fields reliable and accurate, and can they be used for subsequent analysis? Unfortunately,
+as of this date, those questions have not been fully addressed by the  NYC Open Data Team. This paper will address further issues with the
+accuracy and subsequent analytical usage for these six @computed fields.
 	
-	\subsubsection{Verifying data types}
-	Fortunately, both the Data Dictionary and the portal column manager do a good job of indicating the data type.
-	As indicated by the red underline in Figure \ref{fig:computed-columns}, there is a small icon next to the column name 
-	which indicates the data type of the column. The stylized capital ``T'' indicates text, the ``\#'' sign indicates 
-	a numeric, a calendar icon indicates a date field, and the ``pin on a map'' symbol indicates a geospatial field. 
 	
-	The following fields were checked for their specified data types:
+\section{Verifying data types}
+Fortunately, both the Data Dictionary and the portal column manager do a good job of indicating the data type.
+As indicated by the red underline in Figure \ref{fig:computed-columns}, there is a small icon next to the column name 
+which indicates the data type of the column. The stylized capital ``T'' indicates text, the ``\#'' sign indicates 
+a numeric, a calendar icon indicates a date field, and the ``pin on a map'' symbol indicates a geospatial field. 
 	
-		\begin{itemize}
-		\item created\_date, closed\_date, due\_date, and resolution\_action\_updated\_date are all in proper date format.
-		\item zip\_codes and incident\_zip: All are 5 numeric digits except for 2 non-numeric entries for incident\_zip (``na'' and ``N/A'').
-		\item x\_coordinate\_state\_plane \&  y\_coordinate\_state\_plane (a NY State geo-location system) are all numeric.
-		\item latitude \& longitude are both numeric.
-		\item community\_districts, borough\_boundaries, city\_council\_district, police\_precinct, and police\_precincts are all numeric.
-		\item Free-form text fields that contain a ``,'' (e.g. incident\_address, resolution\_description) are enclosed in quotation marks.
-		\end{itemize}	
+The following fields were checked for their specified data types:
+	
+\begin{itemize}
+	\item created\_date, closed\_date, due\_date, and resolution\_action\_updated\_date are all in proper date format.
+	\item zip\_codes and incident\_zip: All are 5 numeric digits except for 2 non-numeric entries for incident\_zip (``na'' and ``N/A'').
+	\item x\_coordinate\_state\_plane \&  y\_coordinate\_state\_plane (a NY State geo-location system) are all numeric.
+	\item latitude \& longitude are both numeric.
+	\item community\_districts, borough\_boundaries, city\_council\_district, police\_precinct, and police\_precincts are all numeric.
+	\item Free-form text fields that contain a ``,'' (e.g. incident\_address, resolution\_description) are enclosed in quotation marks.
+\end{itemize}	
 	
 
-\subsection{Missing-Blank data}
+\section{Blank \& N/A data}
 
 Understanding the absence of data in each fields is an important factor when undertaking analysis. For example, if you wanted to see if the SRs were
 closed before or after their due\_date, you would be challenged as 99.57\% of the due\_date field is blank. (Although with such a large dataset
@@ -681,58 +687,59 @@ rarely occurred fortunately): created\_date, agency, complaint\_type, and unique
 \begin{table}[ht]
 \centering
 \caption{Blank and N/A entries by field}
-\resizebox{\textwidth}{!}{%
+\resizebox{0.8\linewidth}{!}{%
+\tiny
 \begin{tabular}{lrrrl}
 	\toprule
-	\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} & \textbf{NA Count} & \textbf{Blanks Only} \\
+	\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} & \textbf{N/A Count} \\
 	\midrule
-		taxi\_company\_borough & 6391341 & 99.94 & 0 & 6391341 \\
-		road\_ramp & 6379080 & 99.75 & 0 & 6379080 \\
-		vehicle\_type & 6376266 & 99.71 & 0 & 6376266 \\
-		due\_date & 6370497 & 99.62 & 6370497 & 0 \\
-		bridge\_highway\_direction & 6367626 & 99.57 & 0 & 6367626 \\
-		bridge\_highway\_name & 6340197 & 99.14 & 0 & 6340197 \\
-		bridge\_highway\_segment & 6340190 & 99.14 & 0 & 6340190 \\
-		taxi\_pick\_up\_location & 6329954 & 98.98 & 0 & 6329954 \\
-		facility\_type & 5966588 & 93.30 & 0 & 5966588 \\
-		landmark & 2635736 & 41.22 & 0 & 2635736 \\
-		intersection\_street\_1 & 2143847 & 33.52 & 0 & 2143847 \\
-		intersection\_street\_2 & 2140707 & 33.48 & 0 & 2140707 \\
-		cross\_street\_1 & 1846594 & 28.88 & 0 & 1846594 \\
-		cross\_street\_2 & 1846008 & 28.87 & 0 & 1846008 \\
-		location\_type & 798775 & 12.49 & 0 & 798775 \\
-		bbl & 768109 & 12.01 & 0 & 768109 \\
-		city & 332086 & 5.19 & 0 & 332086 \\
-		street\_name & 280463 & 4.39 & 0 & 280463 \\
-		incident\_address & 280268 & 4.38 & 0 & 280268 \\
-		closed\_date & 248839 & 3.89 & 248839 & 0 \\
-		resolution\_description & 132333 & 2.07 & 0 & 132333 \\
-		zip\_codes & 123167 & 1.93 & 0 & 123167 \\
-		borough\_boundaries & 101453 & 1.59 & 0 & 101453 \\
-		community\_districts & 101445 & 1.59 & 0 & 101445 \\
-		city\_council\_districts & 101445 & 1.59 & 0 & 101445 \\
-		police\_precincts & 101445 & 1.59 & 0 & 101445 \\
-		police\_precinct & 101416 & 1.59 & 0 & 101416 \\
-		latitude & 99778 & 1.56 & 0 & 99778 \\
-		longitude & 99778 & 1.56 & 0 & 99778 \\
-		location & 99778 & 1.56 & 0 & 99778 \\
-		x\_coordinate\_state\_plane & 99668 & 1.56 & 0 & 99668 \\
-		y\_coordinate\_state\_plane & 98822 & 1.55 & 0 & 98822 \\
-		resolution\_action\_updated\_date & 91399 & 1.43 & 91399 & 0 \\
-		incident\_zip & 83220 & 1.30 & 2 & 83218 \\
-		descriptor & 74645 & 1.17 & 0 & 74645 \\
-		address\_type & 38655 & 0.60 & 0 & 38655 \\
-		unique\_key & 0 & 0.00 & 0 & 0 \\
-		agency & 0 & 0.00 & 0 & 0 \\
-		agency\_name & 0 & 0.00 & 0 & 0 \\
-		complaint\_type & 0 & 0.00 & 0 & 0 \\
-		status & 0 & 0.00 & 0 & 0 \\
-		community\_board & 0 & 0.00 & 0 & 0 \\
-		borough & 0 & 0.00 & 0 & 0 \\
-		open\_data\_channel\_type & 0 & 0.00 & 0 & 0 \\
-		park\_facility\_name & 0 & 0.00 & 0 & 0 \\
-		park\_borough & 0 & 0.00 & 0 & 0 \\
-		created\_date & 0 & 0.00 & 0 & 0 \\
+		taxi\_company\_borough & 6391341 & 99.94 & 0 \\
+		road\_ramp & 6379080 & 99.75 & 0 \\
+		vehicle\_type & 6376266 & 99.71 & 0 \\
+		due\_date & 6370497 & 99.62 & 6370497 \\
+		bridge\_highway\_direction & 6367626 & 99.57 & 0 \\
+		bridge\_highway\_name & 6340197 & 99.14 & 0 \\
+		bridge\_highway\_segment & 6340190 & 99.14 & 0 \\
+		taxi\_pick\_up\_location & 6329954 & 98.98 & 0 \\
+		facility\_type & 5966588 & 93.30 & 0 \\
+		landmark & 2635736 & 41.22 & 0 \\
+		intersection\_street\_1 & 2143847 & 33.52 & 0 \\
+		intersection\_street\_2 & 2140707 & 33.48 & 0 \\
+		cross\_street\_1 & 1846594 & 28.88 & 0 \\
+		cross\_street\_2 & 1846008 & 28.87 & 0 \\
+		location\_type & 798775 & 12.49 & 0 \\
+		bbl & 768109 & 12.01 & 0 \\
+		city & 332086 & 5.19 & 0 \\
+		street\_name & 280463 & 4.39 & 0 \\
+		incident\_address & 280268 & 4.38 & 0 \\
+		closed\_date & 248839 & 3.89 & 248839 \\
+		resolution\_description & 132333 & 2.07 & 0 \\
+		zip\_codes & 123167 & 1.93 & 0 \\
+		borough\_boundaries & 101453 & 1.59 & 0 \\
+		community\_districts & 101445 & 1.59 & 0 \\
+		city\_council\_districts & 101445 & 1.59 & 0 \\
+		police\_precincts & 101445 & 1.59 & 0 \\
+		police\_precinct & 101416 & 1.59 & 0 \\
+		latitude & 99778 & 1.56 & 0 \\
+		longitude & 99778 & 1.56 & 0 \\
+		location & 99778 & 1.56 & 0 \\
+		x\_coordinate\_state\_plane & 99668 & 1.56 & 0 \\
+		y\_coordinate\_state\_plane & 98822 & 1.55 & 0 \\
+		resolution\_action\_updated\_date & 91399 & 1.43 & 91399 \\
+		incident\_zip & 83220 & 1.30 & 2 \\
+		descriptor & 74645 & 1.17 & 0 \\
+		address\_type & 38655 & 0.60 & 0 \\
+		unique\_key & 0 & 0.00 & 0 \\
+		agency & 0 & 0.00 & 0 \\
+		agency\_name & 0 & 0.00 & 0 \\
+		complaint\_type & 0 & 0.00 & 0 \\
+		status & 0 & 0.00 & 0 \\
+		community\_board & 0 & 0.00 & 0 \\
+		borough & 0 & 0.00 & 0 \\
+		open\_data\_channel\_type & 0 & 0.00 & 0 \\
+		park\_facility\_name & 0 & 0.00 & 0 \\
+		park\_borough & 0 & 0.00 & 0 \\
+		created\_date & 0 & 0.00 & 0 \\
 	\bottomrule
 \end{tabular}
 }
@@ -740,111 +747,292 @@ rarely occurred fortunately): created\_date, agency, complaint\_type, and unique
 
 \FloatBarrier % Ensure all floats before this point are processed before moving on
 
-Here is a graphic depiction of total empty (blank + N/As) for each fields. You can see the natural grouping into the Most, Some, and Few categories. 
+Here is a graphic depiction of total empty (blank \& N/As) for each fields. You can see the natural grouping into the Most, Some, and Few categories. 
 
-
-\begin{figure}[htbp]
+\begin{figure}[H]
   \centering
-	  \includegraphics[scale=0.7]{BlankFields.png}
+	  \includegraphics[width=\textwidth]{BlankFields.png}
 	  \caption{Number and Percentage of Empty Entries}
 	  \label{fig:blank_fields}
 \end{figure}
 
 
-\subsection{Data type correctness}
+\section{Data type correctness}
+
 All data fields were subjected to a test of ``correctness'' according to their ``type'' as specified
 in the Data Dictionary.  Of the nearly 300 million data fields to check (6.5 million rows, 47 fields per row), there were only two  values that failed to test for the
 proper data type; those being two text entries in the incident\_zip filed (``na'', and N/A). All date fields were dates. All number fields were numeric. All text
 fields were character.
 
-\subsection{Checking for Valid Values}
-Testing for valid and invalid values revealed several fairly serious issues associated with select fields. Accordingly, an analyst would need to be
-very diligent if using these fields for analysis. In all likelihood, the rows with the invalid field values would likely need to be removed from the
-analysis.
+ 
+ \section{Validating data}
+ While the dataset may have fields populated with data that appears correct, it is necessary to inspect those fields to determine if the data is indeed valid. For
+ example a date field that contains the value ``February 30, 2024'' is clearly not valid. Nor is a latitude of +95 deg north. 
+ 
+ In this study, testing for invalid values revealed several serious issues associated with select fields. Accordingly, an analyst would need to be
+extra diligent if using these fields for analysis. In all likelihood, rows with invalid field values would likely need to be removed from the
+analysis dataset.
 
-There were a variety of tests for validity that were applied individually to specific fields. Here are the ``good'' results:
+Some fields can be validated against either a acceptable values, often drawn from historical context. In this study we looked at a 10-year
+dataset to ascertain a domain for values what do not have a specific reference source. We would recommend that these domains be published
+in the Data Dictionary. Here are some results.
 
 \begin{itemize}
-		\item Latitude and Longitude fields were tested to ensure all fell within the geographic boundaries of the City of New York. All were.
-		\item The unique\_key field was in fact unique.
-		\item Many fields have a domain of acceptable values. Often these values are determined from common usage or by examining
-		larger datasets. Unfortunately, these domains of acceptable values are not specified in the Data Dictionary. These fields all tested as
-		compliant with their domain of acceptable values:
-			\begin{itemize}
-				\item address\_type
-				\item status
-				\item borough, borough\_boundaries, \& park\_borough 
-				\item data\_channel
-				\item vehicle\_type
-				\item city\_council\_district
-			\end{itemize}
+	\item Latitude and Longitude fields were tested to ensure all fell within the geographic boundaries of the City of New York. All were.
+	\item The unique\_key field was in fact unique.
+	\item Many fields have a domain of acceptable values. Often these values are determined from common usage or by examining
+	larger historical datasets. Unfortunately, these domains of acceptable values are not specified in the Data Dictionary. These fields all tested as
+	compliant with their domain of acceptable values:
+		\begin{itemize}
+			\item address\_type
+			\item status
+			\item borough, borough\_boundaries, \& park\_borough 
+			\item data\_channel
+			\item vehicle\_type
+			\item city\_council\_district
+		\end{itemize}
 \end{itemize}	
- 
- Unfortunately some fields did prove to be quite problematic when comparing the values to the domain of legal values.
- For example, all zip codes (two fields: zip\_codes and incident\_zip) should be valid as defined by the USPS database
- which contains over 44,000 valid zip codes.
- 
- The computed field zip\_codes proved especially problematic with 58\% (3.6 million) of the field entries being invalid.
-This high number indicates that the computation of this computed fields is highly inaccurate. We would recommend
-dropping this field for future analytic efforts.
 
-Furthermore, the field incident\_zip while having only .07\% invalid entries, that is still 4163 such errors. As zip code is
-a primary measure of many NYC city services, and with a freely available database for which to validate entries
-against, it seems an oversight that any such errors could creep into the system. Some invalid entries are 
-clearly incorrect just by observation, e.g. 10000, 12345, 11111, etc. 
+	\subsection{Issues with Zip Codes}
+	 Unfortunately some fields did prove to be quite problematic when comparing the values to the domain of legal values.
+	 For example, all zip codes (two fields: zip\_codes and incident\_zip) should be valid as defined by the USPS database
+	 which contains over 44,000 valid zip codes.
+	 
+	The computed field zip\_codes proved especially problematic with 58\% (3.6 million) of the field entries being invalid.
+	This high number indicates that the computation of this computed fields is highly inaccurate. We would recommend
+	dropping this field for future analytic efforts.
+	
+	Furthermore, the field incident\_zip while having only .07\% invalid entries, that is still 4163 such errors. As zip code is
+	a primary measure of many NYC city services, and with a freely available database for which to validate entries
+	against, it seems an oversight that any such errors could creep into the system. Some invalid entries are 
+	clearly incorrect just by observation, e.g. 10000, 12345, 11111, etc. 
+	
+	Because zip codes play a significant role in analyzing City services, these errors can be quite serious. It's useful in 
+	such cases to observe the breakdown of these errors by the responsible Agency. 
+	
+	The breakdown of the invalid entries in the zip\_code, sorted by Agency shows that the distribution by percentage
+	almost precisely mirrors the overall breakdown of SRs by Agency. This indicates a systemic problem, and since the
+	zip\_code fields is one of the computed fields, it appears these errors are caused by incorrect computations rather
+	than by any Agency mistake.
+	
+	The  errors in the incident\_zip field are more troubling, even though they are, percentage-wise, small. Here is a graphic 
+	illustrating how these errors occur by Agency. Here we can see that the majority of these errors lie in the Dept of Transportation,
+	NYPD, Taxi \& Limo Commission (TLC), and the Economic Development Council (EDC) among others. This representation
+	does not follow the full SR distribution indicating that these errors are likely generated by an incorrect
+	process or application residing at those particular Agencies; it is not a systemic problem.
 
-Because zip codes play a significant role in analyzing City services, these errors can be quite serious. It's useful in 
-such cases to observe the breakdown of these errors by the responsible Agency. 
+	\begin{figure}[H]
+	  \centering
+		  \includegraphics[width=\textwidth]{invalid_incident_zip.png}
+		  \caption{Invalid incident-zip by Agency}
+		  \label{fig:invalid_incident_zip}
+	\end{figure}
+	
+		\subsubsection{Case Study: Noise Complaints by Zip Code}
+		\textbf{Scenario:} The NYC Office of Nightlife (ONL) wants to know ``What are the top 10 zip codes for Noise Complaints (all 8 types) over the last two years?''
+		The goal is to assess the impact of the recent NYC effort looking to promote a safe and vibrant nightlife scene in NYC while seeking to ease
+		strained relations between bar and club owners. 
+		
+		It may come as a surprise to non-NYC residents that dancing at bars and restaurants has been illegal since 1926 (during prohibition), and was only just repealed in 2018. 
+		
+		On the surface this would seem like a simple effort.  The NYC Open Data Portal allows for selection of a timeframe (2022-2023), complaint-type
+		begins with ``Noise'', and group by Zip code, sorted descending by count.  You can do this analysis and grouping right inside the NYC Open Data Portal. \textit{Voila!}
 
-The breakdown of the invalid entries in the zip\_code, sorted by Agency shows that the distribution by percentage
-almost precisely mirrors the overall breakdown of SRs by Agency. This indicates a systemic problem, and since the
-zip\_code fields is one of the computed fields, it appears these errors are caused by incorrect computations rather
-than by any Agency mistake.
+	\begin{figure}[H]
+	    		\centering
+	    		\includegraphics[scale = 0.6]{zipcode_casestudy.png}
+	    		\caption{Top 10 zip codes for Noise complaints (Zip Codes)}
+	    	\label{fig:casestudy1-zipcodes}
+		\end{figure}
+	
+		However, this analysis uses the zip\_codes field, one of the (six) computed fields that has shown to have validity problems. If we repeat the analysis with the 
+		incident\_zip field instead of the zip\_codes field, we obtain a different set of zip code results:
+		
+		\begin{figure}[H]
+	    		\centering
+	    		\includegraphics[scale = 0.6]{incident_zip_casestudy.png}
+	    		\caption{Top 10 zip codes for Noise complaints(Incident Zip)}
+	    	\label{fig:casestudy1-incident-zip}
+		\end{figure}
+		
+	Let's subject these two data sets to validation against the US Postal Service zip code database.
+	 
+	\begin{table}[H]
+	\centering
+	\footnotesize
+	\caption{Comparison of Top Ten Zip Codes Lists}
+	\begin{tabular}{lrr@{\hskip 0.5cm}|@{\hskip 0.5cm}lrr}
+	\toprule
+	\multicolumn{3}{c}{\textbf{zip\_codes}} & \multicolumn{3}{c}{\textbf{incident\_zip}} \\
+	\cmidrule(r){1-3} \cmidrule(l){4-6}
+	\textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} & \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} \\
+		\midrule
+		11275 & 104,556 & FALSE & 10466 & 104,562 & TRUE \\
+		12420 & 27,503 & TRUE & 10023 & 27,972 & TRUE \\
+		12428 & 26,564 & TRUE & 10031 & 25,548 & TRUE \\
+		10935 & 25,508 & FALSE & 10457 & 25,066 & TRUE \\
+		10934 & 23,448 & FALSE & 10453 & 24,752 & TRUE \\
+		10931 & 22,381 & TRUE & 10456 & 24,751 & TRUE \\
+		10930 & 22,121 & TRUE & 10452 & 22,527 & TRUE \\
+		17613 & 21,963 & FALSE & 10025 & 21,705 & TRUE \\
+		10936 & 21,707 & FALSE & 10458 & 21,689 & TRUE \\
+		11606 & 21,435 & FALSE & 10032 & 20,622 & TRUE \\
+		\bottomrule
+	\end{tabular}
+	\end{table}
 
-The  errors in the incident\_zip field are more troubling, even though they are, percentage-wise, small. Here is a graphic 
-illustrating how these errors occur by Agency. Here we can see that the majority of these errors lie in the Dept of Transportation,
-NYPD, Taxi \& Limo Commission (TLC), and the Economic Development Council (EDC) among others. This representation
-does not follow the full SR distribution indicating that these errors are likely generated by an incorrect
-process or application residing at those particular Agencies; it is not a systemic problem.
+	As indicated, six out of ten zip\_codes are invalid, which corresponds closely with what is observed in the overall dataset (58\%). Whereas the incident\_zip
+	field is completely valid, again in-line with the overall incident\_zip validation percentage (99.04\%)
+	Perhaps more curious than the differing zip codes on the two lists, is the fact that the numerical counts are nearly identical;  the overall counts are quite close. This is curious since
+	one field is computed while the other is via data entry; the computed protocol is again the suspect.
 
-\begin{figure}[htbp]
-  \centering
-	  \includegraphics[scale=0.7]{invalid_incident_zip.png}
-	  \caption{Invalid incident-zip by Agency}
-	  \label{fig:invalid_incident_zip}
-\end{figure}
+	
+	\subsection{Issues with Police Precincts}
+	A curious case also exists when examining the two nearly identical fields - police\_precincts and police\_precinct. Both of those fields are among
+	the ``computed'' fields in the dataset. 
+	Using  \href{https://www.nyc.gov/site/nypd/bureaus/patrol/precincts-landing.page}{NYPD Precinct listings} it's possible to determine the valid
+	police precincts; they are generally numeric or have numeric representations in the dataset. 
+	
+	However, what we find is that both fields police\_precinct and police\_precincts  have  35\% invalid entries.
+	Unfortunately, they're not the same invalid entries. 
+	
+	For the police\_precincts field, there are 2,171,864 invalid entries (35\%)., a consequential number of errors. Similarly for the police\_precinct field,
+	 there are 2,171,778 invalid entries ( also 35\%), however they are not the same counts for the two similar fields.
 
-A curious case also exists when examining the two nearly identical fields - police\_precincts and police\_precinct. 
- 
+	The top ten (by count) of invalid precincts are:
 
-\subsection{Logical inconsistencies }
+	\begin{table}[ht]
+	\footnotesize
+	\centering
+		\begin{tabular}{ccccc}
+		\toprule
+		\textbf{Invalid Precinct} & \textbf{police\_precinct count} & \textbf{police\_precincts count} & \textbf{Delta}\\
+		\midrule
+			62 & 151808 & 151720 & 88 \\
+			72 & 148881 & 148796 & 85 \\
+			67 & 133171 & 133115 & 56 \\
+			64 & 111236 & 111221 & 15 \\
+			60 & 105252 & 105317 & -65 \\
+			65 & 103334 & 103306 & 28 \\
+			53 & 100097 & 100074 & 23 \\
+			73 & 97746 & 97755 & -9 \\
+			68 & 94204 & 94254 & -50 \\
+			66 & 93654 & 93848 & -194 \\
+		\bottomrule
+		\end{tabular}
+	\caption{Comparison of the fields police\_precinct and police\_precincts}
+	\label{tab:comparison-precincts-diff}
+	\end{table}
+	
+	A graphic representation of the invalid police\_precincts plotted by Agency show a near perfect match to the
+	distribution of the entire 6.4 million SRs. Note that the ``big six'' Agencies account for 90\% of these invalid precinct errors, identical
+	to the overall distribution of all SRs. This strongly suggests that this is a systemic problem, almost certainly
+	caused by the computation method applied for these two fields.
+	 
+	\begin{figure}[H]
+	  \centering
+		  \includegraphics[width=\textwidth]{invalid_police_precincts.png}
+		  \caption{Invalid NYPD precincts by Agency}
+		  \label{fig:invalid_police_precincts_zip}
+	\end{figure}
 
-\subsection{Accuracy and precision}
+	\subsection{Issues with Community Boards}
+	Community Boards are an important aspect of NYC government. Community boards are the most local, grassroots form of City government, 
+	and the connection between communities and elected officials and City agencies. They are organized by the five Boroughs of NYC and represented
+	in this dataset as ``\#\#-Borough'', e.g. ``10 Bronx''. As such, they play an important role in the quality of life for all New Yorkers. There are 59 community boards 
+	throughout the City. There are 12 Community Districts in the Bronx, 18 in Brooklyn, 12 in Manhattan, 14 in Queens and 3 in Staten Island. The Community Boards are
+	used frequently as a way to measure City services throughout the five boroughs, so correctness is important. NYC Borough Presidents in particular are focused
+	on the services offered at the Community Board level.
+	
+	In the 2022-2023 dataset there are 27,276 invalid community\_board entries which represents 0.43\% of non-blank data. There are a total of 12 different invalid community boards.
+	These include: 
+	
+		\begin{table}[H]
+		\centering
+		\small
+		\caption{Top Ten Invalid 'community\_board' Values}
+		\begin{tabular}{rlr}
+		\toprule
+		\textbf{Rank} & \textbf{Invalid CB} & \textbf{Count} \\
+			\midrule
+				1 & 64 MANHATTAN & 7144 \\
+				2 & 83 QUEENS & 5133 \\
+				3 & 55 BROOKLYN & 3327 \\
+				4 & 81 QUEENS & 3180 \\
+				5 & 80 QUEENS & 2407 \\
+				6 & 26 BRONX & 2364 \\
+				7 & 28 BRONX & 1128 \\
+				8 & 82 QUEENS & 1054 \\
+				9 & 95 STATEN ISLAND & 515 \\
+				10 & 27 BRONX & 514 \\
+			\bottomrule
+		\end{tabular}
+		\end{table}
+		
+		The distribution of invalid Community Boards by Agency is not consistent with the overall SR Agency distribution. This indicates that there are likely
+		specific issues at some key Agencies, in this case Taxi \& Limo Commission (TLC), Parks \& Recreation, etc. It's not a large error, but the division of services
+		(and complaints) by Community Board is a well-tracked measure.
 
-\subsection{Redundant data}
+		\begin{figure}[H]
+	  \centering
+		  \includegraphics[scale = 0.65]{invalid_community_boards.png}
+		  \caption{Invalid Community Board by Agency}
+		  \label{fig:invalid_community_boards}
+	\end{figure}
+
+
+	\subsection{Issues with Community Districts}
+	Another of the computed fields is community\_districts. Community Districts are the boundaries for the Community Boards, but unlike how Community Boards are
+	an arm of the government of New York City, the Community District is used by the Department of City Planning (DCP) for purposes of environmental, socio-economic, and
+	demographic purposes. DCP is the NYC''s primary land use agency and is instrumental in the City's physical framework.  It is a geographical division rather
+	than a local government division. And like Community Boards, the Community Districts are a frequently used means to breakdown zoning, housing, community facilities,
+	and waterfront/open/public spaces. It is also a well-tracked measure.
+
+	Due to how the community\_district data is formatted, it is not possible to establish validity. However, it is possible to determine that the dataset contains
+	72 unique entries, while there are only 59 valid Community Districts.
+	
+\section{Logical inconsistencies }
+
+closed before created (negative duration)
+closed exactly as created (zero duration)
+closed in the future
+
+\subsubsection Case Study: Homeless Person Assistance
+
+due\_date before created
+long resolution\_action\_updated\_date
+
+
+
+
+\section{Accuracy and precision}
+There is one area in particular where the question of precision vs. accuracy immediately arises, and that is with the Latitude and Longitude fields.  Both the 
+Longitude and Latitude fields are expresses as a 14-decimal number, e.g. 40.86769186022511 (also the Location field which is a straight concatenation of
+latitude and longitude). Given that 1 degree of latitude at the equator is equal to 111.044736 kilometers, the ``1'' at the end of that number represents
+approximate 1.1104 nanometer or 1/1,000,000,000 of a meter. A DNA molecule is approximately 2nm in width. 
+
+Clearly the representation of the Latitude and Longitude fields are a classic case of 14-digit precision, 
+but limited accuracy. It is more likely that the Lat/Long values are accurate to the 5\textsuperscript{th} decimal place, about 3.64 feet; even that might be
+overstating things. 
 
 \subsection{Case Study I - Response to Requests for Homeless Person Assistance}
 
-
-\subsection{Case Study I - Studying Noise Complaints by NYC Zip Code}
-
-
-
-
-Invalid values?
-Logical inconsistencies? Concerning patterns?
-Redundant columns?
-
-Invalid data: closed data earlier than creation date;
-latitude/longitude not in NYC; invalid zip code;
-
-Inconsistent data: upper/lower cases; extra spaces; 
-open text entries: provide enough major categories and sub categories;
-
-Inefficiently stored data: lat/long versus (lat, long);
-intersection street 1 versus cross street 1;
-borough could be inferred from zip code;
-full name of agency not needed
+\section{Redundant \& Duplicate data}
+Shrinking file size by deleting these 11 redundant fields:
+     1 - agency\_name 
+     2 - park\_borough 
+     3 - borough\_boundaries 
+     4 - location 
+     5 - intersection\_street\_1 
+     6 - intersection\_street\_2 
+     7 - police\_precinct 
+     8 - duration 
+     9 - postClosedUpdateDuration 
+     10 - translated\_borough\_boundaries 
+     11 - zip\_codes 
+Original size: 3.2 Gb 
+Size after removing redundant columns: 2.8 Gb 
+Potential size reduction: 395.3 Mb or 12.3
 
 \section{Improvements} \label{sec:improve}
 

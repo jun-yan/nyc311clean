@@ -1,0 +1,284 @@
+Execution begins at: 2024-05-22 15:42:04
+
+**********DATA INPUT AND PREPARATION**********
+
+
+**********DATA SUMMARY**********
+
+Total rows: 17,951,600 covering 6 years
+
+Average yearly count: 2,991,933
+Standard deviation: 254,361
+Median: 3,055,945
+Year with maximum count: 2023 with 3,225,450 SRs
+Year with minimum count: 2019 with 2,633,239 SRs
+
+Growth over 6 years is 16.85939 %
+Yearly Summary:
+ Year count  
+ 2018 2760112
+ 2019 2633239
+ 2020 2942060
+ 2021 3220908
+ 2022 3169830
+ 2023 3225450
+
+
+Average quarterly count: 747,983   Standard deviation: 96,669
+Median: 727,509
+Quarter with maximum count: 2020-07 with 952,880 SRs
+Quarter with minimum count: 2020-01 with 548,186 SRs
+
+Quarterly Summary (top 10):
+ Quarter count 
+ 2020-07 952880
+ 2021-07 902904
+ 2023-07 855887
+ 2023-10 854740
+ 2022-07 835704
+ 2021-10 826579
+ 2021-04 817439
+ 2023-04 795851
+ 2022-04 784442
+ 2022-01 775450
+
+Quarterly Summary (bottom 10):
+ Quarter count 
+ 2020-01 548186
+ 2019-10 599617
+ 2019-07 644242
+ 2019-01 668627
+ 2018-01 671983
+ 2021-01 673986
+ 2018-04 682784
+ 2018-10 696537
+ 2020-04 706729
+ 2018-07 708808
+
+Average monthly: 249,328   Standard deviation of 37,598
+Median: 247,440
+Month with maximum count: 2020-08 with 348,463 SRs
+Month with minimum count: 2020-04 with 159,115 SRs
+
+Monthly Summary (top 10):
+ YearMonth count 
+ 2020-08   348463
+ 2021-09   317507
+ 2020-07   316557
+ 2020-06   313306
+ 2021-10   308314
+ 2021-07   303152
+ 2023-10   302854
+ 2021-06   301379
+ 2022-07   294440
+ 2023-07   289410
+
+Monthly Summary (bottom 10):
+ YearMonth count 
+ 2020-04   159115
+ 2020-02   173163
+ 2020-03   179787
+ 2019-12   191394
+ 2018-02   193195
+ 2020-01   195236
+ 2021-02   195980
+ 2019-11   201036
+ 2019-02   203242
+ 2019-10   207187
+
+Average daily count: 8,193   Standard deviation: 1,645
+Median: 8,219
+
+Top ten counts by date:
+2020-08-04    24,415    1 
+2020-08-05    19,560    2 
+2023-09-29    17,963    3 
+2020-07-05    16,916    4 
+2020-06-21    15,883    5 
+2020-06-20    15,825    6 
+2020-07-04    15,794    7 
+2021-09-02    15,205    8 
+2020-06-28    14,057    9 
+2021-10-28    13,575    10 
+
+Bottom ten counts by date:
+2020-03-29     3,785      1 
+2020-03-28     3,818      2 
+2018-12-25     3,909      3 
+2019-12-25     3,994      4 
+2020-04-18     4,160      5 
+2019-11-28     4,165      6 
+2020-04-05     4,384      7 
+2020-04-04     4,386      8 
+2020-03-22     4,428      9 
+2020-04-26     4,437      10 
+
+Average calendar month count: 1,495,967   Standard deviation: 140,252
+Median: 1,503,721
+
+Calendar month with maximum count: July with 1,662,139 SRs
+Per day count (maximum): 53617.39
+
+Calendar month with minimum count: February with 1,234,828 SRs
+Per day count (minimum): 43788.23
+
+SRs by month, ordered by calendar
+ Month     count   count_per_day
+ January   1441625 46504.03     
+ February  1234828 43788.23     
+ March     1380751 44540.35     
+ April     1321549 44051.63     
+ May       1546969 49902.23     
+ June      1639480 54649.33     
+ July      1662139 53617.39     
+ August    1635649 52762.87     
+ September 1602637 53421.23     
+ October   1607650 51859.68     
+ November  1460473 48682.43     
+ December  1417849 45737.06     
+
+SRs by month, ordered by count
+ Month     count   count_per_day
+ July      1662139 53617.39     
+ June      1639480 54649.33     
+ August    1635649 52762.87     
+ October   1607650 51859.68     
+ September 1602637 53421.23     
+ May       1546969 49902.23     
+ November  1460473 48682.43     
+ January   1441625 46504.03     
+ December  1417849 45737.06     
+ March     1380751 44540.35     
+ April     1321549 44051.63     
+ February  1234828 43788.23     
+
+SRs by month, ordered by SRs/day
+ Month     count   count_per_day
+ June      1639480 54649.33     
+ July      1662139 53617.39     
+ September 1602637 53421.23     
+ August    1635649 52762.87     
+ October   1607650 51859.68     
+ May       1546969 49902.23     
+ November  1460473 48682.43     
+ January   1441625 46504.03     
+ December  1417849 45737.06     
+ March     1380751 44540.35     
+ April     1321549 44051.63     
+ February  1234828 43788.23     
+
+Average day-of-the-year count: 49,048   Standard deviation: 5,529
+Median: 49,182
+Day of the year with maximum count: 07/05 with 66,362 SRs
+Day of the year with minimum count: 02/29 with 5,457 SRs
+
+Day of the year with the 2nd minimum count: 12/25 with 31,128 SRs
+
+Day-of-the-Year Summary:
+Top 10 days
+    day_of_year count
+187 07/05       66362
+186 07/04       63703
+173 06/21       62670
+172 06/20       62660
+217 08/04       62144
+257 09/13       60436
+214 08/01       59925
+178 06/26       59657
+218 08/05       59570
+179 06/27       58862
+
+Bottom 10 days
+    day_of_year count
+60  02/29        5457
+360 12/25       31128
+1   01/01       36926
+366 12/31       37514
+359 12/24       38629
+49  02/18       38831
+330 11/25       39390
+92  04/01       39564
+50  02/19       39834
+91  03/31       39855
+
+Average day-of-the-week: 2,564,514   Standard deviation: 158,654
+Median: 2,607,532
+Day-of-the-week maximum: 1-Monday with 2,713,548 SRs
+Day-of-the-week minimum: 7-Sunday with 2,337,737 SRs
+
+Day-of-the-Week Summary:
+ day_of_week count  
+ 1-Monday    2713548
+ 2-Tuesday   2711123
+ 3-Wednesday 2640245
+ 4-Thursday  2607532
+ 5-Friday    2594618
+ 6-Saturday  2346796
+ 7-Sunday    2337737
+
+Average hour-of-the-day 'created' count: 747,983   Standard deviation: 324,007
+Median: 824,723
+Hour of the day with maximum 'created' count is hour #: 12 with 1,280,874 SRs
+Hour of the day with the minimum 'created' count is hour #: 4 with 172,941 SRs
+
+Hour-of-the-day 'created' Summary:
+ created_hour count  
+  0            697597
+  1            435420
+  2            286188
+  3            203772
+  4            172941
+  5            194371
+  6            308920
+  7            532641
+  8            844559
+  9           1080843
+ 10           1113540
+ 11           1099851
+ 12           1280874
+ 13           1002492
+ 14           1010901
+ 15            961325
+ 16            927899
+ 17            843194
+ 18            805803
+ 19            784621
+ 20            799438
+ 21            855696
+ 22            902461
+ 23            806252
+
+Average hour-of-the-day 'closed' count: 729,185   Standard deviation: 413,921
+Median: 667,926
+Hour of the day with maximum 'closed' count is hour #: 0 with 2,146,467 SRs
+Hour of the day with the minimum 'closed' count is hour #: 4 with 244,295 SRs
+
+Hour-of-the-day 'closed' Summary:
+ closed_hour count  
+  0          2146467
+  1           511340
+  2           631137
+  3           308018
+  4           244295
+  5           267937
+  6           332813
+  7           432286
+  8           716946
+  9           958169
+ 10           964585
+ 11           904016
+ 12          1599775
+ 13           843010
+ 14           808509
+ 15           723482
+ 16           674911
+ 17           667134
+ 18           668718
+ 19           578923
+ 20           644467
+ 21           661323
+ 22           688066
+ 23           524115
+
+
+Program run-time:  14.86 minutes
