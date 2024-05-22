@@ -24,6 +24,9 @@ sink("console_output.txt")
 
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
 
+setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
+data1File <- file.path("..", "data", "311_2022-2023_AS_OF_01-31-2024.csv")
+
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-01-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
@@ -88,7 +91,7 @@ create_bar_chart <- function(
   cat(
     "\n", paste("Average", print_out_title, ":"), format(mean_value, big.mark = ","), "  ",
     paste("Median", print_out_title, ":"), format(median_value, big.mark = ","),
-    paste("\nStd Dev", print_out_title, ":"), format(median_value, big.mark = ",")
+    paste("Std Dev", print_out_title, ":"), format(median_value, big.mark = ",")
   )
 
 
@@ -1237,6 +1240,9 @@ missingDataPerColumn <- cbind(missingDataPerColumn, NA_count = na_counts_per_col
 
 missingDataPerColumn$blanks_only <- missingDataPerColumn$total_empty - missingDataPerColumn$NA_count
 
+# Add the "non_blank" column
+#missingDataPerColumn <- missingDataPerColumn %>% mutate(non_blank = num_rows_d311 - total_empty)
+
 # Sort the data frame by the sum of NAs and blanks in descending order
 missingDataPerColumn <- missingDataPerColumn[order(missingDataPerColumn$total_empty, decreasing = TRUE), ]
 
@@ -1401,7 +1407,7 @@ SR_day_of_the_month <- create_bar_chart(
 # SRs created by the day of the year (1-365)
 SR_day_of_the_year <- create_bar_chart(
   dataset = sorted_by_day_of_year,
-  x_col = "calendar_date",
+  x_col = "day_of_year",
   chart_title = "Day of the year SR count w/average",
   sub_title = chart_sub_title,
   x_axis_title = NULL,

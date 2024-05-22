@@ -1,5 +1,5 @@
 
-Execution begins at: 2024-05-19 19:51:35
+Execution begins at: 2024-05-21 21:03:02
 
 **********DATA SUMMARY**********
 
@@ -61,48 +61,48 @@ Number and % blanks and N/A (total empty) entries per column:
  created_date                         0      0.00           0        0    
 
 ***Sort data by different date-time components.
+
 *** Monthly SRs***
  Maximum monthly : 2023-10-01    Maximum monthly count: 302,830
  Minimum monthly : 2023-02-01    Minimum monthly count:  225,012 
 
- Average monthly :  266,454    Median monthly :  270,467 
+ Average monthly : 266,454    Median monthly : 270,467 Std Dev monthly : 270,467
 
 *** Daily SRs***
  Maximum daily : 2023-09-29    Maximum daily count: 17,962
  Minimum daily : 2022-11-24    Minimum daily count:  5,349 
 
- Average daily :  8,760    Median daily :  8,748 
+ Average daily : 8,760    Median daily : 8,748 Std Dev daily : 8,748
 
 *** Day_of_the_month SRs***
  Maximum day_of_the_month : 4    Maximum day_of_the_month count: 216,753
  Minimum day_of_the_month : 31    Minimum day_of_the_month count:  125,949 
 
- Average day_of_the_month :  206,287    Median day_of_the_month :  210,200 
+ Average day_of_the_month : 206,287    Median day_of_the_month : 210,200 Std Dev day_of_the_month : 210,200
 
 *** Day_of_the_year SRs***
  Maximum day_of_the_year : 272    Maximum day_of_the_year count: 26,197
  Minimum day_of_the_year : 1    Minimum day_of_the_year count:  12,075 
 
- Average day_of_the_year :  17,520    Median day_of_the_year :  17,453 
+ Average day_of_the_year : 17,520    Median day_of_the_year : 17,453 Std Dev day_of_the_year : 17,453
 
 *** Day_of_the_week SRs***
  Maximum day_of_the_week : 2-Tuesday    Maximum day_of_the_week count: 967,007
  Minimum day_of_the_week : 6-Saturday    Minimum day_of_the_week count:  841,960 
 
- Average day_of_the_week :  913,558    Median day_of_the_week :  919,694 
+ Average day_of_the_week : 913,558    Median day_of_the_week : 919,694 Std Dev day_of_the_week : 919,694
 
 *** Hourly created SRs***
  Maximum hourly created : 12    Maximum hourly created count: 455,713
  Minimum hourly created : 4    Minimum hourly created count:  72,046 
 
- Average hourly created :  266,454    Median hourly created :  293,928 
+ Average hourly created : 266,454    Median hourly created : 293,928 Std Dev hourly created : 293,928
 
 *** Hourly closed SRs***
  Maximum hourly closed : 0    Maximum hourly closed count: 438,048
  Minimum hourly closed : 4    Minimum hourly closed count:  86,171 
 
- Average hourly closed :  256,086    Median hourly closed :  254,488 
-
+ Average hourly closed : 256,086    Median hourly closed : 254,488 Std Dev hourly closed : 254,488
 Ranking by Agency
  agency count   percent cumulative_percent
  NYPD   2775510 43.40    43.40            
@@ -133,7 +133,7 @@ Top 10 'complaint_type's and responsible Agency:
  STREET CONDITION        143995  2.25   47.48              DOT     
  NOISE - COMMERCIAL      128892  2.02   49.50              NYPD    
  ABANDONED VEHICLE       127423  1.99   51.49              NYPD    
- PLUMBING               wer 126455  1.98   53.47              MULTIPLE
+ PLUMBING                126455  1.98   53.47              MULTIPLE
 
 Bottom 10 'complaint_type's and responsible Agency:
  complaint_type                      count agency
@@ -956,8 +956,8 @@ Shrinking file size by deleting these 11 redundant fields:
 Original size: 3.2 Gb 
 Size after removing redundant columns: 2.8 Gb 
 Potential size reduction: 395.3 Mb or 12.3 %
-Execution ends at: 2024-05-19 21:09:30
+Execution ends at: 2024-05-21 22:09:10
 
-Program run-time:  1.2988 hours 
+Program run-time:  1.1023 hours 
 
  *****END OF PROGRAM*****
