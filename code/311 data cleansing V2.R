@@ -2157,10 +2157,10 @@ if (num_rows_future > 0) {
 
 #########################################################################
 # Identify SRs created at midnight and noon
-# Exclude rows with missing closed_date values
-valid_created_date <- !is.na(d311$created_date)
-
-valid_created_data <- d311[valid_created_date, ]
+# # Exclude rows with missing closed_date values
+# valid_created_date <- !is.na(d311$created_date)
+# 
+# valid_created_data <- d311[valid_created_date, ]
 
 # Extract hour, minute, and second components of closed_date for valid rows
 hour <- as.numeric(format(d311$created_date[valid_created_date], "%H"))
@@ -2175,10 +2175,10 @@ noon_created_rows <- hour == 12 & minute == 0 & second == 0
 midnight_created_count <- sum(midnight_created_rows)
 noon_created_count <- sum(noon_created_rows)
 
-midnight_created_data <- valid_created_data[midnight_created_rows, ]
+midnight_created_data <- d311[midnight_created_rows, ]
 created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "agency")]
 
-noon_created_data <- valid_created_data[noon_created_rows, ]
+noon_created_data <- d311[noon_created_rows, ]
 created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
 
 
@@ -2227,6 +2227,11 @@ if (noon_created_count > 0) {
 
 #########################################################################
 # Identify SRs closed at midnight and noon
+
+valid_created_date <- !is.na(d311$closed_date)
+
+valid_created_data <- d311[valid_created_date, ]
+
 # Extract hour, minute, and second components of closed_date for valid rows
 hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
 minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
@@ -2240,8 +2245,8 @@ noon_closed_rows <- hour == 12 & minute == 0 & second == 0
 midnight_closed_count <- sum(midnight_closed_rows)
 noon_closed_count <- sum(noon_closed_rows)
 
-midnight_closed_data <- d311[midnight_closed_rows, ]
-closed_at_midnight <- d311[, c("unique_key", "created_date", "agency")]
+midnight_closed_data <- valid_created_data[midnight_closed_rows, ]
+closed_at_midnight <- valid_created_data[, c("unique_key", "created_date", "agency")]
 
 noon_closed_data <- valid_closed_data[noon_closed_rows, ]
 closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
