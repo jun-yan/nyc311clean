@@ -14,11 +14,11 @@ library(lubridate)
 
 # Set the working directory to the "nyc311clean/code" directory to enable relative codes.
 setwd("C:/Users/david/OneDrive/Documents/nyc311clean/code")
-data1File <- file.path("..", "data", "10-year 2014-2023.csv")
+data1File <- file.path("..", "data", "2022-2023 created and closed only.csv")
 
 #Define the chart directory
-chart_directory_path <- file.path("C:", "Users", "david", "OneDrive", 
-                                  "Documents", "nyc311clean", "charts", "10-year trends")
+chart_directory_path <- 
+  file.path("..", "charts", "2022-2023 study", "Time lapse charts")
 
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
@@ -145,17 +145,6 @@ max_rows_yearly <- max(yearly_summary$count)
 yearly_summary <- na.omit(yearly_summary)
 
 #########################################################################
-# Aggregate at the quarterly level
-d311$Quarter <- cut(d311$created_date, breaks = "quarter", labels = FALSE)
-
-# Calculate quarterly counts with corresponding quarter dates
-quarterly_summary <- d311 %>%
-  group_by(Quarter) %>%
-  summarise(count = n(), Quarter = min(created_date))
-max_rows_quarterly <- max(quarterly_summary$count)
-quarterly_summary <- na.omit(quarterly_summary)
-
-########################################################################                       
 # Aggregate at the monthly level
 monthly_summary <- d311 %>%
   group_by(YearMonth) %>%
@@ -243,10 +232,6 @@ closed_counts <- d311 %>%
 #########################################################################
 yearly_df <- as.data.frame(yearly_summary)
 
-quarterly_df <- select(quarterly_summary,Quarter,  count)
-quarterly_df$Quarter <- format(quarterly_df$Quarter, "%Y-%m-%d")
-quarterly_df <- as.data.frame(quarterly_df)
-
 monthly_df <- as.data.frame(monthly_summary)
 
 daily_df <- as.data.frame(daily_summary)
@@ -285,7 +270,7 @@ earliest_year_count <- yearly_df %>% filter(Year == min(Year)) %>% select(count)
 latest_year_count <- yearly_df %>% filter(Year == max(Year)) %>% select(count) %>% pull()
 
 # Compute the percentage growth
-percentage_growth <- ((latest_year_count - earliest_year_count) / earliest_year_count) * 100
+percentage_growth <- round(((latest_year_count - earliest_year_count) / earliest_year_count) * 100,2)
 
 cat("\nGrowth over", nrow(yearly_df), "years is", percentage_growth, "%" )
 
@@ -338,95 +323,6 @@ SR_yearly <- ggplot(yearly_df, aes(x = Year, y = count)) +
 suppressMessages(print(SR_yearly))
 chart_path <- file.path(chart_directory_path, "Yearly.png")
 suppressMessages(ggsave(chart_path, plot = SR_yearly, width = 10, height = 8))
-
-#########################################################################
-# Overall quarterly summary
-mean_count <- round(mean(quarterly_df$count), 0)
-median_count <- round(median(quarterly_df$count), 0)
-standard_deviation <- round(sd(quarterly_df$count))
-
-cat("\n\nAverage quarterly count:", format(mean_count, big.mark = ","), 
-    "  Standard deviation:", format(standard_deviation, big.mark = ","))
-cat("\nMedian:", format(median_count, big.mark = ","))
-
-# Format the Quarter column to just show year and month
-# Convert the Quarter column to Date format
-quarterly_df$Quarter <- as.Date(quarterly_df$Quarter)
-quarterly_df$Quarter <- format(quarterly_df$Quarter, "%Y-%m")
-
-max_quarter <- quarterly_df[which.max(quarterly_df$count), ]
-cat("\nQuarter with maximum count:", max_quarter$Quarter,  
-    "with", format(max_quarter$count, big.mark = ","), "SRs")
-
-min_quarter <- quarterly_df[which.min((quarterly_df$count)),]
-cat("\nQuarter with minimum count:", min_quarter$Quarter, 
-    "with", format(min_quarter$count, big.mark = ","), "SRs\n")
-
-quarterly_df <- quarterly_df[order(-quarterly_df$count),]
-
-cat("\nQuarterly Summary (top 10):\n")
-print(head(quarterly_df, 10), row.names = FALSE, right = FALSE)
-
-quarterly_df <- quarterly_df[order(quarterly_df$count),]
-cat("\nQuarterly Summary (bottom 10):\n")
-print(head(quarterly_df, 10), row.names = FALSE, right = FALSE)
-
-# Chart SRs by quarter
-max_count <- max(quarterly_df$count)
-total_count <- sum(quarterly_df$count)
-total_count <- comma(total_count)
-
-earliest_quarter <- min(quarterly_df$Quarter)
-
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
-# Append '-01' to the Quarter column to create a valid date string
-quarterly_df$Quarter <- paste0(quarterly_df$Quarter, "-01")
-#quarterly_df$Quarter <- as.Date(quarterly_df$Quarter)
-
-quarterly_df$Quarter <- as.Date(paste0(substr(quarterly_df$Quarter, 1, 4), "-07-01"), "%Y-%m-%d")
-
-quarterly_df$Quarter <- as.factor(quarterly_df$Quarter)
-
-
-# Create the bar chart with vertical X-axis labels
-SR_quarterly <- ggplot(quarterly_df, aes(x = Quarter, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
-  labs(x = "Year-Quarter" ) +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_discrete(labels = scales::label_date(format = "%Y Q%q")) +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold"),
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
-  ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = earliest_quarter , y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
-    ggtitle("Quarterly SR count (w/trendline)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
-  ) +
-  geom_point(color = "transparent") +
-  stat_poly_eq(use_label(c("R2"))) +
-  geom_point(color = "transparent") +
-  geom_smooth(method = "lm", span = 1, se = FALSE, color = "firebrick3", linetype = "dotted", linewidth = 1) +
-  labs(x=NULL, y=NULL)
-
-# Print the bar chart
-suppressMessages(print(SR_quarterly))
-chart_path <- file.path(chart_directory_path, "Quarterly.png")
-suppressMessages(ggsave(chart_path, plot = SR_quarterly, width = 10, height = 8))
 
 #########################################################################
 # Overall monthly summary
@@ -485,20 +381,26 @@ increment <- result$increment
 scaling_factor <- result$scaling_factor
 scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
+start_date <- min(monthly_df$YearMonth)
+end_date <- max(monthly_df$YearMonth)
+
+# Create a sequence of every other month
+breaks_seq <- seq(from = start_date, to = end_date, by = "2 months")
+
 # Create the bar chart with vertical X-axis labels
 SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
   geom_bar(stat = "identity", fill = "cadetblue") +
   scale_y_continuous(labels = scales::comma) +
   theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
+    axis.title.x = element_blank(),
+    axis.title.y = element_blank(),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
     panel.background = element_rect(fill = "gray91", color = "gray91"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold"),
-    #    scale_x_date(labels = date_format("%Y-%m"), breaks = date_breaks("1 year")) # Display every year on X-axis
-  ) +
+    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)
+    ) + # Adjust plot margins
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
     linetype = "dotted", color = "gray21"
@@ -510,7 +412,8 @@ SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
   ) +
   geom_point(color = "transparent") +
   stat_poly_eq(use_label(c("R2"))) +
-  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("1 year")) +
+  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = breaks_seq,
+               expand = c(0,0)) + 
   geom_smooth(method = "lm", span = 1, se = FALSE, 
               color = "firebrick3", linetype = "dotted", linewidth = 1) +
   annotate("text", x = mxmonth, y = max_month$count, label = "Max", size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
@@ -597,6 +500,7 @@ daily_df$created_date <- as.Date(daily_df$created_date)
 SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
   geom_bar(stat = "identity", fill = "cadetblue") +
   scale_y_continuous(labels = scales::comma) +
+  scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months")) + 
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
@@ -632,7 +536,7 @@ SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
 # Print the bar chart
 suppressMessages(print(SR_daily))
 chart_path <- file.path(chart_directory_path, "Daily.png")
-suppressMessages(ggsave(chart_path, plot = SR_daily, width = 20, height = 12))
+suppressMessages(ggsave(chart_path, plot = SR_daily, width = 18, height = 10))
 
 #########################################################################
 # Overall calendar month summary (Jan, Feb, Mar, etc.)
@@ -664,7 +568,7 @@ days_in_month <- c(
 )
 
 # Add the count_per_day column
-calendar_month_df$count_per_day <- calendar_month_df$count / days_in_month[calendar_month_df$Month]
+calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month[calendar_month_df$Month],0)
 
 # Order by calendar month (Jan, Feb, etc.)
 cat("\n\nSRs by month, ordered by calendar\n")
@@ -959,11 +863,11 @@ SR_created_time_of_day <- ggplot(created_hour_of_day_df, aes(x = created_hour, y
     linetype = "dotted", color = "gray21"
   ) +
   geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  #geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
+  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
   geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  #annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
   annotate("text", x = 0, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
   labs(x="hour-of-the-day (0-23)", y= NULL)
 
@@ -1029,13 +933,13 @@ SR_closed_time_of_day <- ggplot(closed_hour_of_day_df, aes(x = closed_hour, y = 
     linetype = "dotted", color = "gray21"
   ) +
   geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
+#  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
   geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
+#  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
   geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
   annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+#  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
     annotate("text", x = 0, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
   labs(x= "Hour-of-the-day (0-23)", y= NULL)
 

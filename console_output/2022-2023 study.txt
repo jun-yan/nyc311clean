@@ -1,5 +1,5 @@
 
-Execution begins at: 2024-05-21 21:03:02
+Execution begins at: 2024-05-27 21:01:09
 
 **********DATA SUMMARY**********
 
@@ -513,39 +513,30 @@ Ranking by Agency
 There are 235,347 SRs that were 'closed' exactly at midnight.
 Ranking by Agency
  agency count  percent cumulative_percent
- NYPD   102945 42.59   42.59             
- HPD     52140 21.57   64.16             
- DSNY    24032  9.94   74.10             
- DOT     16821  6.96   81.06             
- DEP     13014  5.38   86.44             
- DPR      8551  3.54   89.98             
- DOB      7203  2.98   92.96             
- DOHMH    6273  2.59   95.55             
- DHS      3438  1.42   96.97             
- EDC      2997  1.24   98.21             
- TLC      2475  1.02   99.23             
- DCWP     1693  0.70   99.93             
- DOE       103  0.04   99.97             
- OTI        51  0.02   99.99             
- DFTA        2  0.00   99.99             
- OSE         1  0.00   99.99             
+ DOB    160592 68.24    68.24            
+ DSNY    55724 23.68    91.92            
+ HPD     10685  4.54    96.46            
+ DOT      6279  2.67    99.13            
+ DEP      2014  0.86    99.99            
+ NYPD       41  0.02   100.01            
+ DHS         8  0.00   100.01            
+ OTI         3  0.00   100.01            
+ DOHMH       1  0.00   100.01            
 
 
 There are 105,505 SRs that were 'closed' exactly at noon.
 Ranking by Agency
  agency count percent cumulative_percent
- DSNY   99344 99.56    99.56            
- DOT      197  0.20    99.76            
- DEP      165  0.17    99.93            
- HPD       28  0.03    99.96            
- NYPD      26  0.03    99.99            
- DPR        6  0.01   100.00            
- DOHMH      5  0.01   100.01            
- DHS        2  0.00   100.01            
- DOB        2  0.00   100.01            
- TLC        2  0.00   100.01            
- DCWP       1  0.00   100.01            
- EDC        1  0.00   100.01            
+ DSNY   99343 94.16   94.16             
+ DEP     4519  4.28   98.44             
+ DOT     1535  1.45   99.89             
+ DOHMH     43  0.04   99.93             
+ NYPD      27  0.03   99.96             
+ HPD       17  0.02   99.98             
+ OTI       12  0.01   99.99             
+ DPR        4  0.00   99.99             
+ EDC        3  0.00   99.99             
+ TLC        2  0.00   99.99             
 
 
 There are no SRs with a 'due_date' before 'created_date'.
@@ -956,8 +947,8 @@ Shrinking file size by deleting these 11 redundant fields:
 Original size: 3.2 Gb 
 Size after removing redundant columns: 2.8 Gb 
 Potential size reduction: 395.3 Mb or 12.3 %
-Execution ends at: 2024-05-21 22:09:10
+Execution ends at: 2024-05-27 22:49:56
 
-Program run-time:  1.1023 hours 
+Program run-time:  1.8128 hours 
 
  *****END OF PROGRAM*****

@@ -30,7 +30,7 @@ data1File <- file.path("..", "data", "311_2022-2023_AS_OF_01-31-2024.csv")
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-01-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
-chart_directory_path <- file.path("..", "charts")
+chart_directory_path <- file.path("..", "charts", "2022-2023 study", "Core charts")
 
 writeFilePath <- file.path("..", "data", "smaller.csv")
 
@@ -277,7 +277,8 @@ cross_street_analysis <- function(
     chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
     chart_file_name <- paste0("non-matching", cross_street, "and", intersection_street, ".png", sep = "")
     create_combo_chart(
-      non_dup_streets_non_blank,
+#      non_dup_streets_non_blank,
+      non_dup_streets,
       chart_title,
       chart_file_name
     )
@@ -362,7 +363,7 @@ cross_street_analysis <- function(
     data.frame(
       category = c(
         "Matching",
-        paste("Both blank", "\u2208", "Matching", sep = ""),
+        "Both blank -- Matching",
         "Non-matching",
         paste(cross_street, "blank", sep = "_"),
         paste(intersection_street, "blank", sep = "_"),
@@ -1442,8 +1443,8 @@ SR_created_hourly_ <- create_bar_chart(
   x_axis_title = NULL,
   y_axis_title = "count",
   print_out_title = "Hourly created",
-  add_mean = FALSE,
-  add_median = TRUE,
+  add_mean = TRUE,
+  add_median = FALSE,
   add_sd = TRUE,
   chart_file_name = "Created_Hourly_SR_count.png"
 )
@@ -1456,8 +1457,8 @@ SR_closed_hourly_ <- create_bar_chart(
   x_axis_title = NULL,
   y_axis_title = "count",
   print_out_title = "Hourly closed",
-  add_mean = FALSE,
-  add_median = TRUE,
+  add_mean = TRUE,
+  add_median = FALSE,
   add_sd = TRUE,
   chart_file_name = "Closed_Hourly_SR_count.png"
 )
@@ -2157,15 +2158,10 @@ if (num_rows_future > 0) {
 
 #########################################################################
 # Identify SRs created at midnight and noon
-# # Exclude rows with missing closed_date values
-# valid_created_date <- !is.na(d311$created_date)
-# 
-# valid_created_data <- d311[valid_created_date, ]
-
 # Extract hour, minute, and second components of closed_date for valid rows
-hour <- as.numeric(format(d311$created_date[valid_created_date], "%H"))
-minute <- as.numeric(format(d311$created_date[valid_created_date], "%M"))
-second <- as.numeric(format(d311$created_date[valid_created_date], "%S"))
+hour <- as.numeric(format(d311$created_date, "%H"))
+minute <- as.numeric(format(d311$created_date, "%M"))
+second <- as.numeric(format(d311$created_date, "%S"))
 
 # Identify rows with time exactly at midnight (00:00:00)
 midnight_created_rows <- hour == 0 & minute == 0 & second == 0
@@ -2180,7 +2176,6 @@ created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "
 
 noon_created_data <- d311[noon_created_rows, ]
 created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
-
 
 if (midnight_created_count > 0) {
   cat(
@@ -2228,9 +2223,9 @@ if (noon_created_count > 0) {
 #########################################################################
 # Identify SRs closed at midnight and noon
 
-valid_created_date <- !is.na(d311$closed_date)
-
-valid_created_data <- d311[valid_created_date, ]
+# Remove N/A closed_date(s)
+valid_closed_date <- !is.na(d311$closed_date)
+valid_closed_data <- d311[valid_closed_date, ]
 
 # Extract hour, minute, and second components of closed_date for valid rows
 hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
@@ -2245,8 +2240,8 @@ noon_closed_rows <- hour == 12 & minute == 0 & second == 0
 midnight_closed_count <- sum(midnight_closed_rows)
 noon_closed_count <- sum(noon_closed_rows)
 
-midnight_closed_data <- valid_created_data[midnight_closed_rows, ]
-closed_at_midnight <- valid_created_data[, c("unique_key", "created_date", "agency")]
+midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
+closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "agency")]
 
 noon_closed_data <- valid_closed_data[noon_closed_rows, ]
 closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
@@ -2684,68 +2679,65 @@ xcloned311[address_fields] <- lapply(xcloned311[address_fields], normal_address,
 x_street_dataset <- xcloned311
 cross_street <- "cross_street_1"
 intersection_street <- "intersection_street_1"
-
 y1 <- cross_street_analysis(x_street_dataset, cross_street, intersection_street)
-end_time <- proc.time()
 
 cross_street <- "cross_street_2"
 intersection_street <- "intersection_street_2"
-
 y2 <- cross_street_analysis(x_street_dataset, cross_street, intersection_street)
 
 #########################################################################
 
 cat("\n\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
 
-#########################################################################
-
-# List of redundant columns to remove
-redundant_columns <- c(
-  "agency_name",
-  "park_borough",
-  "borough_boundaries",
-  "location",
-  "intersection_street_1",
-  "intersection_street_2",
-  "police_precinct",
-  "duration",
-  "postClosedUpdateDuration",
-  "translated_borough_boundaries",
-  "zip_codes"
-)
-
-cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
-
-# Print the redundant columns vertically
-index <- 1
-for (column in redundant_columns) {
-  cat("    ", index, "-", column, "\n")
-  index <- index + 1
-}
-
-# Read the data into a data table object
-d311 <- read.csv(data1File, header = TRUE, sep = ",")
-
-# make columns names user friendly
-d311 <- makeColNamesUserFriendly(d311)
-
-# Calculate the current size of the data table object
-original_size <- object.size(d311)
-
-# Delete the redundant columns
-d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
-
-# Calculate the size of the new data table object
-reduced_size <- object.size(d311_reduced)
-
-# Compute the difference in size
-size_reduction <- original_size - reduced_size
-
-# Print the results
-cat("Original size:", format(original_size, units = "auto"), "\n")
-cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
-cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
-    round(size_reduction/original_size * 100, 1),  "%")
+# #########################################################################
+# 
+# # List of redundant columns to remove
+# redundant_columns <- c(
+#   "agency_name",
+#   "park_borough",
+#   "borough_boundaries",
+#   "location",
+#   "intersection_street_1",
+#   "intersection_street_2",
+#   "police_precinct",
+#   "duration",
+#   "postClosedUpdateDuration",
+#   "translated_borough_boundaries",
+#   "zip_codes"
+# )
+# 
+# cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
+# 
+# # Print the redundant columns vertically
+# index <- 1
+# for (column in redundant_columns) {
+#   cat("    ", index, "-", column, "\n")
+#   index <- index + 1
+# }
+# 
+# # Read the data into a data table object
+# d311 <- read.csv(data1File, header = TRUE, sep = ",")
+# 
+# # make columns names user friendly
+# d311 <- makeColNamesUserFriendly(d311)
+# 
+# # Calculate the current size of the data table object
+# original_size <- object.size(d311)
+# 
+# # Delete the redundant columns
+# d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
+# 
+# # Calculate the size of the new data table object
+# reduced_size <- object.size(d311_reduced)
+# 
+# # Compute the difference in size
+# size_reduction <- original_size - reduced_size
+# 
+# # Print the results
+# cat("Original size:", format(original_size, units = "auto"), "\n")
+# cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
+# cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
+#     round(size_reduction/original_size * 100, 1),  "%")
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
