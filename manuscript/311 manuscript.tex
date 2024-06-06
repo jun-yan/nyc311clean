@@ -1146,29 +1146,34 @@ is troubling and can produce bizarre analytical results.
 	\end{figure}	
 		
 	\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
-	An additional  problem discovered with the created\_date and closed\_date fields; there appears to be an unusually large number of 
-	SRs created or closed at exactly midnight (00:00:00) and noon (12:00:00), to the second. The distribution of SR creation and closure 
-	largely follows the work-day clock with lots of SRs created during day-light hours, and fewer SRs 
-	created in the early hours of the morning. However, here there appears to be significantly greater numbers of SR closed exactly at midnight and exactly at noon,
-	as well as a significant number of SRs created exactly at noon. The reason for this anomaly is worth investigating 
-	as it affects the SR ``duration'' question; if SR durations are used to measure responsiveness
+	An additional problem discovered with the created\_date and closed\_date fields; there appears to be an unusually large number of 
+	SRs created or closed at exactly midnight (00:00:00) and exactly noon (12:00:00), to the second. The distribution of SR creation and closure 
+	largely follows the work-day clock with many SRs created during day-light hours, and fewer SRs 
+	created at night and in the early hours of the morning. 
+	However, here there appears to be significantly greater numbers of SR closed exactly at midnight and exactly at noon,
+	as well as a significant number of SRs created exactly at noon. The reason behind this anomaly is worth investigating 
+	as it affects the SR ``duration'' question. If SR durations are used to measure responsiveness
 	for the delivery of services, and if those times are not an accurate reflection of the start/finish of the Service, then the use of
 	duration as a service quality metric is called into question. Observations during this 2-year period include:
 	
 	\begin{itemize}
-		    \item There were 235,347 SRs closed exactly at midnight
+		    \item There were 99,779 SRs created exactly at noon (12:00:00)
+		    \item There were 235,347 SRs closed exactly at midnight (00:00:00)
 		    \item There were 105,505 SRs closed exactly at noon. 
-		    \item There were 99,779 SRs created exactly at noon 
 	\end{itemize}
 	
-	Here is a visualization of SRs closed and created by the hour of the day :
+	There is, of course, a broad distribution of the time that SRs are created by day and hour, by night and day, by weekday and weekend. 
+	One would think that that distribution would be (mostly) evenly distributed by the minute and second. That is, 
+	if there are normally 100 SRs created between 1-2pm, that the distribution to the minute and second 
+	would be close to random. For example, there is no reason to suspect that a larger number of SRs would be 
+	created at 6 minutes past the hour rather than at 5 minutes past the hour. And certainly, if you look at the second that these SRs
+	are created you would again expect a (more-or-less) random distribution; that there would be no reason to believe 
+	that a higher (or lower) number of SRs would arrive at 18 seconds past the minute versus at 39 seconds past the minute.
+	Unfortunately, that turned out not to be true.
 	
-	\begin{figure}[H]
-		 \centering
-		 \includegraphics[scale = 0.65]{Closed_Hourly_SR_count.png}
-		 \caption{SRs by Hourly closed\_date(s)}
-		 \label{fig:hourly-closed}
-	\end{figure}	
+	Let's look at the SR creation distribution. We discovered that there are a significant number of SRs created exactly at noon. To reveal this
+	trend, we looked at the exact date-time stamp of the created\_date(s). We began by selected only SRs that were created exactly on the minute;
+	at 09:00:00 or 13:00:00 for example.  Here is a visualization of the number of SRs created and closed by hour-of-the-day:
 	
 	\begin{figure}[H]
 		 \centering
@@ -1177,21 +1182,80 @@ is troubling and can produce bizarre analytical results.
 		 \label{fig:hourly-created}
 	\end{figure}	
 	
-	The closed\_date chart show significant spikes in the number of SRs at both midnight
-	and noon with significant counts at exactly those times, to the second. The midnight spike is certainly suspect compared to the hours just before and after midnight where
-	there is normally a pronounced slump in SR closures. And both the closed-at-noon and closed-at-midnight are 
-	approaching 2\textsigma's from the hourly average. The created\_date shows a maximum value at noon also with a significant count occurring exactly at noon, again to 
-	the second. 
+	\begin{figure}[H]
+		 \centering
+		 \includegraphics[scale = 0.65]{Closed_Hourly_SR_count.png}
+		 \caption{SRs by Hourly closed\_date(s)}
+		 \label{fig:hourly-closed}
+	\end{figure}	
+	
+	The created\_date shows a maximum value at 12:00. The closed\_date chart show significant spikes at both midnight
+	and noon. The midnight (00:00) spike appears to be an anomaly especially as compared to the hours just 
+	before and after midnight where there is normally a pronounced slump in SR closures. 
+	And both the closed-at-noon and closed-at-midnight are approaching 2\textsigma's from the hourly average. 
 
-	These unusual patterns of created \& closed SRs at exactly the hours of midnight and noon perhaps indicates
-	the presence of a bulk process; one that perhaps automatically ``closes'' (or ``creates'') a large number of SRs with a provided
-	time-stamp of midnight (00:00:00) or noon (12:00:00). If so, then addressing this issue likely requires a closer look at those 
-	Agencies providing these suspect SR closed/created times. Clearly the desirable state is that the created\_date and closed\_date fields
-	reflect the true opening and closing of the SRs, such that an accurate ``duration'' can be computed which accurately
-	represents the SR life-cycle. 
+	Let's drill down on each of these outlier points. First, we aggregate the created\_date over the 2-year period that fall exactly
+	on the top-of-the-hour with the minute and second values equal to 0, e.g. 09:00:00, 14:00:00. This visualization
+	reveals a clearer picture of where these spikes are:
+	
+	\begin{figure}[H]
+		 \centering
+		 \includegraphics[scale = 0.65]{SR_created_by_top_of_hour.png}
+		 \caption{SRs Created at Top of the Hour}
+		 \label{fig:tophourcreated}
+	\end{figure}	
+
+	One other way to visualize this anomaly is to look at the busiest day during this 2-year period (Friday, 2023-09-29).
+	Here we will aggregated the created\_date(s) by minute (with seconds equal to zero). This provides a 
+	minute-by-minute look at SR creation on the busiest day of this study. Here we see a clear spike at 
+	exactly noon (12:00), well beyond the 3\textsigma line, and well above any other hour of the day.
+	
+	\begin{figure}[H]
+		 \centering
+		 \includegraphics[width=\textwidth]{SR_created_by_minute_of_busiest_day.png}
+		 \caption{SRs created minute-by-minute on busiest day}
+		 \label{fig:busiestcreated}
+	\end{figure}	
+
+	Let's take a similar approach to the closed\_date distribution over the 2-year period. We aggregate 
+	SRs by close\_date to find the top-of-the-hour, where minute and second values equal to 0, e.g. 20:00:00. 
+	Here we see spikes at both midnight (00:00) and at noon (12:00), with the midnight spike being 
+	well beyond the 3\textsigma line. Also note how much lower (and nearly equal) all the other
+	top-of-the-hour values are, relative to the midnight and noon spikes. 
+	
+	\begin{figure}[H]
+		 \centering
+		 \includegraphics[scale = 0.65]{SR_closed_by_top_of_hour.png}
+		 \caption{SRs Closed at Top of the Hour}
+		 \label{fig:tophourclosed}
+	\end{figure}
+	
+	As before, let's visualize this anomaly by looking at the closed\_date(s) on the busiest day
+	during this 2-year study period (Friday, 2023-09-29). We aggregate closed\_date(s) by the
+	minute (with seconds equal to zero). This gives a minute-by-minute view of SR closure
+	on the busiest day of this study. Clearly visual is the very large closure spikes occurring
+	at both midnight and noon. The chart highlights both of these anomalies with spikes
+	of 286 and 120 at 00:00:00 and 12:00:00 respectively. Again, note how these spikes
+	are so very much above the median values for all other minutes.
+
+ 	\begin{figure}[H]
+		 \centering
+		 \includegraphics[width=\textwidth]{SR_closed_by_minute_of_busiest_day.png}
+		 \caption{SRs closed minute-by-minute on busiest day}
+		 \label{fig:busiestclosed}
+	\end{figure}	
+
+	These unusual patterns of created \& closed SRs at exactly the hours of midnight and noon likely indicates
+	the presence of a bulk create/close software process; a process that perhaps automatically ``closes'' (or ``creates'') 
+	a large number of SRs with a provided time-stamp of midnight (00:00:00) or noon (12:00:00), and does so in bulk. 
+	If so, then addressing this issue likely requires a closer look at those Agencies providing these suspect SR closed/created times.
+	 The desirable state is that the created\_date and closed\_date fields correctly reflect the true opening and closing 
+	 of the SRs, such that an accurate ``duration'' can be computed for the SR life-cycle. Otherwise, we are likely seeing 
+	 durations that are artificially manipulated by a software process performing bulk uploads to the 311 system.
 
 	Looking at the distribution by Agency for the ``closed-exactly-at-midnight'' shows that \textgreater{}90\% of these suspect SRs come from just two Agencies - Dept. of 
-	Buildings (DOB) and Dept. of Sanitation (DSNY). If you include HPD and DOT, that accounts for 99\% of the suspect SR closures.
+	Buildings (DOB) and Dept. of Sanitation (DSNY). If you include HPD and DOT, that accounts for 99\% of the suspect SR closures. This Agency
+	distribution does not follow the overall SR distribution and we can assume that it is Agency specific. 
 
 	\begin{figure}[H]
 		 \centering
@@ -1200,10 +1264,9 @@ is troubling and can produce bizarre analytical results.
 		 \label{fig:midnight-closed}
 	\end{figure}	
 
-	
-	Hoever, the ``SR closed at noon'' visualization shows that  a single Agency, DSNY,
+	However, the ``SR closed at noon'' visualization shows that  a single Agency, DSNY,
 	is responsible for \textgreater{}99\% of the SRs ``closed-exactly-at-noon''. Accordingly, any effort to resolve this issue
-	necessitates working with DSNY to fully understand what is occurring. 
+	necessitates working with DSNY to fully understand how this is occurring. 
 	
 	\begin{figure}[H]
 		 \centering
@@ -1222,10 +1285,8 @@ is troubling and can produce bizarre analytical results.
 		 \label{fig:noon-created}
 	\end{figure}		
 		
-	It is difficult to determine if these observations are indeed anomalies. They could be the result of normal, expected
-	311 SR activity. But at least by observation that appears unlikely.	
-		
-		
+	While it is difficult to ultimately know if these observations are indeed anomalies; they could be the result of normal, expected
+	311 SR activity. But at least by observation that outcome appears very unlikely.	
 		
 	\subsection{resolution\_action\_update\_date}
 	When an SR is updated, by any means on any field, the software automatically populates the resolution\_action\_update\_date. Analyzing that field

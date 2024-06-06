@@ -1,5 +1,5 @@
 
-Execution begins at: 2024-05-27 21:01:09
+Execution begins at: 2024-05-29 23:17:54
 
 **********DATA SUMMARY**********
 
@@ -815,7 +815,7 @@ Sample of near-matching ' cross_street_1 ' & ' intersection_street_1 (both non-b
 Summary of' cross_street_1 ' and ' intersection_street_1 ':
  category                    count   percentage
  Matching                    5637182 88.15     
- Both blank∈Matching         1624499 25.4      
+ Both blank -- Matching      1624499 25.4      
  Non-matching                 757726 11.85     
  cross_street_1_blank         222232 N/A       
  intersection_street_1_blank  519348 N/A       
@@ -923,7 +923,7 @@ Sample of near-matching ' cross_street_2 ' & ' intersection_street_2 (both non-b
 Summary of' cross_street_2 ' and ' intersection_street_2 ':
  category                    count   percentage
  Matching                    5644365 88.26     
- Both blank∈Matching         1623276 25.38     
+ Both blank -- Matching      1623276 25.38     
  Non-matching                 750543 11.74     
  cross_street_2_blank         222788 N/A       
  intersection_street_2_blank  517431 N/A       
@@ -932,23 +932,8 @@ Summary of' cross_street_2 ' and ' intersection_street_2 ':
 
 **********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********
 
-Shrinking file size by deleting these 11 redundant fields:
-     1 - agency_name 
-     2 - park_borough 
-     3 - borough_boundaries 
-     4 - location 
-     5 - intersection_street_1 
-     6 - intersection_street_2 
-     7 - police_precinct 
-     8 - duration 
-     9 - postClosedUpdateDuration 
-     10 - translated_borough_boundaries 
-     11 - zip_codes 
-Original size: 3.2 Gb 
-Size after removing redundant columns: 2.8 Gb 
-Potential size reduction: 395.3 Mb or 12.3 %
-Execution ends at: 2024-05-27 22:49:56
+Execution ends at: 2024-05-30 00:40:28
 
-Program run-time:  1.8128 hours 
+Program run-time:  1.3761 hours 
 
  *****END OF PROGRAM*****
