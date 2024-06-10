@@ -47,6 +47,8 @@
   round-precision = 0
 }
 
+% image path
+\graphicspath{{.}{./images}}
 
 % control floats
 \renewcommand\floatpagefraction{.9}
@@ -78,9 +80,9 @@
 \begin{document}
 \maketitle
 
-\tableofcontents % Optional: Table of Contents
-\listoffigures % List of Figures
-\listoftables % List of Tables
+% \tableofcontents % Optional: Table of Contents
+% \listoffigures % List of Figures
+% \listoftables % List of Tables
 
 \hyphenpenalty=1000
 
@@ -133,7 +135,6 @@ In the early 21st century, the open data movement began to take shape, driven by
 fundamental belief that freely accessible data can transform 
 both societies and governments. This movement champions the principles of 
 transparency, innovation, and public engagement. 
-
 A landmark in this journey was the launch of the United States'
 \href{https://www.data.gov}{Data.gov} portal in 2009, a pioneering
 platform in making government data widely accessible. Shortly after,
@@ -143,12 +144,12 @@ cementing the movement's global reach. Furthermore, the World Bank's Open
 Data initiative, initiated in 2010, stands out as a comprehensive
 repository for global development data, available at
 \href{https://data.worldbank.org}{World Bank Open Data}. 
-
 These initiatives represent significant strides in democratizing data, in breaking barriers that once
 kept valuable information on government performance in silos. Their collective impact is profound, extending beyond
 mere data sharing to fostering a culture of openness that benefits
 individuals, communities, governments, and economies worldwide
 \citep{barns2016mine, wang2016adoption}.
+
 
 New York City (NYC) has emerged as a forerunner in the open data
 movement, marked by the enactment of the Open Data Law in 2012
@@ -211,17 +212,18 @@ multifaceted nature of data curation but also emphasize
 its indispensable role in enhancing the applicability and value of
 open data across various domains.
 
+
 The contributions of this paper are twofold. First, we delve into
 the specifics of data curation challenges using the NYC 311 Service
 Request (SR) Data as a case study. This renowned and frequently viewed 
 dataset serves as a prime example for examining key issues in data curation, 
 including data validity, consistency, and curation efficiency. 
 We illustrate these points with live examples drawn from our processing of the 311 SR data. 
-
 Secondly, building upon insights gained from this case study, we 
 propose a set of data curation principles tailored for government-released open data. 
 These principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
+
 
 The paper is organized as follows:
 Section~\ref{sec:history} offers a brief review of the history of the 311 system. In 
