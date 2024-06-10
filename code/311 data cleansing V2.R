@@ -252,14 +252,19 @@ cross_street_analysis <- function(
     intersection_street
   )
   num_rows_non_dup <- nrow(non_dup_streets)
+  cat("\n# of non_dup_streets", num_rows_non_dup)
 
   non_dup_streets_non_blank <- subset(
-    non_dup_streets,
-    non_dup_streets$cross_street != "" &
-      non_dup_streets$intersection_street != ""
+   non_dup_streets,
+   non_dup_streets$cross_street != "" &
+     non_dup_streets$intersection_street != ""
   )
 
+
+  
+  
   num_rows_non_dup_non_blank <- nrow(non_dup_streets_non_blank)
+  cat("\n# of non_dup_non_blank", num_rows_non_dup_non_blank)
 
   cat("\nSample of matching 'cross_street' & 'intersection_street':\n")
   random_sample_equal <- equal_streets_non_blank %>% sample_n(min(num_rows_equal_non_blank, 10)) # random sample
@@ -362,15 +367,15 @@ cross_street_analysis <- function(
   summary_street <-
     data.frame(
       category = c(
-        "Matching",
-        "Both blank -- Matching",
+        "Matching -- non-blank",
+        "Matching -- both blank",
         "Non-matching",
         paste(cross_street, "blank", sep = "_"),
         paste(intersection_street, "blank", sep = "_"),
         "Near-match"
       ),
       count = c(
-        num_rows_equal,
+        num_rows_equal - num_rows_both_blank,
         num_rows_both_blank,
         num_rows_non_dup,
         num_rows_cross_street_blank,
@@ -379,7 +384,7 @@ cross_street_analysis <- function(
       )
     )
 
-  summary_street$percentage[1] <- round((num_rows_equal / num_rows_d311) * 100, 2)
+  summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_d311) * 100, 2)
   summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_d311) * 100, 2)
   summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_d311) * 100, 2)
   summary_street$percentage[4] <- "N/A"
@@ -443,6 +448,7 @@ detect_duplicates <- function(
     dataset,
     reference_field,
     duplicate_field) {
+  
   # Condition 0: Identify matching values, excluding NA rows for both fields
   row_condition_0 <- which(!is.na(dataset[[reference_field]]) & !is.na(dataset[[reference_field]]) &
     dataset[[reference_field]] == dataset[[duplicate_field]])
@@ -472,26 +478,25 @@ detect_duplicates <- function(
     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
 
   if (num_non_matching_fields > 0) {
+  
+    if (num_matching_fields > 0) {
     cat(
       "\n\nThere are",
       format(num_matching_fields, big.mark = ","),
       "matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-      matching_percentage, "% of data.\n"
-    )
-
+      matching_percentage, "% of data.\n")
+    }
     cat(
       "\nThere are",
       format(num_non_matching_fields, big.mark = ","),
       "non-matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-      non_matching_percentage, "% of data.\n"
-    )
-    return_rows <- non_matching_fields
-
-    return(return_rows)
-  } else {
-    cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
+      non_matching_percentage, "% of data.\n")
+    
+  return(non_matching_fields)
   }
-}
+  else {
+  cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
+  }
 
 #########################################################################
 create_boxplot <- function(
@@ -2667,7 +2672,9 @@ print(top_10_zip_codes, row.names = FALSE, right = FALSE)
 
 #########################################################################
 # Normalize street names
-address_fields <- c("intersection_street_1", "intersection_street_2", "cross_street_1", "cross_street_2") # Replace with your actual address field names
+address_fields <- c("intersection_street_1", "intersection_street_2", 
+                    "cross_street_1", "cross_street_2",
+                    "street_name", "landmark") # Replace with your actual address field names
 
 xcloned311 <- d311 # Create a copy of the data to avoid modifying the original
 
@@ -2675,6 +2682,11 @@ xcloned311 <- d311 # Create a copy of the data to avoid modifying the original
 # Apply normal_address function to each column in address_fields
 xcloned311[address_fields] <- lapply(xcloned311[address_fields], normal_address, abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
 # **********************
+x_street_dataset <- xcloned311
+cross_street <- "street_name"
+intersection_street <- "landmark"
+z1 <- cross_street_analysis(x_street_dataset, cross_street, intersection_street)
+
 
 x_street_dataset <- xcloned311
 cross_street <- "cross_street_1"
@@ -2690,54 +2702,54 @@ y2 <- cross_street_analysis(x_street_dataset, cross_street, intersection_street)
 cat("\n\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
 
 # #########################################################################
-# 
-# # List of redundant columns to remove
-# redundant_columns <- c(
-#   "agency_name",
-#   "park_borough",
-#   "borough_boundaries",
-#   "location",
-#   "intersection_street_1",
-#   "intersection_street_2",
-#   "police_precinct",
-#   "duration",
-#   "postClosedUpdateDuration",
-#   "translated_borough_boundaries",
-#   "zip_codes"
-# )
-# 
-# cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
-# 
-# # Print the redundant columns vertically
-# index <- 1
-# for (column in redundant_columns) {
-#   cat("    ", index, "-", column, "\n")
-#   index <- index + 1
-# }
-# 
-# # Read the data into a data table object
-# d311 <- read.csv(data1File, header = TRUE, sep = ",")
-# 
-# # make columns names user friendly
-# d311 <- makeColNamesUserFriendly(d311)
-# 
-# # Calculate the current size of the data table object
-# original_size <- object.size(d311)
-# 
-# # Delete the redundant columns
-# d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
-# 
-# # Calculate the size of the new data table object
-# reduced_size <- object.size(d311_reduced)
-# 
-# # Compute the difference in size
-# size_reduction <- original_size - reduced_size
-# 
-# # Print the results
-# cat("Original size:", format(original_size, units = "auto"), "\n")
-# cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
-# cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
-#     round(size_reduction/original_size * 100, 1),  "%")
+
+# List of redundant columns to remove
+redundant_columns <- c(
+  "agency_name",
+  "park_borough",
+  "borough_boundaries",
+  "location",
+  "intersection_street_1",
+  "intersection_street_2",
+  "police_precinct",
+  "duration",
+  "postClosedUpdateDuration",
+  "translated_borough_boundaries",
+  "zip_codes"
+)
+
+cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
+
+# Print the redundant columns vertically
+index <- 1
+for (column in redundant_columns) {
+  cat("    ", index, "-", column, "\n")
+  index <- index + 1
+}
+
+# Read the data into a data table object
+d311 <- read.csv(data1File, header = TRUE, sep = ",")
+
+# make columns names user friendly
+d311 <- makeColNamesUserFriendly(d311)
+
+# Calculate the current size of the data table object
+original_size <- object.size(d311)
+
+# Delete the redundant columns
+d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
+
+# Calculate the size of the new data table object
+reduced_size <- object.size(d311_reduced)
+
+# Compute the difference in size
+size_reduction <- original_size - reduced_size
+
+# Print the results
+cat("Original size:", format(original_size, units = "auto"), "\n")
+cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
+cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
+    round(size_reduction/original_size * 100, 1),  "%")
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
