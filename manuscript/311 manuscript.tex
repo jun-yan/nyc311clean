@@ -86,22 +86,43 @@
 
 
 \begin{abstract}
-  Open data is important ...
-  Quality control is important ...
-  We use New York City 311 requests data  ...
-  We suggest some open data quality control protocols ...
+  In the early 21st century, the open data movement began to transform societies and governments through principles of transparency, 
+  innovation, and public engagement. New York City (NYC) has emerged as a leader in this movement 
+  with the enactment of the Open Data Law in 2012, leading to the creation of the NYC Open Data portal, 
+  which now hosts 2700 datasets from 80 city agencies. This resource has proven invaluable for research 
+  across various domains, including health, urban development, and transportation. 
+  The success of these initiatives underscores the importance of data curation, ensuring the utility and reliability of datasets. 
+
+This paper examines the data curation challenges using the NYC 311 Service Request (SR) Data as a case study, 
+  addressing issues of data validity, consistency, and curation efficiency. Based on insights from this case study, 
+  we propose a set of data curation principles tailored for government-released open data. 
+  These principles aim to enhance data management practices and ensure the ongoing utility of open data. 
+  The paper concludes with actionable suggestions for improving data curation 
+  and offers general principles for the release of open data.
 
 
 \bigskip
   
 \noindent
 {\it Keywords:}
-consistency check;    
-data release protocol;
-data science;
-open data;
-data cleansing;
-quality control	
+Data science;
+Open data;
+Data cleansing;
+Quality control;
+Open Data Movement;
+Data Democratization;
+Transparency;
+Data Curation;
+Government Data;
+NYC Open Data;
+311 Service Request Data;
+Data Validity;
+Data Consistency;
+Data Efficiency;
+Smart Cities;
+Public Engagement;
+Research Data Management;
+
 \end{abstract}
 
 \doublespacing
@@ -249,7 +270,8 @@ Key milestones in the 311 system development include:
 Today, the NYC 311 data system is a robust platform that manages a
 vast array of urban living-related inquiries. The system handles over 3 million service 
 requests (SRs) per year, encompassing such complaints as street noise, illegal parking, heat/hot water, abandoned vehicles,
-and unsanitary conditions. The data, managed through a tailored application built on the Microsoft Dynamics and Azure platform, is a valuable resource for city
+and unsanitary conditions. The data, managed through a tailored application built on the 
+Microsoft Dynamics and Azure platform, is a valuable resource for city
 administration and policy-making. The 311 data is publicly accessible through the 
 \href{https://opendata.cityofnewyork.us/}{NYC Open Data Portal} which provides access
 to all the data sets (approx. 2700) and provides a convenient method for querying, grouping, aggregating, geo-mapping, visualization, and exporting
@@ -447,7 +469,9 @@ identify the responsible party and assist in troubleshooting discrepancies.
 
 When we discovered a data error, we typically observe one of two trends; either a single (or a few) Agencies are responsible (such as Dept of Transportation), 
 or it is a system-wide issue that follows the general distribution of  SRs across the system. 
-Thus we can often identify if it is an Agency specific problem, or a systemic issue.
+Thus we can often identify if it is an Agency specific problem, or a systemic issue.  (Note: a few key NYC Agencies are not 
+represented in the 311 dataset. These include the New York City Housing Authority (NYCHA) and the
+Department of Corrections (DOC).)
 
 Although the 311 SRs involve 16 different agencies, there are the ``big six'' Agencies that comprise
 90\% of the complaints. These six are (in order of \% of complaints):  
@@ -614,7 +638,7 @@ Here is a screenshot of the NYC Open Data Portal ``Column Manager'' page showing
 
 \begin{figure}[H]
   \centering
-	  \includegraphics[scale = 0.65]{computed_columns_screenshot.png}
+	  \includegraphics[width = \textwidth] {computed_columns_screenshot.png}
 	  \caption{Screenshot of data portal showing the ``@computed'' columns}
 	  \label{fig:computed-columns}
 \end{figure}
@@ -814,7 +838,7 @@ dataset before conduction further analysis. Here are some results.
 		  \label{fig:invalid_incident_zip}
 	\end{figure}
 	
-		\subsubsection{Case Study: Noise Complaints by Zip Code}
+		\subsubsection{Case Study: Noise Complaints by Zip Code}{label{sec:case-study-zip-codes}
 		\textbf{Scenario:} The NYC Office of Nightlife (ONL) wants to know ``What are the top 10 zip codes for Noise Complaints (all 8 types) over the last two years?''
 		The goal is to assess the impact of the recent NYC effort looking to promote a safe and vibrant nightlife scene in NYC while seeking to ease
 		strained relations between bar and club owners. 
@@ -869,7 +893,7 @@ dataset before conduction further analysis. Here are some results.
 
 	As indicated, six out of ten zip\_codes are invalid, which corresponds closely with what is observed in the overall dataset (58\%). Whereas the incident\_zip
 	field is completely valid, again in-line with the overall incident\_zip validation percentage (99.04\%). If the analysis performed using the zip\_codes field were to be
-	presented to the Drirectror, ONL, the conclusion would be in error. Perhaps more curious than the differing zip codes on the two lists, 
+	presented to the Director, ONL, the conclusion would be in error. Perhaps more curious than the differing zip codes on the two lists, 
 	is the fact that the numerical counts are nearly identical;  the overall counts are quite close. This is curious since
 	one field is computed while the other is via data entry; the computed protocol is again the suspect. The algorithm appears to be counting corrrectly (or nearly so)
 	but mis-identifying the corresponding zip code.
@@ -963,7 +987,7 @@ dataset before conduction further analysis. Here are some results.
 
 		\begin{figure}[H]
 	 	 \centering
-		  \includegraphics[scale = 0.65]{invalid_community_boards.png}
+		  \includegraphics[width = \textwidth]{invalid_community_boards.png}
 		  \caption{Invalid Community Board by Agency}
 		  \label{fig:invalid_community_boards}
 		\end{figure}
@@ -977,12 +1001,8 @@ dataset before conduction further analysis. Here are some results.
 	and waterfront/open/public spaces. It is another of the NYC well-tracked measures.
 
 	Due to how the community\_district data is formatted, it is not possible to establish validity. However, it is possible to determine that the dataset contains
-	72 unique entries, while there are only 59 valid Community Districts. So it would appear that there are 13 invalid commuity\_board(s) contained in the dataset.
+	72 unique entries, while there are only 59 valid Community Districts. So it would appear that there are 13 invalid community\_board(s) contained in the dataset.
 	
-	
-	
-\section{Inconsistent \& Unusual Patterns with Dates}\label{sec:inconsistencies}
-
 As previously mentioned, the dataset has four data fields:  created\_date, closed\_date, due\_date, and resolution\_action\_update\_date.
 The due\_date field has few entries to analyze; 99.62\% of due\_date entries are ``N/A''.  It is not known if the due\_date(s) are truely
 ``not applicable'' or that the due\_date field is rarely used. The  resolution\_action\_update\_date field serves as a date-time marker
@@ -1082,7 +1102,7 @@ types of errors occur.
 
 \begin{figure}[H]
  	 \centering
-	  \includegraphics[scale = 0.65]{negative_duration_SR_barchart.png}
+	  \includegraphics[width = \textwidth]{negative_duration_SR_barchart.png}
 	  \caption{SRs with a Negative Duration by Agency}
 	  \label{fig:negative-duration}
 \end{figure}
@@ -1093,7 +1113,7 @@ is troubling and can produce bizarre analytical results.
 
 \begin{figure}[H]
  	 \centering
-	  \includegraphics[scale = 0.65]{negative_duration_SR_violin.png}
+	  \includegraphics[width = \textwidth]{negative_duration_SR_violin.png}
 	  \caption{Negative duration distribution}
 	  \label{fig:negative-duration-violin}
 \end{figure}
@@ -1124,7 +1144,7 @@ is troubling and can produce bizarre analytical results.
 		
 		\begin{figure}[H]
 		 	 \centering
-			  \includegraphics[scale = 0.65]{homeless_response_time_clean.png}
+			  \includegraphics[width = \textwidth]{homeless_response_time_clean.png}
 			  \caption{Homeless Assistance SR Durations}
 			  \label{fig:homeless}
 		\end{figure}
@@ -1140,7 +1160,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{zero_duration_SR.png}
+		 \includegraphics[width = \textwidth]{zero_duration_SR.png}
 		 \caption{SRs with Zero Durations by Agency}
 		 \label{fig:sero-duration}
 	\end{figure}	
@@ -1177,14 +1197,14 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{Created_Hourly_SR_count.png}
+		 \includegraphics[width = \textwidth]{Created_Hourly_SR_count.png}
 		 \caption{SRs by Hourly created\_date(s)}
 		 \label{fig:hourly-created}
 	\end{figure}	
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{Closed_Hourly_SR_count.png}
+		 \includegraphics[width = \textwidth]{Closed_Hourly_SR_count.png}
 		 \caption{SRs by Hourly closed\_date(s)}
 		 \label{fig:hourly-closed}
 	\end{figure}	
@@ -1200,7 +1220,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{SR_created_by_top_of_hour.png}
+		 \includegraphics[width = \textwidth]{SR_created_by_top_of_hour.png}
 		 \caption{SRs Created at Top of the Hour}
 		 \label{fig:tophourcreated}
 	\end{figure}	
@@ -1225,7 +1245,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{SR_closed_by_top_of_hour.png}
+		 \includegraphics[width = \textwidth]{SR_closed_by_top_of_hour.png}
 		 \caption{SRs Closed at Top of the Hour}
 		 \label{fig:tophourclosed}
 	\end{figure}
@@ -1259,7 +1279,7 @@ is troubling and can produce bizarre analytical results.
 
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{closed_at_midnight_chart.png}
+		 \includegraphics[width = \textwidth]{closed_at_midnight_chart.png}
 		 \caption{SRs Closed Exactly at Midnight by Agency}
 		 \label{fig:midnight-closed}
 	\end{figure}	
@@ -1270,7 +1290,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{closed_at_noon_chart.png}
+		 \includegraphics[width = \textwidth]{closed_at_noon_chart.png}
 		 \caption{SRs Closed Exactly at Noon by Agency}
 		 \label{fig:noon-closed}
 	\end{figure}	
@@ -1280,7 +1300,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{created_at_noon_chart.png}
+		 \includegraphics[width = \textwidth]{created_at_noon_chart.png}
 		 \caption{SRs Created Exactly at Noon by Agency}
 		 \label{fig:noon-created}
 	\end{figure}		
@@ -1296,7 +1316,7 @@ is troubling and can produce bizarre analytical results.
 	inaccurate dates may possibly be coming from an Excel spreadsheet as that is the minimum date which Excel can handle. Here is a sample
 	of those SRs:
 
-\begin{table}[H]
+	\begin{table}[H]
 	    \centering
 	    \footnotesize
 	    \begin{tabular}{cccc}
@@ -1344,7 +1364,7 @@ is troubling and can produce bizarre analytical results.
 	
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{post_closed_violin.png}
+		 \includegraphics[width = \textwidth]{post_closed_violin.png}
 		 \caption{Post-Closed resolution\_action\_update\_date >30 days }
 		 \label{fig:resolution-violin}
 	\end{figure}		
@@ -1356,7 +1376,7 @@ is troubling and can produce bizarre analytical results.
 
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{postClosedBarChart.png}
+		 \includegraphics[width = \textwidth]{postClosedBarChart.png}
 		 \caption{Post-Closed resolution\_action\_update\_date >30 days by Agency }
 		 \label{fig:resolution-by-agency}
 	\end{figure}		
@@ -1374,7 +1394,9 @@ overstating things.
 
 
 \section{Redundant \& Duplicate fields}\label{sec:duplicates}
-During this analysis, several redundant fields were observed.
+During this analysis, several redundant fields were observed. Listed below is a discussion for each of a pair
+of data fields that are redundant or near-redundant. These fields should be examined further for possible
+consolidation in the overall dataset.
 
 \subsection{latitude \& longitude and the location fields}  The location field is a pure concatenation of the latitude and longitude fields, 
 with a comma an parenthesis added. Example:  
@@ -1404,7 +1426,7 @@ We can tell where the non-matches occur. It is mostly in DOT, NYPD, and DSNY whi
 
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{non_matching_borough_boundaries_chart.png}
+		 \includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.png}
 		 \caption{Non-matching borough and borough\_boundary by Agency }
 		 \label{fig:borough-boundaries}
 	\end{figure}	
@@ -1434,8 +1456,57 @@ the ``right'' field to use. (The validity of these fields is covered in Section 
  of Housing Preservation and Development, Department of Environmental Protection, and so on.  Given how well known the NYC Agency abbreviations are
 it seems redundant to include both in the dataset.
 
+\subsection{landmark and street\_name}
+The landmark field is listed in the Data Dictionary as ``Can refer to any noteworthy location, including but not 
+limited to, parks, hospitals, airports, sports facilities, performance spaces, etc.'' We found that was not the case. To be sure
+many of the entries in the landmark field do contain landmark names, e.g.``Pennsylvania Station'', ``La Guardia Airport'', 
+``Gramercy Park'', the vast majority of the entries are street names, e.g. ``Fenton Avenue'', ``Steinway Street'', ``Broadway''.
+These entries appear to be very similar to those in the street\_name field. And in fact, the values of street\_name
+and landmark exactly match 62\% of the time, and while this is not a full duplicate, it is a precentage of 
+matching that is certainly indicative of duplicate usage. Even the non-matches (excluding blanks) would appear
+to be matches except for minor spelling and nomenclature changes, e.g. ``NINTH AVE'' \& ``9 AVE''.
+
+\begin{table}[ht]
+    \centering
+    \footnotesize
+    \begin{tabular}{>{\raggedright\arraybackslash}p{5cm} >{\raggedright\arraybackslash}p{5cm}}
+        \toprule
+        \textbf{street\_name} & \textbf{landmark} \\
+        \midrule
+        MACDOUGAL ST & MAC DOUGAL ST \\
+        NINTH AVE & 9 AVE \\
+        NORTH SIXTH ST & NORTH 6 ST \\
+        SOUTH FOURTH ST & SOUTH 4 ST \\
+        SIXTH AVE & 6 AVE \\
+        THIRD AVE & 3 AVE \\
+        EAST FIRST ST & EAST 1 ST \\
+        FOURTH AVE & 4 AVE \\
+        SAINT LAWRENCE AVE & ST LAWRENCE AVE \\
+        SOUTH FIRST ST & SOUTH 1 ST \\
+        BRIGHTON SEVENTH ST & BRIGHTON 7 ST \\
+        WEST FIFTH ST & WEST 5 ST \\
+        MT HOPE PL & MOUNT HOPE PL \\
+        PENN STA & PENNSYLVANIA STA \\
+        \bottomrule
+    \end{tabular}
+    \caption{Non-matches between 'street\_name' and 'landmark' fields}
+    \label{landmark}
+\end{table}
+
+The distribution by Agency for the non-matches somewhat follows the overall SR distribution (NYPD, DPR, DSNY), 
+but with some notable exceptions such as Taxi \& Limo Commission, Dept of Homeless Services (DHS),
+ and Dept of Health \& Mental Hygiene (DOHMH).
+
+\begin{figure}[H]
+		 \centering
+		 \includegraphics[width = \textwidth]{landmark_dup.png}
+		 \caption{Non-matching street\_name \& landmark by Agency }
+		 \label{fig:landmarkchart}
+	\end{figure}	
+	
+	
 \subsection{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 \& intersection\_street\_2}
-There are two sets of street pairs in the dataset:
+There are two sets of street pairs in the dataset in addition to the complaint address:
 
 	\begin{itemize}
 		\item cross\_street\_1
@@ -1444,8 +1515,8 @@ There are two sets of street pairs in the dataset:
 		\item intersection\_street\_2
 	\end{itemize}
 	
-These two pairs of streets are used to help identify the location of the reported incident, as in common in
-New York to provide the street address and the cross street, as in ``24 W 90th street between Columbus and
+These two pairs of streets are used to help identify the location of the reported incident, as it is common in
+New York City to provide the street address and the cross street, as in ``24 W 90th street between Columbus and
 Amsterdam''. The Data Dictionary states that these streets are
  ``based on the geo validated incident location''. It then adds ``If the service request 
 pertains to a location in the middle of a block, cross street will be provided by geocoding...If the service request 
@@ -1454,19 +1525,18 @@ cross\_street(s) would apply for ``middle of a block'' incidents, while the inte
 apply to those incidents that happen on a street corner; that those two sets of fields would be
 exclusive to one another; and either/or situation. 
 
-Unfortunately, that is not the case. For the majority of data rows, both pair of fields are populated.
+Unfortunately, that is not the case. For the majority of data rows, both pair of fields are populated and are duplicates.
 In fact, 88\% of the time, cross\_street\_1 exactly matches intersection\_street\_1 and 
-cross\_street\_2 exactly matches intersection\_street\_2, and only 11.9\% are non-matches.
+cross\_street\_2 exactly matches intersection\_street\_2, Only 11.9\% are non-matches.
 
-(Note address standardization was applied to the street addresses using the R \emph{campfin} package. 
+\textit{(Note: Address standardization was applied to the street addresses using the R \emph{campfin} package. 
 This was done so as to prevent the software from generating a non-match between 
 streets such as ``240 E 69\textsuperscript{th} ST'' and ``240 E 69\textsuperscript{th} Street'' 
-which are clearly the same address, just some slight formatting and spelling differences.)
+which are clearly the same address, just slight formatting and spelling differences.)}
 
-The problem occurs when the two pairs of streets do not match, or when one is blank and the
-other is not. Which set is correct? If one is blank, say cross\_street\_1, but  intersection\_street\_1
+The problem occurs when the two pairs of streets do not match, such as when one is blank and the
+other is not. Which street is correct? If one is blank, say cross\_street\_1, but  intersection\_street\_1
 is not blank, should you use the non-blank one?  Let's look at some examples:
-
 
 \begin{table}[H]
     \centering
@@ -1500,19 +1570,26 @@ is not blank, should you use the non-blank one?  Let's look at some examples:
 
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{non-matchingcross_street_1andintersection_street_1.png}
+		 \includegraphics[width = \textwidth]{non-matchingcross_street_1andintersection_street_1.png}
 		 \caption{Non-matching X\_Street\_1 \& Intersection\_Street\_1}
 		 \label{fig:xstreet1}
 	\end{figure}	
 
 	\begin{figure}[H]
 		 \centering
-		 \includegraphics[scale = 0.65]{non-matchingcross_street_2andintersection_street_2.png}
+		 \includegraphics[width = \textwidth]{non-matchingcross_street_2andintersection_street_2.png}
 		 \caption{Non-matching X\_Street\_2 \& Intersection\_Street\_2}
 		 \label{fig:xstreet2}
 	\end{figure}	
 
-Near matches.
+In addition to the matching/non-matching values, we encountered a number of what you might call
+\emph{near-matches}. There were numerous cases where the cross\_street and intersection\_street
+would be close to identical, e.g. HARMON DR and HARMON RD. To identify these near-matches
+we applied a common method of determining matches by measuring 
+the \href{https://en.wikipedia.org/wiki/Hamming_distance}{Hamming Distance} between
+the two fields. The Hamming Distance is a measure of how many letters have to be changed
+in order for the two fields to match. For this analysis, we chose a Hamming Distance of 2.
+Here are the results for both cross\_street and intersection\_street.
 
 \begin{table}[H]
     \centering
@@ -1556,8 +1633,6 @@ Near matches.
     \label{tab:summary1}
 \end{table}
 
-
-
 \begin{table}[H]
     \centering
     \footnotesize
@@ -1565,8 +1640,8 @@ Near matches.
         \toprule
         \textbf{category} & \textbf{count} & \textbf{percentage} \\
         \midrule
-        Matching                    & 5,644,365 & 88.26     \\
-        Both blank -- Matching      & 1,623,276 & 25.38     \\
+        Matching -- non-blank      & 4,012,683 & 62.75     \\
+        Matching -- both blank     & 1,623,276 & 25.38     \\
         Non-matching                &   750,543 & 11.74     \\
         cross\_street\_2\_blank     &   222,788 & N/A       \\
         intersection\_street\_2\_blank &   517,431 & N/A       \\
@@ -1577,8 +1652,6 @@ Near matches.
     \label{tab:summary_cross_intersection_2}
 \end{table}
 
-
-
 \begin{table}[H]
     \centering
     \footnotesize
@@ -1586,8 +1659,8 @@ Near matches.
         \toprule
         \textbf{category} & \textbf{count} & \textbf{percentage} \\
         \midrule
-        Matching                    & 5,644,365 & 88.26     \\
-        Both blank -- Matching      & 1,623,276 & 25.38     \\
+        Matching -- non-blank         & 4,021,089 & 62.88     \\
+        Matching -- both blank  & 1,623,276 & 25.38     \\
         Non-matching                &   750,543 & 11.74     \\
         cross\_street\_2\_blank     &   222,788 & N/A       \\
         intersection\_street\_2\_blank &   517,431 & N/A       \\
@@ -1621,32 +1694,158 @@ Near matches.
     \label{tab:near_matching_cross_intersection_2}
 \end{table}
 
-Shrinking file size by deleting these 11 redundant fields:
-     1 - agency\_name 
-     2 - park\_borough 
-     3 - borough\_boundaries 
-     4 - location 
-     5 - intersection\_street\_1 
-     6 - intersection\_street\_2 
-     7 - police\_precinct 
-     8 - duration 
-     9 - postClosedUpdateDuration 
-     10 - translated\_borough\_boundaries 
-     11 - zip\_codes 
-Original size: 3.2 Gb 
-Size after removing redundant columns: 2.8 Gb 
-Potential size reduction: 395.3 Mb or 12.3\%
+
+ \subsection{Shrinking file size by removing duplicates}
+ 
+ By removing duplicate and ``near-duplicate'' fields, it is possible to shrink the file size by 12.3\%
+ which for this dataset equates to a reduction of 395 Mb. A smaller file size means faster downloads,
+ less storage impact, as well as simplifying data analysis efforts.  
+ 
+ Below is a list of duplicate and near-duplicate fields. There are some challenges with these proposed deletions, 
+ mostly with the ``near duplicate'' fields.  So while the park\_borough is a complete duplicate of the borough
+ field, the borough\_boundary field is only 98.3\% duplicate. Admittedly, loosing 1.7\% of the data in those two
+ fields is quite small, for this large dataset that amounts to 110, 715 non-matching occurrences. Similarly with 
+ police\_precincts and police\_precincts where there is a 99.9\% match; close to 100\% but not a complete match.
+
+Ultimately, it will require a deeper dive into the relationship between these duplicate and near-duplicate fields to
+ determine if they can be removed or not. Pending that, the authors would propose deleting the following fields
+ from the overall data set, which explanation provided.
+ 
+ 	\begin{itemize}
+		    \item agency\_name: Each row of data contains the agency field, which is an abbreviation of the Agency's name.
+		    The agency\_name abbreviations are clear, simple, and well understood. The authors believe the agency\_name field could
+		    be eliminated without loss of data quality. 
+		    
+		    \item park\_borough:  This field is a 100\% match with the borough field. Removal of this field will not result in any loss
+		    of data or data quality.
+		    
+		    \item location:  The location field is simply a concatenation of the latitude and longitude fields, with a comma and 
+		    parenthesis added. The authors feel this field actually hinders data analysis as the
+		    field must be re-split into the two components (latitude and longitude) to conduct geographic analysis.
+		     The data is a 100\% duplication of the latitude and longitude fields. Removal of this field will
+		    not result in any loss of data.
+		    
+		    \item police\_precinct: This field has a 99.95\% match with the police\_precincts fields. We are unable to determine which
+		    field is more correct, but feel that removal of one of the precinct fields is prudent and would result in very minimal 
+		    data loss. (We should note that both police\_precinct and police\_precincts fields each have 34.5\% invalid data.)
+		   
+		   \item borough\_boundaries (computed field): This field is one of the six computed fields. It has a 98.3 match with the
+		    borough field. We recommend deleting this fields despite the somewhat limited loss of data. 
+		    
+		    \item cross\_street\_1 \& 2 and intersection\_street\_1 \& 2: These two pairs of fields each have an 88\% match. We would
+		    recommend deleting the two intersection\_street fields while acknowledging some loss of data in doing so.
+		     
+		    \item zip\_codes(computed field):  This field is one of the six computed fields.  However, this field has error rate of
+		    58\% and as shown in the \ref{sec:case-study-zip-codes} can lead to dangerous mistakes when used for analytical purposes.
+		    We would recommend deleting this field.
+	\end{itemize}
+ 	
+Additionally, it would be worth investigating if certain data fields are in-fact useful, as the population of these fields is very, very 
+scarce. For example, the taxi\_company\_borough field is 99.94\% blank, and the remaining entries match the borough field only
+0.05\% field. A similar situation exists for the road\_ramp field (99.75\% blank), the vehicle\_type field (99.71\%blank), and possibly 
+due\_date which is 99.62\% blank. There are several others: bridge\_highway\_direction, bridge\_highway\_name,
+bridge\_highway\_segment, and taxi\_pick\_up\_location...all of which have \textgreater99\% blanks. Most of those fields appear to be 
+almost exclusively used by the Taxi \& Limo Commission (TLC), which should be consulted to 
+determine if those fields are used and properly populated.   
 
 
 
-\section{Improvements} \label{sec:improvements}
+\section{Data Dictionary Observations} \label{sec:datadictionay}
+During this analysis, it became apparent that the published Data Dictionary could use an update. We found many discrepancies between
+the Data Dictionary and the actual data. While not actually, incorrect or dirty data, it nonetheless can lead analytic efforts astray.
+In data analysis, it's essential to accurately describe the nature and purpose of each field to ensure proper handling and interpretation. 
+Here are some of the noted discrepancies:  
 
-Data validation: identify invalid data
+\begin{itemize}
+	\item While the Open Data portal lists the basic data types of the various fields, the Data Dictionary does not. Nor
+	does it provide meaningful information on the specifics of various fields, such as constraints or domain of legal values.
+	For example, the incident\_zip field is specified as ``text''. That's probably not the best definition, perhaps
+	``categorical'' would be more appropriate with a description indicating that the data can contain only numeric characters
+	and is not subjected to arithmetic operations. We found two instances with the zip\_code field contained character strings (``na'', ``N/A''). 
 
-Data cleaning: convert to all lower/upper cases;
+	\item Domain of legal values as contained in the Data Dictionary are incomplete. For example, the Data Dictionary indicates
+	that the status field has values of assigned, canceled, closed, or pending. However, we found additional status values:
+	in progress, started, and unspecified. Additionally, we discovered no SRs with a status of canceled. Similarly, the 
+	address\_type field is indicated to have values address, blockface, intersection, latlong, and placename. We discovered
+	additional values of bbl and unrecognized. No values of latlong were observed. Other fields suffer the same
+	inaccuracies (facility\_type, vehicle\_type, taxi\_pick\_up\_location, road\_ramp, city).
+\end{itemize}
 
-Data organization: put zipcode/borough in a separate table; verify intersection
-== cross; remove redundant columns (and compare how much space saved)
+
+
+\section{Recommendations} \label{sec:recommendations}
+Having identified a number of data cleanliness related issues with the 311 Service Request (SR) dataset, what follows
+are a series of recommendations as to how to resolve these issues. Below are those recommendations;
+
+\begin{itemize}
+	\item First, and most importantly, the Open Data Team will need to undertake a special effort to identify these data anomalies,
+	confirm the veracity of the issue, and engage with the appropriate Agency Open Data Representatives to resolve these issues.
+	That effort will not be easy, fast, or cheap as in some software changes will likely be required. Perhaps hardest will be
+	working with the external City Agencies that feed data to the 311 SR dataset, but are not using the core 311 system.
+	Integrations and API usage will need to be investigated, and in many cases the changes required to correct an issue will
+	be on the source Agency side. Coordination and mutual approval of any changes will be key. Strong support from senior
+	leadership will be a critical success factor.
+
+	\item Secondly, standards will be to be identified, agreed to, and commitment to support those standards must be
+	obtained. For example, what are the domain of legal values for certain fields, especially those with identified issues?
+
+	\item Obviously, many of the data integrity issues can be resolved through rule enforcement by software. 
+	For example, the software could easily prevent invalid values, such as zip codes, 
+	from entering the system. Similarly for an entire range of data issues. One key area is the
+	created\_date and closed\_date which are frequently cited when determining 
+	responsiveness of various Agency services. The authors would argue that such dates 
+	should be driven by change in ``status'', not manually entered. For example, the closed\_date is captured
+	when the SR ``status'' is changed to ``closed'', and not manually entered. Such a change, along with many others, could prevent errors such
+	nras negative and  zero durations which significantly affect measurements of responsiveness. 
+	
+	\item The large spikes in SR closure and creation occurring at midnight and noon, almost certainly point to an underlying automated
+	process from an external-to-311 Agency. Such processes again distort the accurate capture of an SR duration. Data rule enforcement
+	at the software integration or API level should be investigated.
+
+	\item One possible way to have software enforce certain data standards, would be to move more non-311 Agencies to the core 311
+	software system. That system was completely upgraded in 2019, and should be (relatively) easy to expand to other Agencies and usages.
+	
+	\item As noted, there are six ``computed'' fields in the data export that are not identified in the Data Dictionary. While these fields may be
+	``experimental'', they are nonetheless present in any data portal presentation or export. As noted in this study, a number of those computed
+	fields suffer from data inaccuracies. It is difficult to know what to recommend for these six field without further understanding
+	of their origin, computational method, or intended usage. We would recommend updating the Data Dictionary at a minimum and
+	possibly hiding those fields from public display until such time as their usage and accuracy can be ascertained.
+	
+	\item Removal of duplicate fields should be examined.  In some cases, such a the borough and park\_borough fields, the duplication is 100%. 
+	In other cases, the duplication is in the 80-90\% range. These fields and their usage/utility should be carefully examined to determine if their
+	inclusion in the 311 SR dataset is meaningful, adds value not found in other fields, and should be removed or continued to be collected.
+	Initial analysis indicates that as much as 12\% size reductions are easily achievable with the removal of duplicate fields. A more thorough
+	review and understanding of the fields would no doubt yield more savings. 
+	
+	\item Fields with extremely low data presence, such as taxi\_company\_borough which is populated only 0.06\% of the time. Similarly for several other fields 
+	evaluated in this study which have a high percentage of blank/unknown values. If the presence of a small percentage of SRs 
+	with these fields being populated is deemed useful and necessary, then so be it. But if the usage of these fields is so diminished, 
+	then perhaps its inclusion in the 311 SR dataset is not warranted.
+	
+	\item The Data Dictionary is in need of an upgrade and update. The last revision is indicated at 6 March 2023, well over a year ago. 
+	As noted in \textbackslash nameref: \nameref{sec:datadictionary} there are many problems with the Data Dictionary, including domain
+	values, absence of the six ``computed'' fields, and inaccurate description of the usage of several fields. Some of the Data Dictionary
+	entries can be undertaken immediately, which further revision should be addressed as part of a deeper data clean-up initiative. 
+	
+	\item The excessive precision in the latitude, longitude, and location fields is simply nonsensical.  We would recommend no more than four
+	decimal places (0.000X) which represents a distance of approximately 36.4 feet. Five decimals (0.0000X) represents 3.6 feet, which 
+	although possible, would be an extremely sophisticated and accurate geo-coding system. A 14 decimal number is simply a case
+	of a lot of precision with limited accuracy, and should be avoided.
+
+	\item The 10 address-related address fields (incident\_address, street\_name, city, intersection\_street\_1 \& 2, cross\_street\_1 \& 2,  landmark,
+	road\_ramp, bridge\_highway\_segment, and taxi\_pick\_up\_location should be in standard USPS format. 
+	There are several software packages which can standardize addresses to these standards.
+	We believe such an effort should be automatically applied to these fields at data entry. This step would also greatly improve any underlying geo-coding routines which
+	may be used to determine data values such as BBL, latitude, longitude, and New York State X/Y-plane coordinates.
+	
+	\item The use of the value ``UNKNOWN'' , ``N/A'', ``NA'', and ``na'' when entered directly as text into a field should be very carefully examined, and
+	in all likelihood prohibited.  There are some indeed a few complaint\_type(s) where an ``N/A'' value is appropriate, such as a consumer\_complaint
+	about certain non-geo centric issues, such as a travel agency or tax preparation service . But even in those cases a value of ``N/A'' should be 
+	entered only via a drop-down menu selection. During this analysis, there were far too many data representations of missing data including: <N/A>, ``na'', `` ``,
+	UNKNOWN, and ``N/A''. It's challenging for analyst to have to account for so the many different methods of representing empty or null data fields. 
+	
+	
+\end{itemize}
 
 
 
@@ -1663,6 +1862,3 @@ Data organization: put zipcode/borough in a separate table; verify intersection
 \end{document}
 
 
-
-
-\end{document}
