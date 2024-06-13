@@ -12,13 +12,10 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
-# Set the working directory to the "nyc311clean/code" directory to enable relative codes.
-setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
-data1File <- file.path("..", "data", "2022-2023 created and closed only.csv")
+data1File <- file.path("..", "..", "data", "10-year 2014-2023.csv")
 
 #Define the chart directory
-chart_directory_path <- 
-  file.path("..", "charts", "2022-2023 study", "Time lapse charts")
+chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "10-year trends")
 
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
@@ -302,7 +299,7 @@ earliest_year <- min(yearly_df$Year)
 
 # Create the bar chart with vertical X-axis labels
 SR_yearly <- ggplot(yearly_df, aes(x = Year, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#009E73") +
   scale_y_continuous(labels = scales::comma) +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
@@ -325,7 +322,7 @@ SR_yearly <- ggplot(yearly_df, aes(x = Year, y = count)) +
   geom_point(color = "transparent") +
   scale_x_continuous(breaks = unique(yearly_df$Year)) +
   stat_poly_eq(use_label(c("R2"))) +
-  geom_smooth(method = "lm", span = 1, se = FALSE, color = "firebrick3", linetype = "dotted", linewidth = 1) +
+  geom_smooth(method = "lm", span = 1, se = FALSE, color = "black", linetype = "dotted", linewidth = 2) +
   labs(x=NULL, y=NULL)
 
 # Print the bar chart
@@ -394,7 +391,13 @@ start_date <- min(monthly_df$YearMonth)
 end_date <- max(monthly_df$YearMonth)
 
 # Create a sequence of every other month
-breaks_seq <- seq(from = start_date, to = end_date, by = "2 months")
+
+# Ensure YearMonth is a Date object
+monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
+
+#breaks_seq <- seq(from = start_date, to = end_date, by = "2 months")
+breaks_seq <- seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "2 months")
+
 
 # Create the bar chart with vertical X-axis labels
 SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
@@ -421,8 +424,9 @@ SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
   ) +
   geom_point(color = "transparent") +
   stat_poly_eq(use_label(c("R2"))) +
-  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = breaks_seq,
-               expand = c(0,0)) + 
+#  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = breaks_seq,
+#               expand = c(0,0)) + 
+  scale_x_date(labels = date_format("%Y-%m"), breaks = breaks_seq, expand = c(0, 0)) + 
   geom_smooth(method = "lm", span = 1, se = FALSE, 
               color = "firebrick3", linetype = "dotted", linewidth = 1) +
   annotate("text", x = mxmonth, y = max_month$count, label = "Max", size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
