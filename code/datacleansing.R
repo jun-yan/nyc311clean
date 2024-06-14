@@ -98,13 +98,13 @@ create_bar_chart <- function(
       axis.title.y = element_text(vjust = 1, size = 11),
       plot.title = element_text(hjust = 0.5, size = 13),
       plot.subtitle = element_text(size = 9),
-      panel.background = element_rect(fill = "gray91", color = "gray91"),
+      panel.background = element_rect(fill = "gray95", color = "gray95"),
       axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold"),
       axis.text.y = element_text(face = "bold")
     ) +
     geom_hline(
       yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "gray41", linewidth = 0.4
+      linetype = "dotted", color = "gray20", linewidth = 0.4
     ) +
     ggtitle(chart_title,
       subtitle = paste(sub_title, total_count, sep = "")
@@ -141,14 +141,14 @@ create_bar_chart <- function(
 
   if (add_sd) {
     bar_chart <- bar_chart +
-      # geom_hline(yintercept = mean_value + 1*sd_value, linetype = "longdash", color = "#E69F00", linewidth = 0.5) +
-      # geom_hline(yintercept = mean_value - 1*sd_value, linetype = "longdash", color = "#E69F00", linewidth = 0.5) +
-      geom_hline(yintercept = mean_value + 2 * sd_value, linetype = "longdash", color = "#E69F00", linewidth = 0.4) +
-      geom_hline(yintercept = mean_value - 2 * sd_value, linetype = "longdash", color = "#E69F00", linewidth = 0.4) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value - 1*sd_value, label = "-1 SD", size = 3.5, color = "#E69F00", hjust = -0.5, vjust = -0.75) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value + 1*sd_value, label = "+1 SD", size = 3.5, color = "#E69F00", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 2 * sd_value, label = "+2 SD", size = 3, color = "#E69F00", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value - 2 * sd_value, label = "-2 SD", size = 3, color = "#E69F00", hjust = -0.5, vjust = -0.75)
+      # geom_hline(yintercept = mean_value + 1*sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.5) +
+      # geom_hline(yintercept = mean_value - 1*sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.5) +
+      geom_hline(yintercept = mean_value + 2 * sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.4) +
+      geom_hline(yintercept = mean_value - 2 * sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.4) +
+      # annotate("text", x = min(dataset[[x_col]]), y = mean_value - 1*sd_value, label = "-1 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
+      # annotate("text", x = min(dataset[[x_col]]), y = mean_value + 1*sd_value, label = "+1 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 2 * sd_value, label = "+2 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value - 2 * sd_value, label = "-2 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75)
   }
 
   # Print the bar chart
@@ -435,21 +435,10 @@ detect_duplicates <- function(
     reference_field,
     duplicate_field) {
   
-  # Condition 0: Identify matching values, excluding NA rows for both fields
-#  row_condition_0 <- which(!is.na(dataset[[reference_field]]) & !is.na(dataset[[duplicate_field]]) &
-  
   #Identify matching fields including blanks and NA values
-  row_condition_0 <- dataset[[reference_field]] == dataset[[duplicate_field]]
+  rows_condition_0 <- dataset[[reference_field]] == dataset[[duplicate_field]]
 
-  # Condition 1: Identify non-matching values, excluding NA rows for both fields
-#  rows_condition_1 <- which(!is.na(dataset[[reference_field]]) & !is.na(dataset[[duplicate_field]]) &
   rows_condition_1 <- dataset[[reference_field]] != dataset[[duplicate_field]]
-
-  # # Condition 2: Identify non-matching values where "reference_field" is NA but "duplicate_field" is not NA
-  # rows_condition_2 <- which(is.na(dataset[[reference_field]]) & !is.na(dataset[[duplicate_field]]))
-  # 
-  # # Condition 3: Identify non-matching values where "reference_field" is not NA, but "duplicate_field" is NA
-  # rows_condition_3 <- which(!is.na(dataset[[reference_field]]) & is.na(dataset[[duplicate_field]]))
 
   all_non_matching_rows <- rows_condition_1
   non_matching_fields <- dataset[all_non_matching_rows, ]
@@ -458,7 +447,7 @@ detect_duplicates <- function(
   non_matching_fields <- non_matching_fields %>%
     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
 
-  all_matching_rows <- row_condition_0
+  all_matching_rows <- rows_condition_0
   matching_fields <- dataset[all_matching_rows, ]
   num_matching_fields <- nrow(matching_fields)
   matching_percentage <- round((num_matching_fields / num_rows_d311) * 100, 2)
@@ -494,8 +483,8 @@ create_boxplot <- function(
     chart_title,
     chart_file_name) {
   boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
-    geom_jitter(color = "royalblue", alpha = 0.4, size = 1.9, shape = 17) +
-    geom_boxplot(width = 0.2, fill = "lightsalmon1", alpha = 0.7, color = "gray20") +
+    geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
+    geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "gray20") +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
       plot.subtitle = element_text(size = 9)
@@ -506,8 +495,6 @@ create_boxplot <- function(
     )
 
   suppressMessages(print(boxplot_chart))
-
-  
 }
 
 #########################################################################
@@ -526,8 +513,6 @@ create_combo_chart <- function(
     count = as.vector(count_table)
   )
 
-
-  # Assuming summary_df is your dataframe
   summary_df <- summary_df[order(summary_df$count, decreasing = TRUE), ]
 
   # Calculate percentage and cumulative percentage
@@ -584,7 +569,7 @@ create_combo_chart <- function(
         x = reorder(agency, cumulative_percentage),
         y = count
       ),
-      colour = "gray20", hjust = 0.5, vjust = -0.5, size = 3.5
+      colour = "gray20", hjust = 0.5, vjust = -0.5, size = 4
     ) +
     geom_text(
       aes(
@@ -630,10 +615,11 @@ create_violin_chart <- function(
     x_axis_field,
     chart_title,
     chart_file_name) {
+  
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
-    geom_jitter(width = 0.2, alpha = 0.4, color = "royalblue", size = 1.9, shape = 17) +
+    geom_jitter(width = 0.2, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
     geom_violin(linewidth = 1, fill = "transparent", color = "gray20") +
-    geom_boxplot(width = 0.2, fill = "lightsalmon1", color = "gray20", alpha = 0.6, outlier.colour = "gray20") +
+    geom_boxplot(width = 0.2, fill = "#E69F00", color = "gray20", alpha = 0.6, outlier.colour = "gray20") +
     labs(
       title = chart_title,
       x = x_axis_title,
@@ -717,6 +703,7 @@ calculate_values <- function(max_count) {
 #########################################################################
 # Function to filter rows with non-numeric or non-5-digit zip codes for a specific field
 filter_non_numeric_zipcodes <- function(df, zip_field) {
+
   # Define a logical condition to filter rows based on the selected field
   condition <- !is.na(df[[zip_field]]) & df[[zip_field]] != "" &
     !grepl("^[0-9]{5}$", df[[zip_field]])
@@ -730,6 +717,7 @@ filter_non_numeric_zipcodes <- function(df, zip_field) {
 ##  This function standardizes column names even if there are multiple "."s and trailing "."s
 ##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
 makeColNamesUserFriendly <- function(dataset) {
+
   ## Convert any number of consecutive "."s to an underscore.
   names(dataset) <- gsub(
     x = names(dataset),
@@ -754,6 +742,7 @@ makeColNamesUserFriendly <- function(dataset) {
 #########################################################################
 # Function to check if a column contains valid dates
 areAllDates <- function(dateField) {
+
   # remove blank and NAs
   allDates <-
     suppressWarnings(!is.na(as.Date(dateField[dateField != ""], format = "%m/%d/%Y %I:%M:%S %p")))
@@ -772,6 +761,7 @@ areAllDates <- function(dateField) {
 #########################################################################
 # Validate that number fields are all numeric
 areAllNumbers <- function(numberField) {
+  
   # Identify the non-blank values using nzchar()
   non_blank_indices <- which(nzchar(numberField))
 
@@ -798,6 +788,7 @@ areAllNumbers <- function(numberField) {
 
 #########################################################################
 areFiveDigits2 <- function(zipcodes) {
+  
   # Remove blank values and <NA> values
   non_blank_zipcodes <- zipcodes[!(nzchar(zipcodes) | is.na(zipcodes))]
 
@@ -1084,7 +1075,6 @@ NYC_streets <-
 NYC_streets <- makeColNamesUserFriendly(NYC_streets)
 numNYC_streets <- nrow(NYC_streets)
 
-
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
 d311 <-
@@ -1234,9 +1224,6 @@ missingDataPerColumn <- cbind(missingDataPerColumn, NA_count = na_counts_per_col
 
 missingDataPerColumn$blanks_only <- missingDataPerColumn$total_empty - missingDataPerColumn$NA_count
 
-# Add the "non_blank" column
-#missingDataPerColumn <- missingDataPerColumn %>% mutate(non_blank = num_rows_d311 - total_empty)
-
 # Sort the data frame by the sum of NAs and blanks in descending order
 missingDataPerColumn <- missingDataPerColumn[order(missingDataPerColumn$total_empty, decreasing = TRUE), ]
 
@@ -1261,7 +1248,7 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
     axis.text.y = element_text(face = "bold"),
     legend.position = "none" # Remove all legends
@@ -1281,7 +1268,6 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
 
 # Print the bar chart
 print(blank_chart)
-
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
 
@@ -1613,7 +1599,6 @@ if (is_posixct) {
 
 #########################################################################
 # determine if the incident_zip and zip_codes fields contain 5 numeric digits
-
 # Call the function for "incident_zip" field
 invalid_incident_zip_rows <- filter_non_numeric_zipcodes(d311, "incident_zip")
 
@@ -2010,7 +1995,7 @@ if (num_rows_closedBeforeOpened > 0) {
   negativeDurationChart <- ggplot(
     data = large_neg_duration, aes(x = duration, y = factor(1))
   ) +
-    geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
+    geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
     geom_boxplot(width = 0.1, fill = "#D55E00", alpha = 0.75, color = "gray20") +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
@@ -2023,7 +2008,6 @@ if (num_rows_closedBeforeOpened > 0) {
     )
 
   print(negativeDurationChart)
-
   chart_path <- file.path(chart_directory_path, "negative_duration_SR.pdf")
   ggsave(chart_path, plot = negativeDurationChart, width = 10, height = 8)
 } else {
@@ -2124,7 +2108,7 @@ if (num_rows_future > 0) {
       data = closedinFuture,
       aes(x = future_days, y = factor(1))
     ) +
-      geom_jitter(color = "#0072B2", size = 2, shape = 17) +
+      geom_jitter(color = "#2271B2", size = 2, shape = 17) +
       geom_boxplot(
         outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
         fill = "#D55E00", size = 1, color = "black"
@@ -2239,7 +2223,6 @@ closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "ag
 noon_closed_data <- valid_closed_data[noon_closed_rows, ]
 closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
 
-
 if (midnight_closed_count > 0) {
   cat(
     "\n\nThere are",
@@ -2338,12 +2321,8 @@ too_large_threshold <- 730 # Two years
 
 updatedLate <- post_closed_positive[post_closed_positive$postClosedUpdateDuration > resoultion_action_threshold &
   post_closed_positive$postClosedUpdateDuration <= too_large_threshold, ]
-#                    & !is.na(d311$postClosedUpdateDuration), ]
-#                      & d311$postClosedUpdateDuration > 0, ]
 
 exclude_extreme_late_update <- post_closed_positive[post_closed_positive$postClosedUpdateDuration >= too_large_threshold, ]
-#                                   & !is.na(d311$postClosedUpdateDuration), ]
-#                                    & d311$postClosedUpdateDuration > 0, ]
 
 selected_columns <-
   c("unique_key", "agency", "closed_date", "resolution_action_updated_date", "postClosedUpdateDuration")

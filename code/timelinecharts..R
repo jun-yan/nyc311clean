@@ -12,10 +12,13 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
-data1File <- file.path("..", "..", "data", "10-year 2014-2023.csv")
+main_data_file <- "2-year 2022-2023.csv"
+data1File <- file.path("..", "..", "data", main_data_file)
 
 #Define the chart directory
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "10-year trends")
+chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "2-year trends")
+
+file_name_prefix <- sub(" .*", "", main_data_file)
 
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
@@ -301,33 +304,33 @@ earliest_year <- min(yearly_df$Year)
 SR_yearly <- ggplot(yearly_df, aes(x = Year, y = count)) +
   geom_bar(stat = "identity", fill = "#009E73") +
   scale_y_continuous(labels = scales::comma) +
+  scale_x_continuous(breaks = unique(yearly_df$Year)) +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = earliest_year, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_year, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
   ggtitle("Yearly SR count (w/trendline)",
           subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
   ) +
   geom_point(color = "transparent") +
-  scale_x_continuous(breaks = unique(yearly_df$Year)) +
   stat_poly_eq(use_label(c("R2"))) +
-  geom_smooth(method = "lm", span = 1, se = FALSE, color = "black", linetype = "dotted", linewidth = 2) +
+  geom_smooth(method = "lm", span = 1, se = FALSE, color = "gray20", linetype = "dotted", linewidth = 2) +
   labs(x=NULL, y=NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_yearly))
-chart_path <- file.path(chart_directory_path, "Yearly.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-yearly.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_yearly, width = 10, height = 8))
 
 #########################################################################
@@ -395,47 +398,48 @@ end_date <- max(monthly_df$YearMonth)
 # Ensure YearMonth is a Date object
 monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
 
-#breaks_seq <- seq(from = start_date, to = end_date, by = "2 months")
-breaks_seq <- seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "2 months")
-
+#breaks_seq <- seq(from = start_date, to = end_date, by = "3 months")
+breaks_seq <- seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "3 months")
 
 # Create the bar chart with vertical X-axis labels
 SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_y_continuous(labels = scales::comma) +
+  scale_x_date(labels = date_format("%Y-%m"), breaks = breaks_seq, expand = c(0, 0)) + 
   theme(
     axis.title.x = element_blank(),
     axis.title.y = element_blank(),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold"),
     plot.margin = margin(t = 10, r = 10, b = 10, l = 10)
     ) + # Adjust plot margins
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = as.Date(earliest_YearMonth), y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
   ggtitle(" Monthly SR count (w/trendline)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep = "")
   ) +
   geom_point(color = "transparent") +
-  stat_poly_eq(use_label(c("R2"))) +
+#  stat_poly_eq(use_label(c("R2"))) +
 #  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = breaks_seq,
 #               expand = c(0,0)) + 
-  scale_x_date(labels = date_format("%Y-%m"), breaks = breaks_seq, expand = c(0, 0)) + 
-  geom_smooth(method = "lm", span = 1, se = FALSE, 
-              color = "firebrick3", linetype = "dotted", linewidth = 1) +
-  annotate("text", x = mxmonth, y = max_month$count, label = "Max", size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = mimonth, y = min_month$count, label = "Min", size = 4, color = "dodgerblue4", hjust = -0.2, vjust = -0.5)
+#  geom_smooth(method = "lm", span = 1, se = FALSE, 
+#              color = "gray20", linetype = "dashed", linewidth = 1) +
+  annotate("text", x = as.Date(earliest_YearMonth), y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = mxmonth, y = max_month$count, label = "Max", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
+  annotate("text", x = mimonth, y = min_month$count, label = "Min", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
+#  annotate("text", x = max(monthly_df$YearMonth), y = max_month$count, label = paste0(file_name_prefix, "-yr growth: ", round(percentage_growth,1), "%"), 
+#           size = 4, color = "gray20", hjust = 1, vjust = 1.5) +
   labs(x=NULL, y=NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_monthly))
-chart_path <- file.path(chart_directory_path, "Monthly.pdf")
+chart_path <- file.path(chart_directory_path,  paste0(file_name_prefix, "-trend-monthly.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_monthly, width = 10, height = 8))
 
 #########################################################################
@@ -507,7 +511,7 @@ daily_df$created_date <- as.Date(daily_df$created_date)
 
 # Create the bar chart with vertical X-axis labels
 SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_y_continuous(labels = scales::comma) +
   scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months")) + 
   theme(
@@ -515,7 +519,7 @@ SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")) +
   # geom_hline(
@@ -523,7 +527,7 @@ SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
   #   linetype = "dashed", color = "gray30", linewidth = 0.7) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
   ggtitle("Daily SR count (w/trendline)",
           subtitle = paste("(", earliest_title, "--", latest_title, ") ", "total=", total_count, sep="")
@@ -531,20 +535,20 @@ SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
   geom_point(color = "transparent") +
 #  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("1 year")) +
   labs(x=NULL, y=NULL) +
-  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  #geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  #annotate("text", x = as.Date(earliest_date), y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  #annotate("text", x = as.Date(earliest_date), y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = as.Date(earliest_date), y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = as.Date(earliest_date), y = mean_count, color = "gray21",label = "Average", size = 6, hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = max_date, y = max_value, label = "Max", size = 6, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = min_date, y = min_value, label = "Min", size = 6, color = "dodgerblue4", hjust = -0.2, vjust = -0.5)
+  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  #geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  #annotate("text", x = as.Date(earliest_date), y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  #annotate("text", x = as.Date(earliest_date), y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = as.Date(earliest_date), y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = as.Date(earliest_date), y = mean_count, color = "gray20",label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = max_date, y = max_value, label = "Max", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
+  annotate("text", x = min_date, y = min_value, label = "Min", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5)
 
 # Print the bar chart
 suppressMessages(print(SR_daily))
-chart_path <- file.path(chart_directory_path, "Daily.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-daily.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_daily, width = 18, height = 10))
 
 #########################################################################
@@ -589,13 +593,13 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_created_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_x_discrete(name = "hour-of-the-day (0-23)") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(face = "bold"),
     axis.text.y = element_text(face = "bold"),
   ) +
@@ -604,29 +608,29 @@ SR_created_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = c
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
   geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
   
-  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
   
-  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
+  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
   
   #annotate("text", x = 0, y = mean_count, label = paste0("Average: ", mean_count), size = 4, hjust = -0.5, vjust = -0.75) +
   annotate("text", x = 0, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
   
   annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Max: ",max_count), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("Max: ",max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   
   labs(x="hour-of-the-day (0-23)", y= NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_created_by_top_of_hour))
-chart_path <- file.path(chart_directory_path, "SR_created_by_top_of_hour.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_created_by_top_of_hour.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_created_by_top_of_hour, width = 10, height = 8))
 
 #########################################################################
@@ -669,29 +673,29 @@ earliest_hour_minute <- min(minute_counts$hour_minute)
 
 # Create the bar plot
 SR_created_by_minute_of_busiest_day <- ggplot(minute_counts, aes(x = hour_minute, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   labs(x="hour-of-the-day (0-23)", y= NULL) +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text.y = element_text(face = "bold"),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9)
   ) +
   ggtitle(paste("SRs 'created' by Exact Minute-of-the-Day (00 secs) on", max_date), subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
   annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-           label = paste0("Max: ", max_value), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("Max: ", max_value), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-            label = paste0("Hour:Minute: ", max_hour_and_minute), size = 4, color = "firebrick3", hjust = -0.1, vjust = 1.5) +
+            label = paste0("Hour:Minute: ", max_hour_and_minute), size = 4, color = "gray20", hjust = -0.1, vjust = 1.5) +
   annotate("text", x = earliest_hour_minute, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
   scale_x_datetime(date_labels = "%H:%M", breaks = "2 hour") # Display every hour
 
 # Print the bar chart
 suppressMessages(print(SR_created_by_minute_of_busiest_day))
-chart_path <- file.path(chart_directory_path, "SR_created_by_minute_of_busiest_day.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_created_by_minute_of_busiest_day.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_created_by_minute_of_busiest_day, width = 10, height = 8))
 
 #########################################################################
@@ -745,13 +749,13 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_closed_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_x_discrete(name = "hour-of-the-day (0-23)") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(face = "bold"),
     axis.text.y = element_text(face = "bold"),
   ) +
@@ -760,34 +764,34 @@ SR_closed_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = co
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
   geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
   
   #annotate("text", x = 0, y = mean_count, label = paste0("Average: ", mean_count), size = 4, hjust = -0.5, vjust = -0.75) +
   annotate("text", x = 0, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
   
   annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Max: ",max_count), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("Max: ",max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Hour: ",max_hour), size = 4, color = "firebrick3", hjust = -0.4, vjust = 1.5) +
+           label = paste0("Hour: ",max_hour), size = 4, color = "gray20", hjust = -0.4, vjust = 1.5) +
   
   annotate("text", x = second_max_hour, y = second_max_count ,
-           label = paste0("2nd count: ",second_max_count), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("2nd count: ",second_max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   annotate("text", x = second_max_hour, y = second_max_count ,
-           label = paste0("2nd Hour: ",second_max_hour), size = 4, color = "firebrick3", hjust = -0.3, vjust = 1.5) +
+           label = paste0("2nd Hour: ",second_max_hour), size = 4, color = "gray20", hjust = -0.3, vjust = 1.5) +
   
   labs(x="hour-of-the-day (0-23)", y= NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_closed_by_top_of_hour))
-chart_path <- file.path(chart_directory_path, "SR_closed_by_top_of_hour.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_closed_by_top_of_hour.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_closed_by_top_of_hour, width = 10, height = 8))
 
 #########################################################################
@@ -842,36 +846,36 @@ earliest_hour_minute <- min(minute_counts$hour_minute)
 
 # Create the bar plot
 SR_closed_by_minute_of_busiest_day <- ggplot(minute_counts, aes(x = hour_minute, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   labs(x="hour-of-the-day (0-23)", y= NULL) +
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text.y = element_text(face = "bold"),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9)
   ) +
   ggtitle(paste("SRs 'closed' by Exact Minute-of-the-Day (00:00) on", max_date), subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
   annotate("text", x = earliest_hour_minute, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
   
   annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-           label = paste0("Max: ", max_value), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("Max: ", max_value), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-            label = paste0("Hour:Minute: ", max_hour_minute_of_the_day), size = 4, color = "firebrick3", hjust = -0.1, vjust = 1.5) +
+            label = paste0("Hour:Minute: ", max_hour_minute_of_the_day), size = 4, color = "gray20", hjust = -0.1, vjust = 1.5) +
   
   annotate("text", x = as.POSIXct(second_max_hour_minute_of_the_date, format = "%H:%M"), y = second_max_count ,
-           label = paste0("2nd Count: ", second_max_count), size = 4, color = "firebrick3", hjust = -0.2, vjust = -0.5) +
+           label = paste0("2nd Count: ", second_max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
   annotate("text", x = as.POSIXct(second_max_hour_minute_of_the_date, format = "%H:%M"), y = second_max_count ,
-            label = paste0("2nd Hour: ", second_max_hour_minute_of_the_date), size = 4, color = "firebrick3", hjust = -0.2, vjust = 1.5) +
+            label = paste0("2nd Hour: ", second_max_hour_minute_of_the_date), size = 4, color = "gray20", hjust = -0.2, vjust = 1.5) +
    
   scale_x_datetime(date_labels = "%H:%M", breaks = "2 hour") # Display every hour
 
 # Print the bar chart
 suppressMessages(print(SR_closed_by_minute_of_busiest_day))
-chart_path <- file.path(chart_directory_path, "SR_closed_by_minute_of_busiest_day.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_closed_by_minute_of_busiest_day, width = 10, height = 8))
 
 #########################################################################
@@ -941,15 +945,16 @@ calendar_month_df$Month <- factor(
 
 # Create the bar chart with vertical X-axis labels
 SR_calendar_month <- ggplot(calendar_month_df, aes(x = Month, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   labs(x = "Calendar Month") +
   scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete() +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
@@ -958,18 +963,17 @@ SR_calendar_month <- ggplot(calendar_month_df, aes(x = Month, y = count)) +
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = earliest_month, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_month, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
   geom_point(color = "transparent") +
-  # geom_smooth(method = "lm", span = 1, se = FALSE, color = "firebrick3", linetype = "dotted", linewidth = 1.25) +
-  scale_x_discrete() +
-  labs(x=NULL, y=NULL)
+  # geom_smooth(method = "lm", span = 1, se = FALSE, color = "gray20", linetype = "dotted", linewidth = 1.25) +
+    labs(x=NULL, y=NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_calendar_month))
-chart_path <- file.path(chart_directory_path, "Calendar-Month.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-Calendar-Month.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_calendar_month, width = 10, height = 8))
 
 #########################################################################
@@ -1044,14 +1048,14 @@ day_counts_df$day_of_year <- as.factor(day_counts_df$day_of_year)
 
 # Create the bar chart with vertical X-axis labels
 SR_day_of_the_year <- ggplot(day_counts_df, aes(x = day_of_year, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_y_continuous(labels = scales::comma) +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
@@ -1060,17 +1064,17 @@ SR_day_of_the_year <- ggplot(day_counts_df, aes(x = day_of_year, y = count)) +
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = earliest_day_of_year, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_day_of_year, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
   geom_point(color = "transparent") +
   scale_x_discrete(breaks = day_counts$day_of_year[seq(1, nrow(day_counts), by = 19)]) +
   labs(y = NULL, x = NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_day_of_the_year))
-chart_path <- file.path(chart_directory_path, "day-of-the-year.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-day-of-the-year.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_day_of_the_year, width = 10, height = 8))
 
 #########################################################################
@@ -1112,14 +1116,14 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_day_of_the_week <- ggplot(day_of_week_df, aes(x = day_of_week, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_y_continuous(labels = scales::comma) +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
@@ -1128,17 +1132,17 @@ SR_day_of_the_week <- ggplot(day_of_week_df, aes(x = day_of_week, y = count)) +
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-  annotate("text", x = earliest_day_of_week, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+  annotate("text", x = earliest_day_of_week, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
     geom_point(color = "transparent") +
   scale_x_discrete() +
   labs(x=NULL, y=NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_day_of_the_week))
-chart_path <- file.path(chart_directory_path, "day-of-the-week.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-day-of-the-week.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_day_of_the_week, width = 10, height = 8))
 
 #########################################################################
@@ -1179,7 +1183,7 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_created_time_of_day <- ggplot(created_hour_of_day_df, aes(x = created_hour, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_x_continuous(breaks = seq(0, 23, by = 1), labels = seq(0, 23, by = 1)) +  
   scale_y_continuous(labels = scales::comma) +
   theme(
@@ -1187,7 +1191,7 @@ SR_created_time_of_day <- ggplot(created_hour_of_day_df, aes(x = created_hour, y
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
@@ -1196,20 +1200,20 @@ SR_created_time_of_day <- ggplot(created_hour_of_day_df, aes(x = created_hour, y
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
   geom_point(color = "transparent") +
-  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
   labs(x="hour-of-the-day (0-23)", y= NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_created_time_of_day))
-chart_path <- file.path(chart_directory_path, "created-time-of-the-day.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-created-time-of-the-day.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_created_time_of_day, width = 10, height = 8))
 
 #########################################################################
@@ -1249,7 +1253,7 @@ scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_closed_time_of_day <- ggplot(closed_hour_of_day_df, aes(x = closed_hour, y = count)) +
-  geom_bar(stat = "identity", fill = "cadetblue") +
+  geom_bar(stat = "identity", fill = "#359B73") +
   scale_x_continuous(breaks = seq(0, 23, by = 1), labels = seq(0, 23, by = 1)) +  
   scale_y_continuous(labels = scales::comma) +
   theme(
@@ -1257,7 +1261,7 @@ SR_closed_time_of_day <- ggplot(closed_hour_of_day_df, aes(x = closed_hour, y = 
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray91", color = "gray91"),
+    panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
@@ -1266,22 +1270,22 @@ SR_closed_time_of_day <- ggplot(closed_hour_of_day_df, aes(x = closed_hour, y = 
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray21"
+    linetype = "dotted", color = "gray20"
   ) +
   geom_point(color = "transparent") +
-#  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-#  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "goldenrod4", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray21", linewidth = 0.4) +
-#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-#  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 3, color = "goldenrod4", hjust = -0.5, vjust = -0.75) +
-    annotate("text", x = 0, y = mean_count, label = "Average", size = 3, hjust = -0.5, vjust = -0.75) +
+#  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+#  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
+#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+#  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+    annotate("text", x = 0, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
   labs(x= "Hour-of-the-day (0-23)", y= NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_closed_time_of_day))
-chart_path <- file.path(chart_directory_path, "closed-time-of-the-day.pdf")
+chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-closed-time-of-the-day.pdf"))
 suppressMessages(ggsave(chart_path, plot = SR_closed_time_of_day, width = 10, height = 8))
 
 #########################################################################
