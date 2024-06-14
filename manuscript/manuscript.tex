@@ -407,7 +407,7 @@ accompanied by additional spikes in the 2\textsuperscript{nd}half of 2021 as wel
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{10-year-trend-monthly.pdf}
-  \caption{Monthly SR counts over 10-years}
+  \caption{10-year (2014-2023) Monthly SR Counts}
   \label{fig:10-yr-monthly}
 \end{figure}
 
@@ -439,12 +439,9 @@ of the 311 system has continued into the early months of 2024. It is not surpris
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{2-year-trend-monthly.pdf}
-  \caption{Monthly SR counts over years 2022-2023}
+  \caption{Monthly SR Counts for 2022-2023}
   \label{fig:2-yr-monthly}
 \end{figure}
-
-
-
 
 Two important fields in this analysis effort are the responsible NYC Agency, and the type of complaint.
 Given the size of the City of New York government, it is necessary to identify the responsible Agency as well as the type of complaint in order to 
@@ -471,7 +468,7 @@ Although the 311 SRs involve 16 different agencies, there are the ``big six'' Ag
 \begin{figure}[tbp]
 	\centering
 	\includegraphics[width=\textwidth]{SRs_by_Agency.pdf}
-  	\caption{SR counts by Agency and Cumulative Percentage}
+  	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
 
@@ -481,13 +478,13 @@ This graph shows the top 20 complaint\_type(s) comprising 70\% out of a total of
 \begin{figure}[tbp]
   \centering
  	\includegraphics[width=\textwidth]{SR_by_Complaint_Type.pdf} 
-	\caption{Top 20 SR complaint\_type and Cumulative Percentage} 
+	\caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
 	\label{fig:SR_complaints}
 \end{figure}
 
 The top 20 complaints contain several of the eight different types of ``Noise'' complaints (Residential, Commercial, Street, Helicopter, etc.). These Noise-related
 complaints total 1.435 million in the 2022-2023 dataset, a full 22\% of all complaint types, which, when consolidated, is the most frequently occurring complaint\_type.
-Ilegal Parking is second, followed by Heat/Hot Water. Noise complaints are handled by NYPD, as is Illegal Parking and Blocked Driveway complaints, which contributes
+Illegal Parking is second, followed by Heat/Hot Water. Noise complaints are handled by NYPD, as is Illegal Parking and Blocked Driveway complaints, which contributes
 significantly to the top ranking of the NYPD as the lead responsible Agency, receiving a full 43\% of all SRs. 
 Housing, Preservation, \& Development are 2\textsuperscript{nd}, with 21\%
 
@@ -624,8 +621,8 @@ Here is a screenshot of the NYC Open Data Portal ``Column Manager'' page showing
 
 \begin{figure}[tbp]
   \centering
- 	\includegraphics[width = 0.65\textwidth] {computed_fields.pdf}	
-	\caption{Screenshot of data portal showing the ``@computed'' columns}  
+ 	\includegraphics[width = \textwidth] {computed_fields.pdf}	
+	\caption{Screenshot of Data Portal with ``computed'' Columns}  
 	\label{fig:computed-columns}
 \end{figure}
 
@@ -759,7 +756,7 @@ in the stair-type visualization.
 
 \begin{figure}[tbp]
   \centering
-  	\caption{Number and Percentage of Empty Entries}
+  	\caption{Number and Percentage of Empty/Blank Entries}
 	\includegraphics[width=\textwidth]{BlankFields.pdf}
 	\label{fig:blank_fields}
 \end{figure}
@@ -818,8 +815,8 @@ dataset before conduction further analysis. Here are some results.
 	process or application residing at those particular Agencies; it is not a systemic problem.
 
 	\begin{figure}[tbp]
-	  \centering
-	  	\caption{Invalid incident-zip by Agency}
+		\centering
+		\caption{Invalid incident\_zip(s) by Agency}
 		\includegraphics[width=\textwidth]{invalid_incident_zip.pdf} 
 		\label{fig:invalid_incident_zip}
 	\end{figure}
@@ -1075,7 +1072,7 @@ types of errors occur.
 
 \begin{figure}[tbp]
  	 \centering
- 	 \caption{SRs with a Negative Duration by Agency}
+ 	 \caption{Negative Duration SRs by Agency}
 	  \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
 	  \label{fig:negative-duration}
 \end{figure}
@@ -1086,7 +1083,7 @@ is troubling and can produce bizarre analytical results.
 
 \begin{figure}[tbp]
  	 \centering
- 	 \caption{Negative duration distribution}
+ 	 \caption{Distribution of Negative Durations}
 	  \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
 	  \label{fig:negative-duration-violin}
 \end{figure}
@@ -1194,7 +1191,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{figure}[tbp]
 		\centering
  		\includegraphics[width = \textwidth]{2-year-trend-SR_created_by_top_of_hour.pdf}
-		\caption{SRs Created at Top of the Hour}
+		\caption{SRs Created at Top-of-the-Hour}
 		\label{fig:tophourcreated}
 	\end{figure}	
 
@@ -1206,7 +1203,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width=\textwidth]{2-year-trend-SR_created_by_minute_of_busiest_day.pdf}
-		\caption{SRs created minute-by-minute on busiest day}
+		\caption{SRs Created Minute-by-Minute on Busiest Day}
 		\label{fig:busiestcreated}
 	\end{figure}	
 
@@ -1219,7 +1216,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width = \textwidth]{2-year-trend-SR_closed_by_top_of_hour.pdf}
-		\caption{SRs Closed at Top of the Hour}
+		\caption{SRs Closed at Top-of-the-Hour}
 		\label{fig:tophourclosed}
 	\end{figure}
 	
@@ -1234,7 +1231,7 @@ is troubling and can produce bizarre analytical results.
  	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
-		\caption{SRs closed minute-by-minute on busiest day}
+		\caption{SRs Closed Minute-by-Minute on Busiest Day}
 		\label{fig:busiestclosed}
 	\end{figure}	
 
@@ -1338,7 +1335,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width = \textwidth]{post_closed_violin.pdf}
-		\caption{Post-Closed resolution\_action\_update\_date \textgreater30 days}
+		\caption{Post-Closed resolution\_action\_update\_date(s) \textgreater30 days}
 		\label{fig:resolution-violin}
 	\end{figure}		
 
@@ -1350,7 +1347,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width = \textwidth]{postClosedBarChart.pdf}
-		\caption{Post-Closed resolution\_action\_update\_date \textgreater30 days by Agency}
+		\caption{Post-Closed resolution\_action\_update\_date(s) \textgreater30 days by Agency}
 		\label{fig:resolution-by-agency}
 	\end{figure}		
 
@@ -1472,7 +1469,7 @@ but with some notable exceptions such as Taxi \& Limo Commission, Dept of Homele
 
 \begin{figure}[tbp]
 		\centering
-		\includegraphics[width = \textwidth]{non-matchingstreet_nameandlandmark.pdf}
+		\includegraphics[width = \textwidth]{non-matchingstreet\_nameandlandmark.pdf}
 		\caption{Non-matching street\_name \& landmark by Agency}
 		\label{fig:landmarkchart}
 	\end{figure}	
