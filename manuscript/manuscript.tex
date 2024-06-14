@@ -349,11 +349,12 @@ telephonic vendor. Desktop software at the 311 Agency are subject to the same up
 311 system was designed to be easily configured and updated with new features, some emerging business issues as well as
 technologies nonetheless require additional software engineering efforts to accommodate, along with the concomitant budgets.
 
-One area in particular which is heavily influencing customer outreach for the 311 system is the appropriate use of
-online chatbots and assistants. Increasing these features are influenced by artificial intelligence (AI) advances. It is a given that
-a number of citizen's interactions with City government could be handled accurately and quickly by AI-driven
-applications thus improving timeliness and accuracy. But how to do that while preserving customer privacy and anonymization
-and user engagement are challenging issues. 	
+One area in particular which is heavily influencing customer outreach for the 311 system
+ is the appropriate use of online chatbots and assistants. Increasing these features are 
+ influenced by artificial intelligence (AI) advances. It is a given that a number of 
+ citizen's interactions with City government could be handled accurately and quickly by AI-driven
+applications thus improving timeliness and accuracy. But how to do that while 
+preserving customer privacy and anonymization and user engagement are challenging issues. 	
 
 The impact of the NYC 311 data extends beyond operational efficiency;
 it has become instrumental in shaping City governance and community
@@ -393,40 +394,26 @@ was used exclusively for the detailed, field-by-field level analysis which compr
 Since the NYC 311 System went live in 2003, the usage has grown at an annual
 rate of 4.6\%. As part of this study, we also looked at a 10-year period (2014-2023) to
 observe system performance over a longer time-frame . During that time-frame, 
-the number of 311 SRs grew 50\%.
+the number of 311 SRs grew 50\%. The summer  and early fall months make up all of the Top 5 SR counts by day. 
+The all-time daily high for SRs, 24,415 SRs (a full 9.8 \textsigma's from the 10-year mean), occurred on Tuesday, 2020-08-04.
+The 10-year low count occurs on Christmas Day, 2016, a Sunday. Note also that the difference between 
+the peak day (24,415) and the minimum day (2965) varies by 8X, creating a 
+challenging system performance issue. This timeframe (2014-2023) also includes the COVID pandemic,  
+which reached a peak in the July-September 2020 timeframe, 
+accompanied by additional spikes in the 2\textsuperscript{nd}half of 2021 as well.
+
+
 
 \begin{figure}[tbp]
   \centering
-  \caption{Yearly SR counts over 10-years}
-  \includegraphics[width=\textwidth]{Yearly.pdf}
-  \label{fig:yearly-counts}
+  \includegraphics[width=\textwidth]{10-year-trend-monthly.pdf}
+  \caption{Monthly SR counts over 10-years}
+  \label{fig:10-yr-monthly}
 \end{figure}
-
-This 10-year timeframe (2014-2023) includes the COVID pandemic. INote that the pandemic
-impact reached a peak in the July-September 2020 timeframe, accompanied by additional spikes
-in the 2\textsuperscript{nd}half of 2021 as well. The all-time daily high for SRs occurred on Tuesday, 2020-08-04, 
-with a spike of 24,415 SRs, a full 9.8 \textsigma's from the mean. 
-
-This chart shows the 2-year period which is the basis for this analysis, by calendar month. 
-Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
-of 2020 are ``below average'', while most of the months after that period are ``above average''. That level of higher usage
-of the 311 system has continued into the early months of 2024.
-
-\begin{figure}[htbp]
-  \centering
-   \caption{Monthly SR counts over 10-years}
-  \includegraphics[width=\textwidth]{10-year-monthly.pdf}
-  \label{fig:monthly-counts}
-\end{figure}
-
-It is not surprising that the lowest SR counts-per-day occur during the Christmas holiday period. The summer months and early
-fall months make up all of the Top 5 SR counts by day. (As a note, the all-time daily high for SRs occurred on Tuesday, 2020-08-04 while the 10-year
-low count occurs on Christmas Day in 2016, a Sunday. Note also that the difference between the peak day (24,415) and the minimum day (2965) varies
-by a factor of 8X; all of which creates a challenging  system capacity and performance issue.
 
 \begin{table}[tbp]
     \centering
-    \small
+    \normalsize
     \caption{Top 5 and Bottom 5 Days for SRs}
     \begin{tabular}{@{}lll lll@{}}
         \toprule
@@ -441,11 +428,23 @@ by a factor of 8X; all of which creates a challenging  system capacity and perfo
         2020-06-21 & 15,883 & 5 & 2016-11-06 & 3419 & 5 \\
         \bottomrule
     \end{tabular}
-    \label{tab:combined_counts}
+    \label{tab:top-10-counts}
 \end{table}
 
+This chart shows the 2-year period which is the basis for this analysis, by calendar month. 
+Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
+of 2020 are ``below average'', while most of the months after that period are ``above average''. That level of higher usage
+of the 311 system has continued into the early months of 2024. It is not surprising that the lowest SR counts-per-day occur during the Christmas holiday period. 
 
-%\FloatBarrier % Ensure all floats before this point are processed before moving on
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\textwidth]{2-year-trend-monthly.pdf}
+  \caption{Monthly SR counts over years 2022-2023}
+  \label{fig:2-yr-monthly}
+\end{figure}
+
+
+
 
 Two important fields in this analysis effort are the responsible NYC Agency, and the type of complaint.
 Given the size of the City of New York government, it is necessary to identify the responsible Agency as well as the type of complaint in order to 
@@ -471,8 +470,9 @@ Although the 311 SRs involve 16 different agencies, there are the ``big six'' Ag
 
 \begin{figure}[tbp]
 	\centering
+	\includegraphics[width=\textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency and Cumulative Percentage}
-	\includegraphics[width=\textwidth]{SRs_by_Agency.pdf}  
+	\label{fig:SRcountbyAgency}
 \end{figure}
 
 The distribution of complaint\_type skews to a few select complaints accompanied by a long tail.
@@ -480,9 +480,9 @@ This graph shows the top 20 complaint\_type(s) comprising 70\% out of a total of
 
 \begin{figure}[tbp]
   \centering
-  	\caption{Top 20 SR complaint\_type and Cumulative Percentage}
-	  \includegraphics[width=\textwidth]{SR_by_Complaint_Type.pdf}  
-	  \label{fig:SR_complaints}
+ 	\includegraphics[width=\textwidth]{SR_by_Complaint_Type.pdf} 
+	\caption{Top 20 SR complaint\_type and Cumulative Percentage} 
+	\label{fig:SR_complaints}
 \end{figure}
 
 The top 20 complaints contain several of the eight different types of ``Noise'' complaints (Residential, Commercial, Street, Helicopter, etc.). These Noise-related
@@ -501,7 +501,7 @@ Hence the large number of Heat/Hot Water and Unsanitary complaints handled by HP
 \begin{table}[tbp]
     \centering
     \caption{Noise-related complaints\_type(s) by count with Agency}
-    \footnotesize
+    \normalsize
     \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,round-precision=0]S[table-format=2.2,round-mode=places,round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
         \toprule
         \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
@@ -624,9 +624,9 @@ Here is a screenshot of the NYC Open Data Portal ``Column Manager'' page showing
 
 \begin{figure}[tbp]
   \centering
-  \caption{Screenshot of data portal showing the ``@computed'' columns}
-	  \includegraphics[width = 0.65\textwidth] {computed_columns_screenshot.pdf}	  
-	  \label{fig:computed-columns}
+ 	\includegraphics[width = 0.65\textwidth] {computed_fields.pdf}	
+	\caption{Screenshot of data portal showing the ``@computed'' columns}  
+	\label{fig:computed-columns}
 \end{figure}
 
 This, of course, raises several questions:
@@ -695,7 +695,7 @@ it is very rare occurrence, happening only 1-2 times in 6.4 million records. Her
 \centering
 \caption{Blank and N/A entries by Field}
 \resizebox{0.8\linewidth}{!}{%
-\scriptsize
+\normalsize
 \begin{tabular}{lrrrl}
 	\toprule
 	\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} & \textbf{N/A Count} \\
@@ -841,7 +841,7 @@ dataset before conduction further analysis. Here are some results.
 	 
 \begin{table}[tbp]
     \centering
-    \footnotesize
+    \normalsize
     \caption{Comparison of Top Ten Zip Codes Lists}
     \begin{tabular}{@{}lS[table-format=6.0,round-mode=places,round-precision=0]c@{\hskip 0.5cm}@{}lS[table-format=6.0,round-mode=places,round-precision=0]c@{}}
         \toprule
@@ -888,7 +888,7 @@ dataset before conduction further analysis. Here are some results.
 	The top ten (by count) of invalid precincts for each field are:
 
 	\begin{table}[tbp]
-	\footnotesize
+	\normalsize
 	\centering
 	\caption{Comparison of the fields police\_precinct and police\_precincts}
 		\begin{tabular}{ccccc}
@@ -917,8 +917,8 @@ dataset before conduction further analysis. Here are some results.
 	\begin{figure}[tbp]
 	  \centering
 	  \caption{Invalid NYPD precincts by Agency}
-		  \includegraphics[width=\textwidth]{invalid_police_precincts.pdf}	  
-		  \label{fig:invalid_police_precincts_zip}
+	  \includegraphics[width=\textwidth]{invalid_police_precincts.pdf}	  
+	  \label{fig:invalid_police_precincts_zip}
 	\end{figure}
 
 	\subsection{Issues with Community Boards}
@@ -935,7 +935,7 @@ dataset before conduction further analysis. Here are some results.
 		\begin{table}[tbp]
 		\centering
 		\caption{Top Ten Invalid 'community\_board' Values}
-		\footnotesize
+		\normalsize
 		\begin{tabular}{rlr}
 		\toprule
 		\textbf{Rank} & \textbf{Invalid CB} & \textbf{Count} \\
@@ -1015,7 +1015,7 @@ smallest errors:
 \begin{table}[tbp]
     \centering
     \caption{Largest and Smallest errors (days)}
-    \small
+    \normalsize
     \begin{tabular}{>{\ttfamily}l l l r l}
         \toprule
         \multicolumn{5}{c}{\textbf{Largest errors (days) excluding extreme negative values}} \\
@@ -1054,7 +1054,7 @@ are from the Department of Homeland Services (DHS) Sample:
 \begin{table}[tbp]
     \centering
     \caption{Sample of SRs with extremely large negative durations}
-    \small
+    \normalsize
     \begin{tabular}{l l r l}
         \toprule
         \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} & \textbf{agency} \\
@@ -1135,7 +1135,7 @@ is troubling and can produce bizarre analytical results.
 		 \centering
 		  \caption{SRs with Zero Durations by Agency}
 		 \includegraphics[width = \textwidth]{zero_duration_SR.pdf}
-		 \label{fig:sero-duration}
+		 \label{fig:zero-duration}
 	\end{figure}	
 		
 	\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
@@ -1169,17 +1169,17 @@ is troubling and can produce bizarre analytical results.
 	at 09:00:00 or 13:00:00 for example.  Here is a visualization of the number of SRs created and closed by hour-of-the-day:
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs by Hourly created\_date(s)}
-		 \includegraphics[width = \textwidth]{Created_Hourly_SR_count.pdf}
-		 \label{fig:hourly-created}
+		\centering
+		\includegraphics[width = \textwidth]{Created_Hourly_SR_count.pdf}
+		\caption{SRs by Hourly created\_date(s)}
+		\label{fig:hourly-created}
 	\end{figure}	
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs by Hourly closed\_date(s)}
-		 \includegraphics[width = \textwidth]{Closed_Hourly_SR_count.pdf}
-		 \label{fig:hourly-closed}
+		\centering
+		\includegraphics[width = \textwidth]{Closed_Hourly_SR_count.pdf}
+		\caption{SRs by Hourly closed\_date(s)}
+		\label{fig:hourly-closed}
 	\end{figure}	
 	
 	The created\_date shows a maximum value at 12:00. The closed\_date chart show significant spikes at both midnight
@@ -1192,10 +1192,10 @@ is troubling and can produce bizarre analytical results.
 	reveals a clearer picture of where these spikes are:
 	
 	\begin{figure}[tbp]
-		 \centering
- 		 \caption{SRs Created at Top of the Hour}
-		 \includegraphics[width = \textwidth]{SR_created_by_top_of_hour.pdf}
-		 \label{fig:tophourcreated}
+		\centering
+ 		\includegraphics[width = \textwidth]{2-year-trend-SR_created_by_top_of_hour.pdf}
+		\caption{SRs Created at Top of the Hour}
+		\label{fig:tophourcreated}
 	\end{figure}	
 
 	One other way to visualize this anomaly is to look at the busiest day during this 2-year period (Friday, 2023-09-29).
@@ -1204,10 +1204,10 @@ is troubling and can produce bizarre analytical results.
 	exactly noon (12:00), well beyond the 3\textsigma line, and well above any other hour of the day.
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs created minute-by-minute on busiest day}
-		 \includegraphics[width=\textwidth]{SR_created_by_minute_of_busiest_day.pdf}
-		 \label{fig:busiestcreated}
+		\centering
+		\includegraphics[width=\textwidth]{2-year-trend-SR_created_by_minute_of_busiest_day.pdf}
+		\caption{SRs created minute-by-minute on busiest day}
+		\label{fig:busiestcreated}
 	\end{figure}	
 
 	Let's take a similar approach to the closed\_date distribution over the 2-year period. We aggregate 
@@ -1217,10 +1217,10 @@ is troubling and can produce bizarre analytical results.
 	top-of-the-hour values are, relative to the midnight and noon spikes. 
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs Closed at Top of the Hour}
-		 \includegraphics[width = \textwidth]{SR_closed_by_top_of_hour.pdf}
-		 \label{fig:tophourclosed}
+		\centering
+		\includegraphics[width = \textwidth]{2-year-trend-SR_closed_by_top_of_hour.pdf}
+		\caption{SRs Closed at Top of the Hour}
+		\label{fig:tophourclosed}
 	\end{figure}
 	
 	As before, let's visualize this anomaly by looking at the closed\_date(s) on the busiest day
@@ -1232,10 +1232,10 @@ is troubling and can produce bizarre analytical results.
 	are so very much above the median values for all other minutes.
 
  	\begin{figure}[tbp]
-		 \centering
-		  \caption{SRs closed minute-by-minute on busiest day}
-		 \includegraphics[width=\textwidth]{SR_closed_by_minute_of_busiest_day.pdf}
-		 \label{fig:busiestclosed}
+		\centering
+		\includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
+		\caption{SRs closed minute-by-minute on busiest day}
+		\label{fig:busiestclosed}
 	\end{figure}	
 
 	These unusual patterns of created \& closed SRs at exactly the hours of midnight and noon likely indicates
@@ -1246,36 +1246,36 @@ is troubling and can produce bizarre analytical results.
 	 of the SRs, such that an accurate ``duration'' can be computed for the SR life-cycle. Otherwise, we are likely seeing 
 	 durations that are artificially manipulated by a software process performing bulk uploads to the 311 system.
 
-	Looking at the distribution by Agency for the ``closed-exactly-at-midnight'' shows that \textgreater{}90\% of these suspect SRs come from just two Agencies - Dept. of 
+	Looking at the distribution by Agency for the ``closed-exactly-at-midnight'' shows that \textgreater90\% of these suspect SRs come from just two Agencies - Dept. of 
 	Buildings (DOB) and Dept. of Sanitation (DSNY). If you include HPD and DOT, that accounts for 99\% of the suspect SR closures. This Agency
 	distribution does not follow the overall SR distribution and we can assume that it is Agency specific. 
 
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs Closed Exactly at Midnight by Agency}
-		 \includegraphics[width = \textwidth]{closed_at_midnight_chart.pdf}
-		 \label{fig:midnight-closed}
+		\centering
+		\includegraphics[width = \textwidth]{closed_at_midnight_chart.pdf}
+		\caption{SRs Closed Exactly at Midnight by Agency}
+		\label{fig:midnight-closed}
 	\end{figure}	
 
 	However, the ``SR closed at noon'' visualization shows that  a single Agency, DSNY,
-	is responsible for \textgreater{}99\% of the SRs ``closed-exactly-at-noon''. Accordingly, any effort to resolve this issue
+	is responsible for \textgreater99\% of the SRs ``closed-exactly-at-noon''. Accordingly, any effort to resolve this issue
 	necessitates working with DSNY to fully understand how this is occurring. 
 	
 	\begin{figure}[tbp]
-		 \centering
-		  \caption{SRs Closed Exactly at Noon by Agency}
-		 \includegraphics[width = \textwidth]{closed_at_noon_chart.pdf}
-		 \label{fig:noon-closed}
+		\centering
+		\includegraphics[width = \textwidth]{closed_at_noon_chart.pdf}
+		\caption{SRs Closed Exactly at Noon by Agency}
+		\label{fig:noon-closed}
 	\end{figure}	
 	
 	The 99,779 SRs created-exactly-at-noon also appears to originate with the Dept of Sanitation (DSNY) which
-	is responsible for \textgreater{}99\% of the suspect SRs.
+	is responsible for \textgreater99\% of the suspect SRs.
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{SRs Created Exactly at Noon by Agency}
-		 \includegraphics[width = \textwidth]{created_at_noon_chart.pdf}
-		 \label{fig:noon-created}
+		\centering
+		\includegraphics[width = \textwidth]{created_at_noon_chart.pdf}
+		\caption{SRs Created Exactly at Noon by Agency}
+		\label{fig:noon-created}
 	\end{figure}		
 		
 	While it is difficult to ultimately know if these observations are indeed anomalies; they could be the result of normal, expected
@@ -1292,7 +1292,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{table}[tbp]
 	    \centering
 	    \caption{Extremely long Resolution Updates}
-	    \footnotesize
+	    \normalsize
 	    \begin{tabular}{cccc}
 	        \hline
 	        Agency & Closed Date & Resolution Action Updated Date & Post Closed Update Duration (days) \\
@@ -1309,7 +1309,7 @@ is troubling and can produce bizarre analytical results.
 	
 	These obvious inaccurate date values are removed from the analysis. But even so, there are some very late
 	updates to SRs, with some updates occurring almost two years after the SR is closed.   There are a total of 7460 SRs that are 
-	updated \textgreater{}30 days and \textless{}730 days after the closed\_date. The median of these late (\textless{}30 days)
+	updated \textgreater30 days and \textless{}730 days after the closed\_date. The median of these late (\textless{}30 days)
 	post-closed resolution\_action\_update\_date(s) is 84 days. However, the mean resolution\_action\_update\_date 
 	for all of the SRs is only 0.39 days (9.3 hours) after the SR is closed. It is not known if this is normal behavior
 	or an area that may require further investigation. 
@@ -1317,7 +1317,7 @@ is troubling and can produce bizarre analytical results.
 	\begin{table}[tbp]
     \centering
      \caption{Long post-closed Resolution Updates}
-    \footnotesize
+    \normalsize
 	    \begin{tabular}{cccc}
 	        \hline
 	        Agency & Closed Date & Resolution Action Updated Date & Post Closed Update Duration (days) \\
@@ -1333,13 +1333,13 @@ is troubling and can produce bizarre analytical results.
 	\end{table}
 
 	Here is a look at the spread of the post-closed resolution\_action\_update\_date values those SRs 
-	that are \textgreater{}30 days and \textless{}730 days. There are some significant outliers 
+	that are \textgreater30 days and \textless{}730 days. There are some significant outliers 
 	
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{Post-Closed resolution\_action\_update\_date >30 days }
-		 \includegraphics[width = \textwidth]{post_closed_violin.pdf}
-		 \label{fig:resolution-violin}
+		\centering
+		\includegraphics[width = \textwidth]{post_closed_violin.pdf}
+		\caption{Post-Closed resolution\_action\_update\_date \textgreater30 days}
+		\label{fig:resolution-violin}
 	\end{figure}		
 
 	If we look at a breakout of these (late?) update dates by Agency, we can see that the vast majority li with two
@@ -1348,10 +1348,10 @@ is troubling and can produce bizarre analytical results.
 	the SR has been closed? Perhaps, but it seems to merit closer investigation. 
 
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{Post-Closed resolution\_action\_update\_date >30 days by Agency }
-		 \includegraphics[width = \textwidth]{postClosedBarChart.pdf}
-		 \label{fig:resolution-by-agency}
+		\centering
+		\includegraphics[width = \textwidth]{postClosedBarChart.pdf}
+		\caption{Post-Closed resolution\_action\_update\_date \textgreater30 days by Agency}
+		\label{fig:resolution-by-agency}
 	\end{figure}		
 
 \section{Accuracy and precision}\label{sec:precision}
@@ -1398,10 +1398,10 @@ If one field is blank, can you use the other one? Which field can be used as the
 We can tell where the non-matches occur. It is mostly in DOT, NYPD, and DSNY which represent 90\% of the non-matching values.
 
 	\begin{figure}[tbp]
-		 \centering
-		  \caption{Non-matching borough and borough\_boundary by Agency }
-		 \includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.pdf}
-		 \label{fig:borough-boundaries}
+		\centering
+		\includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.pdf}
+		\caption{Non-matching borough and borough\_boundary by Agency}
+		\label{fig:borough-boundaries}
 	\end{figure}	
 	
 \subsection{borough and taxi\_company\_borough fields}
@@ -1442,7 +1442,7 @@ to be matches except for minor spelling and nomenclature changes, e.g. ``NINTH A
 \begin{table}[ht]
     \centering
     \caption{Non-matches between 'street\_name' and 'landmark' fields}
-    \footnotesize
+    \normalsize
     \begin{tabular}{>{\raggedright\arraybackslash}p{5cm} >{\raggedright\arraybackslash}p{5cm}}
         \toprule
         \textbf{street\_name} & \textbf{landmark} \\
@@ -1471,10 +1471,10 @@ but with some notable exceptions such as Taxi \& Limo Commission, Dept of Homele
  and Dept of Health \& Mental Hygiene (DOHMH).
 
 \begin{figure}[tbp]
-		 \centering
-		  \caption{Non-matching street\_name \& landmark by Agency }
-		 \includegraphics[width = \textwidth]{non-matchingstreet_nameandlandmark.pdf}
-		 \label{fig:landmarkchart}
+		\centering
+		\includegraphics[width = \textwidth]{non-matchingstreet_nameandlandmark.pdf}
+		\caption{Non-matching street\_name \& landmark by Agency}
+		\label{fig:landmarkchart}
 	\end{figure}	
 	
 	
@@ -1514,8 +1514,8 @@ is not blank, should you use the non-blank one?  Let's look at some examples:
 \begin{table}[tbp]
     \centering
      \caption{Matching/Non-Matching cross\_street\_1 \& intersection\_street\_1}
-    \footnotesize
-    \begin{tabular}{>{\small\ttfamily}l >{\small\ttfamily}l >{\small\ttfamily}l}
+    \normalsize
+    \begin{tabular}{>{\normalsize\ttfamily}l >{\normalsize\ttfamily}l >{\normalsize\ttfamily}l}
         \toprule
         \multicolumn{3}{c}{\textbf{Matching cross\_street\_1 and intersection\_street\_1}} \\
         \midrule
@@ -1542,17 +1542,17 @@ is not blank, should you use the non-blank one?  Let's look at some examples:
 \end{table}
 
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{Non-matching X\_Street\_1 \& Intersection\_Street\_1}
-		 \includegraphics[width = \textwidth]{non-matchingcross_street_1andintersection_street_1.pdf}
-		 \label{fig:xstreet1}
+		\centering
+		\includegraphics[width = \textwidth]{non-matchingcross_street_1andintersection_street_1.pdf}
+		\caption{Non-matching X\_Street\_1 \& Intersection\_Street\_1}
+		\label{fig:xstreet1}
 	\end{figure}	
 
 	\begin{figure}[tbp]
-		 \centering
-		 \caption{Non-matching X\_Street\_2 \& Intersection\_Street\_2}
-		 \includegraphics[width = \textwidth]{non-matchingcross_street_2andintersection_street_2.pdf}
-		 \label{fig:xstreet2}
+		\centering
+		\includegraphics[width = \textwidth]{non-matchingcross_street_2andintersection_street_2.pdf}
+		\caption{Non-matching X\_Street\_2 \& Intersection\_Street\_2}
+		\label{fig:xstreet2}
 	\end{figure}	
 
 In addition to the matching/non-matching values, we encountered a number of what you might call
@@ -1567,7 +1567,7 @@ Here are the results for both cross\_street and intersection\_street.
 \begin{table}[tbp]
     \centering
      \caption{Near-matches for cross\_street\_1, intersection\_street\_1}
-    \footnotesize
+    \normalsize
     \begin{tabular}{l l l r}
         \toprule
         \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} & \textbf{agency} & \textbf{hamming\_distance} \\
@@ -1590,7 +1590,7 @@ Here are the results for both cross\_street and intersection\_street.
 \begin{table}[tbp]
     \centering
     \caption{Summary of cross\_street\_1 and intersection\_street\_1}
-    \footnotesize
+    \normalsize
     \begin{tabular}{l r r}
         \toprule
         \textbf{category} & \textbf{count} & \textbf{percentage} \\
@@ -1609,7 +1609,7 @@ Here are the results for both cross\_street and intersection\_street.
 \begin{table}[tbp]
     \centering
     \caption{Summary of cross\_street\_2 and intersection\_street\_2}
-    \footnotesize
+    \normalsize
     \begin{tabular}{l r r}
         \toprule
         \textbf{category} & \textbf{count} & \textbf{percentage} \\
@@ -1628,7 +1628,7 @@ Here are the results for both cross\_street and intersection\_street.
 \begin{table}[tbp]
     \centering
      \caption{Sample of near-matching cross\_street\_2 and intersection\_street\_2 (both non-blank)}
-    \footnotesize
+    \normalsize
     \begin{tabular}{l l l r}
         \toprule
         \textbf{cross\_street\_2} & \textbf{intersection\_street\_2} & \textbf{agency} & \textbf{hamming\_distance} \\
