@@ -90,19 +90,26 @@
 \hyphenpenalty=1000
 
 \begin{abstract}
-  In the early 21st century, the open data movement began to transform societies and governments through principles of transparency, 
-  innovation, and public engagement. New York City (NYC) has emerged as a leader in this movement 
-  with the enactment of the Open Data Law in 2012, leading to the creation of the NYC Open Data portal, 
-  which now hosts 2700 datasets from 80 city agencies. This resource has proven invaluable for research 
-  across various domains, including health, urban development, and transportation. 
-  The success of these initiatives underscores the importance of data curation, ensuring the utility and reliability of datasets. 
+  In the early 21st century, the open data movement began to transform societies 
+  and governments through principles of transparency, innovation, and 
+  public engagement. New York City (NYC) has emerged as a leader in this 
+  movement with the enactment of the Open Data Law in 2012, 
+  leading to the creation of the NYC Open Data portal, which now hosts 
+  2700 datasets from 80 city agencies. This resource has proven invaluable 
+  for research across various domains, including health, 
+  urban development, and transportation. The success of these initiatives 
+  underscores the importance of data curation, ensuring 
+  the utility and reliability of datasets. 
 
-This paper examines the data curation challenges using the NYC 311 Service Request (SR) Data as a case study, 
-  addressing issues of data validity, consistency, and curation efficiency. Based on insights from this case study, 
-  we propose a set of data curation principles tailored for government-released open data. 
-  These principles aim to enhance data management practices and ensure the ongoing utility of open data. 
-  The paper concludes with actionable suggestions for improving data curation 
-  and offers general principles for the release of open data.
+This paper examines the data curation challenges using the 
+NYC 311 Service Request (SR) Data as a case study, addressing issues 
+of data validity, consistency, and curation efficiency. Based on 
+insights from this case study, we propose a set of data curation 
+principles tailored for government-released open data. These principles 
+aim to enhance data management practices and ensure 
+the ongoing utility of open data. The paper concludes with 
+actionable suggestions for improving data curation and offers 
+general principles for the release of open data.
 
 \bigskip
   
@@ -144,10 +151,12 @@ cementing the movement's global reach. Furthermore, the World Bank's Open
 Data initiative, initiated in 2010, stands out as a comprehensive
 repository for global development data, available at
 \href{https://data.worldbank.org}{World Bank Open Data}. 
-These initiatives represent significant strides in democratizing data, in breaking barriers that once
-kept valuable information on government performance in silos. Their collective impact is profound, extending beyond
-mere data sharing to fostering a culture of openness that benefits
-individuals, communities, governments, and economies worldwide
+These initiatives represent significant strides in democratizing data, 
+in breaking barriers that once kept valuable information 
+on government performance in silos. Their collective impact 
+is profound, extending beyond mere data sharing to 
+fostering a culture of openness that benefits individuals, 
+communities, governments, and economies worldwide 
 \citep{barns2016mine, wang2016adoption}.
 
 New York City (NYC) has emerged as a forerunner in the open data
@@ -211,7 +220,6 @@ multifaceted nature of data curation but also emphasize
 its indispensable role in enhancing the applicability and value of
 open data across various domains.
 
-
 The contributions of this paper are twofold. First, we delve into
 the specifics of data curation challenges using the NYC 311 Service
 Request (SR) Data as a case study. This renowned and frequently viewed 
@@ -222,7 +230,6 @@ Secondly, building upon insights gained from this case study, we
 propose a set of data curation principles tailored for government-released open data. 
 These principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
-
 
 The paper is organized as follows:
 Section~\ref{sec:history} offers a brief review of the history of the 311 system. In 
@@ -241,11 +248,14 @@ identifies duplicate and redundant data fields. Section~\ref{sec:improvements} p
 actionable suggestions for mitigating or resolving identified issues. Following this, Section~\ref{sec:protocol} outlines a series of general 
 principles for the release of open data, drawing from our findings. 
 The paper concludes with a discussion and recommendations
-in Section~\ref{sec:discussion}, encapsulating the key insights and implications of our research.
+in Section~\ref{sec:discussion}, encapsulating the key 
+insights and implications of our research.
 
-A note on naming conventions: dataset field names are typically named using ``snake\_case'' where
-each word in the variable name is written in lowercase, and words are separated by underscores,
-e.g created\_date, complaint\_type, zip\_code, etc..   
+A note on naming conventions: dataset field names are typically 
+named using ``snake\_case'' where each word in the 
+variable name is written in lowercase, and 
+words are separated by underscores, e.g 
+created\_date, complaint\_type, zip\_code, etc..   
 
 
 
@@ -264,11 +274,13 @@ Key milestones in the 311 system development include:
 
 \begin{itemize}
  	\item 2003 - NYC 311 system goes live with a phone-based call center only. 
- 	The ``311'' phone number replaces a myriad of numbers to call for each individual City Agency.
+ 	The ``311'' phone number replaces a myriad of numbers to 
+ 	call for each individual City Agency.
    	\item 2009 - 311 online \& mobile apps launched. Today 60\% of all 
    	Service Requests come from mobile \& online channels.
    	\item 2019 - Major software upgrade of 311 system with enhanced capabilities, 
-   	dynamic load-balancing, and cloud-based resilience. Only major software upgrade since 2004.	
+   	dynamic load-balancing, and cloud-based resilience. Only major 
+   	software upgrade since 2004.	
       \item 2020 - In August 2020, driven by the COVID pandemic, monthly 311 
       Service Requests hit an all-time high of 348,463. Seven of the Top 10 busiest 
       days of all-time occur in 2020.
@@ -312,18 +324,23 @@ These and other challenges are continually addressed by the various Agency open 
 as well as the 
 \href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology and Innovation (OTI)} 
 which provides the technology support for the open data system.  
-Many of the underlying datasets are updated daily, usually running 1-2 days behind from creation.
-However, a number of datasets are updated monthly (such as restaurant inspections), and some are
-not updated for one or more years (such as community board boundaries). This poses problems when 
-merging dataset with others, as would be expected. Typically, the data must be
-exported and manipulated in another, external program. The authors found 
+Many of the underlying datasets are updated daily, usually running 
+1-2 days behind from creation. However, a number of datasets 
+are updated monthly (such as restaurant inspections), and some are 
+not updated for one or more years (such as community board 
+boundaries). This poses problems when merging datasets with 
+others, as would be expected. Typically, the data must be exported 
+and manipulated in another, external program. The authors found 
 this to be the case with the large 311 dataset employed.
 
-Data accuracy and consistency is typically established between OTI and the other contributing
-City Agencies, such as NYPD, Housing Preservation and Development (HPD), Parks \& Recreation, etc.,
-via Service Level Agreements (SLAs). However, enforcement of those SLAs is often challenging. The 
-result is that often data accuracy and logical consistency is occasionally compromised. 
-However, the Open Data Team is quite responsive to inquires from users. The authors have provided many such suggestions during the course of this research effort, 
+Data accuracy and consistency is typically established between OTI 
+and the other contributing City Agencies, such as NYPD, Housing 
+Preservation and Development (HPD), Parks \& Recreation, etc., via 
+Service Level Agreements (SLAs). However, enforcement of those 
+SLAs is often challenging. The result is that often data accuracy and 
+logical consistency is occasionally compromised. However, 
+the Open Data Team is quite responsive to inquires from users. The 
+authors have provided many such suggestions during the course of this research effort, 
 and the most current data shows improvements in many of the areas highlighted. 
 Questions and suggestion  can be provide here: 
 \href{https://opendata.cityofnewyork.us/engage/}{Contact Us}.
@@ -2218,7 +2235,7 @@ those recommendations;
 	are several software packages which can standardize addresses to 
 	these standards. We believe such an effort should be automatically 
 	applied to these fields at data entry. This step would also greatly 
-	improve any underlying geo-coding routines which 	may be used 
+	improve any underlying geocoding routines which 	may be used 
 	to determine data values such as BBL, latitude, longitude, and New 
 	York State X/Y-plane coordinates.
 	
@@ -2226,7 +2243,7 @@ those recommendations;
 	entered directly as text into a field should be very carefully examined, 
 	and in all likelihood prohibited.  There are some indeed a few 
 	complaint\_type(s) where an ``N/A'' value is appropriate, such 
-	as a consumer\_complaint about certain non-geo centric issues, such 
+	as a consumer\_complaint about certain non-geocentric issues, such 
 	as a travel agency or tax preparation service . But even in those cases 
 	a value of ``N/A'' should be entered only via a drop-down menu 
 	selection. During this analysis, there were far too many data 

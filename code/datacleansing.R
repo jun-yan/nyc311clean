@@ -141,14 +141,14 @@ create_bar_chart <- function(
 
   if (add_sd) {
     bar_chart <- bar_chart +
-      # geom_hline(yintercept = mean_value + 1*sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.5) +
-      # geom_hline(yintercept = mean_value - 1*sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.5) +
-      geom_hline(yintercept = mean_value + 2 * sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.4) +
-      geom_hline(yintercept = mean_value - 2 * sd_value, linetype = "longdash", color = "#gray20", linewidth = 0.4) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value - 1*sd_value, label = "-1 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value + 1*sd_value, label = "+1 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 2 * sd_value, label = "+2 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value - 2 * sd_value, label = "-2 SD", size = 4, color = "#gray20", hjust = -0.5, vjust = -0.75)
+      # geom_hline(yintercept = mean_value + 1*sd_value, linetype = "longdash", color = "gray20", linewidth = 0.5) +
+      # geom_hline(yintercept = mean_value - 1*sd_value, linetype = "longdash", color = "gray20", linewidth = 0.5) +
+      geom_hline(yintercept = mean_value + 2 * sd_value, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+      geom_hline(yintercept = mean_value - 2 * sd_value, linetype = "longdash", color = "gray20", linewidth = 0.4) +
+      # annotate("text", x = min(dataset[[x_col]]), y = mean_value - 1*sd_value, label = "-1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+      # annotate("text", x = min(dataset[[x_col]]), y = mean_value + 1*sd_value, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 2 * sd_value, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value - 2 * sd_value, label = "-2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75)
   }
 
   # Print the bar chart
@@ -617,9 +617,10 @@ create_violin_chart <- function(
     chart_file_name) {
   
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
-    geom_jitter(width = 0.2, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
-    geom_violin(linewidth = 1, fill = "transparent", color = "gray20") +
-    geom_boxplot(width = 0.2, fill = "#E69F00", color = "gray20", alpha = 0.6, outlier.colour = "gray20") +
+    geom_jitter(width = 0.25, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
+    geom_violin(linewidth = 0.7, fill = "transparent", color = "gray20") +
+    geom_boxplot(width = 0.25, fill = "#E69F00", color = "gray20", alpha = 0.6, 
+                 outlier.colour = "gray20", outlier.size = 1) +
     labs(
       title = chart_title,
       x = x_axis_title,
@@ -1339,6 +1340,7 @@ sorted_by_closed_hour <- d311 %>%
   summarize(count = n()) %>%
   arrange(hour)
 
+
 # SRs created by month-year
 SR_monthly <- create_bar_chart(
   dataset = sorted_by_month_year,
@@ -1993,10 +1995,9 @@ if (num_rows_closedBeforeOpened > 0) {
 
   # Create boxplot of the (negative) duration values
   negativeDurationChart <- ggplot(
-    data = large_neg_duration, aes(x = duration, y = factor(1))
-  ) +
+    data = large_neg_duration, aes(x = duration, y = factor(1))) +
     geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
-    geom_boxplot(width = 0.1, fill = "#D55E00", alpha = 0.75, color = "gray20") +
+    geom_boxplot(width = 0.25, fill = "#D55E00", alpha = 0.75, outlier.colour = "gray20", outlier.size = 1) +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
       plot.subtitle = element_text(size = 9)
