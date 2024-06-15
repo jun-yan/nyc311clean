@@ -566,7 +566,6 @@ handled by HPD.
 
 
 
-
 \begin{table}[tbp]
     \centering
     \normalsize
@@ -1309,6 +1308,7 @@ Here is a graphic visualization of the negative-duration SRs by Agency. It is
 obvious that this negative-duration issue is a problem at the 
 Dept. of Transportation (DOT) where 95\% of these types of errors occur. 
 
+
 \begin{figure}[tbp]
  	 \centering
  	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
@@ -1327,6 +1327,7 @@ produce bizarre analytical results.
 	 \caption{Distribution of Negative Durations}
 	 \label{fig:negative-duration-violin}
 \end{figure}
+
 
 
 \subsubsection{Case Study: Homeless Person Assistance}
@@ -1719,6 +1720,8 @@ as we will see, there are several such examples in this dataset.
 We can tell where the non-matches occur. It is mostly in DOT, NYPD, 
 and DSNY which represent 90\% of the non-matching values.
 
+
+
 	\begin{figure}[tbp]
 		\centering
 		\includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.pdf}
@@ -1726,6 +1729,7 @@ and DSNY which represent 90\% of the non-matching values.
 		\label{fig:borough-boundaries}
 	\end{figure}	
 	
+
 \subsection{borough and taxi\_company\_borough fields}
 The two fields borough and taxi\_company\_borough might appear to be 
 related. In fact, despite the names, the two data fields are nearly 
@@ -1813,14 +1817,17 @@ the overall SR distribution (NYPD, DPR, DSNY), but with some notable
 exceptions such as Taxi \& Limo Commission, Dept of Homeless 
 Services (DHS), and Dept of Health \& Mental Hygiene (DOHMH).
 
+
+
 \begin{figure}[tbp]
-		\centering
-		\includegraphics[width = \textwidth]
-		{non-matchingstreet\_nameandlandmark.pdf}
-		\caption{Non-matching street\_name \& landmark by Agency}
-		\label{fig:landmarkchart}
-	\end{figure}	
-	
+  \centering
+  \includegraphics[width = \textwidth]
+  {non-matchingstreet_nameandlandmark.pdf}
+  \caption{Non-matching street\_name \& landmark by Agency}
+  \label{fig:landmarkchart}
+\end{figure}	
+
+
 	
 \subsection{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
 \& intersection\_street\_2} There are two sets of street pairs in the 
