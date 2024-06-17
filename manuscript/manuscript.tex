@@ -71,7 +71,7 @@
 %% \newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
 
 \title{Principles for Open Data Curation: A Case Study with the New
-  York City 311 Service Request Data}
+York City 311 Service Request Data}
 
 
 \author[1]{David Tussey}
@@ -87,19 +87,19 @@
 \listoffigures % List of Figures
 \listoftables % List of Tables
 
-\hyphenpenalty=1000
+\hyphenpenalty=750
 
 \begin{abstract}
-  In the early 21st century, the open data movement began to transform societies 
-  and governments through principles of transparency, innovation, and 
-  public engagement. New York City (NYC) has emerged as a leader in this 
-  movement with the enactment of the Open Data Law in 2012, 
-  leading to the creation of the NYC Open Data portal, which now hosts 
-  2700 datasets from 80 city agencies. This resource has proven invaluable 
-  for research across various domains, including health, 
-  urban development, and transportation. The success of these initiatives 
-  underscores the importance of data curation, ensuring 
-  the utility and reliability of datasets. 
+In the early 21st century, the open data movement began to transform 
+societies and governments through principles of transparency, 
+innovation, and public engagement. New York City (NYC) has emerged 
+as a leader in this movement with the enactment of the Open 
+Data Law in 2012, leading to the creation of the NYC Open Data 
+portal, which now hosts 2700 datasets from 80 city agencies. This 
+resource has proven invaluable for research across various domains, 
+including health, urban development, and transportation. The 
+success of these initiatives underscores the importance of data 
+curation, ensuring the utility and reliability of datasets. 
 
 This paper examines the data curation challenges using the 
 NYC 311 Service Request (SR) Data as a case study, addressing issues 
@@ -115,29 +115,28 @@ general principles for the release of open data.
   
 \noindent
 \textit{Keywords:}
-311 Service Request Data;
-Data cleansing;
-Data Consistency;
-Data Curation;
-Data Democratization;
-Data Efficiency;
-Data science;
-Data Validity;
-Government Data;
-NYC Open Data;
-Open Data Movement;
-Open data;
-Public Engagement;
-Quality control;
-Research Data Management;
-Smart Cities;
-Transparency;
+	311 Service Request Data;
+	Data cleansing;
+	Data Consistency;
+	Data Curation;
+	Data Democratization;
+	Data Efficiency;
+	Data science;
+	Data Validity;
+	Government Data;
+	NYC Open Data;
+	Open Data Movement;
+	Open data;
+	Public Engagement;
+	Quality control;
+	Research Data Management;
+	Smart Cities;
+	Transparency;
 \end{abstract}
 
 \doublespacing
 
 \section{Introduction} \label{sec:intro}
-
 In the early 21st century, the open data movement began to take shape, driven by the 
 fundamental belief that freely accessible data can transform 
 both societies and governments. This movement champions the principles of 
@@ -245,22 +244,21 @@ deals with the important issues surrounding logical inconsistencies
 and concerning patterns in the data. Section~\ref{sec:precision} 
 explores the age-old issue of precision versus accuracy. Section~\ref{sec:duplicates}
 identifies duplicate and redundant data fields. Section~\ref{sec:improvements} provides 
-actionable suggestions for mitigating or resolving identified issues. Following this, Section~\ref{sec:protocol} outlines a series of general 
-principles for the release of open data, drawing from our findings. 
-The paper concludes with a discussion and recommendations
-in Section~\ref{sec:discussion}, encapsulating the key 
-insights and implications of our research.
+actionable suggestions for mitigating or resolving identified issues. 
+Following this, Section~\ref{sec:protocol} outlines a series of general 
+principles for the release of open data, drawing from our findings. The 
+paper concludes with a discussion and recommendations in 
+Section~\ref{sec:discussion}, encapsulating the key insights and 
+implications of our research.
 
 A note on naming conventions: dataset field names are typically 
-named using ``snake\_case'' where each word in the 
-variable name is written in lowercase, and 
-words are separated by underscores, e.g 
-created\_date, complaint\_type, zip\_code, etc..   
+named using ``snake\_case'' where each word in the variable name 
+is written in lowercase, and words are separated by 
+underscores, e.g. created\_date, complaint\_type, zip\_code, etc..   
 
 
 
 \section{NYC 311 System History} \label{sec:history}
-
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
 for non-emergency inquiries and requests. Introduced in 2003, the NYC
@@ -297,14 +295,14 @@ and unsanitary conditions. The data, managed through a tailored application buil
 Microsoft Dynamics and Azure platform, is a valuable resource for city
 administration and policy-making. The 311 data is publicly accessible through the 
 NYC Open Data Portal which provides access
-to all the data sets (approx. 2700) and provides a convenient method for querying, grouping, aggregating, geo-mapping, visualization, and exporting
-results. This open data initiative enables not only governmental transparency but also empowers 
-researchers, civic developers, and the general public. 
+to all the data sets (approx. 2700) and provides a convenient method for querying, 
+grouping, aggregating, geo-mapping, visualization, and exporting 
+results. This open data initiative enables not only governmental transparency 
+but also empowers researchers, civic developers, and the general public. 
 
 Additional Open Data projects can be found 
 at \href{https://opendata.cityofnewyork.us/projects/}{NYC Open Data Project Gallery}
-and at \href{https://beta.nyc/beta/products/}{\textbeta etaNYC} products and tools.
-
+and at \href{https://beta.nyc/beta/products/}{\textbeta etaNYC} products and tools. 
 Despite its success, the system constantly faces challenges such as:
 
 \begin{itemize}
@@ -320,14 +318,15 @@ Despite its success, the system constantly faces challenges such as:
 	customer service, along with other emergent technologies
 \end{itemize}
 
-These and other challenges are continually addressed by the various Agency open data managers
-as well as the 
-\href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology and Innovation (OTI)} 
-which provides the technology support for the open data system.  
-Many of the underlying datasets are updated daily, usually running 
-1-2 days behind from creation. However, a number of datasets 
-are updated monthly (such as restaurant inspections), and some are 
-not updated for one or more years (such as community board 
+These and other challenges are continually addressed by the various 
+Agency open data managers as well as the 
+\href{https://www.nyc.gov/content/oti/pages/}
+{NYC Office of Technology and Innovation (OTI)} which provides the 
+technology support for the open data system. Many of the underlying 
+datasets are updated daily, usually running 1-2 days behind 
+from creation. However, a number of datasets are updated 
+monthly (such as restaurant inspections), and some are not 
+updated for one or more years (such as community board 
 boundaries). This poses problems when merging datasets with 
 others, as would be expected. Typically, the data must be exported 
 and manipulated in another, external program. The authors found 
@@ -387,7 +386,9 @@ The 311 telephonic integration recently was reconfigured due to a new
 telephonic vendor. Desktop software at the 311 Agency are subject 
 to the same upgrades that home and business users experience. And while the 
 311 system was designed to be easily configured and updated with new features, 
-some emerging business issues as well as technologies nonetheless require additional software engineering efforts to accommodate, along with the concomitant budgets.
+some emerging business issues as well as technologies nonetheless 
+require additional software engineering efforts to accommodate, 
+along with the concomitant budgets.
 
 One area in particular which is heavily influencing customer outreach for the 311 system
  is the appropriate use of online chatbots and assistants. Increasing these features are 
@@ -427,11 +428,11 @@ invaluable resource for data scientists to practice data science activities, inc
 
 We extracted 311 SR data for the period of CY 2022-2023, a dataset consisting of
 6.4 million records. That dataset serves as the primary source for the analysis effort. 
-This is a large dataset which enables 
-observation of some rarely seen events, data inaccuracies, and logical inconsistencies. 
-It provides enough data to examine trends and data outlier analysis. 
-We queried the data directly from the NYC Open Data Portal and then exported the 
-data in CSV format for analysis using custom written R programs.
+This is a large dataset which enables observation of some rarely 
+seen events, data inaccuracies, and logical inconsistencies. It 
+provides enough data to examine trends and data outlier analysis. 
+We queried the data directly from the NYC Open Data Portal and then 
+exported the data in CSV format for analysis using custom written R programs.
 
 Additionally, we extracted two longer-term datasets, a 5-year look (2019-2023) 
 and a 10-year look (2014-2023) ; some 14 and 27 million rows respectively. 
@@ -443,57 +444,52 @@ which comprises the majority of this effort.
 
 
 \section{10-year Analysis \& Trends} \label{sec:trends}
-
 Since the NYC 311 System went live in 2003, the usage has grown at an annual
 rate of 4.6\%. As part of this study, we also looked at a 10-year period (2014-2023) to
 observe system performance over a longer time-frame . During that time-frame, 
 the number of 311 SRs grew 50\%. The summer  and early fall months 
-make up all of the Top 5 SR counts by day. 
-The all-time daily high for SRs, 24,415 SRs (a full 9.8 \textsigma's from the 10-year mean), 
-occurred on Tuesday, 2020-08-04.
-The 10-year low count occurs on Christmas Day, 2016, a Sunday. 
-Note also that the difference between 
+make up all of the Top 5 SR counts by day. The all-time daily 
+high for SRs, 24,415 SRs (a full 9.8 \textsigma's from the 10-year mean), 
+occurred on Tuesday, 2020-08-04. The 10-year low count occurs 
+on Christmas Day, 2016, a Sunday. Note also that the difference between 
 the peak day (24,415) and the minimum day (2965) varies by 8X, creating a 
 challenging system performance issue. This timeframe (2014-2023) 
-also includes the COVID pandemic,  
-which reached a peak in the July-September 2020 timeframe, 
-accompanied by additional spikes in the 2\textsuperscript{nd}half of 2021 as well.
-
-
+also includes the COVID pandemic, which reached a peak in 
+the July-September 2020 timeframe, accompanied by additional 
+spikes in the 2\textsuperscript{nd}half of 2021 as well.
 
 \begin{figure}[tbp]
-  \centering
-  \includegraphics[width=\textwidth]{10-year-trend-monthly.pdf}
-  \caption{10-year (2014-2023) Monthly SR Counts}
-  \label{fig:10-yr-monthly}
+	\centering
+  	\includegraphics[width=\textwidth]{10-year-trend-monthly.pdf}
+  	\caption{10-year (2014-2023) Monthly SR Counts}
+  	\label{fig:10-yr-monthly}
 \end{figure}
 
 \begin{table}[tbp]
     \centering
-    \normalsize
     \caption{Top 5 and Bottom 5 Days for SRs}
-    \begin{tabular}{@{}lll lll@{}}
-        \toprule
-        \multicolumn{3}{c}{Top 5 Days} & \multicolumn{3}{c}{Bottom 5 Days} \\
-        \cmidrule(r){1-3} \cmidrule(l){4-6}
-        Date & Count & Rank & Date & Count & Rank \\
-        \midrule
-        2020-08-04 & 24,415 & 1 & 2014-12-25 & 2965 & 1 \\
-        2020-08-05 & 19,560 & 2 & 2015-12-25 & 3247 & 2 \\
-        2023-09-29 & 17,962 & 3 & 2014-04-20 & 3287 & 3 \\
-        2020-07-05 & 16,916 & 4 & 2015-12-26 & 3405 & 4 \\
-        2020-06-21 & 15,883 & 5 & 2016-11-06 & 3419 & 5 \\
-        \bottomrule
-    \end{tabular}
+	    \begin{tabular}{@{}lll lll@{}}
+	        \toprule
+	        \multicolumn{3}{c}{Top 5 Days} & \multicolumn{3}{c}{Bottom 5 Days} \\
+	        \cmidrule(r){1-3} \cmidrule(l){4-6}
+	        Date & Count & Rank & Date & Count & Rank \\
+	        \midrule
+	        2020-08-04 & 24,415 & 1 & 2014-12-25 & 2965 & 1 \\
+	        2020-08-05 & 19,560 & 2 & 2015-12-25 & 3247 & 2 \\
+	        2023-09-29 & 17,962 & 3 & 2014-04-20 & 3287 & 3 \\
+	        2020-07-05 & 16,916 & 4 & 2015-12-26 & 3405 & 4 \\
+	        2020-06-21 & 15,883 & 5 & 2016-11-06 & 3419 & 5 \\
+	        \bottomrule
+	    \end{tabular}
     \label{tab:top-10-counts}
 \end{table}
 
 This chart shows the 2-year period which is the basis for this analysis, by calendar month. 
 Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
 of 2020 are ``below average'', while most of the months after that period 
-are ``above average''. That level of higher usage
-of the 311 system has continued into the early months of 2024. 
-It is not surprising that the lowest SR counts-per-day occur during the Christmas holiday period. 
+are ``above average''. That level of higher usage of the 311 system 
+has continued into the early months of 2024. It is not surprising that 
+the lowest SR counts-per-day occur during the Christmas holiday period. 
 
 \begin{figure}[tbp]
   \centering
@@ -503,22 +499,22 @@ It is not surprising that the lowest SR counts-per-day occur during the Christma
 \end{figure}
 
 Two important fields in this analysis effort are the responsible NYC Agency, 
-and the type of complaint.
-Given the size of the City of New York government, it is necessary to 
-identify the responsible Agency as well as the type of complaint in order to 
-identify the responsible party and assist in troubleshooting discrepancies.
+and the type of complaint. Given the size of the City of New 
+York government, it is necessary to identify the responsible 
+Agency as well as the type of complaint in order to identify 
+the responsible party and assist in troubleshooting discrepancies.
 
 When we discovered a data error, we typically observe one of two trends; 
 either a single (or a few) Agencies are responsible (such as Dept of Transportation), 
 or it is a system-wide issue that follows the general distribution of  SRs across the system. 
 Thus we can often identify if it is an Agency specific problem, or a systemic issue.  
-(Note: a few key NYC Agencies are not 
-represented in the 311 dataset. These include the New York City Housing Authority (NYCHA) and the
-Department of Corrections (DOC).)
+(Note: a few key NYC Agencies are not represented in the 311 
+dataset. These include the New York City Housing Authority (NYCHA) 
+and the Department of Corrections (DOC).)
 
-Although the 311 SRs involve 16 different agencies, there are the ``big six'' 
-Agencies that comprise 90\% of the complaints. 
-These six are (in order of \% of complaints):  
+Although the 311 SRs involve 16 different agencies, there are 
+the ``big six'' Agencies that comprise 90\% of the complaints. These 
+six are (in order of \% of complaints):  
 
 \begin{itemize}
 	\item New York Police Department (NYPD)
@@ -541,7 +537,7 @@ accompanied by a long tail. This graph shows the top 20 complaint\_type(s)
 comprising 70\% out of a total of 220.
 
 \begin{figure}[tbp]
-  \centering
+	\centering
  	\includegraphics[width=\textwidth]{SR_by_Complaint_Type.pdf} 
 	\caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
 	\label{fig:SR_complaints}
@@ -564,32 +560,27 @@ all City rental and leased apartment units. HPD collectively serves
 Hence the large number of Heat/Hot Water and Unsanitary complaints 
 handled by HPD. 
 
-
-
-
 \begin{table}[tbp]
     \centering
-    \normalsize
     \caption{Noise-related complaints\_type(s) by count with Agency}
-    \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,
-    round-precision=0]S[table-format=2.2,round-mode=places,
-    round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
-        \toprule
-        \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
-        \midrule
-        NOISE - RESIDENTIAL        & 675502 & 10.56 & NYPD  \\ 
-        NOISE - STREET/SIDEWALK    & 300507 &  4.70 & NYPD  \\ 
-        NOISE - COMMERCIAL         & 128892 &  2.02 & NYPD  \\ 
-        NOISE - VEHICLE            & 115956 &  1.81 & NYPD  \\ 
-        NOISE                      & 100413 &  1.57 & DEP   \\ 
-        NOISE - HELICOPTER         &  85345 &  1.33 & EDC   \\ 
-        NOISE - PARK               &  16620 &  0.26 & NYPD  \\ 
-        NOISE - HOUSE OF WORSHIP   &   2757 &  0.04 & NYPD  \\ 
-        \bottomrule
-    \end{tabular}
+	    \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,
+	    round-precision=0]S[table-format=2.2,round-mode=places,
+	    round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
+	        \toprule
+	        \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
+	        \midrule
+	        Noise - Residential        & 675502 & 10.56 & NYPD  \\ 
+	        Noise - Street/Sidewalk    & 300507 &  4.70 & NYPD  \\ 
+	        Noise - Commercial         & 128892 &  2.02 & NYPD  \\ 
+	        Noise - Vehicle            & 115956 &  1.81 & NYPD  \\ 
+	        Noise                      & 100413 &  1.57 & DEP   \\ 
+	        Noise - Helicopter         &  85345 &  1.33 & EDC   \\ 
+	        Noise - Park               &  16620 &  0.26 & NYPD  \\ 
+	        Noise - House of Worship &   2757 &  0.04 & NYPD  \\ 
+	        \bottomrule
+	    \end{tabular}
     \label{tab:noisecomplaints}
 \end{table}
-
 
 There are also some curious and unusual Service Requests in the 311 data: 
 tanning, tattooing, trans fat, unsanitary pigeon condition, illegal animal 
@@ -599,18 +590,18 @@ radioactive material. New Yorkers certainly live interesting lives.
 
 
 \section{Data Cleansing Issues} \label{sec:issues}
-
 What is data cleansing?  Wikipedia 
 \href{https://en.wikipedia.org/wiki/Data_cleansing}{Data Cleansing} offers a good definition. 
 
-``Data cleansing or data cleaning is the process of detecting and 
+\begin{quote}\textit{Data cleansing or data cleaning is the process of detecting and 
 correcting (or removing) corrupt or inaccurate records from a record set, 
 table, or database and refers to identifying incomplete, incorrect, 
-inaccurate or irrelevant parts of the data 
-and then replacing, modifying, or deleting the dirty or coarse data.''
+inaccurate or irrelevant parts of the data and then replacing, 
+modifying, or deleting the dirty or coarse data.}
+\end{quote}
 
-Many quality criteria are required in order to process high-quality data. 
-These include:
+Many quality criteria are required in order to process high-quality 
+data. These include:
 
 \begin{itemize}
 	\item Data validation - this effort can span a number of criteria
@@ -644,9 +635,9 @@ is even an ``error''. Typically this requires discussions with subject matter
 experts (SMEs) and liaison within the various NYC Agency open data 
 coordinators who can help identify the underlying cause for the error. 
 For example, an invalid date field that is provided to the NYC Open Data 
-data lake via an Agency integration could
-be the result of selecting the wrong field from the source Agency's 
-system, e.g. due\_date instead of closed\_date. In other cases, without a subject matter
+data lake via an Agency integration could be the result of selecting 
+the wrong field from the source Agency's system, e.g. 
+due\_date instead of closed\_date. In other cases, without a subject matter
 expert, it is not possible to actually determine if the data is inaccurate or not. 
 There are many empty values in the taxi\_company\_borough field. Are those
 entries missing or does the entry in that field only apply to a 
@@ -673,7 +664,6 @@ This paper will focus on a set of specific data cleansing areas:
 
 
 \section{Structural Issues}\label{sec:structural}
-
 Structural issues in the context of data cleansing refers to issues 
 related to the how data is organized, formatted, or structured within a dataset. Structural issues 
 can make it difficult to analyze the data effectively. Some common 
@@ -705,7 +695,6 @@ Here are some characteristics of the 311 SR data set:
 	supports 934 characters of input, including commas and special characters
 \end{itemize}
 
-
 \textbf{Issue: Fields not in the Data Dictionary} The 311 SR 
 \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}
  identifies 41 data columns (fields) along with related information 
@@ -730,7 +719,7 @@ Here is a screenshot of the NYC Open Data Portal ``Column Manager''
 page showing those columns:
 
 \begin{figure}[tbp]
-  \centering
+ 	\centering
  	\includegraphics[width = .65\textwidth] {computed_fields_jpg.jpg}	
 	\caption{Screenshot of Data Portal with ``@computed'' Columns}  
 	\label{fig:computed-columns}
@@ -762,14 +751,13 @@ exploring the accuracy, validity, and candidacy for subsequent analytical usage.
 	
 \section{Validating data types}\label{sec:datatypes}
 Fortunately, both the Data Dictionary and the portal column manager 
-do a good job of indicating the data type.
-As indicated by the red underline in Figure \ref{fig:computed-columns}, 
-there is a small icon next to the field name which indicates the 
+do a good job of indicating the data type. As indicated by 
+the red underline in Figure \ref{fig:computed-columns}, there 
+is a small icon next to the field name which indicates the 
 data type of the field. The stylized capital ``T'' indicates ``text'', the ``\#'' sign indicates 
 ``numeric'', a calendar icon indicates a ``date'' field, and the pin on a 
-map symbol indicates a ``geospatial'' field. 
-	
-The following fields were checked for their specified data types:
+map symbol indicates a ``geospatial'' field. The following fields were 
+checked for their specified data types:
 	
 \begin{itemize}
 	\item created\_date, closed\_date, due\_date, and resolution\_action\_updated\_date: 
@@ -797,7 +785,6 @@ Data typing appears to not be an issue with this dataset.
  
 
 \section{Blank \& N/A data}\label{sec:blanks}
-
 Understanding the absence of data by field is an important factor 
 when undertaking analysis. For example, if you wanted to see if the SRs were
 closed before or after their due\_date, you would be challenged 
@@ -833,67 +820,64 @@ in 6.4 million records. Here is a breakdown of bank and N/A entries by field.
 
 \begin{table}[tbp]
 \centering
-\normalsize
 \caption{Blank and N/A entries by Field}
 \resizebox{0.8\linewidth}{!}{%
-\begin{tabular}{lrrrl}
-	\toprule
-	\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} 
-	& \textbf{N/A Count} \\
-	\midrule
-		taxi\_company\_borough & 6391341 & 99.94 & 0 \\
-		road\_ramp & 6379080 & 99.75 & 0 \\
-		vehicle\_type & 6376266 & 99.71 & 0 \\
-		due\_date & 6370497 & 99.62 & 6370497 \\
-		bridge\_highway\_direction & 6367626 & 99.57 & 0 \\
-		bridge\_highway\_name & 6340197 & 99.14 & 0 \\
-		bridge\_highway\_segment & 6340190 & 99.14 & 0 \\
-		taxi\_pick\_up\_location & 6329954 & 98.98 & 0 \\
-		facility\_type & 5966588 & 93.30 & 0 \\
-		landmark & 2635736 & 41.22 & 0 \\
-		intersection\_street\_1 & 2143847 & 33.52 & 0 \\
-		intersection\_street\_2 & 2140707 & 33.48 & 0 \\
-		cross\_street\_1 & 1846594 & 28.88 & 0 \\
-		cross\_street\_2 & 1846008 & 28.87 & 0 \\
-		location\_type & 798775 & 12.49 & 0 \\
-		bbl & 768109 & 12.01 & 0 \\
-		city & 332086 & 5.19 & 0 \\
-		street\_name & 280463 & 4.39 & 0 \\
-		incident\_address & 280268 & 4.38 & 0 \\
-		closed\_date & 248839 & 3.89 & 248839 \\
-		resolution\_description & 132333 & 2.07 & 0 \\
-		zip\_codes & 123167 & 1.93 & 0 \\
-		borough\_boundaries & 101453 & 1.59 & 0 \\
-		community\_districts & 101445 & 1.59 & 0 \\
-		city\_council\_districts & 101445 & 1.59 & 0 \\
-		police\_precincts & 101445 & 1.59 & 0 \\
-		police\_precinct & 101416 & 1.59 & 0 \\
-		latitude & 99778 & 1.56 & 0 \\
-		longitude & 99778 & 1.56 & 0 \\
-		location & 99778 & 1.56 & 0 \\
-		x\_coordinate\_state\_plane & 99668 & 1.56 & 0 \\
-		y\_coordinate\_state\_plane & 98822 & 1.55 & 0 \\
-		resolution\_action\_updated\_date & 91399 & 1.43 & 91399 \\
-		incident\_zip & 83220 & 1.30 & 2 \\
-		descriptor & 74645 & 1.17 & 0 \\
-		address\_type & 38655 & 0.60 & 0 \\
-		unique\_key & 0 & 0.00 & 0 \\
-		agency & 0 & 0.00 & 0 \\
-		agency\_name & 0 & 0.00 & 0 \\
-		complaint\_type & 0 & 0.00 & 0 \\
-		status & 0 & 0.00 & 0 \\
-		community\_board & 0 & 0.00 & 0 \\
-		borough & 0 & 0.00 & 0 \\
-		open\_data\_channel\_type & 0 & 0.00 & 0 \\
-		park\_facility\_name & 0 & 0.00 & 0 \\
-		park\_borough & 0 & 0.00 & 0 \\
-		created\_date & 0 & 0.00 & 0 \\
-	\bottomrule
-\end{tabular}
+	\begin{tabular}{lrrrl}
+		\toprule
+		\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} 
+		& \textbf{N/A Count} \\
+		\midrule
+			taxi\_company\_borough & 6391341 & 99.94 & 0 \\
+			road\_ramp & 6379080 & 99.75 & 0 \\
+			vehicle\_type & 6376266 & 99.71 & 0 \\
+			due\_date & 6370497 & 99.62 & 6370497 \\
+			bridge\_highway\_direction & 6367626 & 99.57 & 0 \\
+			bridge\_highway\_name & 6340197 & 99.14 & 0 \\
+			bridge\_highway\_segment & 6340190 & 99.14 & 0 \\
+			taxi\_pick\_up\_location & 6329954 & 98.98 & 0 \\
+			facility\_type & 5966588 & 93.30 & 0 \\
+			landmark & 2635736 & 41.22 & 0 \\
+			intersection\_street\_1 & 2143847 & 33.52 & 0 \\
+			intersection\_street\_2 & 2140707 & 33.48 & 0 \\
+			cross\_street\_1 & 1846594 & 28.88 & 0 \\
+			cross\_street\_2 & 1846008 & 28.87 & 0 \\
+			location\_type & 798775 & 12.49 & 0 \\
+			bbl & 768109 & 12.01 & 0 \\
+			city & 332086 & 5.19 & 0 \\
+			street\_name & 280463 & 4.39 & 0 \\
+			incident\_address & 280268 & 4.38 & 0 \\
+			closed\_date & 248839 & 3.89 & 248839 \\
+			resolution\_description & 132333 & 2.07 & 0 \\
+			zip\_codes & 123167 & 1.93 & 0 \\
+			borough\_boundaries & 101453 & 1.59 & 0 \\
+			community\_districts & 101445 & 1.59 & 0 \\
+			city\_council\_districts & 101445 & 1.59 & 0 \\
+			police\_precincts & 101445 & 1.59 & 0 \\
+			police\_precinct & 101416 & 1.59 & 0 \\
+			latitude & 99778 & 1.56 & 0 \\
+			longitude & 99778 & 1.56 & 0 \\
+			location & 99778 & 1.56 & 0 \\
+			x\_coordinate\_state\_plane & 99668 & 1.56 & 0 \\
+			y\_coordinate\_state\_plane & 98822 & 1.55 & 0 \\
+			resolution\_action\_updated\_date & 91399 & 1.43 & 91399 \\
+			incident\_zip & 83220 & 1.30 & 2 \\
+			descriptor & 74645 & 1.17 & 0 \\
+			address\_type & 38655 & 0.60 & 0 \\
+			unique\_key & 0 & 0.00 & 0 \\
+			agency & 0 & 0.00 & 0 \\
+			agency\_name & 0 & 0.00 & 0 \\
+			complaint\_type & 0 & 0.00 & 0 \\
+			status & 0 & 0.00 & 0 \\
+			community\_board & 0 & 0.00 & 0 \\
+			borough & 0 & 0.00 & 0 \\
+			open\_data\_channel\_type & 0 & 0.00 & 0 \\
+			park\_facility\_name & 0 & 0.00 & 0 \\
+			park\_borough & 0 & 0.00 & 0 \\
+			created\_date & 0 & 0.00 & 0 \\
+		\bottomrule
+	\end{tabular}
 }
 \end{table}
-
-%\FloatBarrier % Ensure all floats before this point are processed before moving on
 
 Here is a graphic depiction of total empty (blank \& N/As) for each fields. 
 You can see the natural grouping into the Most, Some, and Few categories 
@@ -930,18 +914,18 @@ in the stair-type visualization.
 	values are not specified in the Data Dictionary. These fields all tested as 
 	compliant within their domain of acceptable values as determined by 
 	examining a 10-year dataset:
-		\begin{itemize}
-			\item address\_type
-			\item status
-			\item borough, borough\_boundaries, \& park\_borough 
-			\item data\_channel
-			\item vehicle\_type
-			\item city\_council\_district
-		\end{itemize}
-\end{itemize}	
+	\begin{itemize}
+		\item address\_type
+		\item status
+		\item borough, borough\_boundaries, \& park\_borough 
+		\item data\_channel
+		\item vehicle\_type
+		\item city\_council\_district
+	\end{itemize}	
+\end{itemize}
 
-	\subsection{Issues with Zip Codes}
-	\label{sec:zipcodesissues}
+\subsection{Issues with Zip Codes}
+\label{sec:zipcodesissues}
 	 Unfortunately some fields proved to be  problematic when comparing 
 	 the values to a domain of legal values. For example, all zip codes 
 	 (two fields: zip\_codes and incident\_zip) should be valid as defined 
@@ -984,8 +968,8 @@ in the stair-type visualization.
 		\label{fig:invalid_incident_zip}
 	\end{figure}
 	
-		\subsubsection{Case Study: Noise Complaints by Zip Code}
-		{label{sec:case-study-zip-codes}
+\subsubsection{Case Study: Noise Complaints by Zip Code}
+\label{sec:case-study-zip-codes}
 		\textbf{Scenario:} The NYC Office of Nightlife (ONL) wants to 
 		know ``What are the top 10 zip codes for Noise Complaints (all 8 types) 
 		over the last two years?'' The goal is to assess the impact of the 
@@ -1013,30 +997,29 @@ in the stair-type visualization.
 	 
 \begin{table}[tbp]
     \centering
-    \normalsize
     \caption{Comparison of Top Ten Zip Codes Lists}
-    \begin{tabular}{@{}lS[table-format=6.0,round-mode=places,
-    round-precision=0]c@{\hskip 0.5cm}@{}lS[table-format=6.0,
-    round-mode=places,round-precision=0]c@{}}
-        \toprule
-        \multicolumn{3}{c}{\textbf{zip\_codes}} & \multicolumn{3}{c}{\textbf{incident\_zip}} \\
-        \cmidrule(r){1-3} \cmidrule(l){4-6}
-        \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} 
-        & \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} \\
-        \midrule
-        11275 & 104556 & FALSE & 10466 & 104562 & TRUE \\
-        12420 & 27503 & TRUE & 10023 & 27972 & TRUE \\
-        12428 & 26564 & TRUE & 10031 & 25548 & TRUE \\
-        10935 & 25508 & FALSE & 10457 & 25066 & TRUE \\
-        10934 & 23448 & FALSE & 10453 & 24752 & TRUE \\
-        10931 & 22381 & TRUE & 10456 & 24751 & TRUE \\
-        10930 & 22121 & TRUE & 10452 & 22527 & TRUE \\
-        17613 & 21963 & FALSE & 10025 & 21705 & TRUE \\
-        10936 & 21707 & FALSE & 10458 & 21689 & TRUE \\
-        11606 & 21435 & FALSE & 10032 & 20622 & TRUE \\
-        \bottomrule
-    \end{tabular}
-    \label{tab:zipcodes}
+	    \begin{tabular}{@{}lS[table-format=6.0,round-mode=places,
+	    round-precision=0]c@{\hskip 0.5cm}@{}lS[table-format=6.0,
+	    round-mode=places,round-precision=0]c@{}}
+		\toprule
+	 	\multicolumn{3}{c}{\textbf{zip\_codes}} & \multicolumn{3}{c}{\textbf{incident\_zip}} \\
+	      \cmidrule(r){1-3} \cmidrule(l){4-6}
+	      \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} 
+	      & \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} \\
+	      \midrule
+	        11275 & 104556 & FALSE & 10466 & 104562 & TRUE \\
+	        12420 & 27503 & TRUE & 10023 & 27972 & TRUE \\
+	        12428 & 26564 & TRUE & 10031 & 25548 & TRUE \\
+	        10935 & 25508 & FALSE & 10457 & 25066 & TRUE \\
+	        10934 & 23448 & FALSE & 10453 & 24752 & TRUE \\
+	        10931 & 22381 & TRUE & 10456 & 24751 & TRUE \\
+	        10930 & 22121 & TRUE & 10452 & 22527 & TRUE \\
+	        17613 & 21963 & FALSE & 10025 & 21705 & TRUE \\
+	        10936 & 21707 & FALSE & 10458 & 21689 & TRUE \\
+	        11606 & 21435 & FALSE & 10032 & 20622 & TRUE \\
+	      \bottomrule
+	    	\end{tabular}
+ 	\label{tab:zipcodes}
 \end{table}
 
 As indicated, six out of ten zip\_codes are invalid, which corresponds closely 
@@ -1051,9 +1034,8 @@ computed while the other is via data entry; the computed protocol is
 again the suspect. The algorithm appears to be counting corrrectly 
 (or nearly so) 	but mis-identifying the corresponding zip code.
 
-	
-	\subsection{Issues with Police Precincts}
-	\label{sec:police-precincts}
+\subsection{Issues with Police Precincts} 	
+\label{sec:police-precincts}
 	A curious case also exists when examining the two nearly identical 
 	fields - police\_precincts and police\_precinct. Both of those fields 
 	are among the ``computed'' fields in the dataset. Using 
@@ -1074,7 +1056,6 @@ again the suspect. The algorithm appears to be counting corrrectly
 	The top ten (by count) of invalid precincts for each field are:
 
 	\begin{table}[tbp]
-	\normalsize
 	\centering
 	\caption{Comparison of the fields police\_precinct and police\_precincts}
 		\begin{tabular}{ccccc}
@@ -1082,38 +1063,39 @@ again the suspect. The algorithm appears to be counting corrrectly
 		\textbf{Invalid Precinct} & \textbf{police\_precinct count} 
 		& \textbf{police\_precincts count} & \textbf{Delta}\\
 		\midrule
-			62 & 151808 & 151720 & 88 \\
-			72 & 148881 & 148796 & 85 \\
-			67 & 133171 & 133115 & 56 \\
-			64 & 111236 & 111221 & 15 \\
-			60 & 105252 & 105317 & -65 \\
-			65 & 103334 & 103306 & 28 \\
-			53 & 100097 & 100074 & 23 \\
-			73 & 97746 & 97755 & -9 \\
-			68 & 94204 & 94254 & -50 \\
-			66 & 93654 & 93848 & -194 \\
-	\bottomrule
-	\end{tabular}
+				62 & 151808 & 151720 & 88 \\
+				72 & 148881 & 148796 & 85 \\
+				67 & 133171 & 133115 & 56 \\
+				64 & 111236 & 111221 & 15 \\
+				60 & 105252 & 105317 & -65 \\
+				65 & 103334 & 103306 & 28 \\
+				53 & 100097 & 100074 & 23 \\
+				73 & 97746 & 97755 & -9 \\
+				68 & 94204 & 94254 & -50 \\
+				66 & 93654 & 93848 & -194 \\
+		\bottomrule
+		\end{tabular}
 	\label{tab:comparison-precincts-diff}
 	\end{table}
 	
-	A graphic representation of the invalid police\_precincts plotted 
-	by Agency show a near perfect match to the distribution of the 
-	entire 6.4 million SRs as seen in Figure \ref{fig:SR_counts_by_Agency}. 
-	Note that the ``big six'' Agencies account for 90\% of these invalid 
-	precinct errors, identical to the overall distribution of all SRs. 
-	(The same is true for a similar graph of by the police\_precint field.) 
-	This strongly suggests that this is a systemic problem, 
-	almost certainly caused by the computation method applied for these two fields.
-	 
+	A graphic representation of the invalid police\_precincts plotted by 
+	Agency show a near perfect match to the distribution of the entire 
+	6.4 million SRs as seen in Figure \ref{fig:SR_counts_by_Agency}. Note 
+	that the ``big six'' Agencies account for 90\% of these invalid precinct 
+	errors, identical to the overall distribution of all SRs. (The same is true 
+	for a similar graph of by the police\_precint field.) This strongly 
+	suggests that this is a systemic problem, most likely caused by the 
+	computation method applied for these two fields.
+		 
 	\begin{figure}[tbp]
-	  \centering
-	  \includegraphics[width=\textwidth]{invalid_police_precincts.pdf}
-	  \caption{Invalid NYPD precincts by Agency}	  
-	  \label{fig:invalid_police_precincts_zip}
+		\centering
+		\includegraphics[width=\textwidth]{invalid_police_precincts.pdf}
+		\caption{Invalid NYPD precincts by Agency}	  
+		\label{fig:invalid_police_precincts_zip}
 	\end{figure}
 
-	\subsection{Issues with Community Boards}
+\subsection{Issues with Community Boards}
+\label{sec:communityboards}
 	Community Boards are an important aspect of NYC government. They are the 
 	most local, grassroots form of City government, and a vital connection 
 	between communities and elected officials and City agencies. 
@@ -1134,24 +1116,23 @@ again the suspect. The algorithm appears to be counting corrrectly
 	
 		\begin{table}[tbp]
 		\centering
-		\normalsize
 		\caption{Top Ten Invalid 'community\_board' Values}
-		\begin{tabular}{rlr}
-		\toprule
-		\textbf{Rank} & \textbf{Invalid CB} & \textbf{Count} \\
-			\midrule
-				1 & 64 MANHATTAN & 7144 \\
-				2 & 83 QUEENS & 5133 \\
-				3 & 55 BROOKLYN & 3327 \\
-				4 & 81 QUEENS & 3180 \\
-				5 & 80 QUEENS & 2407 \\
-				6 & 26 BRONX & 2364 \\
-				7 & 28 BRONX & 1128 \\
-				8 & 82 QUEENS & 1054 \\
-				9 & 95 STATEN ISLAND & 515 \\
-				10 & 27 BRONX & 514 \\
-			\bottomrule
-		\end{tabular}
+			\begin{tabular}{rlr}
+			\toprule
+			\textbf{Rank} & \textbf{Invalid CB} & \textbf{Count} \\
+				\midrule
+					1 & 64 MANHATTAN & 7144 \\
+					2 & 83 QUEENS & 5133 \\
+					3 & 55 BROOKLYN & 3327 \\
+					4 & 81 QUEENS & 3180 \\
+					5 & 80 QUEENS & 2407 \\
+					6 & 26 BRONX & 2364 \\
+					7 & 28 BRONX & 1128 \\
+					8 & 82 QUEENS & 1054 \\
+					9 & 95 STATEN ISLAND & 515 \\
+					10 & 27 BRONX & 514 \\
+				\bottomrule
+			\end{tabular}
 		\end{table}
 		
 		The distribution of invalid Community Boards by Agency is not consistent 
@@ -1162,14 +1143,15 @@ again the suspect. The algorithm appears to be counting corrrectly
 		well-tracked measure so accuracy is again important.
 
 		\begin{figure}[tbp]
-	 	 \centering
-		  \includegraphics[width = \textwidth]{invalid_community_boards.pdf}
-		  \caption{Invalid Community Board by Agency}
-		  \label{fig:invalid_community_boards}
+		 	 \centering
+			  \includegraphics[width = \textwidth]{invalid_community_boards.pdf}
+			  \caption{Invalid Community Board by Agency}
+			  \label{fig:invalid_community_boards}
 		\end{figure}
 
 
-	\subsection{Issues with Community Districts}
+\subsection{Issues with Community Districts}
+\label{sec:communitydistrict}
 	Another of the computed fields is community\_districts. Community Districts 
 	are the boundaries for the Community Boards, but unlike how 
 	Community Boards are an arm of the government of New York City, 
@@ -1188,186 +1170,190 @@ again the suspect. The algorithm appears to be counting corrrectly
 	Districts. So it would appear that there are 13 invalid 
 	community\_board(s) contained in the dataset.
 	
-As previously mentioned, the dataset has four data fields:  created\_date, 
-closed\_date, due\_date, and resolution\_action\_update\_date. 
-The due\_date field has few entries to analyze; 99.62\% of due\_date entries 
-are ``N/A''.  It is not known if the due\_date(s) are truely ``not applicable'' 
-or that the due\_date field is rarely used. The  resolution\_action\_update\_date 
-field serves as a date-time marker showing when the SR record was last updated.  
-All the date fields are recorded to the second, e/g/ ``2022-02-11 13:43:05''.
+	As previously mentioned, the dataset has four data fields:  created\_date, 
+	closed\_date, due\_date, and resolution\_action\_update\_date. 
+	The due\_date field has few entries to analyze; 99.62\% of due\_date entries 
+	are ``N/A''.  It is not known if the due\_date(s) are truely ``not applicable'' 
+	or that the due\_date field is rarely used. The  resolution\_action\_update\_date 
+	field serves as a date-time marker showing when the SR record was last updated.  
+	All the date fields are recorded to the second, e/g/ ``2022-02-11 13:43:05''.
 
 \subsection{created\_date and closed\_date(s) -- Negative Duration}
-Let's look first at the created\_date and closed\_date fields. You might 
-expect that these two fields are automatically populated by the 
-SR application software, either the software used at the 311 organization 
-or that used at the Agencies that are integrated with the 311 system; 
-and typically that is indeed the case. In such a case, the act of creating an 
-SR would automatically trigger an entry in created\_date based on a 
-system reference clock. Thus the created\_date is associated with 
-setting an SR status to ``new'' or ``open''. And similarly when an SR's 
-status is changed to ``closed'' then the closed\_date would be populated. 
-
-Unfortunately, our analysis found that that assumption is not always 
-the case. When you analyze the various date fields, several anomalies 
-quickly become apparent:
-
+\label{sec:negativeduration}
+	Let's look first at the created\_date and closed\_date fields. You might 
+	expect that these two fields are automatically populated by the 
+	SR application software, either the software used at the 311 organization 
+	or that used at the Agencies that are integrated with the 311 system; 
+	and typically that is indeed the case. In such a case, the act of creating an 
+	SR would automatically trigger an entry in created\_date based on a 
+	system reference clock. Thus the created\_date is associated with 
+	setting an SR status to ``new'' or ``open''. And similarly when an SR's 
+	status is changed to ``closed'' then the closed\_date would be populated. 
+	
+	Unfortunately, our analysis found that that assumption is not always 
+	the case. When you analyze the various date fields, several anomalies 
+	quickly become apparent:
+	
 	\begin{itemize}
-		    \item Some SRs have a closed\_date that occurs before the created\_date.
-		    \item Some created\_date(s) and closed\_date(s) appear either in 
-		    the future or in the far distant past.
-		    \item There are a large number of SRs that are closed and created 
-		    exactly at midnight or exactly at noon. 
+		\item Some SRs have a closed\_date that occurs before the created\_date.
+	 	\item Some created\_date(s) and closed\_date(s) appear either in 
+	 	the future or in the far distant past.
+		\item There are a large number of SRs that are closed and created 
+		exactly at midnight or exactly at noon. 
 	\end{itemize}
-
-\textbf{Why are these date fields important?} They're important because citizens, NYC Government Officials, and NYC Agencies use these dates to measure the responsiveness 
-for providing the services. How long does it take to replace an out-of-order 
-street light? How rapid is the response to a report of domestic violence? 
-Does the NYPD response to a noise complaint in Staten Island take longer 
-than in Manhattan? How long does it take to repair a street pothole in Queens? 
-
-The measure of ``duration'', of the response time of a 311 call is a closely 
-watched, carefully scrutinized metric, both in terms of overall performance 
-and with a geographical area. And it can have broad political, organizational, 
-and budgetary consequences. Duration is not a field in the dataset, 
-but it is easily computed by closed\_date - created\_date. Let's look at 
-some anomalies in this ``duration'' field.
-
-Closed-before-Created:  There are 12,251 SRs that are closed before they 
-were created, thereby generating a nonsensical ``negative duration''. 
-While this is a small percentage overall (0.2\%) it can have significant impact 
-on response time analysis. In most cases, these ``negative durations'' 
-appear to just be mistakes. Here is a sample of some of the 
-largest and the smallest errors:
-
-\begin{table}[tbp]
-    \centering
-    \normalsize
-    \caption{Largest and Smallest errors (days)}
-    \begin{tabular}{>{\ttfamily}l l l r l}
-        \toprule
-        \multicolumn{5}{c}{\textbf{Largest errors (days) excluding 
-        extreme negative values}} \\
-        \midrule
-        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-        & \textbf{agency} \\
-	        \midrule
-	        2023-01-27 14:40:00 & 2022-01-14 14:40:00 & -378.0 & DOT \\
-	        2023-01-18 10:06:00 & 2022-01-12 10:06:00 & -371.0 & DOT \\
-	        2023-01-27 14:36:00 & 2022-01-22 14:35:00 & -370.0 & DOT \\
-	        2023-01-11 11:10:00 & 2022-01-09 11:10:00 & -367.0 & DOT \\
-	        2023-12-18 03:13:00 & 2023-01-16 13:10:00 & -335.6 & DOT \\
-	        \midrule
-	        \multicolumn{5}{c}{\textbf{Smallest errors (days)}} \\
-	        \midrule
-	        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-	        & \textbf{agency} \\
-	        \midrule
-	        2023-06-28 07:07:31 & 2023-06-28 07:07:00 & -0.00036 & DOT \\
-	        2023-06-29 09:10:20 & 2023-06-29 09:10:00 & -0.00023 & DOT \\
-	        2023-01-12 06:50:13 & 2023-01-12 06:50:00 & -0.00015 & DOT \\
-	        2023-06-26 08:09:07 & 2023-06-26 08:09:00 & -0.00008 & DOT \\
-	        2023-01-12 06:51:01 & 2023-01-12 06:51:00 & -0.00001 & DOT \\
-	        \bottomrule
-    \end{tabular}
-    \label{tab:combined_errors}
-\end{table}
-
-The largest errors are shown ``excluding extreme negative values''. We found 
-eight SRs with extremely large negative durations (\textless{} -730), all containing 
-an entry of ``1900-01-01'' as the closed\_date, which generates extremely large 
-negative durations exceeding 44,601 days (122 yrs). That large of an anomaly 
-can skew statistical results, even though the number of occurrences is small. 
-This is especially curious as the date ``1900-01-01'' is also the earliest date that 
-Microsoft Excel can accommodate as well as how Excel treats a blank cell 
-that is designated as a date. All raising suspicions that perhaps these dates 
-were imported into the 311 system from Excel.
-
-According, these  SR rows are removed from the box \& whiskers plot. 
-Note that these extremely large negative duration SRs are all from the 
-Department of Homeland Services (DHS) Sample: 
-
-\begin{table}[tbp]
-    \centering
-     \normalsize
-    \caption{Sample of SRs with extremely large negative durations}
-    \begin{tabular}{l l r l}
-        \toprule
-        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-        & \textbf{agency} \\
-	        \midrule
-	        2022-02-11 13:43:05 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 11:03:38 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 08:29:49 & 1900-01-01 & -44601 & DHS \\
-	        2022-02-11 14:08:08 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 14:05:16 & 1900-01-01 & -44602 & DHS \\
-	        \bottomrule
-    \end{tabular}
-    \label{tab:extreme_negative_durations}
-\end{table}
-
-Here is a graphic visualization of the negative-duration SRs by Agency. It is 
-obvious that this negative-duration issue is a problem at the 
-Dept. of Transportation (DOT) where 95\% of these types of errors occur. 
-
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
-	  \caption{Negative Duration SRs by Agency}
-	  \label{fig:negative-duration}
-\end{figure}
-
-This violin chart shows the broad spread of negative-duration SRs, albeit with 
-the extremely large negative-duration SR removed. While there are few 
-outlier points, the magnitude of the negative-durations is troubling and can 
-produce bizarre analytical results.
-
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
-	 \caption{Distribution of Negative Durations}
-	 \label{fig:negative-duration-violin}
-\end{figure}
+	
+	\textbf{Why are these date fields important?} They're important because 
+	citizens, NYC Government Officials, and NYC Agencies use these 
+	dates to measure the responsiveness for providing the 
+	services. How long does it take to replace an out-of-order 
+	street light? How rapid is the response to a report of domestic 
+	violence? Does the NYPD response to a noise complaint in 
+	Staten Island take longer than in Manhattan? How long does it 
+	take to repair a street pothole in Queens? 
+	
+	The measure of ``duration'', of the response time of a 311 call is a closely 
+	watched, carefully scrutinized metric, both in terms of overall performance 
+	and with a geographical area. And it can have broad political, organizational, 
+	and budgetary consequences. Duration is not a field in the dataset, 
+	but it is easily computed by closed\_date - created\_date. Let's look at 
+	some anomalies in this ``duration'' field.
+	
+	Closed-before-Created:  There are 12,251 SRs that are closed before they 
+	were created, thereby generating a nonsensical ``negative duration''. 
+	While this is a small percentage overall (0.2\%) it can have significant impact 
+	on response time analysis. In most cases, these ``negative durations'' 
+	appear to just be mistakes. Here is a sample of some of the 
+	largest and the smallest errors:
+	
+	\begin{table}[tbp]
+	    \centering
+	    \caption{Largest and Smallest errors (days)}
+		    \begin{tabular}{l l l r l}
+		        \toprule
+		        \multicolumn{5}{c}{\textbf{Largest errors (days) excluding 
+		        extreme negative values}} \\
+		        \midrule
+		        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
+		        & \textbf{agency} \\
+			        \midrule
+			        2023-01-27 14:40:00 & 2022-01-14 14:40:00 & -378.0 & DOT \\
+			        2023-01-18 10:06:00 & 2022-01-12 10:06:00 & -371.0 & DOT \\
+			        2023-01-27 14:36:00 & 2022-01-22 14:35:00 & -370.0 & DOT \\
+			        2023-01-11 11:10:00 & 2022-01-09 11:10:00 & -367.0 & DOT \\
+			        2023-12-18 03:13:00 & 2023-01-16 13:10:00 & -335.6 & DOT \\
+			        \midrule
+			        \multicolumn{5}{c}{\textbf{Smallest errors (days)}} \\
+			        \midrule
+			        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
+			        & \textbf{agency} \\
+			        \midrule
+			        2023-06-28 07:07:31 & 2023-06-28 07:07:00 & -0.00036 & DOT \\
+			        2023-06-29 09:10:20 & 2023-06-29 09:10:00 & -0.00023 & DOT \\
+			        2023-01-12 06:50:13 & 2023-01-12 06:50:00 & -0.00015 & DOT \\
+			        2023-06-26 08:09:07 & 2023-06-26 08:09:00 & -0.00008 & DOT \\
+			        2023-01-12 06:51:01 & 2023-01-12 06:51:00 & -0.00001 & DOT \\
+			        \bottomrule
+		    \end{tabular}
+	    \label{tab:combined_errors}
+	\end{table}
+	
+	The largest errors are shown ``excluding extreme negative values''. We found 
+	eight SRs with extremely large negative durations (\textless{} -730), all containing 
+	an entry of ``1900-01-01'' as the closed\_date, which generates extremely large 
+	negative durations exceeding 44,601 days (122 yrs). That large of an anomaly 
+	can skew statistical results, even though the number of occurrences is small. 
+	This is especially curious as the date ``1900-01-01'' is also the earliest date that 
+	Microsoft Excel can accommodate as well as how Excel treats a blank cell 
+	that is designated as a date. All raising suspicions that perhaps these dates 
+	were imported into the 311 system from Excel.
+	
+	According, these  SR rows are removed from the box \& whiskers plot. 
+	Note that these extremely large negative duration SRs are all from the 
+	Department of Homeland Services (DHS) Sample: 
+	
+	\begin{table}[tbp]
+	    \centering
+	    \caption{Sample of SRs with extremely large negative durations}
+		    \begin{tabular}{l l r l}
+		        \toprule
+		        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
+		        & \textbf{agency} \\
+			        \midrule
+			        2022-02-11 13:43:05 & 1900-01-01 & -44602 & DHS \\
+			        2022-02-11 11:03:38 & 1900-01-01 & -44602 & DHS \\
+			        2022-02-11 08:29:49 & 1900-01-01 & -44601 & DHS \\
+			        2022-02-11 14:08:08 & 1900-01-01 & -44602 & DHS \\
+			        2022-02-11 14:05:16 & 1900-01-01 & -44602 & DHS \\
+			        \bottomrule
+		    \end{tabular}
+	    \label{tab:extreme_negative_durations}
+	\end{table}
+	
+	Here is a graphic visualization of the negative-duration SRs by Agency. It is 
+	obvious that this negative-duration issue is a problem at the 
+	Dept. of Transportation (DOT) where 95\% of these types of errors occur. 
+	
+	\begin{figure}[tbp]
+	 	 \centering
+	 	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
+		  \caption{Negative Duration SRs by Agency}
+		  \label{fig:negative-duration}
+	\end{figure}
+	
+	This violin chart shows the broad spread of negative-duration SRs, albeit with 
+	the extremely large negative-duration SR removed. While there are few 
+	outlier points, the magnitude of the negative-durations is troubling and can 
+	produce bizarre analytical results.
+	
+	\begin{figure}[tbp]
+	 	 \centering
+	 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
+		 \caption{Distribution of Negative Durations}
+		 \label{fig:negative-duration-violin}
+	\end{figure}
 
 
 \subsubsection{Case Study: Homeless Person Assistance}
-		\textbf{Scenario:} The Dept. of Homeless Services wants to 
-		know ``How quickly are 311 calls for ``Homeless Person Assistance 
-		over the past two years?'' resolved. This is a typical request made by 
-		both the public and City government. It's a performance metric along 
-		the lines of ``How quickly is my Agency responding to ``critical'' 
-		requests, and does that performance vary by Borough, Zip Code, etc. 
-		As an analyst, this appears to be a routine effort: 
+\label{sec:homlessassistance}
+	\textbf{Scenario:} The Dept. of Homeless Services wants to 
+	know ``How quickly are 311 calls for ``Homeless Person Assistance 
+	over the past two years?'' resolved. This is a typical request made by 
+	both the public and City government. It's a performance metric along 
+	the lines of ``How quickly is my Agency responding to ``critical'' 
+	requests, and does that performance vary by Borough, Zip Code, etc. 
+	As an analyst, this appears to be a routine effort: 
 		
-		\begin{enumerate}
-		    \item Select data from 2022-2023 and filter the data by 
-		    complaint\_type = ``Homeless Person Assistance'' (yields 55,000 SRs)
-		    \item Compute a new field ``duration'' (closed\_date – created\_date)
-		    \item Take an average of the ``duration'' field == \textbf{Answer:  -4.8 days}  
-		\end{enumerate}
+	\begin{enumerate}
+	    \item Select data from 2022-2023 and filter the data by 
+	    complaint\_type = ``Homeless Person Assistance'' (yields 55,000 SRs)
+	    \item Compute a new field ``duration'' (closed\_date – created\_date)
+	    \item Take an average of the ``duration'' field == \textbf{Answer:  -4.8 days}  
+	\end{enumerate}
 		
-		Clearly that answer is nonsensical. How did such a simple task result 
-		in an absurd answer? The answer lies in the computation of the ``duration'' 
-		field. As it turns out, there are eight DHS SRs that have a closed\_date 
-		of ``1900-01-01''. Each of those SRs creates a negative duration of -44,602 
-		days (-122 years). So just those eight SRs with extreme negative duration 
-		values is enough to drive the average of the 75,000 
-		Homeless Assistance SRs to a negative value, clearly incorrect.
+	Clearly that answer is nonsensical. How did such a simple task result 
+	in an absurd answer? The answer lies in the computation of the ``duration'' 
+	field. As it turns out, there are eight DHS SRs that have a closed\_date 
+	of ``1900-01-01''. Each of those SRs creates a negative duration of -44,602 
+	days (-122 years). So just those eight SRs with extreme negative duration 
+	values is enough to drive the average of the 75,000 
+	Homeless Assistance SRs to a negative value, clearly incorrect.
 		
-		As it turns out the distribution of the ``Homeless Person Assistance'' is 
-		quite skewed due to a small number of long duration SRs. In this case, 
-		the median is a better measure of central tendency than the average. 
-		And the median of the duration field is  0.2 days (approx 5 hrs). 
-		Here is a look at the distribution of durations for the Homeless Person 
-		Assistance SRs showing 	the large outliers. 
+	As it turns out the distribution of the ``Homeless Person Assistance'' is 
+	quite skewed due to a small number of long duration SRs. In this case, 
+	the median is a better measure of central tendency than the average. 
+	And the median of the duration field is  0.2 days (approx 5 hrs). 
+	Here is a look at the distribution of durations for the Homeless Person 
+	Assistance SRs showing 	the large outliers. 
 		
-		\begin{figure}[tbp]
-		 	 \centering
-		 	 \includegraphics[width = \textwidth]{homeless_response_time_clean.pdf}
-			 \caption{Homeless Assistance SR Durations}
-			 \label{fig:homeless}
-		\end{figure}
+	\begin{figure}[tbp]
+	 	 \centering
+	 	 \includegraphics[width = \textwidth]{homeless_response_time_clean.pdf}
+		 \caption{Homeless Assistance SR Durations}
+		 \label{fig:homeless}
+	\end{figure}
 		
-	\subsection{created\_date and closed\_date(s) --  Zero Duration}		
+\subsection{created\_date and closed\_date(s) --  Zero Duration}
+\label{sec: zeroduration}		
 	An even more serious, and more prevalent problem with closed\_date(s) 
 	occurs when the closed\_date and created\_date are exactly the same -- to 
 	the second -- which accordingly creates a \textbf{zero duration'}. Again 
@@ -1387,7 +1373,8 @@ produce bizarre analytical results.
 		 \label{fig:zero-duration}
 	\end{figure}	
 		
-	\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
+\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
+\label{sec:midnightandnoon}
 	An additional problem discovered with the created\_date and 
 	closed\_date fields; there appears to be an unusually large number of SRs 
 	created or closed at exactly midnight (00:00:00) and exactly noon (12:00:00), 
@@ -1404,9 +1391,9 @@ produce bizarre analytical results.
 	this 2-year period include:
 	
 	\begin{itemize}
-		    \item There were 99,779 SRs created exactly at noon (12:00:00)
-		    \item There were 235,347 SRs closed exactly at midnight (00:00:00)
-		    \item There were 105,505 SRs closed exactly at noon. 
+		 \item There were 99,779 SRs created exactly at noon (12:00:00)
+		 \item There were 235,347 SRs closed exactly at midnight (00:00:00)
+		\item There were 105,505 SRs closed exactly at noon. 
 	\end{itemize}
 	
 	There is, of course, a broad distribution of the time that SRs are 
@@ -1570,7 +1557,8 @@ produce bizarre analytical results.
 	expected 311 SR activity. But at least by observation that 
 	outcome appears very unlikely.	
 		
-	\subsection{resolution\_action\_update\_date}
+\subsection{resolution\_action\_update\_date}
+\label{sec: resolutionaction}
 	When an SR is updated, by any means on any field, the software 
 	automatically populates the resolution\_action\_update\_date. 
 	Analyzing that field it is apparent that some of the SR updates 
@@ -1585,20 +1573,19 @@ produce bizarre analytical results.
 
 	\begin{table}[tbp]
 	    \centering
-	    \normalsize
 	    \caption{Extremely long Resolution Updates}
-	    \begin{tabular}{cccc}
-	        \hline
-	        Agency & Closed Date & Resolution Action Updated Date 
-	        & Post Closed Update Duration (days) \\
-	        \hline
-	        DHS & 1900-01-01 & 2022-02-12 00:58:43 & 44602 \\
-	        DHS & 1900-01-01 & 2022-02-11 14:28:59 & 44601 \\
-	        DHS & 1900-01-01 & 2022-02-11 14:17:41 & 44601 \\
-	        DHS & 1900-01-01 & 2022-02-11 13:45:59 & 44601 \\
-	        DHS & 1900-01-01 & 2022-02-11 13:22:12 & 44601 \\
-	        \hline
-	    \end{tabular}
+		    \begin{tabular}{cccc}
+		        \hline
+		        Agency & Closed Date & Resolution Action Updated Date 
+		        & Post Closed Update Duration (days) \\
+		        \hline
+		        DHS & 1900-01-01 & 2022-02-12 00:58:43 & 44602 \\
+		        DHS & 1900-01-01 & 2022-02-11 14:28:59 & 44601 \\
+		        DHS & 1900-01-01 & 2022-02-11 14:17:41 & 44601 \\
+		        DHS & 1900-01-01 & 2022-02-11 13:45:59 & 44601 \\
+		        DHS & 1900-01-01 & 2022-02-11 13:22:12 & 44601 \\
+		        \hline
+		    \end{tabular}
 	    \label{tab:resolution-updates}
 	\end{table}
 	
@@ -1614,22 +1601,21 @@ produce bizarre analytical results.
 	require further investigation. 
 	
 	\begin{table}[tbp]
-    \centering
-    \normalsize
+    	\centering
      \caption{Long post-closed Resolution Updates}
-    \begin{tabular}{cccc}
-	        \hline
-	        Agency & Closed Date & Resolution Action Updated Date 
-	        & Post Closed Update Duration (days) \\
-	        \hline
-	        TLC & 2023-05-25 14:21:12 & 2023-10-19 10:57:02 & 147 \\
-	        TLC & 2023-07-12 11:03:46 & 2023-12-07 09:00:05 & 148 \\
-	        TLC & 2023-08-03 10:34:23 & 2024-01-29 10:00:37 & 179 \\
-	        TLC & 2022-04-04 10:54:39 & 2022-06-02 12:14:11 & 59 \\
-	        TLC & 2022-12-05 15:23:45 & 2023-02-02 09:06:45 & 59 \\
-	        \hline
-	    \end{tabular}
-    \label{tab:resolution}
+	    	\begin{tabular}{cccc}
+		        \hline
+		        Agency & Closed Date & Resolution Action Updated Date 
+		        & Post Closed Update Duration (days) \\
+		        \hline
+		        TLC & 2023-05-25 14:21:12 & 2023-10-19 10:57:02 & 147 \\
+		        TLC & 2023-07-12 11:03:46 & 2023-12-07 09:00:05 & 148 \\
+		        TLC & 2023-08-03 10:34:23 & 2024-01-29 10:00:37 & 179 \\
+		        TLC & 2022-04-04 10:54:39 & 2022-06-02 12:14:11 & 59 \\
+		        TLC & 2022-12-05 15:23:45 & 2023-02-02 09:06:45 & 59 \\
+		        \hline
+		\end{tabular}
+    	\label{tab:resolution}
 	\end{table}
 
 	Here is a look at the spread of the post-closed resolution\_action\_update\_date 
@@ -1659,7 +1645,10 @@ produce bizarre analytical results.
 		\label{fig:resolution-by-agency}
 	\end{figure}		
 
-\section{Accuracy and precision}\label{sec:precision}
+
+
+\section{Accuracy and precision}
+\label{sec:precision}
 There is one area in particular where the question of precision vs. 
 accuracy immediately arises, and that is with the Latitude and Longitude 
 fields. Both the Longitude and Latitude fields are expresses as a 14-decimal 
@@ -1683,25 +1672,29 @@ is a discussion for each of a pair of data fields that are redundant or
 near-redundant. These fields should be examined further for 
 possible consolidation in the overall dataset.
 
-\subsection{latitude \& longitude and the location fields}  The location field is a 
-pure concatenation of the latitude and longitude fields, with a comma and 
-parenthesis added. Example:  
+\subsection{latitude \& longitude and the location fields}
+\label{sec:latlong}
+The location field is a pure concatenation of the latitude 
+and longitude fields, with a comma and parenthesis 
+added. Example:  
 
-	\begin{itemize}
-		\item  latitude: 40.768456429488
-		\item  longitude: -73.9575661888774
-		\item  location: (40.768456429488, -73.95756618887745)
-	\end{itemize}
+\begin{itemize}
+	\item  latitude: 40.768456429488
+	\item  longitude: -73.9575661888774
+	\item  location: (40.768456429488, -73.95756618887745)
+\end{itemize}
 
 The inclusion of the location field seems questionable as the data is 
 arguably more difficult to extract than the two specific fields, especially 
 for software programs.
 
-\subsection{borough and park\_borough fields}  These two fields are 
-100\% matches; fully redundant.
+\subsection{borough and park\_borough fields}
+\label{sec:parkborough}
+These two fields are 100\% matches; fully redundant.
 
-\subsection{borough and borough\_boundaries fields}  The borough field 
-is a text field for the five New York City boroughs (Manhattan, Queens, 
+\subsection{borough and borough\_boundaries fields}
+\label{sec:boroughboundaries}
+The borough field is a text field for the five New York City boroughs (Manhattan, Queens, 
 Brooklyn, etc.). The borough\_boundary field is numeric with values 
 from 1-5 corresponding to the five boroughs (Staten Island, Brooklyn, 
 Queens, Manhattan, Bronx). When the borough\_boundary field is 
@@ -1719,14 +1712,15 @@ as we will see, there are several such examples in this dataset.
 We can tell where the non-matches occur. It is mostly in DOT, NYPD, 
 and DSNY which represent 90\% of the non-matching values.
 
-	\begin{figure}[tbp]
-		\centering
-		\includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.pdf}
-		\caption{Non-matching borough and borough\_boundary by Agency}
-		\label{fig:borough-boundaries}
-	\end{figure}	
+\begin{figure}[tbp]
+	\centering
+	\includegraphics[width = \textwidth]{non_matching_borough_boundaries_chart.pdf}
+	\caption{Non-matching borough and borough\_boundary by Agency}
+	\label{fig:borough-boundaries}
+\end{figure}	
 	
 \subsection{borough and taxi\_company\_borough fields}
+\label{sec:taxicompanyborough}
 The two fields borough and taxi\_company\_borough might appear to be 
 related. In fact, despite the names, the two data fields are nearly 
 completely different with only 0.05\% matching. The mismatch is so 
@@ -1736,6 +1730,7 @@ taxis and other cars for hire. There are a total of 3567 non-blank
 entries in the taxi\_company\_borough field, with 99.94\% blank.
 
  \subsection{incident\_zip and zip\_codes fields}
+ \label{sec:zipcodes}
  The zip\_code field is one of the six computed fields and its validity 
  has been explored in Section \ref{sec:zip-codes} and found to be 
  lacking with 55.55\% of the entries invalid according to the 
@@ -1746,7 +1741,8 @@ entries in the taxi\_company\_borough field, with 99.94\% blank.
  computation of the zip\_code field, such an analysis would seem 
  to provide any useful information.  
 
- \subsection{police\_precinct and police\_precincts fields}  
+ \subsection{police\_precinct and police\_precincts fields} 
+ \label{sec:police} 
 Both the police\_precinct and police\_precincts are among the computed 
 fields not cited in the Data Dictionary. Their usage however, is easy to 
 discern. Are these two fields duplicates? Nearly so:  99.94\% of the entries 
@@ -1756,6 +1752,7 @@ field is the ``right'' field to use. (The validity of these fields is
 covered in Section \ref{sec:police-precincts}.)
 
  \subsection{agency and agency\_name fields}
+ \label{sec:agencyname}
  While not duplicates, these fields have a 1:1 correspondence.  The Agency 
  field contains abbreviations for the City agencies such as NYPD, DOT, 
  HPD, DEP, etc. The agency\_name field contains the full name of 
@@ -1766,6 +1763,7 @@ covered in Section \ref{sec:police-precincts}.)
  to include both in the dataset.
 
 \subsection{landmark and street\_name}
+\label{sec:landmark}
 The landmark field is listed in the Data Dictionary as ``Can refer to 
 any noteworthy location, including but not limited to, parks, 
 hospitals, airports, sports facilities, performance spaces, etc.'' We 
@@ -1783,28 +1781,27 @@ spelling and nomenclature changes, e.g. ``NINTH AVE'' \& ``9 AVE''.
 
 \begin{table}[ht]
     \centering
-    \normalsize
     \caption{Non-matches between 'street\_name' and 'landmark' fields}
-    \begin{tabular}{>{\raggedright\arraybackslash}p{5cm} >
-    {\raggedright\arraybackslash}p{5cm}}
-        \toprule
-        \textbf{street\_name} & \textbf{landmark} \\
-        \midrule
-        MACDOUGAL ST & MAC DOUGAL ST \\
-        NINTH AVE & 9 AVE \\
-        NORTH SIXTH ST & NORTH 6 ST \\
-        SOUTH FOURTH ST & SOUTH 4 ST \\
-        SIXTH AVE & 6 AVE \\
-        THIRD AVE & 3 AVE \\
-        EAST FIRST ST & EAST 1 ST \\
-        FOURTH AVE & 4 AVE \\
-        SAINT LAWRENCE AVE & ST LAWRENCE AVE \\
-        SOUTH FIRST ST & SOUTH 1 ST \\
-        WEST FIFTH ST & WEST 5 ST \\
-        MT HOPE PL & MOUNT HOPE PL \\
-        PENN STA & PENNSYLVANIA STA \\
-        \bottomrule
-    \end{tabular}
+	    \begin{tabular}{>{\raggedright\arraybackslash}p{5cm} >
+	 	{\raggedright\arraybackslash}p{5cm}}
+	 	\toprule
+	      \textbf{street\_name} & \textbf{landmark} \\
+	      \midrule
+	        MACDOUGAL ST & MAC DOUGAL ST \\
+	        NINTH AVE & 9 AVE \\
+	        NORTH SIXTH ST & NORTH 6 ST \\
+	        SOUTH FOURTH ST & SOUTH 4 ST \\
+	        SIXTH AVE & 6 AVE \\
+	        THIRD AVE & 3 AVE \\
+	        EAST FIRST ST & EAST 1 ST \\
+	        FOURTH AVE & 4 AVE \\
+	        SAINT LAWRENCE AVE & ST LAWRENCE AVE \\
+	        SOUTH FIRST ST & SOUTH 1 ST \\
+	        WEST FIFTH ST & WEST 5 ST \\
+	        MT HOPE PL & MOUNT HOPE PL \\
+	        PENN STA & PENNSYLVANIA STA \\
+	      \bottomrule
+	    	\end{tabular}
     \label{landmark}
 \end{table}
 
@@ -1814,24 +1811,25 @@ exceptions such as Taxi \& Limo Commission, Dept of Homeless
 Services (DHS), and Dept of Health \& Mental Hygiene (DOHMH).
 
 \begin{figure}[tbp]
-		\centering
-		\includegraphics[width = \textwidth]
-		{non-matchingstreet\_nameandlandmark.pdf}
-		\caption{Non-matching street\_name \& landmark by Agency}
-		\label{fig:landmarkchart}
-	\end{figure}	
-	
+	\centering
+	\includegraphics[width = \textwidth]
+	{non-matchingstreet\_nameandlandmark.pdf}
+	\caption{Non-matching street\_name \& landmark by Agency}
+	\label{fig:landmarkchart}
+\end{figure}	
 	
 \subsection{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
-\& intersection\_street\_2} There are two sets of street pairs in the 
-dataset in addition to the complaint address:
+\& intersection\_street\_2}
+\label{sec:street1}
+There are two sets of street pairs in the dataset in addition to 
+the complaint address:
 
-	\begin{itemize}
-		\item cross\_street\_1
-		\item cross\_street\_2
-		\item intersection\_street\_1
-		\item intersection\_street\_2
-	\end{itemize}
+\begin{itemize}
+	\item cross\_street\_1
+	\item cross\_street\_2
+	\item intersection\_street\_1
+	\item intersection\_street\_2
+\end{itemize}
 	
 These two pairs of streets are used to help identify the location of the 
 reported incident, as it is common in New York City to provide the 
@@ -1866,56 +1864,51 @@ is blank, say cross\_street\_1, but  intersection\_street\_1 is not blank, shoul
 you use the non-blank one?  Let's look at some examples:
 
 \begin{table}[tbp]
-    \centering
-     \normalsize
-     \caption{Matching/Non-Matching cross\_street\_1 
-     \& intersection\_street\_1}
-    \begin{tabular}{>{\normalsize\ttfamily}l >
-    {\normalsize\ttfamily}l >{\normalsize\ttfamily}l}
-        \toprule
-        \multicolumn{3}{c}
-        {\textbf{Matching cross\_street\_1 and intersection\_street\_1}} \\
-        \midrule
-        \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} 
-        & \textbf{agency} \\
-        \midrule
-        FORT HAMILTON PKWY & FORT HAMILTON PKWY & NYPD \\
-        87 ST              & 87 ST              & NYPD \\
-        EAST 169 ST        & EAST 169 ST        & NYPD \\
-        EAST 74 ST         & EAST 74 ST         & DOT  \\
-        CHERRY AVE         & CHERRY AVE         & NYPD \\
-        \midrule
-        \multicolumn{3}{c}
-        {\textbf{Non-matching cross\_street\_1 and intersection\_street\_1}} \\
-        \midrule
-        \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} 
-        & \textbf{agency} \\
-        \midrule
-        KAPPOCK ST     & NETHERLAND AVE   & DOT \\
-        GREENE AVE     & CLINTON AVE      & DOT \\
-        LEWIS AVE      & FULTON ST        & DOT \\
-        GERARD AVE     & EAST 161 ST      & DOT \\
-        8 AVE          & WEST 136 ST      & DOT \\
-        \bottomrule
-    \end{tabular}
-    \label{tab:streets1}
+	\centering
+     \caption{Matching/Non-Matching cross\_street\_1 \& intersection\_street\_1}
+     	\label{tab:streets1}
+	    	\begin{tabular}{l l l}
+	      	\toprule
+	      	\multicolumn{3}{c}
+	      	{\textbf{Matching cross\_street\_1 \& intersection\_street\_1}} \\
+	      	\midrule
+	      	\textbf{cross\_street\_1} & \textbf{intersection\_street\_1} & \textbf{agency} \\
+	      	\midrule
+	       	FORT HAMILTON PKWY & FORT HAMILTON PKWY & NYPD \\
+	        	87 ST              & 87 ST              & NYPD \\
+	        	EAST 169 ST        & EAST 169 ST        & NYPD \\
+	        	EAST 74 ST         & EAST 74 ST         & DOT  \\
+	        	CHERRY AVE         & CHERRY AVE         & NYPD \\
+	      	\midrule
+	      	\multicolumn{3}{c}
+	      	{\textbf{Non-matching cross\_street\_1 and intersection\_street\_1}} \\
+	      	\midrule
+	      	\textbf{cross\_street\_1} & \textbf{intersection\_street\_1} & \textbf{agency} \\
+	      	\midrule
+	        	KAPPOCK ST     & NETHERLAND AVE   & DOT \\
+	        	GREENE AVE     & CLINTON AVE      & DOT \\
+	        	LEWIS AVE      & FULTON ST        & DOT \\
+	        	GERARD AVE     & EAST 161 ST      & DOT \\
+	        	8 AVE          & WEST 136 ST      & DOT \\
+	      	\bottomrule
+	   	\end{tabular}
 \end{table}
 
-	\begin{figure}[tbp]
-		\centering
-		\includegraphics[width = \textwidth]
-		{non-matchingcross_street_1andintersection_street_1.pdf}
-		\caption{Non-matching X\_Street\_1 \& Intersection\_Street\_1}
-		\label{fig:xstreet1}
-	\end{figure}	
+\begin{figure}[tbp]
+	\centering
+	\includegraphics[width = \textwidth]
+	{non-matchingcross_street_1andintersection_street_1.pdf}
+	\caption{Non-matching X\_Street\_1 \& Intersection\_Street\_1}
+	\label{fig:xstreet1}
+\end{figure}	
 
-	\begin{figure}[tbp]
-		\centering
-		\includegraphics[width = \textwidth]
-		{non-matchingcross_street_2andintersection_street_2.pdf}
-		\caption{Non-matching X\_Street\_2 \& Intersection\_Street\_2}
-		\label{fig:xstreet2}
-	\end{figure}	
+\begin{figure}[tbp]
+	\centering
+	\includegraphics[width = \textwidth]
+	{non-matchingcross_street_2andintersection_street_2.pdf}
+	\caption{Non-matching X\_Street\_2 \& Intersection\_Street\_2}
+	\label{fig:xstreet2}
+\end{figure}	
 
 In addition to the matching/non-matching values, we encountered a number 
 of what you might call \emph{near-matches}. There were numerous cases 
@@ -1930,108 +1923,104 @@ are the results for both cross\_street and intersection\_street.
 
 \begin{table}[tbp]
     \centering
-     \normalsize
      \caption{Near-matches for cross\_street\_1, intersection\_street\_1}
-	\begin{tabular}{l l l r}
-        \toprule
-        \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} 
-        & \textbf{agency} & \textbf{hamming\_distance} \\
-        \midrule
-        WEST 168 ST    & WEST 167 ST           & DOT    & 1 \\
-        115 AVE        & 120 AVE               & DOT    & 2 \\
-        105 AVE        & 107 AVE               & DOT    & 1 \\
-        71 ST          & 80 ST                 & DOT    & 2 \\
-        145 ST         & 150 ST                & DOT    & 2 \\
-        138 ST         & 139 ST                & DOT    & 1 \\
-        19 AVE         & 20 AVE                & DOT    & 2 \\
-        25 AVE         & 30 AVE                & DOT    & 2 \\
-        76 ST          & 79 ST                 & DOT    & 1 \\
-        67 ST          & 68 ST                 & DOT    & 1 \\
-        \bottomrule
-    \end{tabular}
      \label{tab:x1nearmatches}
+		\begin{tabular}{l l l r}
+	        \toprule
+	        \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} 
+	        & \textbf{agency} & \textbf{hamming\_distance} \\
+	        \midrule
+	        WEST 168 ST    & WEST 167 ST           & DOT    & 1 \\
+	        115 AVE        & 120 AVE               & DOT    & 2 \\
+	        105 AVE        & 107 AVE               & DOT    & 1 \\
+	        71 ST          & 80 ST                 & DOT    & 2 \\
+	        145 ST         & 150 ST                & DOT    & 2 \\
+	        138 ST         & 139 ST                & DOT    & 1 \\
+	        19 AVE         & 20 AVE                & DOT    & 2 \\
+	        25 AVE         & 30 AVE                & DOT    & 2 \\
+	        76 ST          & 79 ST                 & DOT    & 1 \\
+	        67 ST          & 68 ST                 & DOT    & 1 \\
+	        \bottomrule
+	    \end{tabular}
 \end{table}
 
 \begin{table}[tbp]
     \centering
-    \normalsize
     \caption{Summary of cross\_street\_1 and intersection\_street\_1}
-    \begin{tabular}{l r r}
-        \toprule
-        \textbf{category} & \textbf{count} & \textbf{percentage} \\
-        \midrule
-        Matching                    & 5,637,182 & 88.15     \\
-        Both blank -- Matching      & 1,624,499 & 25.4      \\
-        Non-matching                &   757,726 & 11.85     \\
-        cross\_street\_1\_blank     &   222,232 & N/A       \\
-        intersection\_street\_1\_blank &   519,348 & N/A       \\
-        Near-match                  &       128 & 0.002002  \\
-        \bottomrule
-    \end{tabular}
     \label{tab:summary1}
+	    \begin{tabular}{l r r}
+	        \toprule
+	        \textbf{category} & \textbf{count} & \textbf{percentage} \\
+	        \midrule
+	        Matching                    & 5,637,182 & 88.15     \\
+	        Both blank -- Matching      & 1,624,499 & 25.4      \\
+	        Non-matching                &   757,726 & 11.85     \\
+	        cross\_street\_1\_blank     &   222,232 & N/A       \\
+	        intersection\_street\_1\_blank &   519,348 & N/A       \\
+	        Near-match                  &       128 & 0.002002  \\
+	        \bottomrule
+	    \end{tabular}
 \end{table}
-
 \begin{table}[tbp]
     \centering
-    \normalsize
     \caption{Summary of cross\_street\_2 and intersection\_street\_2}
-    \begin{tabular}{l r r}
-        \toprule
-        \textbf{category} & \textbf{count} & \textbf{percentage} \\
-        \midrule
-        Matching -- non-blank      & 4,012,683 & 62.75     \\
-        Matching -- both blank     & 1,623,276 & 25.38     \\
-        Non-matching                &   750,543 & 11.74     \\
-        cross\_street\_2\_blank     &   222,788 & N/A       \\
-        intersection\_street\_2\_blank &   517,431 & N/A       \\
-        Near-match                  &     1,500 & 0.023456  \\
-        \bottomrule
-    \end{tabular}
     \label{tab:summary_cross_intersection_2}
+	    \begin{tabular}{l r r}
+	        \toprule
+	        \textbf{category} & \textbf{count} & \textbf{percentage} \\
+	        \midrule
+	        Matching -- non-blank      & 4,012,683 & 62.75     \\
+	        Matching -- both blank     & 1,623,276 & 25.38     \\
+	        Non-matching                &   750,543 & 11.74     \\
+	        cross\_street\_2\_blank     &   222,788 & N/A       \\
+	        intersection\_street\_2\_blank &   517,431 & N/A       \\
+	        Near-match                  &     1,500 & 0.023456  \\
+	        \bottomrule
+	    \end{tabular}
 \end{table}
 
 \begin{table}[tbp]
-    \centering
-     \normalsize
-     \caption{Sample of near-matching cross\_street\_2 and 
-     intersection\_street\_2 (both non-blank)}
-     \begin{tabular}{l l l r}
-        \toprule
-        \textbf{cross\_street\_2} & \textbf{intersection\_street\_2} 
-        & \textbf{agency} & \textbf{hamming\_distance} \\
-        \midrule
-        19 AVE         & 18 AVE                & DOT    & 1 \\
-        227 ST         & 225 ST                & DOT    & 1 \\
-        65 ST          & 65 PL                 & DOT    & 2 \\
-        18 AVE         & 17 AVE                & DOT    & 1 \\
-        BEACH 110 ST   & BEACH 109 ST          & DOT    & 2 \\
-        3 AVE          & 2 AVE                 & DOT    & 1 \\
-        88 ST          & 87 ST                 & DOT    & 1 \\
-        WEST 114 ST    & WEST 113 ST           & DOT    & 1 \\
-        192 ST         & 189 ST                & DOT    & 2 \\
-        5 AVE          & 4 AVE                 & DOT    & 1 \\
-        \bottomrule
-    \end{tabular}
-    \label{tab:near_matching_cross_intersection_2}
+	\centering
+	\caption{Sample of near-matching cross\_street\_2 and 
+     	intersection\_street\_2 (both non-blank)}
+     	\label{tab:near_matching_cross_intersection_2}
+	     	\begin{tabular}{l l l r}
+	      \toprule
+	      \textbf{cross\_street\_2} & \textbf{intersection\_street\_2} 
+	      & \textbf{agency} & \textbf{hamming\_distance} \\
+	      \midrule
+	        19 AVE         & 18 AVE                & DOT    & 1 \\
+	        227 ST         & 225 ST                & DOT    & 1 \\
+	        65 ST          & 65 PL                 & DOT    & 2 \\
+	        18 AVE         & 17 AVE                & DOT    & 1 \\
+	        BEACH 110 ST   & BEACH 109 ST          & DOT    & 2 \\
+	        3 AVE          & 2 AVE                 & DOT    & 1 \\
+	        88 ST          & 87 ST                 & DOT    & 1 \\
+	        WEST 114 ST    & WEST 113 ST           & DOT    & 1 \\
+	        192 ST         & 189 ST                & DOT    & 2 \\
+	        5 AVE          & 4 AVE                 & DOT    & 1 \\
+	      \bottomrule
+	    	\end{tabular}
 \end{table}
 
 
  \subsection{Shrinking file size by removing duplicates}
+ \label{sec:filesize}
+By removing duplicate and ``near-duplicate'' fields, it is possible to 
+shrink the file size by 12.3\% which for this dataset equates to a 
+reduction of 395 Mb. A smaller file size means faster downloads, 
+less storage impact, as well as simplifying data analysis efforts.  
  
- By removing duplicate and ``near-duplicate'' fields, it is possible to 
- shrink the file size by 12.3\% which for this dataset equates to a 
- reduction of 395 Mb. A smaller file size means faster downloads, less 
- storage impact, as well as simplifying data analysis efforts.  
- 
- Below is a list of duplicate and near-duplicate fields. There are some 
- challenges with these proposed deletions, mostly with the ``near 
- duplicate'' fields.  So while the park\_borough is a complete duplicate 
- of the borough field, the borough\_boundary field is only 98.3\% 
- duplicate. Admittedly, loosing 1.7\% of the data in those two fields 
- is quite small, for this large dataset that amounts to 110, 715 
- non-matching occurrences. Similarly with police\_precincts 
- and police\_precincts where there is a 99.9\% match; close 
- to 100\% but not a complete match.
+Below is a list of duplicate and near-duplicate fields. There are 
+some challenges with these proposed deletions, mostly with 
+the ``near duplicate'' fields.  So while the park\_borough is 
+a complete duplicate of the borough field, the 
+borough\_boundary field is only 98.3\% duplicate. Admittedly, 
+loosing 1.7\% of the data in those two fields is quite small, for 
+this large dataset that amounts to 110, 715 non-matching 
+occurrences. Similarly with police\_precincts and police\_precincts 
+where there is a 99.9\% match; close to 100\% but 
+not a complete match.
 
 Ultimately, it will require a deeper dive into the relationship 
 between these duplicate and near-duplicate fields to determine 
@@ -2039,48 +2028,48 @@ if they can be removed or not. Pending that, the authors would propose
 deleting the following fields from the overall data set, 
 which explanation provided.
  
- 	\begin{itemize}
-		    \item agency\_name: Each row of data contains the agency field, 
-		    which is an abbreviation of the Agency's name. The agency\_name 
-		    abbreviations are clear, simple, and well understood. The 
-		    authors believe the agency\_name field could be eliminated 
-		    without loss of data quality. 
+\begin{itemize}
+	\item agency\_name: Each row of data contains the agency field, 
+	which is an abbreviation of the Agency's name. The agency\_name 
+	abbreviations are clear, simple, and well understood. The 
+	authors believe the agency\_name field could be eliminated 
+	without loss of data quality. 
 		    
-		    \item park\_borough:  This field is a 100\% match with the 
-		    borough field. Removal of this field will not result in any loss of 
-		    data or data quality.
+	\item park\_borough:  This field is a 100\% match with the 
+	borough field. Removal of this field will not result in any loss of 
+	data or data quality.
 		    
-		    \item location:  The location field is simply a concatenation of 
-		    the latitude and longitude fields, with a comma and parenthesis 
-		    added. The authors feel this field actually hinders data analysis 
-		    as the field must be re-split into the two components 
-		    (latitude and longitude) to conduct geographic analysis. The data is 
-		    a 100\% duplication of the latitude and longitude fields. Removal 
-		    of this field will not result in any loss of data.
+	\item location:  The location field is simply a concatenation of 
+	the latitude and longitude fields, with a comma and parenthesis 
+	added. The authors feel this field actually hinders data analysis 
+	as the field must be re-split into the two components 
+	(latitude and longitude) to conduct geographic analysis. The data is 
+	a 100\% duplication of the latitude and longitude fields. Removal 
+	of this field will not result in any loss of data.
 		    
-		    \item police\_precinct: This field has a 99.95\% match with the 
-		    police\_precincts fields. We are unable to determine which field 
-		    is more correct, but feel that removal of one of the precinct fields 
-		    is prudent and would result in very minimal data loss. (We 
-		    should note that both police\_precinct and police\_precincts 
-		    fields each have 34.5\% invalid data.)
+	\item police\_precinct: This field has a 99.95\% match with the 
+	police\_precincts fields. We are unable to determine which field 
+	is more correct, but feel that removal of one of the precinct fields 
+	is prudent and would result in very minimal data loss. (We 
+	should note that both police\_precinct and police\_precincts 
+	fields each have 34.5\% invalid data.)
 		   
-		   \item borough\_boundaries (computed field): This field is one of 
-		   the six computed fields. It has a 98.3 match with the borough 
-		   field. We recommend deleting this fields despite the somewhat 
-		   limited loss of data. 
+	\item borough\_boundaries (computed field): This field is one of 
+	the six computed fields. It has a 98.3 match with the borough 
+	field. We recommend deleting this fields despite the somewhat 
+	limited loss of data. 
 		    
-		    \item cross\_street\_1 \& 2 and intersection\_street\_1 \& 2: These 
-		    two pairs of fields each have an 88\% match. We would recommend 
-		    deleting the two intersection\_street fields while acknowledging 
-		    some loss of data in doing so.
+	\item cross\_street\_1 \& 2 and intersection\_street\_1 \& 2: These 
+	two pairs of fields each have an 88\% match. We would recommend 
+	deleting the two intersection\_street fields while acknowledging 
+	some loss of data in doing so.
 		     
-		    \item zip\_codes(computed field):  This field is one of the six 
-		    computed fields.  However, this field has error rate of 58\% and 
-		    as shown in the \ref{sec:case-study-zip-codes} can lead to 
-		    dangerous mistakes when used for analytical purposes. We would 
-		    recommend deleting this field.
-	\end{itemize}
+	\item zip\_codes(computed field):  This field is one of the six 
+	computed fields.  However, this field has error rate of 58\% and 
+	as shown in the \ref{sec:case-study-zip-codes} can lead to 
+	dangerous mistakes when used for analytical purposes. We would 
+	recommend deleting this field.
+\end{itemize}
  	
 Additionally, it would be worth investigating if certain data fields are 
 in-fact useful, as the population of these fields is very, very scarce. For 
@@ -2097,7 +2086,8 @@ to determine if those fields are used and properly populated.
 
 
 
-\section{Data Dictionary Observations} \label{sec:datadictionay}
+\section{Data Dictionary Observations} 
+\label{sec:datadictionay}
 During this analysis, it became apparent that the published Data 
 Dictionary could use an update. We found many discrepancies 
 between the Data Dictionary and the actual data. While not actually, 
@@ -2132,7 +2122,8 @@ are some of the noted discrepancies:
 
 
 
-\section{Recommendations} \label{sec:recommendations}
+\section{Recommendations} 
+\label{sec:recommendations}
 Having identified a number of data cleanliness related issues with the 
 311 Service Request (SR) dataset, what follows are a series of 
 recommendations as to how to resolve these issues. Below are 
@@ -2250,8 +2241,6 @@ those recommendations;
 	representations of missing data including: <N/A>, ``na'', `` ``, UNKNOWN, 
 	and ``N/A''. It's challenging for analyst to have to account for so 
 	the many different methods of representing empty or null data fields. 
-	
-	
 \end{itemize}
 
 
@@ -2262,10 +2251,7 @@ those recommendations;
 
 \section{Discussion} \label{sec:discussion}
 
-
 \bibliographystyle{asa}
 \bibliography{ref}
 
 \end{document}
-
-
