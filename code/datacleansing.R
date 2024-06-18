@@ -619,7 +619,7 @@ create_violin_chart <- function(
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
     geom_jitter(width = 0.25, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
     geom_violin(linewidth = 0.7, fill = "transparent", color = "gray20") +
-    geom_boxplot(width = 0.25, fill = "#E69F00", color = "gray20", alpha = 0.6, 
+    geom_boxplot(width = 0.25, fill = "#D55E00", color = "gray20", alpha = 0.6, 
                  outlier.colour = "gray20", outlier.size = 1) +
     labs(
       title = chart_title,

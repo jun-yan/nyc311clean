@@ -136,7 +136,8 @@ general principles for the release of open data.
 
 \doublespacing
 
-\section{Introduction} \label{sec:intro}
+\section{Introduction} 
+\label{sec:intro}
 In the early 21st century, the open data movement began to take shape, driven by the 
 fundamental belief that freely accessible data can transform 
 both societies and governments. This movement champions the principles of 
@@ -179,10 +180,8 @@ illustrates how open data can be a powerful tool in addressing complex
 urban challenges. Examples of some of the more popular NYC datasets include:
 
 \begin{itemize}
-	\item NYC restaurant violations
-	\item Popular baby names
+	\item NYC restaurant health inspection violations
 	\item Mapping of car crashes involving pedestrians
-	\item Mapping of sidewalk widths in NYC 
 	\item Visualization of NYC High School and College enrollment
 	\item An interactive dashboard to filter and view charges for jail inmates
 	\item Location of City-wide free Internet access points
@@ -224,25 +223,28 @@ the specifics of data curation challenges using the NYC 311 Service
 Request (SR) Data as a case study. This renowned and frequently viewed 
 dataset serves as a prime example for examining key issues in data curation, 
 including data validity, consistency, and curation efficiency. 
-We illustrate these points with live examples drawn from our processing of the 311 SR data. 
-Secondly, building upon insights gained from this case study, we 
-propose a set of data curation principles tailored for government-released open data. 
-These principles are designed to address the unique challenges 
+We illustrate these points with live examples drawn from our 
+processing of the 311 SR data. Secondly, building upon insights 
+gained from this case study, we propose a set of data curation 
+principles tailored for government-released open data. These 
+principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
 
 The paper is organized as follows:
 Section~\ref{sec:history} offers a brief review of the history of the 311 system. In 
-Section~\ref{sec:trends} we take a look at long-term trends presented via a 10-year analysis.
-Section~\ref{sec:issues} offers a general discussion of data cleansing issues
-impacting data quality and curation efficiency. Section~\ref{sec:structural} examines
+Section~\ref{sec:trends} we take a look at long-term trends presented 
+via a 10-year analysis. Section~\ref{sec:issues} offers a 
+general discussion of data cleansing issues impacting data 
+quality and curation efficiency. Section~\ref{sec:structural} examines
 the technical dimensions of the dataset, the structural issues. 
 In Section~\ref{sec:datatypes} we examine the data fields for compliance 
-with the stated data type as found in the Data Dictionary. Section~\ref{sec:blanks} looks
-at the data fields as regards missing, blank, or N/A entries. Section~\ref{sec:domain} explores
-how data fields comply with a domain of legal or acceptable values. Section~\ref{sec:inconsistencies}
-deals with the important issues surrounding logical inconsistencies 
+with the Data Dictionary. Section~\ref{sec:blanks} looks at the 
+data fields as regards missing, blank, or N/A entries. Section~\ref{sec:domain} 
+explores how data fields comply with a domain of legal 
+or acceptable values. Section~\ref{sec:inconsistencies} deals 
+with the important issues surrounding logical inconsistencies 
 and concerning patterns in the data. Section~\ref{sec:precision} 
-explores the age-old issue of precision versus accuracy. Section~\ref{sec:duplicates}
+explores the issue of precision versus accuracy. Section~\ref{sec:duplicates}
 identifies duplicate and redundant data fields. Section~\ref{sec:improvements} provides 
 actionable suggestions for mitigating or resolving identified issues. 
 Following this, Section~\ref{sec:protocol} outlines a series of general 
@@ -251,14 +253,15 @@ paper concludes with a discussion and recommendations in
 Section~\ref{sec:discussion}, encapsulating the key insights and 
 implications of our research.
 
-A note on naming conventions: dataset field names are typically 
-named using ``snake\_case'' where each word in the variable name 
+A note on naming conventions: dataset field names are named 
+using ``snake\_case'' where each word in the variable name 
 is written in lowercase, and words are separated by 
 underscores, e.g. created\_date, complaint\_type, zip\_code, etc..   
 
 
 
-\section{NYC 311 System History} \label{sec:history}
+\section{NYC 311 System History} 
+\label{sec:history}
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
 for non-emergency inquiries and requests. Introduced in 2003, the NYC
@@ -267,8 +270,8 @@ non-emergency issues, ranging from noise complaints to street
 maintenance requests. The evolution of this system can be traced from
 its initial implementation as a simple inquiry channel via telephone to a
 comprehensive data management system that handles millions of requests
-annually. Each inquiry is logged as a complaint in the 311 system.
-Key milestones in the 311 system development include:
+annually. Each inquiry is logged as a complaint, a Service Request (SR), 
+in the 311 system. Key milestones in the 311 system include:
 
 \begin{itemize}
  	\item 2003 - NYC 311 system goes live with a phone-based call center only. 
@@ -276,13 +279,10 @@ Key milestones in the 311 system development include:
  	call for each individual City Agency.
    	\item 2009 - 311 online \& mobile apps launched. Today 60\% of all 
    	Service Requests come from mobile \& online channels.
-   	\item 2019 - Major software upgrade of 311 system with enhanced capabilities, 
-   	dynamic load-balancing, and cloud-based resilience. Only major 
-   	software upgrade since 2004.	
       \item 2020 - In August 2020, driven by the COVID pandemic, monthly 311 
-      Service Requests hit an all-time high of 348,463. Seven of the Top 10 busiest 
-      days of all-time occur in 2020.
-      \item 2021 - 311 System is expanded to into the MTA's city subway system, 
+      SRs hit an all-time high of 348,463. Seven of the Top 10 all-time busiest 
+      days occur in 2020.
+      \item 2021 - 311 System is expanded to include the MTA's city subway system, 
       the largest expansion since its inception.
    	\item 2023 - Record high year for 311 with 3.23 million Service Requests.
 \end{itemize}
@@ -291,19 +291,15 @@ Today, the NYC 311 data system is a robust platform that manages a
 vast array of urban living-related inquiries. The system handles over 3 million service 
 requests (SRs) per year, encompassing such complaints as street noise, 
 illegal parking, heat/hot water, abandoned vehicles,
-and unsanitary conditions. The data, managed through a tailored application built on the 
-Microsoft Dynamics and Azure platform, is a valuable resource for city
+and unsanitary conditions. The data is a valuable resource for City
 administration and policy-making. The 311 data is publicly accessible through the 
-NYC Open Data Portal which provides access
-to all the data sets (approx. 2700) and provides a convenient method for querying, 
+NYC Open Data Portal which provides access to all the data 
+sets (approx. 2700) and provides a convenient method for querying, 
 grouping, aggregating, geo-mapping, visualization, and exporting 
-results. This open data initiative enables not only governmental transparency 
-but also empowers researchers, civic developers, and the general public. 
+results. This open data  enables not only governmental transparency 
+but empowers researchers, civic developers, and the general public. 
 
-Additional Open Data projects can be found 
-at \href{https://opendata.cityofnewyork.us/projects/}{NYC Open Data Project Gallery}
-and at \href{https://beta.nyc/beta/products/}{\textbeta etaNYC} products and tools. 
-Despite its success, the system constantly faces challenges such as:
+Despite its success, the 311 system faces challenges such as:
 
 \begin{itemize}
 	\item Data timeliness, accuracy, and consistency
@@ -313,89 +309,15 @@ Despite its success, the system constantly faces challenges such as:
 	\item Integration with stand-alone systems at selected NYC Agencies
 	\item Managing API usage, authentication, and load for 3\textsuperscript{rd} 
 	party users, of which there are many
-	\item Incorporating ongoing technology changes and upgrades 
-	\item Understanding the role of chatbots and AI to provide online 
-	customer service, along with other emergent technologies
 \end{itemize}
 
-These and other challenges are continually addressed by the various 
+These and other challenges are addressed by the various 
 Agency open data managers as well as the 
 \href{https://www.nyc.gov/content/oti/pages/}
 {NYC Office of Technology and Innovation (OTI)} which provides the 
-technology support for the open data system. Many of the underlying 
-datasets are updated daily, usually running 1-2 days behind 
-from creation. However, a number of datasets are updated 
-monthly (such as restaurant inspections), and some are not 
-updated for one or more years (such as community board 
-boundaries). This poses problems when merging datasets with 
-others, as would be expected. Typically, the data must be exported 
-and manipulated in another, external program. The authors found 
-this to be the case with the large 311 dataset employed.
-
-Data accuracy and consistency is typically established between OTI 
-and the other contributing City Agencies, such as NYPD, Housing 
-Preservation and Development (HPD), Parks \& Recreation, etc., via 
-Service Level Agreements (SLAs). However, enforcement of those 
-SLAs is often challenging. The result is that often data accuracy and 
-logical consistency is occasionally compromised. However, 
-the Open Data Team is quite responsive to inquires from users. The 
-authors have provided many such suggestions during the course of this research effort, 
-and the most current data shows improvements in many of the areas highlighted. 
-Questions and suggestion  can be provide here: 
-\href{https://opendata.cityofnewyork.us/engage/}{Contact Us}.
-
-The NYC 311 organization, part of OTI, operates a highly tailored and sophisticated case
-management. However, one constraint was particularly challenging 
-during the recent complete overhaul of the software and hardware in 2019. When the original 311system was developed in 2003, a decision was made to allow select 
-NYC Agencies to maintain their own local computer systems, 
-such as the mainframe systems at the NYC Department of Sanitation (DSNY) and others. 
-And when the 311 system was completely upgraded in 2019, those
-same integrations were honored in order to reduce the scope of the project. 
-Perhaps in retrospect, while a good budgetary and policy decision, 
-it was perhaps not such a good technology decision.
-
-At least nine NYC Agencies have local systems that are integrated 
-directly to the 311 system either via an API or custom code. These include:
-
-\begin{itemize}
-	\item Department of Social Services (DSS), one of the largest City Agencies
-	\item Department of Sanitation, although recently part of DSNY 
-	has moved to the core 311 software.
-	\item Department of Parks \& Recreation (forestry complaints only)
-	\item Housing, Preservation \& Development (fully integrated)
-	\item Department of Environmental Protection (DEP) (fully integrated)
-	\item Department of Healthy \& Mental Hygiene (fully integrated) 
-	\item Department of Consumer \& Worker Protection 
-	(DCWP - formerly known as the Dept of Consumer Affairs)
-	\item New York Police Department (NYPD) (integrated with their reporting system)
-	\item Department of Business (DoB) (fully integrated)
-\end{itemize}
-
-One unfortunate side-effect from these integrations, and other Agencies 
-that use the 311 APIs, is that some of the data consistency
-checks which are inherent in the 311 system are not applied uniformly, 
-and in some cases not at all, to the integrated data streams.
-Errors often creep in from other Agency systems and are not easily 
-corrected or detected in the 311 application itself,
-but rather require correction at the source Agency; challenging.
-
-One area that will almost certainly remain an ongoing issue is the 
-ongoing incorporation of new software, hardware,
-and cloud services which are constantly changing while new approaches emerge. 
-The 311 telephonic integration recently was reconfigured due to a new
-telephonic vendor. Desktop software at the 311 Agency are subject 
-to the same upgrades that home and business users experience. And while the 
-311 system was designed to be easily configured and updated with new features, 
-some emerging business issues as well as technologies nonetheless 
-require additional software engineering efforts to accommodate, 
-along with the concomitant budgets.
-
-One area in particular which is heavily influencing customer outreach for the 311 system
- is the appropriate use of online chatbots and assistants. Increasing these features are 
- influenced by artificial intelligence (AI) advances. It is a given that a number of 
- citizen's interactions with City government could be handled accurately and quickly by AI-driven
-applications thus improving timeliness and accuracy. But how to do that while 
-preserving customer privacy and anonymization and user engagement are challenging issues. 	
+technology support for the open data system. Typically, the data 
+will be exported and processed in an external program. The authors found 
+this to be the case with the large 311 dataset examined.
 
 The impact of the NYC 311 data extends beyond operational efficiency;
 it has become instrumental in shaping City governance and community
@@ -413,50 +335,27 @@ engagement. The data has been pivotal in such areas as:
 	\item Increased 311 SRs related to Homelessness resulted in the launch 
 	of the City's Homeless Outreach \& Mobile Engagement Street Action Teams (HOME-STAT)
 	which includes street canvassers and increases in homeless housing facilities.
-	\item A significant increase in graffiti complains in 2017 led directly to 
-	the `Graffiti-Free NYC'' campaigns and increased funding for removal of graffiti in public spaces.
-	\item Enhanced geospatial data regarding the location of incidents, 
-	the responding Agency, and actions taken across a myriad of complaint\_types
-	\item Establishment of Agency SLAs in regard to certain complaint types, 
-	such as residential noise, homelessness person assistance, street light outages, 
-	rat sightings, and other neighborhood quality of life issues.
 \end{itemize}
 
-The NYC 311 service exemplifies the dynamic nature of urban data
-management and its critical role in modern governance. In addition it provides an
-invaluable resource for data scientists to practice data science activities, including data curation.
-
-We extracted 311 SR data for the period of CY 2022-2023, a dataset consisting of
-6.4 million records. That dataset serves as the primary source for the analysis effort. 
-This is a large dataset which enables observation of some rarely 
-seen events, data inaccuracies, and logical inconsistencies. It 
-provides enough data to examine trends and data outlier analysis. 
-We queried the data directly from the NYC Open Data Portal and then 
-exported the data in CSV format for analysis using custom written R programs.
-
-Additionally, we extracted two longer-term datasets, a 5-year look (2019-2023) 
-and a 10-year look (2014-2023) ; some 14 and 27 million rows respectively. 
-These larger datasets afford an opportunity for long-term trend observations, 
-confirming and supporting the analysis using the 2-year dataset. The 2022-2023 dataset
-was used exclusively for the detailed, field-by-field level analysis 
-which comprises the majority of this effort. 
+We extracted 311 SR data for the period of CY 2022-2023, a dataset of
+6.4 million SR records. This is a large dataset which enables 
+observation of some rarely seen events, data inaccuracies, 
+and logical inconsistencies. It provides enough data to 
+examine trends and data outlier analysis. We queried the data 
+directly from the NYC Open Data Portal and exported the 
+data for analysis with custom written R programs.
 
 
 
-\section{10-year Analysis \& Trends} \label{sec:trends}
-Since the NYC 311 System went live in 2003, the usage has grown at an annual
-rate of 4.6\%. As part of this study, we also looked at a 10-year period (2014-2023) to
+\section{10-year Analysis \& Trends} 
+\label{sec:trends}
+As part of this study, we also looked at a 10-year period (2014-2023) to
 observe system performance over a longer time-frame . During that time-frame, 
-the number of 311 SRs grew 50\%. The summer  and early fall months 
+the number of 311 SRs grew by 50\%. The summer and early fall months 
 make up all of the Top 5 SR counts by day. The all-time daily 
 high for SRs, 24,415 SRs (a full 9.8 \textsigma's from the 10-year mean), 
 occurred on Tuesday, 2020-08-04. The 10-year low count occurs 
-on Christmas Day, 2016, a Sunday. Note also that the difference between 
-the peak day (24,415) and the minimum day (2965) varies by 8X, creating a 
-challenging system performance issue. This timeframe (2014-2023) 
-also includes the COVID pandemic, which reached a peak in 
-the July-September 2020 timeframe, accompanied by additional 
-spikes in the 2\textsuperscript{nd}half of 2021 as well.
+on Christmas Day, 2016, a Sunday. 
 
 \begin{figure}[tbp]
 	\centering
@@ -470,51 +369,28 @@ spikes in the 2\textsuperscript{nd}half of 2021 as well.
     \caption{Top 5 and Bottom 5 Days for SRs}
 	    \begin{tabular}{@{}lll lll@{}}
 	        \toprule
-	        \multicolumn{3}{c}{Top 5 Days} & \multicolumn{3}{c}{Bottom 5 Days} \\
-	        \cmidrule(r){1-3} \cmidrule(l){4-6}
-	        Date & Count & Rank & Date & Count & Rank \\
+	        \multicolumn{2}{c}{Top 5 Days} & \multicolumn{2}{c}{Bottom 5 Days} \\
+	        \cmidrule(r){1-2} \cmidrule(l){3-4}
+	        Date & Count & Date & Count\\
 	        \midrule
-	        2020-08-04 & 24,415 & 1 & 2014-12-25 & 2965 & 1 \\
-	        2020-08-05 & 19,560 & 2 & 2015-12-25 & 3247 & 2 \\
-	        2023-09-29 & 17,962 & 3 & 2014-04-20 & 3287 & 3 \\
-	        2020-07-05 & 16,916 & 4 & 2015-12-26 & 3405 & 4 \\
-	        2020-06-21 & 15,883 & 5 & 2016-11-06 & 3419 & 5 \\
+	        2020-08-04 & 24,415 & 2014-12-25 & 2965\\
+	        2020-08-05 & 19,560 & 2015-12-25 & 3247\\
+	        2023-09-29 & 17,962 & 2014-04-20 & 3287\\
+	        2020-07-05 & 16,916 & 2015-12-26 & 3405\\
+	        2020-06-21 & 15,883 & 2016-11-06 & 3419\\
 	        \bottomrule
 	    \end{tabular}
     \label{tab:top-10-counts}
 \end{table}
-
-This chart shows the 2-year period which is the basis for this analysis, by calendar month. 
-Note that almost all the months before the COVID pandemic outbreak in Feb/Mar
-of 2020 are ``below average'', while most of the months after that period 
-are ``above average''. That level of higher usage of the 311 system 
-has continued into the early months of 2024. It is not surprising that 
-the lowest SR counts-per-day occur during the Christmas holiday period. 
-
-\begin{figure}[tbp]
-  \centering
-  \includegraphics[width=\textwidth]{2-year-trend-monthly.pdf}
-  \caption{Monthly SR Counts for 2022-2023}
-  \label{fig:2-yr-monthly}
-\end{figure}
 
 Two important fields in this analysis effort are the responsible NYC Agency, 
 and the type of complaint. Given the size of the City of New 
 York government, it is necessary to identify the responsible 
 Agency as well as the type of complaint in order to identify 
 the responsible party and assist in troubleshooting discrepancies.
-
-When we discovered a data error, we typically observe one of two trends; 
-either a single (or a few) Agencies are responsible (such as Dept of Transportation), 
-or it is a system-wide issue that follows the general distribution of  SRs across the system. 
-Thus we can often identify if it is an Agency specific problem, or a systemic issue.  
-(Note: a few key NYC Agencies are not represented in the 311 
-dataset. These include the New York City Housing Authority (NYCHA) 
-and the Department of Corrections (DOC).)
-
-Although the 311 SRs involve 16 different agencies, there are 
-the ``big six'' Agencies that comprise 90\% of the complaints. These 
-six are (in order of \% of complaints):  
+Thus we can often identify if it is an Agency specific problem, 
+or a systemic issue. Although 311 SRs involve 16 different agencies, 
+there are six Agencies that comprise 90\% of the complaints.
 
 \begin{itemize}
 	\item New York Police Department (NYPD)
@@ -534,7 +410,7 @@ six are (in order of \% of complaints):
 
 The distribution of complaint\_type skews to a few select complaints 
 accompanied by a long tail. This graph shows the top 20 complaint\_type(s) 
-comprising 70\% out of a total of 220.
+comprising 70\% out of a total of 220 different types.
 
 \begin{figure}[tbp]
 	\centering
@@ -545,20 +421,7 @@ comprising 70\% out of a total of 220.
 
 The top 20 complaints contain several of the eight different types of ``Noise'' 
 complaints (Residential, Commercial, Street, Helicopter, etc.). These Noise-related
-complaints total 1.435 million in the 2022-2023 dataset, a full 22\% of 
-all complaint types, which, when consolidated, is the most frequently occurring complaint\_type.
-Illegal Parking is second, followed by Heat/Hot Water. Noise complaints 
-are handled by NYPD, as is Illegal Parking and Blocked Driveway complaints, 
-which contributes significantly to the top ranking of the NYPD as the lead 
-responsible Agency, receiving a full 43\% of all SRs. 
-Housing, Preservation, \& Development are 2\textsuperscript{nd}, with 21\%
-
-For  non-NYC residents, HPD is the City agency that manages the 
-177,569 NYC public housing units as well as monitoring
-all City rental and leased apartment units. HPD collectively serves 
-528,105 people, a population larger than Atlanta or Miami. 
-Hence the large number of Heat/Hot Water and Unsanitary complaints 
-handled by HPD. 
+complaints total a full 22\% of all complaint types, which, when consolidated, is the most frequently occurring complaint\_type.
 
 \begin{table}[tbp]
     \centering
@@ -582,14 +445,10 @@ handled by HPD.
     \label{tab:noisecomplaints}
 \end{table}
 
-There are also some curious and unusual Service Requests in the 311 data: 
-tanning, tattooing, trans fat, unsanitary pigeon condition, illegal animal 
-kept as pet, harboring bees/wasps, and the authors' favorite
-radioactive material. New Yorkers certainly live interesting lives. 
 
 
-
-\section{Data Cleansing Issues} \label{sec:issues}
+\section{Data Cleansing Issues} 
+\label{sec:issues}
 What is data cleansing?  Wikipedia 
 \href{https://en.wikipedia.org/wiki/Data_cleansing}{Data Cleansing} offers a good definition. 
 
@@ -608,89 +467,44 @@ data. These include:
 	\begin{itemize}
 		\item Mandatory fields: Certain data fields cannot be empty.
 		\item Data-types: Certain fields must be of the correct type, e.g. numeric, 
-		character, date, 5 numeric digits, etc. Typically these are identified 
+		character, date, 5 numeric digits, etc. Typically these are specified 
 		in a Data Dictionary.
-		\item Domain adherence:  Many data fields must adhere to a specific 
+		\item Domain compliance:  Many data fields must adhere to a specific 
 		domain of values, e.g. statuses, state names, zip codes, gender. 
-		This includes data fields that are restricted to certain ranges, 
-		such as longitudes and latitudes.
 	\end{itemize}   
 	\item Structural errors to include naming conventions, 
-	extra fields not in the Data Dictionary, or inconsistent data entry.
-	For example intermixing blanks, spaces, NA, N/A, and \textless{}NA\textgreater{} 
-	all to indicate the absence of data.
+	 fields not in the Data Dictionary, or inconsistent data entry. For example 
+	 intermixing blanks, spaces, NA, N/A, and \textless{}NA\textgreater{} 
+	 all to indicate the absence of data.
 	\item Redundant, unnecessary, or irrelevant fields
 	\item Logical inconsistencies such as related fields that violate the 
 	nature of that relationship, e.g. a ``due date'' that is before the ``created date''
-	\item Data standardization. Often free-form entry fields can suffer 
-	from inconsistent data structures. Efforts to standardize these fields 
-	can greatly assist analysis.
-	\item Accuracy and precision, which of course are not the same thing 
+	\item Accuracy versus precision
 \end{itemize}
 
 This analysis effort is to identify the presence of such errors; not to correct them. 
 That effort would be undertaken only after an investigation as to the why
 and how such errors came about, and a discussion as to whether or not it 
-is even an ``error''. Typically this requires discussions with subject matter 
-experts (SMEs) and liaison within the various NYC Agency open data 
-coordinators who can help identify the underlying cause for the error. 
-For example, an invalid date field that is provided to the NYC Open Data 
-data lake via an Agency integration could be the result of selecting 
-the wrong field from the source Agency's system, e.g. 
-due\_date instead of closed\_date. In other cases, without a subject matter
-expert, it is not possible to actually determine if the data is inaccurate or not. 
-There are many empty values in the taxi\_company\_borough field. Are those
-entries missing or does the entry in that field only apply to a 
-very small number of complaint\_type(s) or circumstances. Only a SME
-from the Taxi \& Limo Commission (TLC) can provide that answer. 
-The R code used here to analyze the 311 Service Request dataset identifies
-both obvious inaccuracies as well as potential errors requiring further 
-investigation. It is not a conclusive list of errors, but rather mostly identifies
-``a place to look'' for further evaluation and potential action.
-
-This paper will focus on a set of specific data cleansing areas:
-
-\begin{itemize}
-	\item Examining structural issues within the data
-	\item Validating data type correctness
-	\item Identifying missing, blank, or N/A data
-	\item Identifying invalid values
-	\item Exposing logical inconsistencies \& inconsistent or 
-	unusual patterns in the data
-	\item Accuracy and precision issues
-	\item Identifying potential redundant or irrelevant data  
-\end{itemize}
+is even an ``error''. 
 
 
 
-\section{Structural Issues}\label{sec:structural}
+\section{Structural Issues}
+\label{sec:structural}
 Structural issues in the context of data cleansing refers to issues 
-related to the how data is organized, formatted, or structured within a dataset. Structural issues 
-can make it difficult to analyze the data effectively. Some common 
-structural concerns in this 311 SR 2022-2023 dataset include:
-
-\begin{itemize}
-	\item Data structure (data fields, columns, formats, data types, etc.) 
-	not corresponding to the Data Dictionary
-	\item Verification of correct data types (numeric, character, geospactial, dates, etc.)
-	\item Embedded or combined values: data elements that 
-	contain multiple pieces of information 
-\end{itemize}
-
-Here are some characteristics of the 311 SR data set:
+related to the how data is organized, formatted, or structured within a 
+dataset. Structural issues can make it difficult to analyze the 
+data effectively. Here are some characteristics of the 311 SR data set:
 
 \begin{itemize}
 	\item There are 47 columns of data for each row, exportable as a CSV file.
 	\item There are four date fields (created, closed, updated, due).
-	\item There are three borough fields; two of which we believe to be duplicates.
+	\item There are three borough fields; two of which appear to be duplicates.
 	\item Two zip code fields, but not duplicates
-	\item Seven street fields; one pair of which we believe to be duplicates
-	\item Agency name and Agency abbreviation
+	\item Seven street fields; one pair of which appear to be duplicates
 	\item Two Police Precinct fields; not duplicates
-	\item In addition to street/city, there are three other location fields: 
-	lat/long, NY State plane, and Block \#
-	\item incident\_address and street\_name, e.g. incident\_address, 
-	25 Grymes Hill Road and street\_name (Grymes Hill Road)
+	\item In addition to incident\_address, there are five additional location fields: 
+	lat/long, street\_name, landmark, NY State plane, and Block \#
 	\item One free-form text field, resolution\_description, which 
 	supports 934 characters of input, including commas and special characters
 \end{itemize}
@@ -703,8 +517,9 @@ Here are some characteristics of the 311 SR data set:
  are 47 columns (fields). The additional six fields are not addressed in the 
  Data Dictionary, but do and show up on the Column Manager widget
  as ``@computed\_region\_xxxx\_xxxx''. To some extent one can infer 
- what the these @computed\_fields are, but it is not possible to know 
- for certain. These six fields are:
+ what the these @computed\_fields are and how they are determined, but 
+ it is not possible to know for certain. Most importantly, can these fields 
+ be reliably used for analytical purposes?  These six fields are:
 
 \begin{itemize}
 	\item zip\_codes
@@ -715,48 +530,13 @@ Here are some characteristics of the 311 SR data set:
 	\item police\_precinct 
 \end{itemize}	
 
-Here is a screenshot of the NYC Open Data Portal ``Column Manager'' 
-page showing those columns:
-
-\begin{figure}[tbp]
- 	\centering
- 	\includegraphics[width = .65\textwidth] {computed_fields_jpg.jpg}	
-	\caption{Screenshot of Data Portal with ``@computed'' Columns}  
-	\label{fig:computed-columns}
-\end{figure}
-
-This, of course, raises several questions:
-
-\begin{itemize}
-	\item How are these fields computed? Using what source data? 
-	Using what computational method?
-	\item How can these fields be verified or cross-checked?
-	\item Why are there two fields that appear redundant ``police\_precinct' 
-	and ``police\_precincts''? Are these redundant?
-	\item What are ``borough boundaries''? They appear to be borough names. 
-	Why are they referred to as ``boundaries''?
-	\item What are ``community districts''? Is this the same as the
-	 ``community\_board(s)'' that are part of the NYC government?
-	\item Why are not these fields included in the official 311 SR Data Dictionary?
-	\item Can these fields be reliably used for analytical purposes? 
-\end{itemize}	
-
-The last bullet point is the key here. Are these fields reliable and accurate, 
-and can they be used for subsequent analysis? Unfortunately,
-as of this date, those questions have not been fully addressed by the 
-NYC Open Data Team. This paper will further address that issue by
-exploring the accuracy, validity, and candidacy for subsequent analytical usage.
 	
 	
 	
-\section{Validating data types}\label{sec:datatypes}
+\section{Validating data types}
+\label{sec:datatypes}
 Fortunately, both the Data Dictionary and the portal column manager 
-do a good job of indicating the data type. As indicated by 
-the red underline in Figure \ref{fig:computed-columns}, there 
-is a small icon next to the field name which indicates the 
-data type of the field. The stylized capital ``T'' indicates ``text'', the ``\#'' sign indicates 
-``numeric'', a calendar icon indicates a ``date'' field, and the pin on a 
-map symbol indicates a ``geospatial'' field. The following fields were 
+do a good job of indicating the data type. The following fields were 
 checked for their specified data types:
 	
 \begin{itemize}
@@ -773,24 +553,15 @@ checked for their specified data types:
 	\& resolution\_description) are properly enclosed in quotation marks.
 \end{itemize}	
 
-All data fields were subjected to a test of ``correctness'' 
-according to their ``type'' as specified
-in the Data Dictionary. Of the nearly 300 million data fields to check 
-(6.5 million rows, 47 fields per row), there were only two values that failed 
-the test for appropriate data type; those being two text entries in the 
-incident\_zip field (``na'', and ``N/A''). All date fields were dates. 
-All numbers were numeric. All text fields were character. 
-Data typing appears to not be an issue with this dataset.
-
  
 
-\section{Blank \& N/A data}\label{sec:blanks}
+\section{Blank \& N/A data}
+\label{sec:blanks}
 Understanding the absence of data by field is an important factor 
 when undertaking analysis. For example, if you wanted to see if the SRs were
 closed before or after their due\_date, you would be challenged 
-as 99.57\% of the due\_date field is blank. (Although with such a large dataset
-that still leaves 24,411 values, all of which are ``N/A'. Which calls 
-into question...are these missing values, or is the concept of a
+as 99.57\% of the due\_date field is blank. Which calls into 
+question...are these missing values, or is the concept of a 
 due\_date simply not applicable for the vast majority of SRs?
 
 When counting the various fields for blank or N/A values, the fields appear 
@@ -800,87 +571,9 @@ It includes such fields as taxi\_company due\_date, pickup\_location, and
 landmark. The Partially Empty includes such fields as location\_type, borough, 
 and cross\_street. And the Few/None Empty includes created\_date, 
 complaint\_type, agency, and status. In some cases it may make 
-sense to inquiry as to why some fields are frequently blank. Is the data 
-difficult to capture? Does it pertain to only a small set of 
-complaint\_type(s) or Agencies? And if the data is truly that sparse, 
-does it make sense to collect it? Is it legacy data? For example, 
-one would expect that every complaint\_type that has a geographical 
-component, such as an address, would also have a corresponding 
-police\_precinct, community\_board, and community\_district since these
-are all-inclusive throughout the five Boroughs of NYC. Addtionally, 
-that it would have a lat/long. And generally that is the case, but these fields 
-do have small number, but nonetheless significant, of empty entries. 
-
-During the analysis, it was determined that the following fields are mandatory, 
-and any row missing these fields should be removed from the dataset (which fortunately
-very rarely occurred): created\_date, agency, complaint\_type, and unique\_key. 
-The absence of any one of these four fields prohibits further analysis  as currently 
-conducted. Again, it is very rare occurrence, happening only 1-2 times 
-in 6.4 million records. Here is a breakdown of bank and N/A entries by field.
-
-\begin{table}[tbp]
-\centering
-\caption{Blank and N/A entries by Field}
-\resizebox{0.8\linewidth}{!}{%
-	\begin{tabular}{lrrrl}
-		\toprule
-		\textbf{Field} & \textbf{Total Empty} & \textbf{Percent Empty} 
-		& \textbf{N/A Count} \\
-		\midrule
-			taxi\_company\_borough & 6391341 & 99.94 & 0 \\
-			road\_ramp & 6379080 & 99.75 & 0 \\
-			vehicle\_type & 6376266 & 99.71 & 0 \\
-			due\_date & 6370497 & 99.62 & 6370497 \\
-			bridge\_highway\_direction & 6367626 & 99.57 & 0 \\
-			bridge\_highway\_name & 6340197 & 99.14 & 0 \\
-			bridge\_highway\_segment & 6340190 & 99.14 & 0 \\
-			taxi\_pick\_up\_location & 6329954 & 98.98 & 0 \\
-			facility\_type & 5966588 & 93.30 & 0 \\
-			landmark & 2635736 & 41.22 & 0 \\
-			intersection\_street\_1 & 2143847 & 33.52 & 0 \\
-			intersection\_street\_2 & 2140707 & 33.48 & 0 \\
-			cross\_street\_1 & 1846594 & 28.88 & 0 \\
-			cross\_street\_2 & 1846008 & 28.87 & 0 \\
-			location\_type & 798775 & 12.49 & 0 \\
-			bbl & 768109 & 12.01 & 0 \\
-			city & 332086 & 5.19 & 0 \\
-			street\_name & 280463 & 4.39 & 0 \\
-			incident\_address & 280268 & 4.38 & 0 \\
-			closed\_date & 248839 & 3.89 & 248839 \\
-			resolution\_description & 132333 & 2.07 & 0 \\
-			zip\_codes & 123167 & 1.93 & 0 \\
-			borough\_boundaries & 101453 & 1.59 & 0 \\
-			community\_districts & 101445 & 1.59 & 0 \\
-			city\_council\_districts & 101445 & 1.59 & 0 \\
-			police\_precincts & 101445 & 1.59 & 0 \\
-			police\_precinct & 101416 & 1.59 & 0 \\
-			latitude & 99778 & 1.56 & 0 \\
-			longitude & 99778 & 1.56 & 0 \\
-			location & 99778 & 1.56 & 0 \\
-			x\_coordinate\_state\_plane & 99668 & 1.56 & 0 \\
-			y\_coordinate\_state\_plane & 98822 & 1.55 & 0 \\
-			resolution\_action\_updated\_date & 91399 & 1.43 & 91399 \\
-			incident\_zip & 83220 & 1.30 & 2 \\
-			descriptor & 74645 & 1.17 & 0 \\
-			address\_type & 38655 & 0.60 & 0 \\
-			unique\_key & 0 & 0.00 & 0 \\
-			agency & 0 & 0.00 & 0 \\
-			agency\_name & 0 & 0.00 & 0 \\
-			complaint\_type & 0 & 0.00 & 0 \\
-			status & 0 & 0.00 & 0 \\
-			community\_board & 0 & 0.00 & 0 \\
-			borough & 0 & 0.00 & 0 \\
-			open\_data\_channel\_type & 0 & 0.00 & 0 \\
-			park\_facility\_name & 0 & 0.00 & 0 \\
-			park\_borough & 0 & 0.00 & 0 \\
-			created\_date & 0 & 0.00 & 0 \\
-		\bottomrule
-	\end{tabular}
-}
-\end{table}
-
-Here is a graphic depiction of total empty (blank \& N/As) for each fields. 
-You can see the natural grouping into the Most, Some, and Few categories 
+sense to inquiry as to why some fields are frequently blank. Here is a graphic 
+depiction of total empty (blank \& N/As) for each fields. You can see 
+the natural grouping into the Most, Some, and Few categories 
 in the stair-type visualization. 
 
 \begin{figure}[tbp]
@@ -892,28 +585,24 @@ in the stair-type visualization.
 
 
 
- \section{Validating Data for Acceptable Values}\label{sec:domain}
- While the dataset may have fields populated with data that appears correct, 
- it is necessary to inspect those fields to determine if the data is indeed valid. 
- For example a date field that contains the value ``February 30, 2024'' is 
- clearly not valid. Nor is a latitude of +95 deg north. 
- 
- In this study, testing for invalid values revealed several serious issues 
- associated with select fields. Accordingly, an analyst would need to be 
- extra diligent if using these fields for analysis. In all likelihood, 
+
+ \section{Validating Data for Acceptable Values}
+ \label{sec:domain}
+ In this study, testing for invalid values revealed several issues 
+ associated with select fields. Accordingly, an analyst needs to be 
+ extra diligent if using these fields for analysis, and in all likelihood, 
  rows with invalid field values would  need to be removed from the 
- dataset before conduction further analysis. Here are some results.
+ analysis. Here are some results.
 
 \begin{itemize}
-	\item Latitude and Longitude fields were tested to ensure all fell 
-	within the geographic boundaries of the City of New York. All did.
+	\item Latitude and Longitude fields fell within the geographic 
+	boundaries of New York City. 
 	\item The unique\_key field was in fact unique.
-	\item Many fields have a domain of acceptable values. Often these 
-	values are determined from common usage or by examining
-	larger historical datasets. Unfortunately, these domains of acceptable 
+	\item Many fields have a domain of acceptable values, often 
+	determined from common usage or by examining historical 
+	datasets. Unfortunately, these domains of acceptable 
 	values are not specified in the Data Dictionary. These fields all tested as 
-	compliant within their domain of acceptable values as determined by 
-	examining a 10-year dataset:
+	compliant within their domain:
 	\begin{itemize}
 		\item address\_type
 		\item status
@@ -929,71 +618,27 @@ in the stair-type visualization.
 	 Unfortunately some fields proved to be  problematic when comparing 
 	 the values to a domain of legal values. For example, all zip codes 
 	 (two fields: zip\_codes and incident\_zip) should be valid as defined 
-	 by the USPS database which contains 37,946 valid zip codes.
-	 
-	The computed field zip\_codes proved especially problematic with 
-	58\% (3.6 million) of the field entries being invalid. That high number 
-	indicates that the computation of this field is highly inaccurate. We 
-	recommend dropping this field for future analytic efforts.
-	
-	Furthermore, the field incident\_zip while having only .07\% invalid entries, 
-	still is a problem with 4163 such errors. As the zip code is a primary 
-	measure of many NYC city services, and with a freely available 
-	database for which to validate entries, it seems an oversight 
-	that any such errors could creep into the 311 system. 
-	Some invalid entries can clearly be identified as incorrect by 
-	observation, e.g. 10000, 12345, 11111, etc. 
-	
-	The breakdown of the invalid entries in the zip\_code, sorted by 
+	 by the USPS database which contains 37,946 valid zip codes. However,
+	 the computed field zip\_codes proved problematic with 
+	58\% (3.6 million) of the field entries being invalid. Even the 
+	field incident\_zip while having only .07\% invalid entries, exhibited
+	4163 such errors. The breakdown of the invalid entries in the zip\_code, sorted by 
 	Agency shows that the distribution by percentage almost precisely 
-	mirrors the overall breakdown of SRs by Agency as shown in . 
-	This indicates a systemic problem, and since the zip\_code fields is 
-	one of the computed fields, it appears these errors are caused by 
-	incorrect computations rather than by any Agency mistake.
-	
-	The  errors in the incident\_zip field are more troubling, even though 
-	they are, percentage-wise, small. Here is a graphic illustrating how 
-	these errors occur by Agency. Here we can see that the majority of 
-	the errors lie in the Dept of Transportation, NYPD, Taxi \& Limo 
-	Commission (TLC), and the Economic Development Council (EDC) 
-	among others. This representation does not follow the full SR 
-	distribution indicating that these errors are likely generated by 
-	an incorrect process or application residing at those particular 
-	Agencies; it is not a systemic problem.
-
-	\begin{figure}[tbp]
-		\centering
-		\includegraphics[width=\textwidth]{invalid_incident_zip.pdf}
-		\caption{Invalid incident\_zip(s) by Agency} 
-		\label{fig:invalid_incident_zip}
-	\end{figure}
+	mirrors the overall breakdown of SRs by Agency, potentially indicating
+	a systemic problem.
 	
 \subsubsection{Case Study: Noise Complaints by Zip Code}
 \label{sec:case-study-zip-codes}
 		\textbf{Scenario:} The NYC Office of Nightlife (ONL) wants to 
 		know ``What are the top 10 zip codes for Noise Complaints (all 8 types) 
-		over the last two years?'' The goal is to assess the impact of the 
-		recent NYC effort looking to promote a safe and vibrant 
-		nightlife scene in NYC while seeking to ease strained 
-		relations between bar and club owners. 
-		
-		It may come as a surprise to non-NYC residents that dancing at 
-		bars and restaurants has been illegal since 1926 (during prohibition), 
-		and was only just repealed in 2018. 
-		
-		On the surface this would seem like a simple effort.  The NYC Open 
-		Data Portal allows for selection of a timeframe (2022-2023), 
-		complaint-type begins with ``Noise'', and group by Zip code, 
-		sorted descending by count. You can do this analysis and 
-		grouping right inside the NYC Open Data Portal. \textit{Voila!}
-
-		However, this analysis uses the zip\_codes field, one of the (six) 
+		over the last two years?'' The intent is to assess the impact of the 
+		recent NYC effort promoting a vibrant nightlife 
+		in NYC while seeking to ease strained relations 
+		between bar and club owners. Let's assume that this analysis 
+		uses the zip\_codes field, one of the (six) 
 		computed fields that has shown to have validity problems. 
-		If we repeat the analysis with the incident\_zip field instead 
-		of the zip\_codes field, we obtain a different set of zip code results:
-		
-		Let's subject these two data sets to validation against 
-		the US Postal Service zip code database.
+		We then repeat the analysis with the incident\_zip field instead. Let's 
+		subject these two data sets to validation against the USPS zip code database.
 	 
 \begin{table}[tbp]
     \centering
@@ -1027,12 +672,7 @@ with what is observed in the overall dataset (58\%). Whereas the incident\_zip
 field is completely valid, again in-line with the overall incident\_zip 
 validation percentage (99.04\%). If the analysis performed using the 
 zip\_codes field were to be 	presented to the Director, ONL, the conclusion 
-would be in error. Perhaps more curious than the differing zip codes 
-on the two lists, is the fact that the numerical counts are nearly identical; 
-the overall counts are quite close. This is curious since one field is 
-computed while the other is via data entry; the computed protocol is 
-again the suspect. The algorithm appears to be counting corrrectly 
-(or nearly so) 	but mis-identifying the corresponding zip code.
+would be in error. 
 
 \subsection{Issues with Police Precincts} 	
 \label{sec:police-precincts}
@@ -1042,188 +682,73 @@ again the suspect. The algorithm appears to be counting corrrectly
 	\href{https://www.nyc.gov/site/nypd/bureaus/patrol/precincts-landing.page}
 	{NYPD Precinct listings} it's possible to determine the valid 
 	police precincts; they are generally numeric or have numeric 
-	representations in the dataset. 
-	
-	However, what we find is that both fields police\_precinct 
-	and police\_precincts  have  35\% invalid entries. Unfortunately, 
-	they're not the same invalid entries. 
+	representations in the dataset. However, what we find is that 
+	both fields police\_precinct and police\_precincts  have  35\% 
+	invalid entries. Unfortunately, it's not the same invalid entries. 
 	
 	For the police\_precincts field, there are 2,171,864 invalid entries 
 	(35\%)., a consequential number of errors. Similarly for the 
 	police\_precinct field, there are 2,171,778 invalid entries 
-	(also 35\%), however they are not the same counts for the two similar fields.
-
-	The top ten (by count) of invalid precincts for each field are:
-
-	\begin{table}[tbp]
-	\centering
-	\caption{Comparison of the fields police\_precinct and police\_precincts}
-		\begin{tabular}{ccccc}
-		\toprule
-		\textbf{Invalid Precinct} & \textbf{police\_precinct count} 
-		& \textbf{police\_precincts count} & \textbf{Delta}\\
-		\midrule
-				62 & 151808 & 151720 & 88 \\
-				72 & 148881 & 148796 & 85 \\
-				67 & 133171 & 133115 & 56 \\
-				64 & 111236 & 111221 & 15 \\
-				60 & 105252 & 105317 & -65 \\
-				65 & 103334 & 103306 & 28 \\
-				53 & 100097 & 100074 & 23 \\
-				73 & 97746 & 97755 & -9 \\
-				68 & 94204 & 94254 & -50 \\
-				66 & 93654 & 93848 & -194 \\
-		\bottomrule
-		\end{tabular}
-	\label{tab:comparison-precincts-diff}
-	\end{table}
+	(also 35\%). 
 	
-	A graphic representation of the invalid police\_precincts plotted by 
-	Agency show a near perfect match to the distribution of the entire 
-	6.4 million SRs as seen in Figure \ref{fig:SR_counts_by_Agency}. Note 
-	that the ``big six'' Agencies account for 90\% of these invalid precinct 
-	errors, identical to the overall distribution of all SRs. (The same is true 
-	for a similar graph of by the police\_precint field.) This strongly 
-	suggests that this is a systemic problem, most likely caused by the 
-	computation method applied for these two fields.
-		 
-	\begin{figure}[tbp]
-		\centering
-		\includegraphics[width=\textwidth]{invalid_police_precincts.pdf}
-		\caption{Invalid NYPD precincts by Agency}	  
-		\label{fig:invalid_police_precincts_zip}
-	\end{figure}
-
 \subsection{Issues with Community Boards}
 \label{sec:communityboards}
 	Community Boards are an important aspect of NYC government. They are the 
 	most local, grassroots form of City government, and a vital connection 
-	between communities and elected officials and City agencies. 
-	They are organized by the five Boroughs of NYC and represented	
-	in this dataset as ``\#\#-Borough'', e.g. ``10 Bronx'' and report to the 
-	various Borough Presidents in NYC. As such, they play an important 
-	role in the quality of life for all New Yorkers. There are 59 community 
-	boards throughout the City: 12 Community Districts in Bronx, 18 in Brooklyn, 
-	12 in Manhattan, 14 in Queens and 3 in Staten Island. The Community 
-	Boards are used frequently as a way to measure distribution of 
-	City services throughout the five boroughs, so correctness is important. 
-	NYC Borough Presidents in particular are focused on the services 
-	offered at the Community Board level within their respective Borough.
-	
-	In the 2022-2023 dataset there are 27,276 invalid community\_board 
-	entries which represents 0.43\% of non-blank data. There are a total 
-	of 12 different invalid community boards, to include: 
-	
-		\begin{table}[tbp]
-		\centering
-		\caption{Top Ten Invalid 'community\_board' Values}
-			\begin{tabular}{rlr}
-			\toprule
-			\textbf{Rank} & \textbf{Invalid CB} & \textbf{Count} \\
-				\midrule
-					1 & 64 MANHATTAN & 7144 \\
-					2 & 83 QUEENS & 5133 \\
-					3 & 55 BROOKLYN & 3327 \\
-					4 & 81 QUEENS & 3180 \\
-					5 & 80 QUEENS & 2407 \\
-					6 & 26 BRONX & 2364 \\
-					7 & 28 BRONX & 1128 \\
-					8 & 82 QUEENS & 1054 \\
-					9 & 95 STATEN ISLAND & 515 \\
-					10 & 27 BRONX & 514 \\
-				\bottomrule
-			\end{tabular}
-		\end{table}
-		
-		The distribution of invalid Community Boards by Agency is not consistent 
-		with the overall SR Agency distribution. This indicates that there are likely 
-		specific issues at some key Agencies, in this case Taxi \& Limo Commission 
-		(TLC), Parks \& Recreation, etc. It's not a large error, but the 
-		division of services (and complaints) by Community Board is a 
-		well-tracked measure so accuracy is again important.
-
-		\begin{figure}[tbp]
-		 	 \centering
-			  \includegraphics[width = \textwidth]{invalid_community_boards.pdf}
-			  \caption{Invalid Community Board by Agency}
-			  \label{fig:invalid_community_boards}
-		\end{figure}
-
+	between communities and elected officials and City agencies. Community 
+	Boards are used as a measure of City services throughout the five 
+	boroughs. In the 2022-2023 dataset there are 27,276 invalid community\_board 
+	entries which represents 0.43\% of non-blank data. The distribution 
+	of invalid Community Boards by Agency is not consistent with 
+	the overall SR Agency distribution. This indicates that there are likely 
+	specific issues at some key Agencies, in this case Taxi \& Limo 
+	Commission (TLC), Parks \& Recreation, etc. 
 
 \subsection{Issues with Community Districts}
 \label{sec:communitydistrict}
-	Another of the computed fields is community\_districts. Community Districts 
+	Another of the ``computed'' fields is community\_districts. Community Districts 
 	are the boundaries for the Community Boards, but unlike how 
 	Community Boards are an arm of the government of New York City, 
 	the Community District is used by the Department of City Planning 
 	(DCP) for purposes of environmental, socio-economic, and demographic 
-	purposes. DCP is the NYC''s primary land use agency and is 
-	instrumental in the City's physical framework.  It is a geographical 
-	division rather than a local government division. And like Community 
-	Boards, the Community Districts are frequently cited as a means to 
-	track zoning, housing, community facilities, and waterfront/open/public spaces. 
-	It is another of the NYC well-tracked measures.
-
-	Due to how the community\_district data is formatted, it is not possible 
-	to establish validity. However, it is possible to determine that the 
-	dataset contains 72 unique entries, while there are only 59 valid Community 
-	Districts. So it would appear that there are 13 invalid 
-	community\_board(s) contained in the dataset.
+	purposes. It is a geographical division rather than a local 
+	government division. Due to how the community\_district data 
+	is formatted, it is not possible to establish validity. However, 
+	it is possible to determine that the dataset contains 72 unique 
+	entries, while there are only 59 valid Community Districts. 
 	
-	As previously mentioned, the dataset has four data fields:  created\_date, 
-	closed\_date, due\_date, and resolution\_action\_update\_date. 
-	The due\_date field has few entries to analyze; 99.62\% of due\_date entries 
-	are ``N/A''.  It is not known if the due\_date(s) are truely ``not applicable'' 
-	or that the due\_date field is rarely used. The  resolution\_action\_update\_date 
-	field serves as a date-time marker showing when the SR record was last updated.  
-	All the date fields are recorded to the second, e/g/ ``2022-02-11 13:43:05''.
-
 \subsection{created\_date and closed\_date(s) -- Negative Duration}
 \label{sec:negativeduration}
 	Let's look first at the created\_date and closed\_date fields. You might 
 	expect that these two fields are automatically populated by the 
-	SR application software, either the software used at the 311 organization 
-	or that used at the Agencies that are integrated with the 311 system; 
-	and typically that is indeed the case. In such a case, the act of creating an 
-	SR would automatically trigger an entry in created\_date based on a 
-	system reference clock. Thus the created\_date is associated with 
-	setting an SR status to ``new'' or ``open''. And similarly when an SR's 
-	status is changed to ``closed'' then the closed\_date would be populated. 
-	
-	Unfortunately, our analysis found that that assumption is not always 
-	the case. When you analyze the various date fields, several anomalies 
-	quickly become apparent:
+	SR application software. In such a case, creating an SR would 
+	automatically trigger a created\_date based on a system clock. 
+	Thus the created\_date is associated with setting an SR status 
+	to ``new'' or ``open''. And similarly when an SR's 	status is 
+	changed to ``closed'' then the closed\_date would be 
+	populated. Unfortunately, that is not always the case. There are
+	several anomalies with the various date fields.
 	
 	\begin{itemize}
-		\item Some SRs have a closed\_date that occurs before the created\_date.
-	 	\item Some created\_date(s) and closed\_date(s) appear either in 
-	 	the future or in the far distant past.
-		\item There are a large number of SRs that are closed and created 
-		exactly at midnight or exactly at noon. 
+		\item SRs with a closed\_date that occurs before the created\_date.
+	 	\item created\_date(s) and closed\_date(s) in the far distant past.
+	 	\item created\_date(s) and closed\_date(s) that match to the second.
+		\item A large number of SRs closed and created exactly at midnight 
+		or exactly at noon. 
 	\end{itemize}
 	
-	\textbf{Why are these date fields important?} They're important because 
-	citizens, NYC Government Officials, and NYC Agencies use these 
-	dates to measure the responsiveness for providing the 
-	services. How long does it take to replace an out-of-order 
-	street light? How rapid is the response to a report of domestic 
-	violence? Does the NYPD response to a noise complaint in 
-	Staten Island take longer than in Manhattan? How long does it 
-	take to repair a street pothole in Queens? 
-	
-	The measure of ``duration'', of the response time of a 311 call is a closely 
+	These date fields are important because citizens, NYC Government Officials, 
+	and NYC Agencies use these dates to measure the 
+	responsiveness for providing services. The measure of ``duration'',	 
+	of the response time of a 311 call is a closely 
 	watched, carefully scrutinized metric, both in terms of overall performance 
-	and with a geographical area. And it can have broad political, organizational, 
-	and budgetary consequences. Duration is not a field in the dataset, 
-	but it is easily computed by closed\_date - created\_date. Let's look at 
-	some anomalies in this ``duration'' field.
+	and with a geographical area. Duration, while not a field in the dataset, 
+	it is easily computed by closed\_date - created\_date.
 	
 	Closed-before-Created:  There are 12,251 SRs that are closed before they 
 	were created, thereby generating a nonsensical ``negative duration''. 
 	While this is a small percentage overall (0.2\%) it can have significant impact 
-	on response time analysis. In most cases, these ``negative durations'' 
-	appear to just be mistakes. Here is a sample of some of the 
-	largest and the smallest errors:
+	on response time analysis. Here is a sample:
 	
 	\begin{table}[tbp]
 	    \centering
@@ -1261,37 +786,12 @@ again the suspect. The algorithm appears to be counting corrrectly
 	eight SRs with extremely large negative durations (\textless{} -730), all containing 
 	an entry of ``1900-01-01'' as the closed\_date, which generates extremely large 
 	negative durations exceeding 44,601 days (122 yrs). That large of an anomaly 
-	can skew statistical results, even though the number of occurrences is small. 
-	This is especially curious as the date ``1900-01-01'' is also the earliest date that 
-	Microsoft Excel can accommodate as well as how Excel treats a blank cell 
-	that is designated as a date. All raising suspicions that perhaps these dates 
-	were imported into the 311 system from Excel.
-	
-	According, these  SR rows are removed from the box \& whiskers plot. 
-	Note that these extremely large negative duration SRs are all from the 
-	Department of Homeland Services (DHS) Sample: 
-	
-	\begin{table}[tbp]
-	    \centering
-	    \caption{Sample of SRs with extremely large negative durations}
-		    \begin{tabular}{l l r l}
-		        \toprule
-		        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-		        & \textbf{agency} \\
-			        \midrule
-			        2022-02-11 13:43:05 & 1900-01-01 & -44602 & DHS \\
-			        2022-02-11 11:03:38 & 1900-01-01 & -44602 & DHS \\
-			        2022-02-11 08:29:49 & 1900-01-01 & -44601 & DHS \\
-			        2022-02-11 14:08:08 & 1900-01-01 & -44602 & DHS \\
-			        2022-02-11 14:05:16 & 1900-01-01 & -44602 & DHS \\
-			        \bottomrule
-		    \end{tabular}
-	    \label{tab:extreme_negative_durations}
-	\end{table}
-	
-	Here is a graphic visualization of the negative-duration SRs by Agency. It is 
-	obvious that this negative-duration issue is a problem at the 
-	Dept. of Transportation (DOT) where 95\% of these types of errors occur. 
+	can skew statistical results, even though the number of occurrences is 
+	small. According, these  SR rows are removed from the analysis. These 
+	extremely large negative duration SRs are all from the 
+	Department of Homeland Services (DHS) A visualization of the 
+	negative-duration SRs by Agency shows that this negative-duration 
+	issue is a DOT problem, where 95\% of these types of errors occur. 
 	
 	\begin{figure}[tbp]
 	 	 \centering
@@ -1312,120 +812,11 @@ again the suspect. The algorithm appears to be counting corrrectly
 		 \label{fig:negative-duration-violin}
 	\end{figure}
 
-\textbf{Why are these date fields important?} They're important because citizens, NYC Government Officials, and NYC Agencies use these dates to measure the responsiveness 
-for providing the services. How long does it take to replace an out-of-order 
-street light? How rapid is the response to a report of domestic violence? 
-Does the NYPD response to a noise complaint in Staten Island take longer 
-than in Manhattan? How long does it take to repair a street pothole in Queens? 
-
-The measure of ``duration'', of the response time of a 311 call is a closely 
-watched, carefully scrutinized metric, both in terms of overall performance 
-and with a geographical area. And it can have broad political, organizational, 
-and budgetary consequences. Duration is not a field in the dataset, 
-but it is easily computed by closed\_date - created\_date. Let's look at 
-some anomalies in this ``duration'' field.
-
-Closed-before-Created:  There are 12,251 SRs that are closed before they 
-were created, thereby generating a nonsensical ``negative duration''. 
-While this is a small percentage overall (0.2\%) it can have significant impact 
-on response time analysis. In most cases, these ``negative durations'' 
-appear to just be mistakes. Here is a sample of some of the 
-largest and the smallest errors:
-
-\begin{table}[tbp]
-    \centering
-    \normalsize
-    \caption{Largest and Smallest errors (days)}
-    \begin{tabular}{>{\ttfamily}l l l r l}
-        \toprule
-        \multicolumn{5}{c}{\textbf{Largest errors (days) excluding 
-        extreme negative values}} \\
-        \midrule
-        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-        & \textbf{agency} \\
-	        \midrule
-	        2023-01-27 14:40:00 & 2022-01-14 14:40:00 & -378.0 & DOT \\
-	        2023-01-18 10:06:00 & 2022-01-12 10:06:00 & -371.0 & DOT \\
-	        2023-01-27 14:36:00 & 2022-01-22 14:35:00 & -370.0 & DOT \\
-	        2023-01-11 11:10:00 & 2022-01-09 11:10:00 & -367.0 & DOT \\
-	        2023-12-18 03:13:00 & 2023-01-16 13:10:00 & -335.6 & DOT \\
-	        \midrule
-	        \multicolumn{5}{c}{\textbf{Smallest errors (days)}} \\
-	        \midrule
-	        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-	        & \textbf{agency} \\
-	        \midrule
-	        2023-06-28 07:07:31 & 2023-06-28 07:07:00 & -0.00036 & DOT \\
-	        2023-06-29 09:10:20 & 2023-06-29 09:10:00 & -0.00023 & DOT \\
-	        2023-01-12 06:50:13 & 2023-01-12 06:50:00 & -0.00015 & DOT \\
-	        2023-06-26 08:09:07 & 2023-06-26 08:09:00 & -0.00008 & DOT \\
-	        2023-01-12 06:51:01 & 2023-01-12 06:51:00 & -0.00001 & DOT \\
-	        \bottomrule
-    \end{tabular}
-    \label{tab:combined_errors}
-\end{table}
-
-The largest errors are shown ``excluding extreme negative values''. We found 
-eight SRs with extremely large negative durations (\textless{} -730), all containing 
-an entry of ``1900-01-01'' as the closed\_date, which generates extremely large 
-negative durations exceeding 44,601 days (122 yrs). That large of an anomaly 
-can skew statistical results, even though the number of occurrences is small. 
-This is especially curious as the date ``1900-01-01'' is also the earliest date that 
-Microsoft Excel can accommodate as well as how Excel treats a blank cell 
-that is designated as a date. All raising suspicions that perhaps these dates 
-were imported into the 311 system from Excel.
-
-According, these  SR rows are removed from the box \& whiskers plot. 
-Note that these extremely large negative duration SRs are all from the 
-Department of Homeland Services (DHS) Sample: 
-
-\begin{table}[tbp]
-    \centering
-     \normalsize
-    \caption{Sample of SRs with extremely large negative durations}
-    \begin{tabular}{l l r l}
-        \toprule
-        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-        & \textbf{agency} \\
-	        \midrule
-	        2022-02-11 13:43:05 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 11:03:38 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 08:29:49 & 1900-01-01 & -44601 & DHS \\
-	        2022-02-11 14:08:08 & 1900-01-01 & -44602 & DHS \\
-	        2022-02-11 14:05:16 & 1900-01-01 & -44602 & DHS \\
-	        \bottomrule
-    \end{tabular}
-    \label{tab:extreme_negative_durations}
-\end{table}
-
-Here is a graphic visualization of the negative-duration SRs by Agency. It is 
-obvious that this negative-duration issue is a problem at the 
-Dept. of Transportation (DOT) where 95\% of these types of errors occur. 
-
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
-	  \caption{Negative Duration SRs by Agency}
-	  \label{fig:negative-duration}
-\end{figure}
-
-This violin chart shows the broad spread of negative-duration SRs, albeit with 
-the extremely large negative-duration SR removed. While there are few 
-outlier points, the magnitude of the negative-durations is troubling and can 
-produce bizarre analytical results.
-
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
-	 \caption{Distribution of Negative Durations}
-	 \label{fig:negative-duration-violin}
-\end{figure}
-
 \subsubsection{Case Study: Homeless Person Assistance}
 \label{sec:homlessassistance}
-	\textbf{Scenario:} The Dept. of Homeless Services wants to 
-	know ``How quickly are 311 calls for ``Homeless Person Assistance 
-	over the past two years?'' resolved. This is a typical request made by 
+	\textbf{Scenario:} The Dept. of Homeless Services (DHS) wants to 
+	know ``How quickly are 311 calls for ``Homeless Person Assistance
+	resolved over the past two years?'' This is a typical request made by 
 	both the public and City government. It's a performance metric along 
 	the lines of ``How quickly is my Agency responding to ``critical'' 
 	requests, and does that performance vary by Borough, Zip Code, etc. 
@@ -1446,12 +837,8 @@ produce bizarre analytical results.
 	values is enough to drive the average of the 75,000 
 	Homeless Assistance SRs to a negative value, clearly incorrect.
 		
-	As it turns out the distribution of the ``Homeless Person Assistance'' is 
-	quite skewed due to a small number of long duration SRs. In this case, 
-	the median is a better measure of central tendency than the average. 
+	In this case, the median is a better measure of central tendency than the average. 
 	And the median of the duration field is  0.2 days (approx 5 hrs). 
-	Here is a look at the distribution of durations for the Homeless Person 
-	Assistance SRs showing 	the large outliers. 
 		
 	\begin{figure}[tbp]
 	 	 \centering
