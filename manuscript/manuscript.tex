@@ -7,7 +7,7 @@
 \usepackage{setspace}
 \usepackage{natbib}
 \usepackage{hyperref}\hypersetup{colorlinks=true, citecolor=blue}
-\usepackage{parskip}
+% \usepackage{parskip}
 \usepackage{textgreek}
 \usepackage{graphicx}
 \usepackage{booktabs} % For better looking tables
@@ -63,9 +63,10 @@
 \setcounter{topnumber}{50}
 \setcounter{bottomnumber}{50}
 
-\newcommand{\jy}[1]{\textcolor{orange}{JY: (#1)}}
-\newcommand{\yh}[1]{\textcolor{purple}{YH: (#1)}}
-\newcommand{\yx}[1]{\textcolor{cyan}{YX: (#1)}}
+\usepackage{xcolor}
+\newcommand{\dt}[1]{\textcolor{purple}{DT: (#1)}}
+\newcommand{\jy}[1]{\textcolor{cyan}{JY: (#1)}}
+
 \let\proglang=\textsf
 %% \newcommand{\pkg}[1]{{\fontseries{m}\selectfont #1}}
 %% \newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
@@ -91,28 +92,28 @@ York City 311 Service Request Data}
 
 \begin{abstract}
 In the early 21st century, the open data movement began to transform 
-societies and governments through principles of transparency, 
-innovation, and public engagement. New York City (NYC) has emerged 
-as a leader in this movement with the enactment of the Open 
-Data Law in 2012, leading to the creation of the NYC Open Data 
-portal, which now hosts 2700 datasets from 80 city agencies. This 
-resource has proven invaluable for research across various domains, 
+societies and governments by promoting transparency,
+innovation, and public engagement. New York City (NYC) has been at
+the forefront of this movement since the enactment of the Open 
+Data Law in 2012, which led to the creation of the NYC Open Data
+portal. This portal now hosts 2,700 datasets from 80 city agencies,
+serving as a crucial resource for research across various domains, 
 including health, urban development, and transportation. The 
-success of these initiatives underscores the importance of data 
-curation, ensuring the utility and reliability of datasets. 
-
-This paper examines the data curation challenges using the 
-NYC 311 Service Request (SR) Data as a case study, addressing issues 
+success of these initiatives highlights the importance of data 
+curation in ensuring the utility and reliability of open datasets.
+This paper examines the challenges of open data curation through a
+case study of the NYC 311 Service Request (SR), addressing issues 
 of data validity, consistency, and curation efficiency. Based on 
 insights from this case study, we propose a set of data curation 
 principles tailored for government-released open data. These principles 
 aim to enhance data management practices and ensure 
 the ongoing utility of open data. The paper concludes with 
-actionable suggestions for improving data curation and offers 
-general principles for the release of open data.
+actionable recommendations for enhancing data curation and outlines
+general principles for the effective release of open data.
 
 \bigskip
-  
+
+\jy{cut down to 6-8}
 \noindent
 \textit{Keywords:}
 	311 Service Request Data;
@@ -138,10 +139,11 @@ general principles for the release of open data.
 
 \section{Introduction} 
 \label{sec:intro}
-In the early 21st century, the open data movement began to take shape, driven by the 
+In the early 21st century,
+the open data movement began to take shape, driven by the
 fundamental belief that freely accessible data can transform 
-both societies and governments. This movement champions the principles of 
-transparency, innovation, and public engagement. 
+both societies and governments. This movement champions the principles
+of transparency, innovation, and public engagement. 
 A landmark in this journey was the launch of the United States'
 \href{https://www.data.gov}{Data.gov} portal in 2009, a pioneering
 platform in making government data widely accessible. Shortly after,
@@ -159,64 +161,53 @@ fostering a culture of openness that benefits individuals,
 communities, governments, and economies worldwide 
 \citep{barns2016mine, wang2016adoption}.
 
-New York City (NYC) has emerged as a forerunner in the open data
-movement, marked by the enactment of the Open Data Law in 2012
+
+New York City (NYC) has emerged as a leader in the open data movement,
+marked by the enactment of the Open Data Law in 2012
 \citep{zuiderwijk2014open}. This landmark legislation led to the
 creation of the \href{https://opendata.cityofnewyork.us}{NYC Open Data
-  portal}, which today hosts an impressive array of 2700 datasets
+  portal}, which today hosts an impressive array of 2,700 datasets
 from 80 different city agencies. This resource has become invaluable
-for researchers in various fields as well an enabling local government transparency
+for researchers across various fields and has significantly enhanced
+local government transparency. Popular datasets include information on
+restaurant health inspection violations, car crashes, high school and
+college enrollment statistics, jail inmate charges, and the location
+of city-wide free Internet access points. These datasets have been
+applied in civil life in various ways, such as mapping car crashes
+involving pedestrians and visualizing high school and college
+enrollment trends. Furthermore, they have enabled significant research
+across multiple domains, including health \citep{cantor2018facets,
+  shankar2021data}, urban development \citep{neves2020impacts}, and
+transportation \citep{gerte2019understanding}, aiding in the
+understanding and addressing of complex urban challenges.
 
-In health, datasets have enabled
-significant studies on facets of health and healthcare delivery
-\citep{cantor2018facets, shankar2021data}. In the realm of urban
-development, data has been instrumental in advancing smart city
-initiatives \citep{neves2020impacts}. Additionally, transportation
-research has benefited greatly from this wealth of data, aiding in the
-understanding of urban mobility and infrastructure
-\citep{gerte2019understanding}. NYC's Open Data initiative not only
-exemplifies commitment to transparency and public engagement but also
-illustrates how open data can be a powerful tool in addressing complex
-urban challenges. Examples of some of the more popular NYC datasets include:
 
-\begin{itemize}
-	\item NYC restaurant health inspection violations
-	\item Mapping of car crashes involving pedestrians
-	\item Visualization of NYC High School and College enrollment
-	\item An interactive dashboard to filter and view charges for jail inmates
-	\item Location of City-wide free Internet access points
-	\item ...and 220 other complaint types. 
-\end{itemize}
-
-Data curation is fundamental in the open data ecosystem, ensuring the
-utility and reliability of datasets for diverse applications. Among
-the earliest discussions, \citet{witt2009constructing} focus on the
-development of data curation profiles tailored to specific contexts,
-setting a precedent for targeted data management
-strategies. Addressing broader challenges in data sharing and
-management, \citet{borgman2012conundrum} highlights the complexities
-of research data distribution, emphasizing the need for robust
-strategies. This is complemented by the work of \citet{hart2016ten},
-who outline essential principles for effective data management,
-particularly emphasizing the importance of meticulous curation
-practices. 
-
-In the realm of collaborative data management,
-\citet{beheshti2019datasynapse} underscore the significance of
-cooperative environments for managing and sharing social data
-effectively. This aspect of data curation gains further relevance in
-the research by \citet{mclure2014data}, which delves into the specific
+The civil and research applications of open data critically depend on
+its quality, making data curation fundamental in the open data
+ecosystem. Among the earliest discussions,
+\citet{witt2009constructing} focused on developing data curation
+profiles tailored to specific contexts, setting a precedent for
+targeted data management strategies. Addressing broader challenges in
+data sharing and management, \citet{borgman2012conundrum} highlighted
+the complexities of research data distribution, emphasizing the need
+for robust strategies. This is complemented by \citet{hart2016ten},
+who outlined essential principles for effective data management,
+particularly emphasizing meticulous curation practices. In
+collaborative data management, \citet{beheshti2019datasynapse}
+underscored the significance of cooperative environments for managing
+and sharing social data effectively. This aspect gains further
+relevance in \citet{mclure2014data}, which delved into the specific
 practices and needs within data curation communities. The practical
-implications of data curation are vividly illustrated in the context
-of public health and global challenges. \citet{cantor2018facets}
-demonstrate the utility of curated open data in evaluating community
-health determinants. Furthermore, the COVID-19 pandemic serves as a
-real-world example, with \citet{shankar2021data} observing the
-critical role of collective data curation efforts in managing and
-responding to the crisis. Collectively, these studies not only highlight the 
-multifaceted nature of data curation but also emphasize
-its indispensable role in enhancing the applicability and value of
-open data across various domains.
+implications of data curation are vividly illustrated in public health
+and global challenges. \citet{cantor2018facets} demonstrated the
+utility of curated open data in evaluating community health
+determinants. The COVID-19 pandemic served as a real-world example,
+with \citet{shankar2021data} observing the critical role of collective
+data curation efforts in managing and responding to the
+crisis. Collectively, these studies highlight the multifaceted nature
+of data curation and emphasize its indispensable role in enhancing the
+applicability and value of open data across various domains.
+
 
 The contributions of this paper are twofold. First, we delve into
 the specifics of data curation challenges using the NYC 311 Service
@@ -229,6 +220,7 @@ gained from this case study, we propose a set of data curation
 principles tailored for government-released open data. These 
 principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
+
 
 The paper is organized as follows:
 Section~\ref{sec:history} offers a brief review of the history of the 311 system. In 
@@ -253,11 +245,12 @@ paper concludes with a discussion and recommendations in
 Section~\ref{sec:discussion}, encapsulating the key insights and 
 implications of our research.
 
+\dt{
 A note on naming conventions: dataset field names are named 
 using ``snake\_case'' where each word in the variable name 
 is written in lowercase, and words are separated by 
 underscores, e.g. created\_date, complaint\_type, zip\_code, etc..   
-
+}
 
 
 \section{NYC 311 System History} 
