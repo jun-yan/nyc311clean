@@ -84,9 +84,9 @@ York City 311 Service Request Data}
 \begin{document}
 \maketitle
 
-\tableofcontents % Optional: Table of Contents
-\listoffigures % List of Figures
-\listoftables % List of Tables
+% \tableofcontents % Optional: Table of Contents
+% \listoffigures % List of Figures
+% \listoftables % List of Tables
 
 \hyphenpenalty=750
 
@@ -139,6 +139,7 @@ general principles for the effective release of open data.
 
 \section{Introduction} 
 \label{sec:intro}
+
 In the early 21st century,
 the open data movement began to take shape, driven by the
 fundamental belief that freely accessible data can transform 
@@ -223,9 +224,9 @@ and requirements observed in the curation of such datasets.
 
 
 The paper is organized as follows:
-Section~\ref{sec:history} offers a brief review of the history of the 311 system. In 
-Section~\ref{sec:trends} we take a look at long-term trends presented 
-via a 10-year analysis. Section~\ref{sec:issues} offers a 
+Section~\ref{sec:data} offers a brief review of the history of the 311
+system and the long-term trends presented via a 10-year analysis.
+Section~\ref{sec:issues} offers a 
 general discussion of data cleansing issues impacting data 
 quality and curation efficiency. Section~\ref{sec:structural} examines
 the technical dimensions of the dataset, the structural issues. 
@@ -253,84 +254,64 @@ underscores, e.g. created\_date, complaint\_type, zip\_code, etc..
 }
 
 
-\section{NYC 311 System History} 
-\label{sec:history}
+\section{NYC 311 Service Request Data} 
+\label{sec:data}
+
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
 for non-emergency inquiries and requests. Introduced in 2003, the NYC
 311 system was designed to streamline the city's response to
 non-emergency issues, ranging from noise complaints to street
-maintenance requests. The evolution of this system can be traced from
-its initial implementation as a simple inquiry channel via telephone to a
-comprehensive data management system that handles millions of requests
-annually. Each inquiry is logged as a complaint, a Service Request (SR), 
-in the 311 system. Key milestones in the 311 system include:
+maintenance requests. Initially a phone-based call center, the system
+evolved into a comprehensive data management platform handling
+millions of requests annually. Key milestones since its launch in 2003
+include the addition of online and mobile app channels in 2009, a
+record high of 348,463 monthly service requests in August 2020 due to
+the COVID-19 pandemic, the 2021 expansion to include the MTA's city
+subway system, and a record 3.23 million service requests in
+2023. Today, the NYC 311 data system manages over 3 million service
+requests per year, covering issues such as street noise, illegal
+parking, heat and hot water, abandoned vehicles, and unsanitary
+conditions. This data is publicly accessible through the NYC Open Data
+Portal, which provides tools for querying, grouping, aggregating,
+geo-mapping, visualizing, and exporting results.
 
-\begin{itemize}
- 	\item 2003 - NYC 311 system goes live with a phone-based call center only. 
- 	The ``311'' phone number replaces a myriad of numbers to 
- 	call for each individual City Agency.
-   	\item 2009 - 311 online \& mobile apps launched. Today 60\% of all 
-   	Service Requests come from mobile \& online channels.
-      \item 2020 - In August 2020, driven by the COVID pandemic, monthly 311 
-      SRs hit an all-time high of 348,463. Seven of the Top 10 all-time busiest 
-      days occur in 2020.
-      \item 2021 - 311 System is expanded to include the MTA's city subway system, 
-      the largest expansion since its inception.
-   	\item 2023 - Record high year for 311 with 3.23 million Service Requests.
-\end{itemize}
 
-Today, the NYC 311 data system is a robust platform that manages a
-vast array of urban living-related inquiries. The system handles over 3 million service 
-requests (SRs) per year, encompassing such complaints as street noise, 
-illegal parking, heat/hot water, abandoned vehicles,
-and unsanitary conditions. The data is a valuable resource for City
-administration and policy-making. The 311 data is publicly accessible through the 
-NYC Open Data Portal which provides access to all the data 
-sets (approx. 2700) and provides a convenient method for querying, 
-grouping, aggregating, geo-mapping, visualization, and exporting 
-results. This open data  enables not only governmental transparency 
-but empowers researchers, civic developers, and the general public. 
+Despite its success, the 311 system faces several challenges, such as
+data timeliness, accuracy, and consistency, difficulties in
+correlating data over long periods, handling of personally
+identifiable information (PII), integration with stand-alone systems
+at selected NYC agencies, and managing API usage and load for numerous
+third-party users. These challenges are addressed by various agency
+open data managers and the
+\href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology
+  and Innovation (OTI)}, which provides technological support for the
+open data system. Data often needs to be exported and processed in
+external programs to address these issues, as observed in the
+examination of the large 311 dataset. Furthermore, the system must
+adapt to changes such as agency name changes and the introduction of
+new complaint types, which can complicate long-term data analysis.
 
-Despite its success, the 311 system faces challenges such as:
 
-\begin{itemize}
-	\item Data timeliness, accuracy, and consistency
-	\item Difficulties correlating data over long time periods, e.g. over a 10-year 
-	period, e.g. Agency name changes, new complaint types.
-	\item Data anonymization and handling of Personally identifiable information (PII)
-	\item Integration with stand-alone systems at selected NYC Agencies
-	\item Managing API usage, authentication, and load for 3\textsuperscript{rd} 
-	party users, of which there are many
-\end{itemize}
+The impact of NYC 311 data extends beyond operational efficiency; it
+has become instrumental in shaping city governance and community
+engagement. This open data not only ensures governmental transparency
+but also empowers researchers, civic developers, and the general
+public. The data has been pivotal in providing advice on shelters
+during emergencies, handling inquiries during the COVID-19 pandemic,
+enforcing standards between landlords and tenants, reallocating taxi
+routes based on analyses by the Taxi and Limousine Commission (TLC),
+improving responsiveness for city agencies like Parks and Recreation,
+the Department of Transportation, and the Department of Sanitation,
+and addressing homelessness through initiatives like the Homeless
+Outreach and Mobile Engagement Street Action Teams (HOME-STAT). These
+applications demonstrate the transformative potential of open data in
+enhancing urban living and fostering a more responsive and transparent
+city government.
 
-These and other challenges are addressed by the various 
-Agency open data managers as well as the 
-\href{https://www.nyc.gov/content/oti/pages/}
-{NYC Office of Technology and Innovation (OTI)} which provides the 
-technology support for the open data system. Typically, the data 
-will be exported and processed in an external program. The authors found 
-this to be the case with the large 311 dataset examined.
 
-The impact of the NYC 311 data extends beyond operational efficiency;
-it has become instrumental in shaping City governance and community
-engagement. The data has been pivotal in such areas as:
-
-\begin{itemize}
-	\item Providing advice on shelters during hurricanes, heat emergencies, and winter blizzards
-	\item Handling countless inquires during the COVID pandemic 
-	(testing centers, vaccine sites, mobile vaccine clinics, etc.)
-	\item Enforcement of standards between landlords and tenants
-	\item Re-allocation of NYC's yellow taxi routes based upon an insightful analysis 
-	conducted by the Taxi \& Limousine Commission (TLC)
-	\item Improved responsiveness for City Agencies with regards to direct 
-	client-facing responsibilities such as Parks \& Rec, Dept of Transportation, DSNY, etc.
-	\item Increased 311 SRs related to Homelessness resulted in the launch 
-	of the City's Homeless Outreach \& Mobile Engagement Street Action Teams (HOME-STAT)
-	which includes street canvassers and increases in homeless housing facilities.
-\end{itemize}
-
-We extracted 311 SR data for the period of CY 2022-2023, a dataset of
+\jy{FixME: this paragraph's location will be revisited later.}
+We extracted 311 SR data for the period of CY 2022--2023, a dataset of
 6.4 million SR records. This is a large dataset which enables 
 observation of some rarely seen events, data inaccuracies, 
 and logical inconsistencies. It provides enough data to 
@@ -340,103 +321,131 @@ data for analysis with custom written R programs.
 
 
 
-\section{10-year Analysis \& Trends} 
-\label{sec:trends}
-As part of this study, we also looked at a 10-year period (2014-2023) to
-observe system performance over a longer time-frame . During that time-frame, 
-the number of 311 SRs grew by 50\%. The summer and early fall months 
-make up all of the Top 5 SR counts by day. The all-time daily 
-high for SRs, 24,415 SRs (a full 9.8 \textsigma's from the 10-year mean), 
-occurred on Tuesday, 2020-08-04. The 10-year low count occurs 
-on Christmas Day, 2016, a Sunday. 
+
+\jy{Every float (figure/table) needs to be referred to in the text.}
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=\textwidth]{10-year-trend-monthly.pdf}
+  	\includegraphics[width=0.8\textwidth]{10-year-trend-monthly.pdf}
   	\caption{10-year (2014-2023) Monthly SR Counts}
   	\label{fig:10-yr-monthly}
 \end{figure}
 
+We also looked at a 10-year period (2014-2023) to
+observe system performance over a longer time-frame; see
+Figure~\ref{fig:10-yr-monthly}. During that time-frame,
+the number of 311 SRs grew by 50\%. The summer and early fall months 
+make up all of the Top 5 SR counts by day.
+
+
 \begin{table}[tbp]
     \centering
     \caption{Top 5 and Bottom 5 Days for SRs}
-	    \begin{tabular}{@{}lll lll@{}}
-	        \toprule
-	        \multicolumn{2}{c}{Top 5 Days} & \multicolumn{2}{c}{Bottom 5 Days} \\
-	        \cmidrule(r){1-2} \cmidrule(l){3-4}
-	        Date & Count & Date & Count\\
-	        \midrule
-	        2020-08-04 & 24,415 & 2014-12-25 & 2965\\
-	        2020-08-05 & 19,560 & 2015-12-25 & 3247\\
-	        2023-09-29 & 17,962 & 2014-04-20 & 3287\\
-	        2020-07-05 & 16,916 & 2015-12-26 & 3405\\
-	        2020-06-21 & 15,883 & 2016-11-06 & 3419\\
-	        \bottomrule
-	    \end{tabular}
     \label{tab:top-10-counts}
+    \begin{tabular}{@{}lll lll@{}}
+      \toprule
+      \multicolumn{2}{c}{Top 5 Days} & \multicolumn{2}{c}{Bottom 5 Days} \\
+      \cmidrule(r){1-2} \cmidrule(l){3-4}
+      Date & Count & Date & Count\\
+      \midrule
+      2020-08-04 & 24,415 & 2014-12-25 & 2965\\
+      2020-08-05 & 19,560 & 2015-12-25 & 3247\\
+      2023-09-29 & 17,962 & 2014-04-20 & 3287\\
+      2020-07-05 & 16,916 & 2015-12-26 & 3405\\
+      2020-06-21 & 15,883 & 2016-11-06 & 3419\\
+      \bottomrule
+    \end{tabular}
 \end{table}
 
-Two important fields in this analysis effort are the responsible NYC Agency, 
-and the type of complaint. Given the size of the City of New 
-York government, it is necessary to identify the responsible 
-Agency as well as the type of complaint in order to identify 
-the responsible party and assist in troubleshooting discrepancies.
-Thus we can often identify if it is an Agency specific problem, 
-or a systemic issue. Although 311 SRs involve 16 different agencies, 
-there are six Agencies that comprise 90\% of the complaints.
 
-\begin{itemize}
-	\item New York Police Department (NYPD)
-	\item Housing Preservation \& Development (HPD
-	\item New York City Department of Sanitation (DSNY)
-	\item Department of Transportation (DOT)
-	\item Department of Environmental Protection (DEP)
-	\item Department of Parks \& Recreation (DPR)
-\end{itemize}
+Table~\ref{tab:top-10-counts} summarizes the top 5 and bottom 5 days
+in counts of SRs. The highest daily SR count, 24,415, occurred on
+August 4, 2020, coinciding with the aftermath of Tropical Storm
+Isaias, highlighting the system's critical role during crises. The
+second-highest count, 19,560, was the following day, reflecting the
+storm's continued impact. 
+Conversely, the lowest daily SR count, 2,965, was on Christmas Day,
+2014, with similar lows on other Christmas Days, indicating reduced
+activity during major holidays. The data also shows fewer requests on
+weekends, such as April 20, 2014 (Easter Sunday), and November 6, 2016
+(a non-holiday Sunday).
+
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width=\textwidth]{SRs_by_Agency.pdf}
+	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
 
-The distribution of complaint\_type skews to a few select complaints 
-accompanied by a long tail. This graph shows the top 20 complaint\_type(s) 
-comprising 70\% out of a total of 220 different types.
+
+Figure~\ref{fig:SRcountbyAgency} display the SR counts by agency with
+cumulative percentage. Two important fields in this analysis are the
+responsible NYC Agency and the type of complaint. Given the size of
+the City of New York government, identifying the responsible agency
+and the type of complaint is essential for pinpointing the accountable
+party and troubleshooting discrepancies. This identification helps
+determine whether an issue is specific to an agency or indicative of a
+systemic problem. Although 311 SRs involve 16 different agencies, six
+agencies account for 90\% of the complaints. These are the New York
+Police Department (NYPD), Housing Preservation and Development (HPD),
+New York City Department of Sanitation (DSNY), Department of
+Transportation (DOT), Department of Environmental Protection (DEP),
+and Department of Parks and Recreation (DPR).
+
+
 
 \begin{figure}[tbp]
-	\centering
- 	\includegraphics[width=\textwidth]{SR_by_Complaint_Type.pdf} 
-	\caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
-	\label{fig:SR_complaints}
+  \centering
+  \includegraphics[width=0.8\textwidth]{SR_by_Complaint_Type.pdf} 
+  \caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
+  \label{fig:SR_complaints}
 \end{figure}
 
-The top 20 complaints contain several of the eight different types of ``Noise'' 
-complaints (Residential, Commercial, Street, Helicopter, etc.). These Noise-related
-complaints total a full 22\% of all complaint types, which, when consolidated, is the most frequently occurring complaint\_type.
-
 \begin{table}[tbp]
-    \centering
-    \caption{Noise-related complaints\_type(s) by count with Agency}
-	    \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,
-	    round-precision=0]S[table-format=2.2,round-mode=places,
-	    round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
-	        \toprule
-	        \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
-	        \midrule
-	        Noise - Residential        & 675502 & 10.56 & NYPD  \\ 
-	        Noise - Street/Sidewalk    & 300507 &  4.70 & NYPD  \\ 
-	        Noise - Commercial         & 128892 &  2.02 & NYPD  \\ 
-	        Noise - Vehicle            & 115956 &  1.81 & NYPD  \\ 
-	        Noise                      & 100413 &  1.57 & DEP   \\ 
-	        Noise - Helicopter         &  85345 &  1.33 & EDC   \\ 
-	        Noise - Park               &  16620 &  0.26 & NYPD  \\ 
-	        Noise - House of Worship &   2757 &  0.04 & NYPD  \\ 
-	        \bottomrule
-	    \end{tabular}
-    \label{tab:noisecomplaints}
+  \centering
+  \caption{Noise-related complaints\_type(s) by count with Agency}
+  \label{tab:noisecomplaints}
+  \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,
+    round-precision=0]S[table-format=2.2,round-mode=places,
+    round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
+    \toprule
+    \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
+    \midrule
+    Noise - Residential        & 675502 & 10.56 & NYPD  \\ 
+    Noise - Street/Sidewalk    & 300507 &  4.70 & NYPD  \\ 
+    Noise - Commercial         & 128892 &  2.02 & NYPD  \\ 
+    Noise - Vehicle            & 115956 &  1.81 & NYPD  \\ 
+    Noise                      & 100413 &  1.57 & DEP   \\ 
+    Noise - Helicopter         &  85345 &  1.33 & EDC   \\ 
+    Noise - Park               &  16620 &  0.26 & NYPD  \\ 
+    Noise - House of Worship &   2757 &  0.04 & NYPD  \\ 
+    \bottomrule
+  \end{tabular}
 \end{table}
+
+The distribution of complaint types skews toward a few select
+categories, accompanied by a long tail. Figure~\ref{fig:SR_complaints}
+shows that the top 20 complaint types account for 70\% of the total
+220 different types. Notably, these top complaints include several
+variations of noise-related issues, which collectively represent 22\%
+of all complaints. When consolidated, noise complaints emerge as the
+most frequently occurring type. Table~\ref{tab:noisecomplaints}
+provides a detailed breakdown of noise-related complaint types by
+count and responsible agency. The most common noise complaint is
+``Noise - Residential,'' with 675,502 complaints, accounting for 10.56\%
+of all service requests, and primarily handled by the NYPD. Other
+significant noise complaints include ``Noise - Street/Sidewalk"
+(4.70\%), ``Noise - Commercial'' (2.02\%), and ``Noise - Vehicle"
+(1.81\%), all managed by the NYPD. Additional categories such as
+"Noise - Helicopter'' (1.33\%) fall under the jurisdiction of the EDC,
+and ``Noise'' (1.57\%) is managed by the DEP. The prevalence of these
+complaints underscores the critical role of the NYPD and other
+agencies in addressing noise-related issues, reflecting the
+significant impact of urban noise on residents' quality of life. This
+data highlights the importance of efficient response and management
+strategies to mitigate noise disturbances in New York City.
+
 
 
 
