@@ -1266,161 +1266,120 @@ appear to used exclusively by the Taxi \& Limo Commission (TLC).
 
 
 \section{Data Dictionary Observations} 
-\label{sec:datadictionay}
+\label{sec:datadictionary}
 During this analysis, it became apparent that the  Data 
 Dictionary could use an update. We found several discrepancies 
 between the Data Dictionary and the actual data which can lead 
 analytic efforts astray. 
 
-===========================================
-REVIEW BELOW HERE
-===========================================
-
 \begin{itemize}
-	\item While the Open Data portal lists the basic data types of the 
+	\item While the Open Data portal lists the data types of the 
 	various fields, the Data Dictionary does not. Nor does it provide 
-	meaningful information on the specifics of various fields, such 
+	much information on the specifics of various fields, such 
 	as constraints or domain of legal values. For example, the 
 	incident\_zip field is specified as ``text''. That's probably not the 
-	best definition, perhaps	``categorical'' would be more 
-	appropriate with a description indicating that the data can 
+	best definition, perhaps	``categorical'' indicating that the data can 
 	contain only numeric characters and is not subjected to arithmetic 
-	operations. We found two instances with the zip\_code field 
-	contained character strings (``na'', ``N/A''). 
+	operations. 
 
-	\item Domain of legal values as contained in the Data Dictionary 
-	are incomplete. For example, the Data Dictionary indicates that 
-	the status field has values of assigned, canceled, closed, or pending. 
-	However, we found additional status values: in progress, started, 
-	and unspecified. Additionally, we discovered no SRs with a status of 
-	canceled. Similarly, the address\_type field is indicated to have 
-	values address, blockface, intersection, latlong, and placename. We 
-	discovered additional values of bbl and unrecognized. No values of 
-	latlong were observed. Other fields suffer the same 	inaccuracies 
-	(facility\_type, vehicle\_type, taxi\_pick\_up\_location, road\_ramp, city).
+	\item Many of the domain of legal values are incomplete or 
+	inaccurate. For example, the Data Dictionary indicates that 
+	the ``status'' field has values of \textit{assigned, canceled, closed}, 
+	or \textit{pending}. However, we found additional status 
+	values of: \textit{in progress, started}, and \textit{unspecified}. 
+	However, we found no SRs with a status of \textit{canceled}. 
+	Similarly, the address\_type field is indicated to have 
+	values \textit{address, blockface, intersection, latlong}, and 
+	\textit{placename}. We discovered the additional values of 
+	\textit{bbl} and \textit{unrecognized}. Additonally, no values of 
+	\textit{latlong} were observed. Other fields (facility\_type, 
+	vehicle\_type, taxi\_pick\_up\_location, road\_ramp, city) 
+	suffer similar inaccuracies in their doman of values.
+	
+	\item As noted previously, there are six \textit{@computed} fields that
+	are present in the data, but not described in the Data Dictionary.
 \end{itemize}
 
 
 
 \section{Recommendations} 
 \label{sec:recommendations}
-Having identified a number of data cleanliness related issues with the 
-311 Service Request (SR) dataset, what follows are a series of 
-recommendations as to how to resolve these issues. Below are 
-those recommendations;
+Here are recommendations as to how to resolve these issues.
 
 \begin{itemize}
 	\item First, and most importantly, the Open Data Team will need 
-	to undertake a special effort to identify these data anomalies, confirm 
-	the veracity of the issue, and engage with the appropriate Agency 
-	Open Data Representatives to resolve these issues. That effort will 
-	not be easy, fast, or cheap as in some software changes will likely 
-	be required. Perhaps hardest will be working with the external City 
-	Agencies that feed data to the 311 SR dataset, but are not using 
-	the core 311 system. Integrations and API usage will need to be 
-	investigated, and in many cases the changes required to correct 
-	an issue will be on the source Agency side. Coordination and 
-	mutual approval of any changes will be key. Strong support from 
-	senior 	leadership will be a critical success factor.
+	to undertake a dedicated effort to identify these 
+	data anomalies, confirm the veracity of the issue, 
+	and engage with the appropriate Agency Open Data 
+	Representatives to resolve these issues. That effort will not 
+	be easy, fast, or cheap and in some cases software changes will likely 
+	be required. Coordination and mutual approval of any 
+	changes will be key, and solid support from senior leadership 
+	will be required.
 
-	\item Secondly, standards will be to be identified, agreed to, and 
-	commitment to support those standards must be obtained. For 
-	example, what are the domain of legal values for certain fields, 
-	especially those with identified issues?
+	\item Secondly, standards and protocols will need to be 
+	identified, agreed to, and commitment obtained. For example, 
+	what are the domain of legal values for certain fields?
 
-	\item Obviously, many of the data integrity issues can be 
+	\item Many of the data integrity issues could potentially be 
 	resolved through rule enforcement by software. For example, the 
-	software could easily prevent invalid values, such as zip codes, from 
-	entering the system. Similarly for an entire range of data issues. One 
-	key area is the created\_date and closed\_date which are frequently 
-	cited when determining responsiveness of various Agency services. The 
-	authors would argue that such dates should be driven by change 
-	in ``status'', not manually entered. For example, the closed\_date 
-	is captured when the SR ``status'' is changed to ``closed'', and 
-	not manually entered. Such a change, along with many others, could 
-	prevent errors such as negative and  zero durations which 
-	significantly affect measurements of responsiveness. 
+	software could easily prevent invalid values, such as zip 
+	codes. Similarly for other data issues. One key area are is the 
+	created\_date and closed\_date which are frequently cited 
+	when determining responsiveness of various Agency services.
 	
 	\item The large spikes in SR closure and creation occurring at 
-	midnight and noon, almost certainly point to an underlying automated 
-	process from an external-to-311 Agency. Such processes again distort 
-	the accurate capture of an SR duration. Data rule enforcement at the 
-	software integration or API level should be investigated.
-
-	\item One possible way to have software enforce certain data 
-	standards, would be to move more non-311 Agencies to the core 
-	311 software system. That system was completely upgraded in 
-	2019, and should be (relatively) easy to expand to other 
-	Agencies and usages.
+	midnight and noon, almost certainly point to an automated 
+	process from an external Agency integration. Such processes again distort 
+	the accurate capture of an SR duration.
+	
+	\item Investigate moving additional Agencies to the core 
+	311 software system where enforcement of data rules would 
+	presumably be more consistent.
 	
 	\item As noted, there are six ``computed'' fields in the data export 
-	that are not identified in the Data Dictionary. While these fields may 
-	be ``experimental'', they are nonetheless present in any data portal 
-	presentation or export. As noted in this study, a number of those 
-	computed fields suffer from data inaccuracies. It is difficult to know 
-	what to recommend for these six field without further understanding of 
-	their origin, computational method, or intended usage. We would 
+	that are not identified in the Data Dictionary. As noted, several of 
+	these computed fields suffer from data inaccuracies. We would 
 	recommend updating the Data Dictionary at a minimum and 
-	possibly hiding those fields from public display until such time as 
-	their usage and accuracy can be ascertained.
+	possibly hiding those fields from public usage until such time as 
+	their accuracy can be ascertained.
 	
 	\item Removal of duplicate fields should be examined.  In some cases, such 
 	as the borough and park\_borough fields, the duplication is 100\%. In 
 	other cases, the duplication is in the 80-90\% range. These fields and 
 	their usage/utility should be carefully examined to determine if 
-	their inclusion in the 311 SR dataset is meaningful, adds value not found 
-	in other fields, and should be removed or continued to be collected. Initial 
-	analysis indicates that as much as 12\% size reductions are achievable 
-	with the removal of duplicate fields. A more thorough review and 
-	understanding of the fields would no doubt yield more savings. 
+	their inclusion in the 311 SR dataset is meaningful and adds value not found 
+	in other fields. Initial analysis indicates that as much as 12\% 
+	size reductions are achievable.
 	
 	\item Fields with extremely low data presence, such as taxi\_company\_borough 
-	which is populated only 0.06\% of the time. Similarly for several other 
-	fields evaluated in this study which have a high percentage of blank/unknown 
-	values. If the presence of a small percentage of SRs with these fields 
-	being populated is deemed useful and necessary, then so be it. But if 
-	the usage of these fields is so diminished, then perhaps its inclusion 
-	in the 311 SR dataset is not warranted.
+	which is populated only 0.06\% of the time, should be evaluated 
+	to determine if their inclusion is warranted.
 	
 	\item The Data Dictionary is in need of an upgrade and update. The last 
 	revision is indicated at 6 March 2023, well over a year ago. 	As noted 
-	in \textbackslash nameref: \nameref{sec:datadictionary} there are many 
-	problems with the Data Dictionary, including domain values, absence of 
+	in Section~\ref{sec:datadictionary} there are several problems 
+	with the Data Dictionary, including domain values, absence of 
 	the six ``computed'' fields, and inaccurate description of the usage of 
-	several fields. Some of the Data Dictionary entries can be undertaken 
-	immediately, which further revision should be addressed as part of 
-	a deeper data clean-up initiative. 
+	several fields.
 	
 	\item The excessive precision in the latitude, longitude, and location 
-	fields is simply nonsensical.  We would recommend no more than 
+	fields is  nonsensical.  We would recommend no more than 
 	four decimal places (0.000X) which represents a distance of approximately 
-	36.4 feet. Five decimals (0.0000X) represents 3.6 feet, which although 
-	possible, would be an extremely sophisticated and accurate 
-	geo-coding system. A 14 decimal number is simply a case of a lot 
-	of precision with limited accuracy, and should be avoided.
+	36.4 feet. A 14 decimal number is simply a case of a great 
+	precision but limited accuracy.
 
-	\item The 10 address-related address fields (incident\_address, 
+	\item The 11 address-related address fields (incident\_address, 
 	street\_name, city, intersection\_street\_1 \& 2, cross\_street\_1 \& 2,  
 	landmark, road\_ramp, bridge\_highway\_segment, and 
-	taxi\_pick\_up\_location should be in standard USPS format. There 
-	are several software packages which can standardize addresses to 
-	these standards. We believe such an effort should be automatically 
-	applied to these fields at data entry. This step would also greatly 
-	improve any underlying geocoding routines which 	may be used 
-	to determine data values such as BBL, latitude, longitude, and New 
-	York State X/Y-plane coordinates.
+	taxi\_pick\_up\_location) should be put into standard USPS format. There 
+	are several software packages which can normalize addresses to 
+	these standards.
 	
-	\item The use of the value ``UNKNOWN'' , ``N/A'', ``NA'', and ``na'' when 
-	entered directly as text into a field should be very carefully examined, 
-	and in all likelihood prohibited.  There are some indeed a few 
-	complaint\_type(s) where an ``N/A'' value is appropriate, such 
-	as a consumer\_complaint about certain non-geocentric issues, such 
-	as a travel agency or tax preparation service . But even in those cases 
-	a value of ``N/A'' should be entered only via a drop-down menu 
-	selection. During this analysis, there were far too many data 
-	representations of missing data including: <N/A>, ``na'', `` ``, UNKNOWN, 
-	and ``N/A''. It's challenging for analyst to have to account for so 
-	the many different methods of representing empty or null data fields. 
+	\item There are multiple means by which missing data is 
+	represented. These include ``UNKNOWN'' , ``N/A'', ``NA'', ``na'', and 
+	a blank field, e.g. `` ''. Protocols should be established 
+	regarding how to represent missing data.
 \end{itemize}
 
 
