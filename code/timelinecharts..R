@@ -12,17 +12,170 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
-main_data_file <- "2-year 2022-2023.csv"
+sink("timeline_console_output.txt")
+main_data_file <- "10-year 2014-2023.csv"
 data1File <- file.path("..", "..", "data", main_data_file)
 
 #Define the chart directory
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "2-year trends")
+chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "10-year trends")
 
 file_name_prefix <- sub(" .*", "", main_data_file)
 
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 cat("\nExecution begins at:", formattedStartTime)
+
+#########################################################################
+# Create the bar chart
+create_bar_chart <- function(
+    dataset,
+    x_col,
+    y_col,
+    chart_title,
+    sub_title,
+    x_axis_title,
+    y_axis_title,
+    print_out_title,
+    add_mean = FALSE,
+    add_median = FALSE,
+    add_sd = FALSE,
+    add_trendline = FALSE,
+    add_maximum = FALSE,
+    add_minimum = FALSE,
+    add_second_maximum = FALSE,
+    extra_line = NULL,
+    chart_file_name) 
+{
+  # Find the row with the maximum count
+  max_row <- dataset[which.max(dataset[[y_col]]), ]
+  y_max_count <- max_row[[y_col]]
+  y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
+
+  # Find the row with the minimum count
+  min_row <- dataset[which.min(dataset[[y_col]]), ]
+  y_min_count <- round(min_row[[y_col]], 0)
+
+  result <- calculate_values(y_max_count)
+  starting_value <- result$starting_value
+  increment <- result$increment
+
+  # Calculate mean, median, and standard deviation if requested
+  y_mean_value <- round( mean(dataset[[y_col]]), 0 )
+  y_median_value <- round( median(dataset[[y_col]]), 0 )
+  y_sd_value <- round( sd(dataset[[y_col]]), 0)
+
+  # Print the date and count for maximum value
+  cat("\n\n***", print_out_title, "SRs***")
+
+  # Change the first letter to lower case for print out purposes
+  print_out_title <- substr(print_out_title, 1, 1) %>%
+    tolower() %>% paste(., substr(print_out_title, 2, nchar(print_out_title)), sep = "")
+
+  cat( "\n", paste("Maximum", print_out_title, ":"), as.character(max_row[[x_col]]), "  ",
+    paste("Maximum", print_out_title, "count:"), format(y_max_count, big.mark = ",")
+  )
+
+  # Print the date and count for minimum value
+  cat( "\n", paste("Minimum", print_out_title, ":"), as.character(min_row[[x_col]]), "  ",
+    paste("Minimum", print_out_title, "count: "), format(y_min_count, big.mark = ","), "\n"
+  )
+
+  # Print the date and count for minimum value
+  cat( "\n")
+  cat( paste("Average ", print_out_title, ":", sep = ""), format(y_mean_value, big.mark = ","), "  ",
+    paste("\nMedian ", print_out_title, ":", sep = ""), format(y_median_value, big.mark = ","),
+    paste("\nStd Dev (\u03C3) ", print_out_title, ":", sep = ""), format(y_median_value, big.mark = ",")
+  )
+
+  # Create the bar chart
+  bar_chart <- ggplot(dataset, aes(x = .data[[x_col]], y = .data[[y_col]])) +
+    geom_bar(stat = "identity", fill = "#117733") +
+    theme(
+      axis.title.x = element_text(vjust = 0, size = 11),
+      axis.title.y = element_text(vjust = 1, size = 11),
+      plot.title = element_text(hjust = 0.5, size = 13),
+      plot.subtitle = element_text(size = 9),
+      panel.background = element_rect(fill = "gray95", color = "gray95"),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold"),
+      axis.text.y = element_text(face = "bold")
+    ) +
+    geom_hline( yintercept = seq(starting_value, y_max_count, by = increment),
+                linetype = "dotted", color = "gray40", linewidth = 0.3) +
+    ggtitle( chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = "") ) +
+    labs(x = x_axis_title, y = NULL)
+
+    if (add_maximum) {
+      bar_chart <- bar_chart +
+      annotate("text", x = max_row[[x_col]], y = y_max_count,
+             label = paste0("Max: ", format(y_max_count, big.mark = ",")), 
+             size = 3.7, color = "black", vjust = -0.4, hjust = 0.5)
+    }
+  
+    if (add_second_maximum) {
+      # Order the data frame by the count column in descending order
+      ordered_by_count <- dataset[order(dataset[[y_col]], decreasing = TRUE), ]
+      # Select the second row
+      second_max <- ordered_by_count[2, ]
+      
+      bar_chart <- bar_chart +
+      annotate("text", x = second_max[[x_col]], y = second_max[[y_col]],
+               label = paste0("2^nd~'Highest: ", format(second_max[[y_col]], big.mark = ","), "'"), , 
+               size = 3.7, color = "black", vjust = -0.4, hjust = 0.05, parse = TRUE)
+    }
+  
+    if (add_minimum) { 
+      bar_chart <- bar_chart + 
+      annotate("text", x = min_row[[x_col]], y = y_min_count,
+             label = paste0("Min: ", format(y_min_count, big.mark = ",")),
+             size = 3.7, color = "black", vjust = -0.4, hjust = 0.5 )
+    }
+
+    if (!is.null(starting_value) && !is.null(y_max_count) && !is.null(increment)) {
+    bar_chart <- bar_chart +
+      geom_hline(yintercept = seq(starting_value, y_max_count, by = increment), 
+                 linetype = "dotted", color = "gray40")
+    }
+
+    if (add_mean) {
+      bar_chart <- bar_chart +
+        geom_hline(yintercept = y_mean_value, linetype = "twodash", color = "black", linewidth = 0.6) +
+          annotate("text", x = min(dataset[[x_col]]), y = y_mean_value, 
+               label = paste0("Average: ", format(round(y_mean_value, 0), big.mark = ",")), 
+                              size = 4, color = "black", hjust = -0.5, vjust = -0.75)
+    }
+
+    if (add_median) {
+      bar_chart <- bar_chart +
+        geom_hline(yintercept = y_median_value, linetype = "twodash", color = "black", linewidth = 0.6) +
+        annotate("text", x = min(dataset[[x_col]]), y = y_median_value, 
+               label = paste0("Median: ", format(round(y_median_value,0), big.mark = ",")), 
+                              size = 4, color = "black",hjust = -0.5, vjust = -0.75)
+    }
+
+    if (add_sd) {
+    bar_chart <- bar_chart +
+      geom_hline(yintercept = round(y_mean_value + 3*y_sd_value, 0), linetype = "longdash", 
+                 color = "black", linewidth = 0.3) +
+      annotate("text", x = min(dataset[[x_col]]), y = y_mean_value + 3*y_sd_value, 
+        label = "+3 sigma", size = 3.5, color = "black", hjust = -0.5, vjust = -0.75)
+    }
+
+    if(add_trendline) {
+    bar_chart <- bar_chart +
+      stat_poly_eq( color = "#D55E00" ) +
+      geom_smooth(method = "lm", span = 1, se = FALSE, color = "#D55E00", 
+                  linetype = "dashed", linewidth = 0.9)
+    }
+
+    if (!is.null(extra_line)) {
+    bar_chart <- bar_chart + extra_line
+    }
+
+  # Print the bar chart
+  suppressMessages(print(bar_chart))
+  chart_path <- file.path(chart_directory_path, chart_file_name)
+  suppressMessages(ggsave(chart_path, plot = bar_chart, width = 10, height = 8))
+}
 
 #########################################################################
 calculate_values <- function(max_count) {
@@ -90,13 +243,12 @@ d311 <-
            header = TRUE,
            colClasses = rep("character", ncol(read.csv(data1File)))
   )
+
 colnames(d311) <- gsub("Created.Date", "created_date", colnames(d311))
 colnames(d311) <- gsub("Closed.Date", "closed_date", colnames(d311))
 
 # Filter out rows with NA values in the created_date column
 d311 <- d311[!is.na(d311$created_date),]
-
-numrows <- nrow(d311)
 
 #########################################################################
 cat("\n\n**********DATA SUMMARY**********\n")
@@ -106,30 +258,10 @@ d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %
 d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 
 d311 <- d311[!is.na(d311$created_date),]
+num_years <- unique(d311$Year)
+numrows <- nrow(d311)
 
-# # Create new columns for Year, Year-Month, Month, Day of Week, Day of Year, Minute, and Second
- d311 <- d311 %>%
-   mutate(
-     Year = format(created_date, "%Y"),
-     YearMonth = format(created_date, "%Y-%m"),
-#     YearMonthDay = format(created_date, "%Y-%m-%d"),  # Year-Month-Da
-#     YearMonthDayHour = format(created_date, "%Y-%m-%d %H"), 
-#     Month = format(created_date, "%b"),                # Month as abbreviated name (Jan, Feb, Mar, ...)
-#     DayOfWeek = format(created_date, "%a"),            # Day of the week as abbreviated name (Mon, Tue, ...)
-#     DayOfYear = yday(created_date),                    # Day of the year (1, 2, ..., 365 or 366)
-#     Minute = minute(created_date),
-#     Hour = hour(created_date),
-#     Second = second(created_date)
-   )
-
-# Extract the years from the created_date
-years <- d311 %>%
-  mutate(year = format(created_date, "%Y")) %>%
-  select(year)
-
-num_years <- length(years) + 1
-
-cat("\nTotal rows:", format(numrows, big.mark = ","), "covering", num_years,"years")
+cat("\nTotal rows:", format(numrows, big.mark = ","), "covering", length(num_years),"years")
 
 #########################################################################
 earliest_date <- min(d311$created_date, na.rm = TRUE)
@@ -144,40 +276,44 @@ latest_title <- format(as.Date(latest_date_formatted), format = "%Y-%m-%d")
 cat("\nData contains SRs created from", earliest_date_formatted, "through", latest_date_formatted)
 
 #########################################################################
-
-#########################################################################
 # Aggregate at the yearly level
 yearly_summary <- d311 %>%
+  mutate(Year = format(created_date, "%Y")) %>%
   group_by(Year) %>%
   summarise(count = n())
+
 max_rows_yearly <- max(yearly_summary$count)
 yearly_summary <- na.omit(yearly_summary)
+cat("\nYearly Summary complete.")
 
 #########################################################################
 # Aggregate at the monthly level
 monthly_summary <- d311 %>%
+  mutate(YearMonth = format(created_date, "%Y-%m")) %>%
   group_by(YearMonth) %>%
   summarise(count = n())
+  
 max_rows_monthly <- max(monthly_summary$count)
 monthly_summary <- na.omit(monthly_summary)
+cat("\nMonthly Summary complete.")
 
 ########################################################################                       
 # Aggregate at the daily level
 daily_summary <- d311 %>%
-  mutate(date = date(created_date)) %>%  # Extract date part from datetime_col
-  group_by(date) %>%                     # Group by the extracted date
+  mutate(created_date = date(created_date)) %>%  # Extract date part from datetime_col
+  group_by(created_date) %>%                     # Group by the extracted date
   summarise(count = n())                 # Summarize by counting the number of entries per day
-
-colnames(daily_summary) <- c("created_date", "count")
 
 max_rows_daily <- max(daily_summary$count)
 daily_summary <- na.omit(daily_summary)
+cat("\nDaily Summary complete.")
 
 ########################################################################                       
 # Aggregate by calendar month
 calendar_month_summary <- d311 %>%
   group_by(Month = format(created_date, "%B")) %>%
   summarise(count = n())
+
 max_rows_calendar_month <- max(calendar_month_summary$count)
 calendar_month_summary <- na.omit(calendar_month_summary)
 
@@ -189,12 +325,10 @@ calendar_month_summary$Month <- factor(
 
 # Order the data by month
 calendar_month_summary <- calendar_month_summary[order(calendar_month_summary$Month), ]
+cat("\nCalendar Month Summary complete.")
 
 #########################################################################
 #Aggregate by day of the year, e.g. Jan 1st, July 4th, Dec 25th, etc.
-# Remove rows with NA values in "created_date" column
-d311 <- d311[!is.na(d311$created_date), ]
-
 # Extract day of the year
 d311$day_of_year <- format(d311$created_date, "%m/%d")
 
@@ -202,6 +336,7 @@ d311$day_of_year <- format(d311$created_date, "%m/%d")
 day_counts <- d311 %>%
   group_by(day_of_year) %>%
   summarise(count = n())
+cat("\nDay of Year Summary complete.")
 
 #########################################################################
 # Aggregate by day of the week
@@ -219,6 +354,7 @@ day_of_week <- d311 %>%
                           "Saturday" = "6-Saturday",
                           "Sunday" = "7-Sunday"
   ))
+cat("\nDay of Week Summary complete.")
 
 #########################################################################
 # Aggregate by hour of the day
@@ -238,6 +374,8 @@ closed_counts <- d311 %>%
   group_by(closed_hour) %>%
   summarise(count = n())
 
+cat("\nHourly Summaries complete.")
+
 #########################################################################
 yearly_df <- as.data.frame(yearly_summary)
 
@@ -251,24 +389,25 @@ day_counts_df <- as.data.frame(day_counts)
 
 day_of_week_df <- as.data.frame(day_of_week)
 
-# Rename the column to 'count'
 created_hour_of_day_df <- as.data.frame((created_counts))
 
-# Rename the column to 'count'
 closed_hour_of_day_df <- as.data.frame((closed_counts))
+
+cat("\nDataframes complete.")
 
 #########################################################################
 # Overall yearly summary
 mean_count <- round(mean(yearly_df$count), 0)
 median_count <- round(median(yearly_df$count), 0)
-standard_deviation <- round(sd(yearly_df$count))
+standard_deviation <- round(sd(yearly_df$count), 0)
 
 cat("\n\nAverage yearly count:", format(mean_count, big.mark = ","))
 cat("\nStandard deviation:", format(standard_deviation, big.mark = ","))
 cat("\nMedian:", format(median_count, big.mark = ","))
 
 max_year <- yearly_df[which.max(yearly_df$count), ]
-cat("\nYear with maximum count:",max_year$Year, "with", format(max_year$count, big.mark = ","), "SRs")
+max_count <- max_year$count
+cat("\nYear with maximum count:",max_year$Year, "with", format(max_count, big.mark = ","), "SRs")
 
 min_year <- yearly_df[which.min((yearly_df$count)),]
 cat("\nYear with minimum count:", min_year$Year, 
@@ -279,65 +418,47 @@ earliest_year_count <- yearly_df %>% filter(Year == min(Year)) %>% select(count)
 latest_year_count <- yearly_df %>% filter(Year == max(Year)) %>% select(count) %>% pull()
 
 # Compute the percentage growth
-percentage_growth <- round(((latest_year_count - earliest_year_count) / earliest_year_count) * 100,2)
+percentage_growth <- round(((latest_year_count - earliest_year_count) / earliest_year_count) * 100, 1)
 
 cat("\nGrowth over", nrow(yearly_df), "years is", percentage_growth, "%" )
 
 cat("\nYearly Summary:\n")
 print(yearly_df, row.names = FALSE, right = FALSE)
 
-# Chart SRs by year
-max_count <- max(yearly_df$count)
-total_count <- sum(yearly_df$count)
-total_count <- comma(total_count)
-
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
 yearly_df$Year <- as.numeric(yearly_df$Year)
 earliest_year <- min(yearly_df$Year)
 
-# Create the bar chart with vertical X-axis labels
-SR_yearly <- ggplot(yearly_df, aes(x = Year, y = count)) +
-  geom_bar(stat = "identity", fill = "#009E73") +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_continuous(breaks = unique(yearly_df$Year)) +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold")
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_year, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  ggtitle("Yearly SR count (w/trendline)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
-  ) +
-  geom_point(color = "transparent") +
-  stat_poly_eq(use_label(c("R2"))) +
-  geom_smooth(method = "lm", span = 1, se = FALSE, color = "gray20", linetype = "dotted", linewidth = 2) +
-  labs(x=NULL, y=NULL)
+chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
 
-# Print the bar chart
-suppressMessages(print(SR_yearly))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-yearly.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_yearly, width = 10, height = 8))
+# Define the extra line
+extra_line <- annotate("text", x = as.numeric(max_year$Year), y = max_year$count,
+                       label = paste0("10-yr growth: ", percentage_growth, "%", sep = ""), 
+                       size = 3.7, color = "#D55E00", vjust = -2, hjust = 5.75)
+SR_yearly <- create_bar_chart(
+  yearly_df,
+  x_col = "Year",
+  y_col = "count",
+  chart_title = "Yearly SR count (w/trendline)",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = NULL,
+  print_out_title = "Yearly",
+  add_mean = TRUE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = TRUE,
+  add_maximum = FALSE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-yearly.pdf")
+  )
 
 #########################################################################
 # Overall monthly summary
 mean_count <- round(mean(monthly_df$count), 0)
 median_count <- round(median(monthly_df$count), 0)
-standard_deviation <- round(sd(monthly_df$count))
+standard_deviation <- round(sd(monthly_df$count), 0)
 
 cat("\nAverage monthly:", format(mean_count, big.mark = ","), 
     "  Standard deviation of", format(standard_deviation, big.mark = ","))
@@ -384,69 +505,45 @@ mimonth <- min_month$YearMonth
 
 earliest_YearMonth <- min(monthly_df$YearMonth)
 
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
 start_date <- min(monthly_df$YearMonth)
 end_date <- max(monthly_df$YearMonth)
-
-# Create a sequence of every other month
 
 # Ensure YearMonth is a Date object
 monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
 
-#breaks_seq <- seq(from = start_date, to = end_date, by = "3 months")
-breaks_seq <- seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "3 months")
+extra_line1 <- scale_x_date(labels = date_format("%Y-%m"), 
+                  breaks = seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "6 months"), 
+                                                 expand = c(0, 0))  
 
-# Create the bar chart with vertical X-axis labels
-SR_monthly <- ggplot(monthly_df, aes(x = YearMonth, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(labels = date_format("%Y-%m"), breaks = breaks_seq, expand = c(0, 0)) + 
-  theme(
-    axis.title.x = element_blank(),
-    axis.title.y = element_blank(),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold"),
-    plot.margin = margin(t = 10, r = 10, b = 10, l = 10)
-    ) + # Adjust plot margins
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  ggtitle(" Monthly SR count (w/trendline)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep = "")
-  ) +
-  geom_point(color = "transparent") +
-#  stat_poly_eq(use_label(c("R2"))) +
-#  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = breaks_seq,
-#               expand = c(0,0)) + 
-#  geom_smooth(method = "lm", span = 1, se = FALSE, 
-#              color = "gray20", linetype = "dashed", linewidth = 1) +
-  annotate("text", x = as.Date(earliest_YearMonth), y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = mxmonth, y = max_month$count, label = "Max", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = mimonth, y = min_month$count, label = "Min", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-#  annotate("text", x = max(monthly_df$YearMonth), y = max_month$count, label = paste0(file_name_prefix, "-yr growth: ", round(percentage_growth,1), "%"), 
-#           size = 4, color = "gray20", hjust = 1, vjust = 1.5) +
-  labs(x=NULL, y=NULL)
+extra_line2 <- annotate("text", x = max_month$YearMonth, y = max_month$count,
+                        label = paste0("10-yr growth: ", percentage_growth, "%", sep = ""), 
+                        size = 3.7, color = "#D55E00", vjust = -1, hjust = 4)
 
-# Print the bar chart
-suppressMessages(print(SR_monthly))
-chart_path <- file.path(chart_directory_path,  paste0(file_name_prefix, "-trend-monthly.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_monthly, width = 10, height = 8))
+SR_monthly <- create_bar_chart(
+  monthly_df,
+  x_col = "YearMonth",
+  y_col = "count",
+  chart_title = "Monthly SR count",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "Monthly",
+  add_mean = TRUE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = TRUE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = extra_line2, 
+  chart_file_name = paste0(file_name_prefix, "-monthly.pdf")
+)
 
 #########################################################################
 # Overall daily summary
-mean_count <- round(mean(daily_df$count), 2)
-median_count <- median(daily_df$count)
-standard_deviation <- round(sd(daily_df$count), 2)
+mean_count <- round(mean(daily_df$count), 0)
+median_count <- round(median(daily_df$count), 0)
+standard_deviation <- round(sd(daily_df$count), 0)
 
 cat("\nAverage daily count:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ",")) 
@@ -454,8 +551,6 @@ cat("\nAverage daily count:", format(mean_count, big.mark = ","),
 cat("\nMedian:", format(median_count, big.mark = ","))
 
 daily_df$created_date <- as.character(daily_df$created_date)
-
-#cat("\nMaximum:", maximum_day$count,"on", maximum_day$created_date)
 
 # Convert created_date to Date format
 daily_df$created_date <- as.Date(daily_df$created_date)
@@ -484,72 +579,34 @@ for (i in 1:nrow(bottom_ten)) {
   cat( format(bottom_ten$created_date[i], "%Y-%m-%d"), "   ", format(bottom_ten$count[i], big.mark = ","), "    ", i, "\n")
 }
 
-# Chart SRs by day
-max_count <- max(daily_df$count)
-earliest_date <- min(daily_df$created_date)
-
-# Calculate max and min values
-max_value <- max(daily_df$count)
-min_value <- min(daily_df$count)
-
 # Find corresponding dates
 max_date <- daily_df$created_date[which.max(daily_df$count)]
 min_date <- daily_df$created_date[which.min(daily_df$count)]
 
-total_count <- sum(daily_df$count)
-#total_count <- comma(total_count)
-
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
 daily_df <- daily_df[order(daily_df$created_date), ]
-
 daily_df$created_date <- as.Date(daily_df$created_date)
 
-# Create the bar chart with vertical X-axis labels
-SR_daily <- ggplot(daily_df, aes(x = created_date, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_y_continuous(labels = scales::comma) +
-  scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months")) + 
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold")) +
-  # geom_hline(
-  #   yintercept = median_count,  # Add average line
-  #   linetype = "dashed", color = "gray30", linewidth = 0.7) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  ggtitle("Daily SR count (w/trendline)",
-          subtitle = paste("(", earliest_title, "--", latest_title, ") ", "total=", total_count, sep="")
-  ) +
-  geom_point(color = "transparent") +
-#  scale_x_date(labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("1 year")) +
-  labs(x=NULL, y=NULL) +
-  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  #geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  #annotate("text", x = as.Date(earliest_date), y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  #annotate("text", x = as.Date(earliest_date), y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = as.Date(earliest_date), y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = as.Date(earliest_date), y = mean_count, color = "gray20",label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = max_date, y = max_value, label = "Max", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = min_date, y = min_value, label = "Min", size = 4, color = "gray20", hjust = -0.2, vjust = -0.5)
-
-# Print the bar chart
-suppressMessages(print(SR_daily))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-daily.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_daily, width = 18, height = 10))
+extra_line <- scale_x_date(expand = c(0, 0), labels = scales::date_format("%Y-%m"), 
+                           breaks = scales::date_breaks("6 months"))
+SR_daily <- create_bar_chart(
+  daily_df,
+  x_col = "created_date",
+  y_col = "count",
+  chart_title = "Daily SR count (w/trendline)",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "Daily",
+  add_mean = FALSE,
+  add_median = TRUE,
+  add_sd = TRUE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-trend-daily.pdf")
+)
 
 #########################################################################
 # Determine the # of SRs created exactly on the hour with 00 minutes and 00 seconds.
@@ -563,9 +620,9 @@ grouped_by_hour <- filtered_by_hour %>%
   group_by(hour = hour(created_date)) %>%
   summarise(count = n())
 
-mean_count <- round(mean(grouped_by_hour$count), 2)
-median_count <- median(grouped_by_hour$count)
-standard_deviation <- round(sd(grouped_by_hour$count), 2)
+mean_count <- round(mean(grouped_by_hour$count), 0)
+median_count <- round(median(grouped_by_hour$count), 0)
+standard_deviation <- round(sd(grouped_by_hour$count), 0)
 
 total_count <- sum(grouped_by_hour$count)
 
@@ -585,53 +642,28 @@ min_hour_of_the_day$hour <- as.character(min_hour_of_the_day$hour)
 cat("\nTop of the Hour with the minimum 'created' count is hour #:", min_hour_of_the_day$hour, 
     "with", format(min_hour_of_the_day$count, big.mark = ","), "SRs\n")
 
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
-# Create the bar chart with vertical X-axis labels
-SR_created_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_x_discrete(name = "hour-of-the-day (0-23)") +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(face = "bold"),
-    axis.text.y = element_text(face = "bold"),
-  ) +
-  ggtitle("SRs 'created' Exactly on the Hour (zero minutes/zero seconds)",
-          subtitle = paste0("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  
-  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  
-  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  
-  #annotate("text", x = 0, y = mean_count, label = paste0("Average: ", mean_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  
-  annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Max: ",max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  
-  labs(x="hour-of-the-day (0-23)", y= NULL)
-
-# Print the bar chart
-suppressMessages(print(SR_created_by_top_of_hour))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_created_by_top_of_hour.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_created_by_top_of_hour, width = 10, height = 8))
+extra_line <- annotate("text", x = 0, y = median_count, 
+                       label = paste0("Median: ", round(median_count, 0)), 
+                       size = 3.5, hjust = -0.5, vjust = -0.75)
+SR_created_by_top_of_hour <- create_bar_chart(
+  grouped_by_hour,
+  x_col = "hour",
+  y_col = "count",
+  chart_title = "SRs 'created' Exactly on the Hour (zero minutes/zero seconds)",
+  sub_title = chart_sub_title,
+  x_axis_title = "hour-of-the-day (0-23)",
+  y_axis_title = "count",
+  print_out_title = "Top-of-Hour",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = TRUE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = TRUE,
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_created_by_top_of_hour.pdf")
+)
 
 #########################################################################
 # Show minute-by-minute creation of SRs on the busiest day of the year.
@@ -650,53 +682,53 @@ minute_counts <- date_filtered %>%
   group_by(hour = hour(created_date), minute = minute(created_date)) %>%
   summarise(count = n(), .groups = 'drop')
 
-mean_count <- round(mean(minute_counts$count), 2)
-median_count <- median(minute_counts$count)
-standard_deviation <- round(sd(minute_counts$count), 2)
+mean_count <- round(mean(minute_counts$count), 0)
+median_count <- round(median(minute_counts$count), 0)
+standard_deviation <- round(sd(minute_counts$count), 0)
 
 total_count <- sum(minute_counts$count)
 
 # Calculate max values for annotation
 max_hour_of_the_day <- minute_counts[which.max(minute_counts$count), ]
-max_hour_minute_of_the_date <- paste0(sprintf("%02d", max_hour_of_the_day$hour), ":", sprintf("%02d", max_hour_of_the_day$minute))
+max_hour_minute_of_the_date <- paste0(sprintf("%02d", max_hour_of_the_day$hour), ":", 
+                                      sprintf("%02d", max_hour_of_the_day$minute, sep = ""))
 max_value <- max(minute_counts$count)
 
-max_hour_and_minute <- paste0(max_hour_of_the_day$hour, ":", max_hour_of_the_day$minute, "0")
+max_hour_and_minute <- paste0(max_hour_of_the_day$hour, ":", 
+                              max_hour_of_the_day$minute, "0", sep = "")
 
 # Create unique hour:minute labels
+# minute_counts <- minute_counts %>%
+#   mutate(hour_minute = paste0(sprintf("%02d", hour), ":", sprintf("%02d", minute), sep = ""))
+
+# Assuming 'minute_counts' is your data frame with 'hour' and 'minute' columns
 minute_counts <- minute_counts %>%
-  mutate(hour_minute = paste0(sprintf("%02d", hour), ":", sprintf("%02d", minute)))
+  mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
 
 # Convert hour_minute to a time format
 minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
 earliest_hour_minute <- min(minute_counts$hour_minute)
 
-# Create the bar plot
-SR_created_by_minute_of_busiest_day <- ggplot(minute_counts, aes(x = hour_minute, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  labs(x="hour-of-the-day (0-23)", y= NULL) +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.text.y = element_text(face = "bold"),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9)
-  ) +
-  ggtitle(paste("SRs 'created' by Exact Minute-of-the-Day (00 secs) on", max_date), subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-           label = paste0("Max: ", max_value), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-            label = paste0("Hour:Minute: ", max_hour_and_minute), size = 4, color = "gray20", hjust = -0.1, vjust = 1.5) +
-  annotate("text", x = earliest_hour_minute, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  scale_x_datetime(date_labels = "%H:%M", breaks = "2 hour") # Display every hour
-
-# Print the bar chart
-suppressMessages(print(SR_created_by_minute_of_busiest_day))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_created_by_minute_of_busiest_day.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_created_by_minute_of_busiest_day, width = 10, height = 8))
+extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = "2 hour")
+SR_created_by_minute_of_busiest_day <- create_bar_chart(
+  minute_counts,
+  x_col = "hour_minute",
+  y_col = "count",
+  chart_title = paste("SRs 'created' by Exact Minute-of-the-Day (00 secs) on", max_date),
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "By Minute (00 sec)",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = TRUE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = TRUE,
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_created_by_minute_of_busiest_day.pdf")
+)
 
 #########################################################################
 # Determine the # of SRs closed exactly on hour with minute and seconds == 00.
@@ -709,9 +741,9 @@ grouped_by_hour <- filtered_by_hour %>%
   group_by(hour = hour(closed_date)) %>%
   summarise(count = n())
 
-mean_count <- round(mean(grouped_by_hour$count), 2)
-median_count <- round(median(grouped_by_hour$count, 2))
-standard_deviation <- round(sd(grouped_by_hour$count), 2)
+mean_count <- round(mean(grouped_by_hour$count), 0)
+median_count <- round(median(grouped_by_hour$count, 0))
+standard_deviation <- round(sd(grouped_by_hour$count), 0)
 
 total_count <- sum(grouped_by_hour$count)
 
@@ -741,58 +773,25 @@ min_hour_of_the_day$hour <- as.character(min_hour_of_the_day$hour)
 cat("\nTop of the Hour with the minimum 'created' count is hour #:", min_hour_of_the_day$hour, 
     "with", format(min_hour_of_the_day$count, big.mark = ","), "SRs\n")
 
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
-# Create the bar chart with vertical X-axis labels
-SR_closed_by_top_of_hour <- ggplot(grouped_by_hour, aes(x = factor(hour), y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_x_discrete(name = "hour-of-the-day (0-23)") +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(face = "bold"),
-    axis.text.y = element_text(face = "bold"),
-  ) +
-  ggtitle("SRs 'closed' Exactly on the Hour (zero minutes/zero seconds)",
-          subtitle = paste0("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_point(color = "transparent") +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  #geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  
-  #annotate("text", x = 0, y = mean_count, label = paste0("Average: ", mean_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  
-  annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Max: ",max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = max_hour, y = max_count ,
-           label = paste0("Hour: ",max_hour), size = 4, color = "gray20", hjust = -0.4, vjust = 1.5) +
-  
-  annotate("text", x = second_max_hour, y = second_max_count ,
-           label = paste0("2nd count: ",second_max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = second_max_hour, y = second_max_count ,
-           label = paste0("2nd Hour: ",second_max_hour), size = 4, color = "gray20", hjust = -0.3, vjust = 1.5) +
-  
-  labs(x="hour-of-the-day (0-23)", y= NULL)
-
-# Print the bar chart
-suppressMessages(print(SR_closed_by_top_of_hour))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_closed_by_top_of_hour.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_closed_by_top_of_hour, width = 10, height = 8))
+SR_closed_by_top_of_hour <- create_bar_chart(
+  grouped_by_hour,
+  x_col = "hour",
+  y_col = "count",
+  chart_title = "SRs 'closed' Exactly on the Hour (zero minutes/zero seconds",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "By Minute (00 sec)",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = TRUE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  extra_line = NULL,
+  add_second_maximum = TRUE,
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_top_of_hour.pdf")
+)
 
 #########################################################################
 # Show minute-by-minute closure of SRs on the busiest day of the year.
@@ -812,9 +811,9 @@ minute_counts <- date_filtered %>%
   group_by(hour = hour(closed_date), minute = minute(closed_date)) %>%
   summarise(count = n(), .groups = 'drop')
 
-mean_count <- round(mean(minute_counts$count), 2)
-median_count <- round(median(minute_counts$count), 2)
-standard_deviation <- round(sd(minute_counts$count), 2)
+mean_count <- round(mean(minute_counts$count), 0)
+median_count <- round(median(minute_counts$count), 0)
+standard_deviation <- round(sd(minute_counts$count), 0)
 
 total_count <- sum(minute_counts$count)
 
@@ -825,80 +824,59 @@ max_value <- max(minute_counts$count)
 
 max_hour_minute_of_the_day <- paste0(max_hour_of_the_day$hour, "0:", max_hour_of_the_day$minute, "0")
 
-# Calculate 2nd max values for annotation
-# Order the data frame by the count column in descending order
-ordered_by_count <- minute_counts[order(-minute_counts$count), ]
-# Select the second row
-second_max_hour_of_the_day <- ordered_by_count[2, ]
+# # Calculate 2nd max values for annotation
+# # Order the data frame by the count column in descending order
+# ordered_by_count <- minute_counts[order(-minute_counts$count), ]
+# # Select the second row
+# second_max_hour_of_the_day <- ordered_by_count[2, ]
+# 
+# second_max_hour_minute_of_the_date <- paste0(sprintf("%02d", second_max_hour_of_the_day$hour), ":", sprintf("%02d", second_max_hour_of_the_day$minute))
+# 
+# second_max_hour <- as.character(second_max_hour_of_the_day$hour)
+# second_max_count <- second_max_hour_of_the_day$count
+# 
+# # Create unique hour:minute labels
+# minute_counts <- minute_counts %>%
+#  mutate(hour_minute = paste0(sprintf("%02d", hour), ":", sprintf("%02d", minute)))
 
-second_max_hour_minute_of_the_date <- paste0(sprintf("%02d", second_max_hour_of_the_day$hour), ":", sprintf("%02d", second_max_hour_of_the_day$minute))
-
-second_max_hour <- as.character(second_max_hour_of_the_day$hour)
-second_max_count <- second_max_hour_of_the_day$count
-
-# Create unique hour:minute labels
+# Assuming 'minute_counts' is your data frame with 'hour' and 'minute' columns
 minute_counts <- minute_counts %>%
-  mutate(hour_minute = paste0(sprintf("%02d", hour), ":", sprintf("%02d", minute)))
+  mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
 
 # Convert hour_minute to a time format
 minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
 earliest_hour_minute <- min(minute_counts$hour_minute)
 
-# Create the bar plot
-SR_closed_by_minute_of_busiest_day <- ggplot(minute_counts, aes(x = hour_minute, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  labs(x="hour-of-the-day (0-23)", y= NULL) +
-  theme(
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    axis.text.y = element_text(face = "bold"),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9)
-  ) +
-  ggtitle(paste("SRs 'closed' by Exact Minute-of-the-Day (00:00) on", max_date), subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep="")) +
-  geom_hline(yintercept = median_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_hour_minute, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = earliest_hour_minute, y = median_count, label = paste0("Median: ",median_count), size = 4, hjust = -0.5, vjust = -0.75) +
-  
-  annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-           label = paste0("Max: ", max_value), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = as.POSIXct(max_hour_minute_of_the_date, format = "%H:%M"), y = max_value,
-            label = paste0("Hour:Minute: ", max_hour_minute_of_the_day), size = 4, color = "gray20", hjust = -0.1, vjust = 1.5) +
-  
-  annotate("text", x = as.POSIXct(second_max_hour_minute_of_the_date, format = "%H:%M"), y = second_max_count ,
-           label = paste0("2nd Count: ", second_max_count), size = 4, color = "gray20", hjust = -0.2, vjust = -0.5) +
-  annotate("text", x = as.POSIXct(second_max_hour_minute_of_the_date, format = "%H:%M"), y = second_max_count ,
-            label = paste0("2nd Hour: ", second_max_hour_minute_of_the_date), size = 4, color = "gray20", hjust = -0.2, vjust = 1.5) +
-   
-  scale_x_datetime(date_labels = "%H:%M", breaks = "2 hour") # Display every hour
-
-# Print the bar chart
-suppressMessages(print(SR_closed_by_minute_of_busiest_day))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_closed_by_minute_of_busiest_day, width = 10, height = 8))
+extra_line <- scale_x_datetime(expand = c(.03, .03), date_labels = "%H:%M", breaks = "2 hour")
+SR_closed_by_minute_of_busiest_day <- create_bar_chart(
+  minute_counts,
+  x_col = "hour_minute",
+  y_col = "count",
+  chart_title = paste("SRs 'closed' by Exact Minute-of-the-Day (00:00) on", max_date),
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "Minute",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = TRUE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = TRUE,
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf")
+)
 
 #########################################################################
 # Overall calendar month summary (Jan, Feb, Mar, etc.)
 mean_count <- round(mean(calendar_month_df$count), 0)
 median_count <- round(median(calendar_month_df$count), 0)
-standard_deviation <- round(sd(calendar_month_df$count))
+standard_deviation <- round(sd(calendar_month_df$count), 0)
 
 cat("\nAverage calendar month count:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ","))
 cat("\nMedian:", format(median_count, big.mark = ","))
-
-max_calendar_month <- calendar_month_df[which.max(calendar_month_df$count), ]
-max_calendar_month$Month <- as.character(month.name[max_calendar_month$Month])
-cat("\n\nCalendar month with maximum count:", max_calendar_month$Month, 
-    "with", format(max_calendar_month$count, big.mark = ","), "SRs")
-cat("\nPer day count (maximum):",max_calendar_month$count/31 )
-
-min_calendar_month <- calendar_month_df[which.min((calendar_month_df$count)),]
-min_calendar_month$Month <- as.character(month.name[min_calendar_month$Month])
-cat("\n\nCalendar month with minimum count:", min_calendar_month$Month, 
-    "with", format(min_calendar_month$count, big.mark = ","), "SRs")
-cat("\nPer day count (minimum):",min_calendar_month$count/28.2 )
 
 # Number of days in each month, with February as 28.2 days
 days_in_month <- c(
@@ -907,47 +885,60 @@ days_in_month <- c(
   "September" = 30, "October" = 31, "November" = 30, "December" = 31
 )
 
+max_calendar_month <- calendar_month_df[which.max(calendar_month_df$count), ]
+max_calendar_month_name <- as.character(calendar_month_df$Month[which.max(calendar_month_df$count)])
+max_calendar_month$Month <- as.character(month.name[max_calendar_month$Month])
+max_calendar_count <- max_calendar_month$count
+
+# Get the number of days for the max_calendar_month
+days_for_max_month <- days_in_month[max_calendar_month$Month]
+cat("\n\nCalendar month with maximum count:", max_calendar_month$Month, 
+    "with", format(max_calendar_count, big.mark = ","), "SRs")
+cat("\nPer day count (maximum):", round(max_calendar_month$count/days_for_max_month, 0) )
+
+min_calendar_month <- calendar_month_df[which.min((calendar_month_df$count)),]
+min_calendar_month_name <- as.character(calendar_month_df$Month[which.min(calendar_month_df$count)])
+min_calendar_month$Month <- as.character(month.name[min_calendar_month$Month])
+min_calendar_count <- min_calendar_month$count
+
+# Get the number of days for the min_calendar_month
+days_for_min_month <- days_in_month[min_calendar_month$Month]
+cat("\n\nCalendar month with minimum count:", min_calendar_month$Month, 
+    "with", format(min_calendar_count, big.mark = ","), "SRs")
+cat("\nPer day count (minimum):", round(min_calendar_month$count/days_for_min_month, 0) )
+
 # Add the count_per_day column
 calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month[calendar_month_df$Month],0)
 
 # Order by calendar month (Jan, Feb, etc.)
-cat("\n\nSRs by month, ordered by calendar\n")
+cat("\n\nSRs by calendar month, ordered by calendar\n")
 print(calendar_month_df, row.names = FALSE, right = FALSE)
 
 # Order the dataframe by total count
 calendar_month_df <- calendar_month_df %>%
   arrange(desc(count))
-cat("\nSRs by month, ordered by count\n")
+cat("\nSRs by calendar month, ordered by count\n")
 print(calendar_month_df, row.names = FALSE, right = FALSE)
 
 # Order the dataframe by count_per_day
 calendar_month_df <- calendar_month_df %>%
   arrange(desc(count_per_day))
-cat("\nSRs by month, ordered by SRs/day\n")
+cat("\nSRs by calendar month, ordered by SRs/day\n")
 print(calendar_month_df, row.names = FALSE, right = FALSE)
 
 # Chart SRs by calendar month
 max_count <- max(calendar_month_df$count)
+total_count <- sum(calendar_month_df$count)
 
 earliest_month <- "January"
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
-# Convert Month to factor with custom order
-calendar_month_df$Month <- factor(
-  calendar_month_df$Month,
-  levels = month.name
-)
 
 # Create the bar chart with vertical X-axis labels
 SR_calendar_month <- ggplot(calendar_month_df, aes(x = Month, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  labs(x = "Calendar Month") +
-  scale_y_continuous(labels = scales::comma) +
+  geom_bar(stat = "identity", fill = "#117733") +
   scale_x_discrete() +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
@@ -955,21 +946,29 @@ SR_calendar_month <- ggplot(calendar_month_df, aes(x = Month, y = count)) +
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
     panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 60, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
   ggtitle("SR count by Calendar Month",
-          subtitle = paste("(", earliest_title, "--", latest_title, ") ", "total=", total_count, sep = "")
+          subtitle = paste("(", earliest_title, "--", latest_title, ") ", 
+                           "total=", format(total_count, big.mark = ","), sep = "")
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
+    linetype = "dotted", color = "gray40"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_month, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  geom_point(color = "transparent") +
-  # geom_smooth(method = "lm", span = 1, se = FALSE, color = "gray20", linetype = "dotted", linewidth = 1.25) +
-    labs(x=NULL, y=NULL)
+  geom_hline(yintercept = mean_count, linetype = "twodash", color = "black", linewidth = 0.6) +
+  annotate("text", x = earliest_month, y = mean_count, 
+           label = paste0("Average: ", format(round(mean_count, 0), big.mark = ",")), 
+           size = 4, hjust = -0.5, vjust = -0.75) +
+  # Add annotations for min and max values
+  # annotate("text", x = min_calendar_month_name, y = min_calendar_count,
+  #          label = paste0("Min: ", format(min_calendar_count, big.mark = ",")),
+  #          size = 4, color = "black", vjust = -0.6, hjust = 0.3 ) +
+  annotate("text", x = max_calendar_month_name, y = max_calendar_count,
+           label = paste0("Max: ", format(max_calendar_count, big.mark = ",")), 
+           size = 4, color = "black", vjust = -0.6, hjust = 0.3) +
+  labs(x=NULL, y=NULL)
 
 # Print the bar chart
 suppressMessages(print(SR_calendar_month))
@@ -980,7 +979,7 @@ suppressMessages(ggsave(chart_path, plot = SR_calendar_month, width = 10, height
 # Overall day-of-the-year summary (Jan 1st, Jan 2nd, Jan 3rd, etc.)
 mean_count <- round(mean(day_counts_df$count), 0)
 median_count <- round(median(day_counts_df$count), 0)
-standard_deviation <- round(sd(day_counts_df$count))
+standard_deviation <- round(sd(day_counts_df$count, 0))
 
 cat("\nAverage day-of-the-year count:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ","))
@@ -1040,15 +1039,13 @@ earliest_day_of_year <- min(day_counts$day_of_year)
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Convert day_of_year to a factor
 day_counts_df$day_of_year <- as.factor(day_counts_df$day_of_year)
 
 # Create the bar chart with vertical X-axis labels
 SR_day_of_the_year <- ggplot(day_counts_df, aes(x = day_of_year, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
+  geom_bar(stat = "identity", fill = "#117733") +
   scale_y_continuous(labels = scales::comma) +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
@@ -1060,16 +1057,21 @@ SR_day_of_the_year <- ggplot(day_counts_df, aes(x = day_of_year, y = count)) +
     axis.text.y = element_text(face = "bold")
   ) +
   ggtitle("SR count by Day-of-the-Year",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", 
+                           "total=", format(total_count, big.mark = ","))
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
+    linetype = "dotted", color = "gray40"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_day_of_year, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  geom_point(color = "transparent") +
-  scale_x_discrete(breaks = day_counts$day_of_year[seq(1, nrow(day_counts), by = 19)]) +
+  geom_hline(yintercept = mean_count, linetype = "twodash", color = "black", linewidth = 0.6) +
+  annotate("text", x = earliest_day_of_year, y = mean_count, 
+           label = paste0( "Average: ", format(round(mean_count, 0), big.mark = "," )), 
+           size = 4, hjust = -0.5, vjust = -0.75) +
+  annotate("text", x = max_day_of_the_year$day_of_year, y = max_day_of_the_year$count,
+           label = paste0("Max: ", format(max_day_of_the_year$count, big.mark = ",")), 
+           size = 4, color = "black", vjust = -0.6, hjust = 0.3) +
+    scale_x_discrete(breaks = day_counts$day_of_year[seq(1, nrow(day_counts), by = 19)]) +
   labs(y = NULL, x = NULL)
 
 # Print the bar chart
@@ -1081,7 +1083,7 @@ suppressMessages(ggsave(chart_path, plot = SR_day_of_the_year, width = 10, heigh
 # Overall day-of-the-week summary
 mean_count <- round(mean(day_of_week_df$count), 0)
 median_count <- round(median(day_of_week_df$count), 0)
-standard_deviation <- round(sd(day_of_week_df$count))
+standard_deviation <- round(sd(day_of_week_df$count), 0)
 
 cat("\nAverage day-of-the-week:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ","))
@@ -1098,46 +1100,43 @@ min_day_of_the_week <- day_of_week_df[which.min((day_of_week_df$count)),]
 cat("\nDay-of-the-week minimum:", min_day_of_the_week$day_of_week, 
     "with", format(min_day_of_the_week$count, big.mark = ","), "SRs")
 
-# # Convert the "YearMonth" column to Date format
-# monthly_df$YearMonth <- as.Date(paste0(monthly_df$YearMonth, "-01"))
-
 cat("\n\nDay-of-the-Week Summary:\n")
 print(day_of_week_df, row.names = FALSE, right = FALSE)
 
 # Chart SRs by day-of-the-week
 max_count <- max(day_of_week_df$count)
 earliest_day_of_week <- "1-Monday"
+total_count <- sum(day_of_week_df$count)
 
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 SR_day_of_the_week <- ggplot(day_of_week_df, aes(x = day_of_week, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_y_continuous(labels = scales::comma) +
+  scale_x_discrete() +
+  geom_bar(stat = "identity", fill = "#117733") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
     plot.title = element_text(hjust = 0.5, size = 13),
     plot.subtitle = element_text(size = 9),
     panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
+    axis.text.x = element_text(angle = 60, vjust = 0.5, hjust = 0.5, face = "bold"),
     axis.text.y = element_text(face = "bold")
   ) +
   ggtitle("SR count by Day-of-the-Week",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
+          subtitle = paste("(", earliest_title, "--", latest_title, ")", 
+                           "total=", format(total_count, big.mark = ","))
   ) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
+    linetype = "dotted", color = "gray40"
   ) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-  annotate("text", x = earliest_day_of_week, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-    geom_point(color = "transparent") +
-  scale_x_discrete() +
+  geom_hline(yintercept = mean_count, linetype = "twodash", color = "black", linewidth = 0.6) +
+  annotate("text", x = earliest_day_of_week, y = mean_count, 
+           label = paste0("Average: ", format(round(mean_count, 0), big.mark = ",")), 
+           size = 4, hjust = -0.5, vjust = -0.75) +
   labs(x=NULL, y=NULL)
 
 # Print the bar chart
@@ -1149,13 +1148,11 @@ suppressMessages(ggsave(chart_path, plot = SR_day_of_the_week, width = 10, heigh
 # Overall created time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 mean_count <- round(mean(created_hour_of_day_df$count), 0)
 median_count <- round(median(created_hour_of_day_df$count), 0)
-standard_deviation <- round(sd(created_hour_of_day_df$count))
+standard_deviation <- round(sd(created_hour_of_day_df$count), 0)
 
 cat("\nAverage hour-of-the-day 'created' count:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ","))
 cat("\nMedian:", format(median_count, big.mark = ","))
-# cat("\nMaximum is", format(max(created_hour_of_day_df$count), big.mark = ","),
-#     "and Minimum is", format(min(created_hour_of_day_df$count), big.mark = ","))
 
 max_hour_of_the_day <- created_hour_of_day_df[which.max(created_hour_of_day_df$count), ]
 max_hour_of_the_day$created_hour <- as.character(max_hour_of_the_day$created_hour)
@@ -1178,49 +1175,32 @@ max_count <- max(created_hour_of_day_df$count)
 result <- calculate_values(max_count)
 starting_value <- result$starting_value
 increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
-# Create the bar chart with vertical X-axis labels
-SR_created_time_of_day <- ggplot(created_hour_of_day_df, aes(x = created_hour, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_x_continuous(breaks = seq(0, 23, by = 1), labels = seq(0, 23, by = 1)) +  
-  scale_y_continuous(labels = scales::comma) +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold")
-  ) +
-  ggtitle("SR 'created' count by time-of-the-day",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_point(color = "transparent") +
-  #geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  labs(x="hour-of-the-day (0-23)", y= NULL)
-
-# Print the bar chart
-suppressMessages(print(SR_created_time_of_day))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-created-time-of-the-day.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_created_time_of_day, width = 10, height = 8))
+SR_created_time_of_day <- create_bar_chart(
+  created_hour_of_day_df,
+  x_col = "created_hour",
+  y_col = "count",
+  chart_title = "SR 'created' count by hour-of-the-day",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "Hour-of-Day",
+  add_mean = TRUE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = TRUE,
+  extra_line = NULL,
+  chart_file_name = paste0(file_name_prefix, "-trend-created-time-of-the-day.pdf")
+)
 
 #########################################################################
 # Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 mean_count <- round(mean(closed_hour_of_day_df$count), 0)
 median_count <- round(median(closed_hour_of_day_df$count), 0)
-standard_deviation <- round(sd(closed_hour_of_day_df$count))
+standard_deviation <- round(sd(closed_hour_of_day_df$count), 0)
 
 cat("\nAverage hour-of-the-day 'closed' count:", format(mean_count, big.mark = ","), 
     "  Standard deviation:", format(standard_deviation, big.mark = ","))
@@ -1241,52 +1221,25 @@ cat("\nHour-of-the-day 'closed' Summary:\n")
 # Print the created time-of-the-day Summary
 print(closed_hour_of_day_df, row.names = FALSE, right = FALSE)
 
-# Chart by 'closed' time-of-the-day
-max_count <- max(closed_hour_of_day_df$count)
-earliest_date <- 0
-
-result <- calculate_values(max_count)
-starting_value <- result$starting_value
-increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
-
-# Create the bar chart with vertical X-axis labels
-SR_closed_time_of_day <- ggplot(closed_hour_of_day_df, aes(x = closed_hour, y = count)) +
-  geom_bar(stat = "identity", fill = "#359B73") +
-  scale_x_continuous(breaks = seq(0, 23, by = 1), labels = seq(0, 23, by = 1)) +  
-  scale_y_continuous(labels = scales::comma) +
-  theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
-    plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 0.5, face = "bold"),
-    axis.text.y = element_text(face = "bold")
-  ) +
-  ggtitle("SRs 'closed' count by time-of-the-day",
-          subtitle = paste("(", earliest_title, "--", latest_title, ")", "total=", total_count)
-  ) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
-  ) +
-  geom_point(color = "transparent") +
-#  geom_hline(yintercept = mean_count + 1*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count + 2*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-#  geom_hline(yintercept = mean_count + 3*standard_deviation, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-  geom_hline(yintercept = mean_count, linetype = "solid", color = "gray20", linewidth = 0.4) +
-#  annotate("text", x = 0, y = mean_count + 1*standard_deviation, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-  annotate("text", x = 0, y = mean_count + 2*standard_deviation, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-#  annotate("text", x = 0, y = mean_count + 3*standard_deviation, label = "+3 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-    annotate("text", x = 0, y = mean_count, label = "Average", size = 4, hjust = -0.5, vjust = -0.75) +
-  labs(x= "Hour-of-the-day (0-23)", y= NULL)
-
-# Print the bar chart
-suppressMessages(print(SR_closed_time_of_day))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend-closed-time-of-the-day.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_closed_time_of_day, width = 10, height = 8))
+SR_closed_time_of_day <- create_bar_chart(
+  closed_hour_of_day_df,
+  x_col = "closed_hour",
+  y_col = "count",
+  chart_title = "SRs 'closed' count by time-of-the-day",
+  sub_title = chart_sub_title,
+  x_axis_title = NULL,
+  y_axis_title = "count",
+  print_out_title = "Hour-of-Day",
+  add_mean = TRUE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = TRUE,
+  extra_line = NULL,
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_created_by_minute_of_busiest_day.pdf")
+)
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
@@ -1305,3 +1258,4 @@ if (duration > 3600) {
 #########################################################################
 cat("\n *****END OF PROGRAM*****")
 #########################################################################
+sink()
