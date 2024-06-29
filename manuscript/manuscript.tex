@@ -17,6 +17,7 @@
 \usepackage{float}   % Required for the H specifier
 \usepackage{adjustbox}
 \usepackage[]{lineno}
+\usepackage{comment}
 \linenumbers*[1]
 
 %% patches to make lineno work better with amsmath
@@ -84,9 +85,9 @@ York City 311 Service Request Data}
 \begin{document}
 \maketitle
 
-% \tableofcontents % Optional: Table of Contents
-% \listoffigures % List of Figures
-% \listoftables % List of Tables
+\tableofcontents % Optional: Table of Contents
+\listoffigures % List of Figures
+\listoftables % List of Tables
 
 \hyphenpenalty=750
 
@@ -113,24 +114,13 @@ general principles for the effective release of open data.
 
 \bigskip
 
-\jy{cut down to 6-8}
 \noindent
 \textit{Keywords:}
-	311 Service Request Data;
 	Data cleansing;
-	Data Consistency;
 	Data Curation;
-	Data Democratization;
-	Data Efficiency;
 	Data science;
-	Data Validity;
-	Government Data;
 	NYC Open Data;
-	Open Data Movement;
 	Open data;
-	Public Engagement;
-	Quality control;
-	Research Data Management;
 	Smart Cities;
 	Transparency;
 \end{abstract}
@@ -139,7 +129,6 @@ general principles for the effective release of open data.
 
 \section{Introduction} 
 \label{sec:intro}
-
 In the early 21st century,
 the open data movement began to take shape, driven by the
 fundamental belief that freely accessible data can transform 
@@ -246,17 +235,10 @@ paper concludes with a discussion and recommendations in
 Section~\ref{sec:discussion}, encapsulating the key insights and 
 implications of our research.
 
-\dt{
-A note on naming conventions: dataset field names are named 
-using ``snake\_case'' where each word in the variable name 
-is written in lowercase, and words are separated by 
-underscores, e.g. created\_date, complaint\_type, zip\_code, etc..   
-}
 
 
 \section{NYC 311 Service Request Data} 
 \label{sec:data}
-
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
 for non-emergency inquiries and requests. Introduced in 2003, the NYC
@@ -310,6 +292,7 @@ enhancing urban living and fostering a more responsive and transparent
 city government.
 
 
+\begin{comment}
 \jy{FixME: this paragraph's location will be revisited later.}
 We extracted 311 SR data for the period of CY 2022--2023, a dataset of
 6.4 million SR records. This is a large dataset which enables 
@@ -318,26 +301,23 @@ and logical inconsistencies. It provides enough data to
 examine trends and data outlier analysis. We queried the data 
 directly from the NYC Open Data Portal and exported the 
 data for analysis with custom written R programs.
+\end{comment}
+
+%\begin{figure}[tbp]
+%	\centering
+ % 	\includegraphics[width=0.8\textwidth]{10-year-trend-monthly.pdf}
+ %	\caption{10-year (2014-2023) Monthly SR Counts}
+ % 	\label{fig:10-yr-monthly}
+%\end{figure}
 
 
-
-
-\jy{Every float (figure/table) needs to be referred to in the text.}
-
-\begin{figure}[tbp]
-	\centering
-  	\includegraphics[width=0.8\textwidth]{10-year-trend-monthly.pdf}
-  	\caption{10-year (2014-2023) Monthly SR Counts}
-  	\label{fig:10-yr-monthly}
-\end{figure}
-
-We also looked at a 10-year period (2014-2023) to
-observe system performance over a longer time-frame; see
+To begin, we looked at a 10-year period (2014-2023) to
+observe the data over a longer time-frame; see
 Figure~\ref{fig:10-yr-monthly}. During that time-frame,
-the number of 311 SRs grew by 50\%. The summer and early fall months 
-make up all of the Top 5 SR counts by day.
+the number of 311 SRs grew by nearly 50\%. The summer months make
+up the highest days, and the winter months show the lowest activity.
 
-
+\begin{comment}
 \begin{table}[tbp]
     \centering
     \caption{Top 5 and Bottom 5 Days for SRs}
@@ -356,51 +336,56 @@ make up all of the Top 5 SR counts by day.
       \bottomrule
     \end{tabular}
 \end{table}
+\end{comment}
 
+%Table~\ref{tab:top-10-counts} summarizes the top 5 and bottom 5 days
+i%n counts of SRs. 
 
-Table~\ref{tab:top-10-counts} summarizes the top 5 and bottom 5 days
-in counts of SRs. The highest daily SR count, 24,415, occurred on
+The highest daily SR count, 24,415, occurred on
 August 4, 2020, coinciding with the aftermath of Tropical Storm
-Isaias, highlighting the system's critical role during crises. The
-second-highest count, 19,560, was the following day, reflecting the
-storm's continued impact. 
+Isaias, highlighting the system's critical role during crises.
+
+% The second-highest count of 19,560 was the following day, 
+%reflecting the storm's continued impact. 
+
 Conversely, the lowest daily SR count, 2,965, was on Christmas Day,
 2014, with similar lows on other Christmas Days, indicating reduced
-activity during major holidays. The data also shows fewer requests on
-weekends, such as April 20, 2014 (Easter Sunday), and November 6, 2016
-(a non-holiday Sunday).
+activity during major holidays.
+
+% The data also shows fewer requests on weekends, such as 
+%April 20, 2014 (Easter Sunday), and November 6, 2016 (a non-holiday Sunday).
 
 
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
-  	\caption{SR counts by Agency with Cumulative Percentage}
-	\label{fig:SRcountbyAgency}
-\end{figure}
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
+ % 	\caption{SR counts by Agency with Cumulative Percentage}
+%	\label{fig:SRcountbyAgency}
+%\end{figure}
 
 
 Figure~\ref{fig:SRcountbyAgency} display the SR counts by agency with
 cumulative percentage. Two important fields in this analysis are the
-responsible NYC Agency and the type of complaint. Given the size of
-the City of New York government, identifying the responsible agency
-and the type of complaint is essential for pinpointing the accountable
-party and troubleshooting discrepancies. This identification helps
-determine whether an issue is specific to an agency or indicative of a
-systemic problem. Although 311 SRs involve 16 different agencies, six
-agencies account for 90\% of the complaints. These are the New York
+responsible NYC Agency and the type of complaint. Identifying the 
+responsible agency and type of complaint is essential 
+for identifying the accountable party and troubleshooting discrepancies. 
+This identification also assists in determining whether an issue is 
+specific to an agency or indicative of a broader, systemic problem. 
+Six agencies account for 90\% of the complaints. These are the New York
 Police Department (NYPD), Housing Preservation and Development (HPD),
 New York City Department of Sanitation (DSNY), Department of
 Transportation (DOT), Department of Environmental Protection (DEP),
 and Department of Parks and Recreation (DPR).
 
 
-
+\begin{comment}
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.8\textwidth]{SR_by_Complaint_Type.pdf} 
   \caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
+
 
 \begin{table}[tbp]
   \centering
@@ -423,6 +408,8 @@ and Department of Parks and Recreation (DPR).
     \bottomrule
   \end{tabular}
 \end{table}
+\end{comment}
+
 
 The distribution of complaint types skews toward a few select
 categories, accompanied by a long tail. Figure~\ref{fig:SR_complaints}
@@ -430,21 +417,23 @@ shows that the top 20 complaint types account for 70\% of the total
 220 different types. Notably, these top complaints include several
 variations of noise-related issues, which collectively represent 22\%
 of all complaints. When consolidated, noise complaints emerge as the
-most frequently occurring type. Table~\ref{tab:noisecomplaints}
-provides a detailed breakdown of noise-related complaint types by
-count and responsible agency. The most common noise complaint is
-``Noise - Residential,'' with 675,502 complaints, accounting for 10.56\%
-of all service requests, and primarily handled by the NYPD. Other
-significant noise complaints include ``Noise - Street/Sidewalk"
-(4.70\%), ``Noise - Commercial'' (2.02\%), and ``Noise - Vehicle"
-(1.81\%), all managed by the NYPD. Additional categories such as
-"Noise - Helicopter'' (1.33\%) fall under the jurisdiction of the EDC,
-and ``Noise'' (1.57\%) is managed by the DEP. The prevalence of these
-complaints underscores the critical role of the NYPD and other
-agencies in addressing noise-related issues, reflecting the
-significant impact of urban noise on residents' quality of life. This
-data highlights the importance of efficient response and management
-strategies to mitigate noise disturbances in New York City.
+most frequently occurring complaint type.
+
+% Table~\ref{tab:noisecomplaints}
+%provides a detailed breakdown of noise-related complaint types by
+%count and responsible agency. The most common noise complaint is
+%``Noise - Residential,'' with 675,502 complaints, accounting for 10.56\%
+%of all service requests, and primarily handled by the NYPD. Other
+%significant noise complaints include ``Noise - Street/Sidewalk"
+(%4.70\%), ``Noise - Commercial'' (2.02\%), and ``Noise - Vehicle"
+(%1.81\%), all managed by the NYPD. Additional categories such as
+%"Noise - Helicopter'' (1.33\%) fall under the jurisdiction of the EDC,
+%and ``Noise'' (1.57\%) is managed by the DEP. The prevalence of these
+%complaints underscores the critical role of the NYPD and other
+%agencies in addressing noise-related issues, reflecting the
+%significant impact of urban noise on residents' quality of life. This
+%data highlights the importance of efficient response and management
+%strategies to mitigate noise disturbances in New York City.
 
 
 
@@ -493,10 +482,10 @@ is even an ``error''.
 
 \section{Structural Issues}
 \label{sec:structural}
-Structural issues in the context of data cleansing refers to issues 
-related to the how data is organized, formatted, or structured within a 
-dataset. Structural issues can make it difficult to analyze the 
-data effectively. Here are some characteristics of the 311 SR data set:
+Structural issues refers to how data is organized, formatted, 
+or structured within a dataset. Structural issues can make 
+it difficult to analyze the data effectively. Here are some 
+characteristics of the 311 SR data set:
 
 \begin{itemize}
 	\item There are 47 columns of data for each row, exportable as a CSV file.
@@ -514,14 +503,13 @@ data effectively. Here are some characteristics of the 311 SR data set:
 \textbf{Issue: Fields not in the Data Dictionary} The 311 SR 
 \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}
  identifies 41 data columns (fields) along with related information 
- for each column. However, when you download the data or 
- explore it via the online portal, you immediately note that there 
- are 47 columns (fields). The additional six fields are not addressed in the 
- Data Dictionary, but do and show up on the Column Manager widget
+ for each column. However, when downloaded the data contains 
+ six fields are not included in the Data Dictionary. However, these
+ fields do show up on the portal Column Manager widget
  as ``@computed\_region\_xxxx\_xxxx''. To some extent one can infer 
- what the these @computed\_fields are and how they are determined, but 
- it is not possible to know for certain. Most importantly, can these fields 
- be reliably used for analytical purposes?  These six fields are:
+ what the these @computed\_fields are and how they are determined but
+ not with certainty. Most importantly, can these fields be reliably 
+ used for analytical purposes?  These six fields are:
 
 \begin{itemize}
 	\item zip\_codes
@@ -533,24 +521,29 @@ data effectively. Here are some characteristics of the 311 SR data set:
 \end{itemize}	
 
 	
-	
-	
+		
 \section{Validating data types}
 \label{sec:datatypes}
 Fortunately, both the Data Dictionary and the portal column manager 
-do a good job of indicating the data type. The following fields were 
+clearly indicate the epected data type. The following fields were 
 checked for their specified data types:
+
 	
 \begin{itemize}
 	\item created\_date, closed\_date, due\_date, and resolution\_action\_updated\_date: 
 	All are all in proper date format.
+	
 	\item zip\_codes and incident\_zip: All are 5 numeric digits except 
 	for two non-numeric entries for incident\_zip (``na'' and ``N/A'').
+	
 	\item x\_coordinate\_state\_plane \&  y\_coordinate\_state\_plane 
 	(a NY State geo-location system): All are all numeric.
+	
 	\item latitude \& longitude: Both are numeric.
+	
 	\item community\_districts, borough\_boundaries, 
 	city\_council\_district, police\_precinct, and police\_precincts: All are numeric.
+	
 	\item Free-form text fields that contain a ``,'' (e.g. incident\_address 
 	\& resolution\_description) are properly enclosed in quotation marks.
 \end{itemize}	
@@ -559,52 +552,49 @@ checked for their specified data types:
 
 \section{Blank \& N/A data}
 \label{sec:blanks}
-Understanding the absence of data by field is an important factor 
+Understanding the absence of data by field is important 
 when undertaking analysis. For example, if you wanted to see if the SRs were
 closed before or after their due\_date, you would be challenged 
-as 99.57\% of the due\_date field is blank. Which calls into 
-question...are these missing values, or is the concept of a 
-due\_date simply not applicable for the vast majority of SRs?
-
-When counting the various fields for blank or N/A values, the fields appear 
+as 99.57\% of the due\_date field is blank. When counting 
+the various fields for blank or N/A values, the fields appear 
 to divide into three groups: \textbf{Mostly Empty}, \textbf{Partially Empty}, 
-and \textbf{Few/None Empty}. he Mostly Empty category ranges from 93-99.9\% blank. 
-It includes such fields as taxi\_company due\_date, pickup\_location, and 
+and \textbf{Few/None Empty}. The Mostly Empty category 
+ranges from 93-99.9\% blank and includes such fields as 
+taxi\_company due\_date, pickup\_location, and 
 landmark. The Partially Empty includes such fields as location\_type, borough, 
 and cross\_street. And the Few/None Empty includes created\_date, 
 complaint\_type, agency, and status. In some cases it may make 
 sense to inquiry as to why some fields are frequently blank. Here is a graphic 
-depiction of total empty (blank \& N/As) for each fields. You can see 
-the natural grouping into the Most, Some, and Few categories 
-in the stair-type visualization. 
+depiction of total empty (blank \& N/As) for each fields illustrating
+the grouping into the Most, Some, and Few categories. 
 
-\begin{figure}[tbp]
-	\centering
-  	\includegraphics[width=\textwidth]{BlankFields.pdf}
-	\caption{Number and Percentage of Empty/Blank Entries}
-	\label{fig:blank_fields}
-\end{figure}
 
+%\begin{figure}[tbp]
+%	\centering
+ % 	\includegraphics[width=\textwidth]{BlankFields.pdf}
+%	\caption{Number and Percentage of Empty/Blank Entries}
+%	\label{fig:blank_fields}
+%\end{figure}
 
 
 
  \section{Validating Data for Acceptable Values}
  \label{sec:domain}
- In this study, testing for invalid values revealed several issues 
- associated with select fields. Accordingly, an analyst needs to be 
- extra diligent if using these fields for analysis, and in all likelihood, 
- rows with invalid field values would  need to be removed from the 
- analysis. Here are some results.
+Any analytic effort needs to be aware of fields which 
+contain invalid values. Typically such fields would need to be
+identified and removed from the analysis. Here are some results
+of field validation.
 
 \begin{itemize}
 	\item Latitude and Longitude fields fell within the geographic 
 	boundaries of New York City. 
+	
 	\item The unique\_key field was in fact unique.
-	\item Many fields have a domain of acceptable values, often 
-	determined from common usage or by examining historical 
-	datasets. Unfortunately, these domains of acceptable 
-	values are not specified in the Data Dictionary. These fields all tested as 
-	compliant within their domain:
+	
+	\item Unfortunately, very few domains of acceptable 
+	values are specified in the Data Dictionary. The below 
+	fields were tested as complying with their domain as 
+	determined by public usage and historical datasets:
 	\begin{itemize}
 		\item address\_type
 		\item status
@@ -615,33 +605,34 @@ in the stair-type visualization.
 	\end{itemize}	
 \end{itemize}
 
-\subsection{Issues with Zip Codes}
+%\subsection{Issues with Zip Codes}
 \label{sec:zipcodesissues}
- Unfortunately some fields proved to be  problematic when comparing 
- the values to a domain of legal values. For example, all zip codes 
+ \textbf{Issues with Zip Codes} Some fields proved to be problematic 
+ as to complying with a domain of legal values. For example, all zip codes 
  (two fields: zip\_codes and incident\_zip) should be valid as defined 
  by the USPS database which contains 37,946 valid zip codes. However,
  the computed field zip\_codes proved problematic with 
-58\% (3.6 million) of the field entries being invalid. Even the 
-field incident\_zip while having only .07\% invalid entries, exhibited
+58\% (3.6 million) of the field entries being invalid. And the 
+incident\_zip field, while having only .07\% invalid entries, still contains
 4163 such errors. The breakdown of the invalid entries in the zip\_code, sorted by 
-Agency shows that the distribution by percentage almost precisely 
-mirrors the overall breakdown of SRs by Agency, potentially indicating
-a systemic problem.
+Agency shows that the distribution by percentage mirrors the overall 
+breakdown of SRs by Agency, potentially indicating a systemic problem.
 	
-\subsubsection{Case Study: Noise Complaints by Zip Code}
+%\subsubsection{Case Study: Noise Complaints by Zip Code}
 \label{sec:case-study-zip-codes}
-\textbf{Scenario:} The NYC Office of Nightlife (ONL) wants to 
-know ``What are the top 10 zip codes for Noise Complaints (all 8 types) 
-over the last two years?'' The intent is to assess the impact of the 
-recent NYC effort promoting a vibrant nightlife 
-in NYC while seeking to ease strained relations 
-between bar and club owners. Let's assume that this analysis 
-uses the zip\_codes field, one of the (six) 
-computed fields that has shown to have validity problems. 
-We then repeat the analysis with the incident\_zip field instead. Let's 
-subject these two data sets to validation against the USPS zip code database.
-	 
+\textbf{Case Study: Noise Complaints by Zip Code} Scenario: The NYC 
+Office of Nightlife (ONL) wants to know ``What are the top 10 
+zip codes for Noise Complaints over the last two years?'' ONL wants
+to assess the impact of the recent NYC effort promoting a vibrant nightlife 
+in NYC while seeking to ease strained relations between bar 
+and club owners. Let's assume that this analysis 
+uses the zip\_codes field, one of the (six) computed fields known to 
+have validity problems. We then repeat the analysis with the more 
+accurate incident\_zip field. We subject these two analysis effort 
+to validation against the USPS zip code database.
+
+
+\begin{comment}	 
 \begin{table}[tbp]
     \centering
     \caption{Comparison of Top Ten Zip Codes Lists}
@@ -668,31 +659,32 @@ subject these two data sets to validation against the USPS zip code database.
 	    	\end{tabular}
  	\label{tab:zipcodes}
 \end{table}
+\end{comment}
+
 
 As indicated, six out of ten zip\_codes are invalid, which corresponds closely 
-with what is observed in the overall dataset (58\%). Whereas the incident\_zip 
-field is completely valid, again in-line with the overall incident\_zip 
-validation percentage (99.04\%). If the analysis performed using the 
-zip\_codes field were to be 	presented to the Director, ONL, the conclusion 
-would be in error. 
+with what is observed in the overall dataset (58\% invalid). Whereas 
+the incident\_zip field is completely valid, in-line with the 
+overall incident\_zip validation percentage of 99.04\%.
 
-\subsection{Issues with Police Precincts} 	
+
+%\subsection{Issues with Police Precincts} 	
 \label{sec:police-precincts}
-A curious case also exists when examining the two nearly identical 
-fields - police\_precincts and police\_precinct. Both of those fields 
-are among the ``computed'' fields in the dataset. Using 
+A curious case exists when examining two (nearly) identical 
+fields: police\_precincts and police\_precinct. Both of those fields 
+are among the ``computed'' fields previously mentioned. Using 
 \href{https://www.nyc.gov/site/nypd/bureaus/patrol/precincts-landing.page}
-{NYPD Precinct listings} it's possible to determine the valid 
-police precincts; they are generally numeric or have numeric 
-representations in the dataset. However, what we find is that 
-both fields police\_precinct and police\_precincts  have  35\% 
-invalid entries. Unfortunately, it's not the same invalid entries. For 
-the police\_precincts field, there are 2,171,864 invalid entries 
-(35\%)., a consequential number of errors. Similarly for the 
+{NYPD Precinct listings} it is possible to determine what are valid 
+police precincts. What we find is that both police\_precinct 
+and police\_precincts  have  35\% invalid entries. Unfortunately, 
+it's not the same invalid entries. For the police\_precincts field, 
+there are 2,171,864 invalid entries (35\%). Similarly for the 
 police\_precinct field, there are 2,171,778 invalid entries 
-(also 35\%). 
+(also 35\%), but not the same invalid entries. 
+
+==========REVIEW BELOW HERE===========	
 	
-\subsection{Issues with Community Boards}
+%\subsection{Issues with Community Boards}
 \label{sec:communityboards}
 Community Boards are an important aspect of NYC government. They are the 
 most local, grassroots form of City government, and a vital connection 
@@ -705,7 +697,7 @@ the overall SR Agency distribution. This indicates that there are likely
 specific issues at some key Agencies, in this case Taxi \& Limo 
 Commission (TLC), Parks \& Recreation, etc. 
 
-\subsection{Issues with Community Districts}
+%\subsection{Issues with Community Districts}
 \label{sec:communitydistrict}
 Another of the ``computed'' fields is community\_districts. Community Districts 
 are the boundaries for the Community Boards, but unlike how 
@@ -718,7 +710,7 @@ is formatted, it is not possible to establish validity. However,
 it is possible to determine that the dataset contains 72 unique 
 entries, while there are only 59 valid Community Districts. 
 	
-\subsection{created\_date and closed\_date(s) -- Negative Duration}
+%\subsection{created\_date and closed\_date(s) -- Negative Duration}
 \label{sec:negativeduration}
 For the created\_date and closed\_date fields, you might 
 expect that these two fields are automatically populated by the 
@@ -748,7 +740,9 @@ Closed-before-Created:  There are 12,251 SRs that are closed before they
 were created, thereby generating a nonsensical ``negative duration''. 
 While this is a small percentage overall (0.2\%) it can have significant impact 
 on response time analysis. Here is a sample:
-	
+
+
+\begin{comment}	
 \begin{table}[tbp]
     \centering
     \caption{Largest and Smallest errors (days)}
@@ -780,6 +774,8 @@ on response time analysis. Here is a sample:
 	    \end{tabular}
     \label{tab:combined_errors}
 \end{table}
+\end{comment}
+
 	
 The largest errors are shown ``excluding extreme negative values''. We found 
 eight SRs with extremely large negative durations (\textless{} -730), all containing 
@@ -792,26 +788,28 @@ Department of Homeland Services (DHS) A visualization of the
 negative-duration SRs by Agency shows that this negative-duration 
 issue is a DOT problem, where 95\% of these types of errors occur. 
 	
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
-	  \caption{Negative Duration SRs by Agency}
-	  \label{fig:negative-duration}
-\end{figure}
+%\begin{figure}[tbp]
+% 	 \centering
+% 	 \includegraphics[width = \textwidth]{negative_duration_SR_barchart.pdf}
+%	  \caption{Negative Duration SRs by Agency}
+%	  \label{fig:negative-duration}
+%\end{figure}
 	
 This violin chart shows the broad spread of negative-duration SRs, albeit with 
 the extremely large negative-duration SR removed. While there are few 
 outliers, the magnitude of the negative-durations is troubling and can 
 produce bizarre analytical results.
-	
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
-	 \caption{Distribution of Negative Durations}
-	 \label{fig:negative-duration-violin}
-\end{figure}
 
-\subsubsection{Case Study: Homeless Person Assistance}
+
+%\begin{figure}[tbp]
+ %	 \centering
+ %	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
+%	 \caption{Distribution of Negative Durations}
+%	 \label{fig:negative-duration-violin}
+%\end{figure}
+
+
+%\subsubsection{Case Study: Homeless Person Assistance}
 \label{sec:homlessassistance}
 \textbf{Scenario:} The Dept. of Homeless Services (DHS) wants to 
 know ``How quickly are 311 calls for ``Homeless Person Assistance
@@ -820,13 +818,15 @@ both the public and City government. It's a performance metric along
 the lines of ``How quickly is my Agency responding to ``critical'' 
 requests, and does that performance vary by Borough, Zip Code, etc. 
 As an analyst, this appears to be a routine effort: 
+
 		
-\begin{enumerate}
+\begin{itemize}
     \item Select data from 2022-2023 and filter the data by 
     complaint\_type = ``Homeless Person Assistance'' (yields 55,000 SRs)
     \item Compute a new field ``duration'' (closed\_date – created\_date)
     \item Take an average of the ``duration'' field == \textbf{Answer:  -4.8 days}  
-\end{enumerate}
+\end{itemize}
+
 		
 Clearly that answer is nonsensical. How did such a simple task result 
 in an absurd answer? The answer lies in the computation of the ``duration'' 
@@ -836,17 +836,19 @@ days (-122 years). So just those eight SRs with extreme negative duration
 values is enough to drive the average of the 75,000 
 Homeless Assistance SRs to a negative value, clearly incorrect.
 		
+		
 In this case, the median is a better measure of central tendency than the average. 
 And the median of the duration field is  0.2 days (approx 5 hrs). 
 		
-\begin{figure}[tbp]
- 	 \centering
- 	 \includegraphics[width = \textwidth]{homeless_response_time_clean.pdf}
-	 \caption{Homeless Assistance SR Durations}
-	 \label{fig:homeless}
-\end{figure}
+%\begin{figure}[tbp]
+% 	 \centering
+ %	 \includegraphics[width = \textwidth]{homeless_response_time_clean.pdf}
+%	 \caption{Homeless Assistance SR Durations}
+%	 \label{fig:homeless}
+%end{figure}
+	
 		
-\subsection{created\_date and closed\_date(s) --  Zero Duration}
+%\subsection{created\_date and closed\_date(s) --  Zero Duration}
 \label{sec: zeroduration}		
 A more serious and prevalent problem with closed\_date(s) 
 occurs when the closed\_date and created\_date are exactly the same -- to 
@@ -860,14 +862,16 @@ Dept of Business, Dept of Sanitation, and Dept of Environmental Protection.)
 This is not in-line with the overall Agency distribution of SRs and indicates an 
 Agency-specific issue, and the solution likely lies at those Agencies.
 	
-\begin{figure}[tbp]
-	 \centering
-	 \includegraphics[width = \textwidth]{zero_duration_SR.pdf}
-	 \caption{SRs with Zero Durations by Agency}
-	 \label{fig:zero-duration}
-\end{figure}	
 		
-\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
+%\begin{figure}[tbp]
+%	 \centering
+%	 \includegraphics[width = \textwidth]{zero_duration_SR.pdf}
+%	 \caption{SRs with Zero Durations by Agency}
+%	 \label{fig:zero-duration}
+%\end{figure}	
+
+		
+%\subsection{created\_date and closed\_date(s) -- Midnight \&Noon}
 \label{sec:midnightandnoon}
 Another problem discovered with the created\_date and 
 closed\_date fields - there appears to be an unusually large number of SRs 
@@ -878,6 +882,7 @@ fewer SRs 	created at night and the early hours of the morning. However,
 here there appears to be significantly greater numbers of SR closed exactly 
 at midnight and exactly at noon, as well as a significant number of SRs 
 created exactly at noon. Observations during this 2-year period include:
+
 	
 \begin{itemize}
 	 \item There were 99,779 SRs created exactly at noon (12:00:00)
@@ -885,19 +890,21 @@ created exactly at noon. Observations during this 2-year period include:
 	\item There were 105,505 SRs closed exactly at noon. 
 \end{itemize}
 
+
 One other way to visualize this anomaly is to look at the busiest day 
 during this 2-year period (Friday, 2023-09-29). Then aggregate 
 the created\_date(s) by minute (with seconds equal to zero), providing
 a minute-by-minute look at SR creation. Here we see a clear 
 spike at exactly noon (12:00), well beyond the 3\textsigma line.
 
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width=\textwidth]
-	{2-year-trend-SR_created_by_minute_of_busiest_day.pdf}
-	\caption{SRs Created Minute-by-Minute on Busiest Day}
-	\label{fig:busiestcreated}
-\end{figure}	
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width=\textwidth]
+%	{2-year-trend-SR_created_by_minute_of_busiest_day.pdf}
+%	\caption{SRs Created Minute-by-Minute on Busiest Day}
+%	\label{fig:busiestcreated}
+%\end{figure}	
+
 
 As before, let's visualize this anomaly by looking at the closed\_date(s) 
 on the busiest day during this 2-year study period (Friday, 2023-09-29). 
@@ -905,13 +912,15 @@ We aggregate closed\_date(s) by the minute (with seconds equal to zero).
 The chart highlights anomalies with spikes at 00:00:00 and 
 12:00:00 respectively. 
 
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width=\textwidth]
-	{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
-	\caption{SRs Closed Minute-by-Minute on Busiest Day}
-	\label{fig:busiestclosed}
-\end{figure}	
+
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width=\textwidth]
+%	{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
+%	\caption{SRs Closed Minute-by-Minute on Busiest Day}
+%	\label{fig:busiestclosed}
+%\end{figure}	
+
 
 These unusual patterns of created \& closed SRs at exactly the hours 
 of midnight and noon likely indicates the presence of a bulk create/close 
@@ -922,27 +931,30 @@ distort the duration of these SRs. Looking at the distribution
 by Agency for the ``closed-exactly-at-midnight'' 
 shows that \textgreater90\% of these suspect SRs come from just two 
 Agencies - Dept. of Buildings (DOB) and Dept. of Sanitation (DSNY). 
+
 	
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width = \textwidth]{closed_at_midnight_chart.pdf}
-	\caption{SRs Closed Exactly at Midnight by Agency}
-	\label{fig:midnight-closed}
-\end{figure}	
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width = \textwidth]{closed_at_midnight_chart.pdf}
+%	\caption{SRs Closed Exactly at Midnight by Agency}
+%	\label{fig:midnight-closed}
+%end{figure}	
+
 
 However, the ``SR closed at noon'' visualization shows that  a single 
 Agency, DSNY, is responsible for \textgreater99\% of the 
 SRs ``closed-exactly-at-noon''. 
 	
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width = \textwidth]
-	{closed_at_noon_chart.pdf}
-	\caption{SRs Closed Exactly at Noon by Agency}
-	\label{fig:noon-closed}
-\end{figure}	
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width = \textwidth]
+%	{closed_at_noon_chart.pdf}
+%	\caption{SRs Closed Exactly at Noon by Agency}
+%	\label{fig:noon-closed}
+%\end{figure}	
+	
 		
-\subsection{resolution\_action\_update\_date}
+%\subsection{resolution\_action\_update\_date}
 \label{sec: resolutionaction}
 When an SR is updated, by any means on any field, the 311 software 
 automatically populates the resolution\_action\_update\_date. 
@@ -953,13 +965,14 @@ days after the closed\_date (to avoid infeasible dates such as 1900-01-01).
 It is not known if this is normal behavior or an area that may 
 require further investigation. 
 	
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width = \textwidth]{post_closed_violin.pdf}
-	\caption{Post-Closed resolution\_action\_update\_date(s) 
-	\textgreater30 days}
-	\label{fig:resolution-violin}
-\end{figure}		
+	
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width = \textwidth]{post_closed_violin.pdf}
+%	\caption{Post-Closed resolution\_action\_update\_date(s) 
+%	\textgreater30 days}
+%	\label{fig:resolution-violin}
+%\end{figure}		
 
 
 	
@@ -983,7 +996,7 @@ precision, but limited accuracy.
 During this analysis, several redundant fields were observed. These 
 fields should be examined further for possible consolidation.
 
-\subsection{latitude \& longitude and the location fields}
+%\subsection{latitude \& longitude and the location fields}
 \label{sec:latlong}
 The location field is a pure concatenation of the latitude 
 and longitude fields, with a comma and parenthesis 
@@ -991,17 +1004,20 @@ added. The inclusion of the location field seems questionable
 as the data is arguably more difficult to extract than the 
 two specific fields, especially for software programs. Example:  
 
+
 \begin{itemize}
 	\item  latitude: 40.768456429488
 	\item  longitude: -73.9575661888774
 	\item  location: (40.768456429488, -73.95756618887745)
 \end{itemize}
 
-\subsection{borough and park\_borough fields}
+
+%\subsection{borough and park\_borough fields}
 \label{sec:parkborough}
 These two fields are 100\% matches; fully redundant.
 
-\subsection{borough and borough\_boundaries fields}
+
+%\subsection{borough and borough\_boundaries fields}
 \label{sec:boroughboundaries}
 The borough field is a text field for the five New York City boroughs (Manhattan, Queens, 
 Brooklyn, etc.). The borough\_boundary field is numeric with values 
@@ -1011,7 +1027,8 @@ translated and compared to the borough field, there is a
 98.3\% match. And that is the problem with two ``near-duplicate'' 
 fields; which field is correct when they disagree?
 
-\subsection{borough and taxi\_company\_borough fields}
+
+%\subsection{borough and taxi\_company\_borough fields}
 \label{sec:taxicompanyborough}
 The two fields borough and taxi\_company\_borough might appear to be 
 related. In fact, despite the names, the two data fields are nearly 
@@ -1020,7 +1037,7 @@ high that it suggests the two fields are used very differently. This field
 is used exclusively by the Taxi \& Limo Commission which governs 
 taxis and other cars for hire.
 
- \subsection{incident\_zip and zip\_codes fields}
+ %\subsection{incident\_zip and zip\_codes fields}
  \label{sec:zipcodes}
  The zip\_code field is one of the six computed fields and its validity 
  has been explored in Section \ref{sec:zip-codes} and found to be 
@@ -1028,7 +1045,8 @@ taxis and other cars for hire.
  USPS, while the companion zipcode field incident\_zip field had 
  an accuracy rate of 99.93\%. 
 
- \subsection{police\_precinct and police\_precincts fields} 
+
+ %\subsection{police\_precinct and police\_precincts fields} 
  \label{sec:police} 
 Both the police\_precinct and police\_precincts are among the computed 
 fields not cited in the Data Dictionary. Their usage however, is easy to 
@@ -1038,7 +1056,8 @@ process are not know, it remains a challenge to determine which
 field is the ``right'' field to use. (The validity of these fields is 
 covered in Section \ref{sec:police-precincts}.)
 
- \subsection{agency and agency\_name fields}
+
+% \subsection{agency and agency\_name fields}
  \label{sec:agencyname}
  While not duplicates, these fields have a 1:1 correspondence.  The Agency 
  field contains abbreviations for the City agencies such as NYPD, DOT, 
@@ -1047,7 +1066,8 @@ covered in Section \ref{sec:police-precincts}.)
  of Transportation, Department of Housing Preservation and 
  Development, and so on. It seems redundant to include both.
 
-\subsection{landmark and street\_name}
+
+%\subsection{landmark and street\_name}
 \label{sec:landmark}
 The landmark field is listed in the Data Dictionary as ``Can refer to 
 any noteworthy location, including but not limited to, parks, 
@@ -1063,6 +1083,8 @@ to be indicative of duplicate usage. Even the non-matches
 (excluding blanks) would appear to be matches except for minor 
 spelling and nomenclature changes, e.g. ``NINTH AVE'' \& ``9 AVE''.
 
+
+\begin{comment}
 \begin{table}[ht]
     \centering
     \caption{Non-matches between 'street\_name' and 'landmark' fields}
@@ -1083,12 +1105,15 @@ spelling and nomenclature changes, e.g. ``NINTH AVE'' \& ``9 AVE''.
 	    	\end{tabular}
     \label{landmark}
 \end{table}
+\end{comment{
+
 	
-\subsection{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
+%\subsection{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
 \& intersection\_street\_2}
 \label{sec:street1}
 There are two sets of street pairs in the dataset in addition to 
 the complaint address:
+
 
 \begin{itemize}
 	\item cross\_street\_1
@@ -1096,6 +1121,7 @@ the complaint address:
 	\item intersection\_street\_1
 	\item intersection\_street\_2
 \end{itemize}
+
 	
 These two pairs of streets are used to help identify the location of the 
 reported incident, as it is common in New York City to provide the 
@@ -1105,12 +1131,14 @@ pair of fields are populated and are duplicates; 88\% of
 cross\_street\_1 matches intersection\_street\_1. Similarly with
 cross\_street\_2 exactly matches intersection\_street\_2.
 
+
 \textit{(Note: Address standardization was applied to the street 
 addresses using the R \emph{campfin} package. This was done 
 to prevent generating a non-match between 
 streets such as ``240 E 69\textsuperscript{th} ST'' and ``240 E 
 69\textsuperscript{th} Street'' which are clearly the same address
 but with formatting and spelling differences.)}
+
 
 In addition to the matching/non-matching values, we encountered a number 
 of \emph{near-matches}, cases where the 
@@ -1122,6 +1150,8 @@ measure of how many letters have to be changed in order for the two
 fields to match. For this analysis, we chose a Hamming Distance of 2. Here 
 are the results for both cross\_street and intersection\_street.
 
+
+\begin{comment}
 \begin{table}[tbp]
     \centering
      \caption{Near-matches for cross\_street\_1, intersection\_street\_1}
@@ -1197,14 +1227,16 @@ are the results for both cross\_street and intersection\_street.
 	      \bottomrule
 	    	\end{tabular}
 \end{table}
+\end{comment}
 
 
- \subsection{Shrinking file size by removing duplicates}
+ %\subsection{Shrinking file size by removing duplicates}
  \label{sec:filesize}
 By removing duplicate and ``near-duplicate'' fields, it is possible to 
 shrink the file size by 12.3\% which for this dataset equates to a 
 reduction of 395 Mb. A smaller file size means faster downloads, 
 less storage impact, as well as simplifying data analysis efforts.  
+ 
  
 Below is a list of duplicate and near-duplicate fields. There are 
 some challenges with these proposed deletions, mostly with 
@@ -1215,6 +1247,7 @@ loosing 1.7\% of the data in those two fields is quite small, however
 for this large dataset that amounts to 110, 715 
 non-matching occurrences. The authors  propose 
 deleting the following fields from the data set.
+ 
  
 \begin{itemize}
 	\item agency\_name: Each row of data contains the agency field, 
@@ -1251,6 +1284,7 @@ deleting the following fields from the data set.
 	dangerous mistakes when used for analytical purposes. 
 	We recommend deleting this field.
 \end{itemize}
+ 	
  	
 Additionally, it would be worth investigating if certain data fields are 
 in-fact useful, as the population of these fields is very, very scarce. For 
@@ -1384,7 +1418,7 @@ Here are recommendations as to how to resolve these issues.
 
 
 
-\section{Protocol Suggestions} \label{sec:protocol}
+%\section{Protocol Suggestions} \label{sec:protocol}
 
 
 

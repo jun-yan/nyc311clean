@@ -31,9 +31,12 @@ max_closed_date <- as.POSIXct("2024-01-31 23:59:59", format = "%Y-%m-%d %H:%M:%S
 
 #########################################################################
 # Create the bar chart
+#########################################################################
+# Create the bar chart
 create_bar_chart <- function(
     dataset,
     x_col,
+    y_col,
     chart_title,
     sub_title,
     x_axis_title,
@@ -42,7 +45,13 @@ create_bar_chart <- function(
     add_mean = FALSE,
     add_median = FALSE,
     add_sd = FALSE,
-    chart_file_name) {
+    add_trendline = FALSE,
+    add_maximum = FALSE,
+    add_minimum = FALSE,
+    add_second_maximum = FALSE,
+    extra_line = NULL,
+    chart_file_name) 
+{
   # Find the row with the maximum count
   max_row <- dataset[which.max(dataset[[y_axis_title]]), ]
   max_count <- max_row[[y_axis_title]]
@@ -89,10 +98,9 @@ create_bar_chart <- function(
     paste("Std Dev", print_out_title, ":"), format(median_value, big.mark = ",")
   )
 
-
   # Create the bar chart
   bar_chart <- ggplot(dataset, aes(x = .data[[x_col]], y = .data[[y_axis_title]])) +
-    geom_bar(stat = "identity", fill = "#009E73") +
+    geom_bar(stat = "identity", fill = "#117733") +
     theme(
       axis.title.x = element_text(vjust = 0, size = 11),
       axis.title.y = element_text(vjust = 1, size = 11),
@@ -104,56 +112,87 @@ create_bar_chart <- function(
     ) +
     geom_hline(
       yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "gray20", linewidth = 0.4
+      linetype = "dotted", color = "gray40", linewidth = 0.3
     ) +
     ggtitle(chart_title,
-      subtitle = paste(sub_title, total_count, sep = "")
+      subtitle = paste0(sub_title, format(total_count, big.mark = ","), sep = "")
     ) +
     labs(x = x_axis_title, y = NULL) +
-
-    # Add annotations for min and max values
-    annotate("text",
-      x = min_row[[x_col]], y = min_count,
-      label = "Min", size = 4, color = "gray20", vjust = 0.4, hjust = -0.6
-    ) +
-    annotate("text",
-      x = max_row[[x_col]], y = max_count,
-      label = "Max", size = 4, color = "gray20", vjust = 0.4, hjust = -0.6
+    annotate("text", x = max_row[[x_col]], y = max_count,
+             label = paste0("Max: ", format(max_count, big.mark = ",")),
+      size = 3.7, color = "black", vjust = -0.4, hjust = 0.5
     )
 
   # Add optional elements
   if (!is.null(starting_value) && !is.null(max_count) && !is.null(increment)) {
     bar_chart <- bar_chart +
-      geom_hline(yintercept = seq(starting_value, max_count, by = increment), linetype = "dotted", color = "gray20")
+      geom_hline(yintercept = seq(starting_value, max_count, by = increment),
+                 linetype = "dotted", color = "gray40")
   }
 
+  
+  if (add_maximum) {
+    bar_chart <- bar_chart +
+      annotate("text", x = max_row[[x_col]], y = y_max_count,
+               label = paste0("Max: ", format(y_max_count, big.mark = ",")), 
+               size = 3.7, color = "black", vjust = -0.4, hjust = 0.5)
+  }
+  
+  if (add_second_maximum) {
+    # Order the data frame by the count column in descending order
+    ordered_by_count <- dataset[order(dataset[[y_col]], decreasing = TRUE), ]
+    # Select the second row
+    second_max <- ordered_by_count[2, ]
+    
+    bar_chart <- bar_chart +
+      annotate("text", x = second_max[[x_col]], y = second_max[[y_col]],
+               label = paste0("2^nd~'Highest: ", format(second_max[[y_col]], big.mark = ","), "'"), , 
+               size = 3.7, color = "black", vjust = -0.4, hjust = 0.05, parse = TRUE)
+  }
+  
+  if (add_minimum) { 
+    bar_chart <- bar_chart + 
+      annotate("text", x = min_row[[x_col]], y = y_min_count,
+               label = paste0("Min: ", format(y_min_count, big.mark = ",")),
+               size = 3.7, color = "black", vjust = -0.4, hjust = 0.5 )
+  }
+  
   if (add_mean) {
     bar_chart <- bar_chart +
-      geom_hline(yintercept = mean_value, linetype = "dashed", color = "gray20", linewidth = 0.6) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value, label = "Average", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75)
+      geom_hline(yintercept = mean_value, linetype = "twodash", color = "black", linewidth = 0.6) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value, label = "Average",
+               size = 3.7, color = "black", hjust = -0.5, vjust = -0.75)
   }
 
   if (add_median) {
     bar_chart <- bar_chart +
-      geom_hline(yintercept = median_value, linetype = "dashed", color = "gray20", linewidth = 0.6) +
-      annotate("text", x = min(dataset[[x_col]]), y = median_value, label = "Median", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75)
+      geom_hline(yintercept = median_value, linetype = "twodash", color = "black", linewidth = 0.6) +
+      annotate("text", x = min(dataset[[x_col]]), y = median_value, label = "Median",
+               size = 3.7, color = "black", hjust = -0.5, vjust = -0.75)
   }
 
   if (add_sd) {
     bar_chart <- bar_chart +
-      # geom_hline(yintercept = mean_value + 1*sd_value, linetype = "longdash", color = "gray20", linewidth = 0.5) +
-      # geom_hline(yintercept = mean_value - 1*sd_value, linetype = "longdash", color = "gray20", linewidth = 0.5) +
-      geom_hline(yintercept = mean_value + 2 * sd_value, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-      geom_hline(yintercept = mean_value - 2 * sd_value, linetype = "longdash", color = "gray20", linewidth = 0.4) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value - 1*sd_value, label = "-1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-      # annotate("text", x = min(dataset[[x_col]]), y = mean_value + 1*sd_value, label = "+1 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 2 * sd_value, label = "+2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value - 2 * sd_value, label = "-2 SD", size = 4, color = "gray20", hjust = -0.5, vjust = -0.75)
+      geom_hline(yintercept = mean_value + 3*sd_value, linetype = "longdash",
+                 color = "black", linewidth = 0.3) +
+      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 3*sd_value, label = "+3 sigma",
+               size = 3.5, color = "black", hjust = -0.5, vjust = -0.75)
   }
 
+  if(add_trendline) {
+    bar_chart <- bar_chart +
+      stat_poly_eq( color = "#D55E00" ) +
+      geom_smooth(method = "lm", span = 1, se = FALSE, color = "#D55E00", 
+                  linetype = "dashed", linewidth = 0.9)
+  }
+  
+  
+  if (!is.null(extra_line)) {
+    bar_chart <- bar_chart + extra_line
+  }
+  
   # Print the bar chart
   suppressMessages(print(bar_chart))
-
   chart_path <- file.path(chart_directory_path, chart_file_name)
   suppressMessages(ggsave(chart_path, plot = bar_chart, width = 10, height = 8))
 }
@@ -482,18 +521,18 @@ create_boxplot <- function(
     x_axis_title,
     chart_title,
     chart_file_name) {
-  boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
-    geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
-    geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "gray20") +
-    theme(
-      legend.position = "none", plot.title = element_text(hjust = 0.5),
-      plot.subtitle = element_text(size = 9)
-    ) +
-    labs(
-      title = chart_title, x = x_axis_title, y = "",
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
-    )
-
+  
+    boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
+      geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
+      geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "black") +
+      theme(
+        legend.position = "none", plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(size = 9)
+      ) +
+      labs(
+        title = chart_title, x = x_axis_title, y = "",
+        subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
+      )
   suppressMessages(print(boxplot_chart))
 }
 
@@ -540,7 +579,6 @@ create_combo_chart <- function(
   starting_value <- result$starting_value
   increment <- result$increment
   scaling_factor <- result$scaling_factor
-  scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
   # Create a combination chart
   combo_chart <- ggplot(summary_df) +
@@ -551,7 +589,7 @@ create_combo_chart <- function(
       ),
       stat = "identity",
       fill = "#D55E00",
-      width = 0.5
+      width = 0.55
     ) +
     geom_line(
       aes(
@@ -559,17 +597,17 @@ create_combo_chart <- function(
         y = cumulative_percentage * max_count,
         group = 1,
       ),
-      colour = "gray20",
-      linewidth = 1.25,
+      colour = "black",
+      linewidth = 1,
       linetype = "dotted",
     ) +
     geom_text(
       aes(
-        label = round(count / scaling_factor, 2),
+        label = round(count / scaling_factor, 1),
         x = reorder(agency, cumulative_percentage),
         y = count
       ),
-      colour = "gray20", hjust = 0.5, vjust = -0.5, size = 4
+      colour = "black", hjust = 0.5, vjust = -0.5, size = 3
     ) +
     geom_text(
       aes(
@@ -577,24 +615,25 @@ create_combo_chart <- function(
         x = reorder(agency, cumulative_percentage),
         y = max_count * cumulative_percentage
       ),
-      colour = "gray20", hjust = 0.5, vjust = 1.7
+      colour = "black", hjust = 0.5, vjust = 1.7
     ) +
     geom_hline(
       yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "gray20"
+      linetype = "dotted", color = "black"
     ) +
     theme(
       axis.title.x = element_text(vjust = 0, size = 11),
-      axis.title.y.right = element_text(vjust = 1, size = 11, color = "gray20"),
+      axis.title.y.right = element_text(vjust = 1, size = 11, color = "black"),
       axis.title.y.left = element_blank(),
-      axis.text.y.right = element_text(color = "gray20"),
+      axis.text.y.right = element_text(color = "black"),
       axis.text.x = element_text(angle = 90, vjust = 0.35, hjust = 1, face = "bold"),
       plot.title = element_text(hjust = 0.5, size = 13),
       plot.subtitle = element_text(size = 9),
       legend.position = "none" # Remove all legends
     ) +
     ggtitle(chart_title,
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", total_count, sep = "")
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", 
+                       format(total_count, big.mark = ","), sep = "")
     ) +
     scale_y_continuous(
       breaks = seq(starting_value, max_count, by = increment),
@@ -603,7 +642,6 @@ create_combo_chart <- function(
     labs(x = NULL, y = NULL)
 
   suppressMessages(print(combo_chart, row.names = FALSE, right = FALSE))
-
   chart_path <- file.path(chart_directory_path, chart_file_name)
   suppressMessages(ggsave(chart_path, plot = combo_chart, width = 10, height = 8))
 }
@@ -618,14 +656,15 @@ create_violin_chart <- function(
   
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
     geom_jitter(width = 0.25, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
-    geom_violin(linewidth = 0.7, fill = "transparent", color = "gray20") +
-    geom_boxplot(width = 0.25, fill = "#D55E00", color = "gray20", alpha = 0.6, 
-                 outlier.colour = "gray20", outlier.size = 1) +
+    geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
+    geom_boxplot(width = 0.25, fill = "#D55E00", color = "black", alpha = 0.6, 
+                 outlier.colour = "black", outlier.size = 1) +
     labs(
       title = chart_title,
       x = x_axis_title,
       y = "",
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
+      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
+                       format(nrow(dataset), big.mark = ","), sep = "")
     ) +
     theme(
       plot.title = element_text(size = 13, hjust = 0.5),
@@ -633,7 +672,6 @@ create_violin_chart <- function(
     )
 
   suppressMessages(print(violin_chart))
-
   chart_path <- file.path(chart_directory_path, chart_file_name)
   suppressMessages(ggsave(chart_path, plot = violin_chart, width = 10, height = 8))
 }
@@ -720,12 +758,19 @@ filter_non_numeric_zipcodes <- function(df, zip_field) {
 makeColNamesUserFriendly <- function(dataset) {
 
   ## Convert any number of consecutive "."s to an underscore.
+  # names(dataset) <- gsub(
+  #   x = names(dataset),
+  #   pattern = "(\\.)+",
+  #   replacement = "_"
+  # )
+
+  
   names(dataset) <- gsub(
     x = names(dataset),
-    pattern = "(\\.)+",
+    pattern = "(\\.|\\s)+",
     replacement = "_"
   )
-
+  
   ## Drop the trailing "."s
   names(dataset) <- gsub(
     x = names(dataset),
@@ -911,10 +956,12 @@ options(digits = 14) # Set the number of decimal places to 14
 # Load the USPS zipcode file
 data2File <- file.path("..", "..", "data", "USPS_zipcodes.csv")
 USPSzipcodes <-
-  read.csv(data2File,
+  fread(data2File,
     header = TRUE,
-    colClasses = rep("character", ncol(read.csv(data2File)))
-  )
+    colClasses = rep("character"))
+
+USPSzipcodes <- as.data.frame(USPSzipcodes)
+
 USPSzipcodes <- makeColNamesUserFriendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
@@ -1066,25 +1113,26 @@ cityCouncilNYC <- makeColNamesUserFriendly(cityCouncilNYC)
 numCityCouncil <- nrow(cityCouncilNYC)
 
 #########################################################################
-# Load the NYC Streets file
-data4File <- file.path("..", "..", "data", "NYC_streets.csv")
-NYC_streets <-
-  read.csv(data4File,
-    header = TRUE,
-    colClasses = rep("character", ncol(read.csv(data4File)))
-  )
-NYC_streets <- makeColNamesUserFriendly(NYC_streets)
-numNYC_streets <- nrow(NYC_streets)
+# # Load the NYC Streets file
+# data4File <- file.path("..", "..", "data", "NYC_streets.csv")
+# NYC_streets <-
+#   fread(data4File,
+#     header = TRUE,
+#     colClasses = rep("character", ncol(read.csv(data4File)))
+#   )
+# NYC_streets <- makeColNamesUserFriendly(NYC_streets)
+# numNYC_streets <- nrow(NYC_streets)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
 d311 <-
-  read.csv(data1File,
+  fread(data1File,
     header = TRUE,
     colClasses = rep("character", ncol(read.csv(data1File)))
   )
 
-#d311 <- as.data.frame(d311)
+# Convert data.table to data.frame
+d311 <- as.data.frame(d311)
 
 # make columns names user friendly
 d311 <- makeColNamesUserFriendly(d311)
@@ -1214,7 +1262,7 @@ names(blank_count) <- c(char_non_date_cols, other_non_date_cols, date_cols)
 missingDataPerColumn <- data.frame(
   field = names(blank_count),
   total_empty = blank_count,
-  pct_empty = round((blank_count / num_rows_d311) * 100, 2)
+  pct_empty = round((blank_count / num_rows_d311) * 100, 1)
 )
 
 # Count NAs in each column
@@ -1238,12 +1286,10 @@ total_count <- sum(missingDataPerColumn$count)
 result <- calculate_values(max_count)
 starting_value <- as.numeric(result$starting_value)
 increment <- result$increment
-scaling_factor <- result$scaling_factor
-scaling_factor_str <- format(scaling_factor, scientific = FALSE, big.mark = ",")
 
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
-  geom_bar(stat = "identity", fill = "#009E73") +
+  geom_bar(stat = "identity", fill = "#117733") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
@@ -1260,10 +1306,10 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
   )) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray20"
+    linetype = "dotted", color = "gray40"
   ) +
   ggtitle("Number and % of blank/missing fields per column",
-    subtitle = paste(chart_sub_title, num_rows_d311, sep = "")
+    subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
   ) +
   labs(y = NULL, x = NULL)
 
@@ -1271,6 +1317,35 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
 print(blank_chart)
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
+########################################################################
+# Remove specific columns using base R subsetting
+# Check memory usage before deleting columns
+mem_before <- memory.size()
+
+# Delete columns (example: dataset <- dataset[, -c(1:5)])
+d311 <- d311[, !names(d311) %in% c(
+  "agency_name", 
+  "descriptor", 
+  "resolution_description", 
+  "bbl", 
+  "x_coordinate_state_plane ",
+  "y_coordinate_state_plane ",
+  "park_facility_name",
+  "bridge_highway_name",
+  "bridge_highway_direction",
+  "road_ramp",
+  "bridge_highway_segment")]
+
+gc()  #execute garbage collection to free up space
+
+# Check memory usage after deleting columns
+mem_after <- memory.size()
+
+# Calculate difference
+memory_freed <- mem_before - mem_after
+
+# Print results
+cat("Memory freed (MB):", memory_freed, "\n")
 
 ########################################################################
 cat("\n***Sort data by different date-time components.")
@@ -1426,7 +1501,7 @@ SR_created_hourly_ <- create_bar_chart(
   print_out_title = "Hourly created",
   add_mean = TRUE,
   add_median = FALSE,
-  add_sd = TRUE,
+  add_sd = FALSE,
   chart_file_name = "Created_Hourly_SR_count.pdf"
 )
 
@@ -1985,6 +2060,7 @@ if (num_rows_closedBeforeOpened > 0) {
   x_axis_field <- "duration"
   chart_title <- "Closed before Created (negative duration days)"
   chart_file_name <- "negative_duration_SR_violin.pdf"
+  
   negativeDurationViolin <- create_violin_chart(
     large_neg_duration,
     x_axis_label,
@@ -1997,7 +2073,7 @@ if (num_rows_closedBeforeOpened > 0) {
   negativeDurationChart <- ggplot(
     data = large_neg_duration, aes(x = duration, y = factor(1))) +
     geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
-    geom_boxplot(width = 0.25, fill = "#D55E00", alpha = 0.75, outlier.colour = "gray20", outlier.size = 1) +
+    geom_boxplot(width = 0.25, fill = "#D55E00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
       plot.subtitle = element_text(size = 9)
@@ -2383,6 +2459,7 @@ if (num_row_updatedLate > 0) {
     x_axis_field <- "postClosedUpdateDuration"
     chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
     chart_file_name <- "post_closed_violin.pdf"
+    
     post_closed_violin_chart <- create_violin_chart(
       updatedLate,
       x_axis_name,
@@ -2588,6 +2665,7 @@ chart_title <- "Response time for 'Homeless Person Assistance (cleaned data)' SR
 chart_file_name <- "homeless_response_time_clean.pdf"
 x_axis_name <- "Response time (days)"
 x_axis_field <- "duration"
+
 homeless_violin_chart <- create_violin_chart(
   homeless_assistance_SRs,
   x_axis_name,
@@ -2639,15 +2717,16 @@ print(top_10_zip_codes, row.names = FALSE, right = FALSE)
 
 #########################################################################
 # Normalize street names
-address_fields <- c("intersection_street_1", "intersection_street_2", 
+address_fields <- c("intersection_street_1", "intersection_street_2",
                     "cross_street_1", "cross_street_2",
-                    "street_name", "landmark") # Replace with your actual address field names
+                    "street_name", "landmark", "taxi_pick_up_location")
 
 xcloned311 <- d311 # Create a copy of the data to avoid modifying the original
 
 # **********************
 # Apply normal_address function to each column in address_fields
-xcloned311[address_fields] <- lapply(xcloned311[address_fields], normal_address, abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
+xcloned311[address_fields] <- lapply(xcloned311[address_fields], normal_address, 
+                                     abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
 
 # **********************
 cross_street <- "street_name"
@@ -2668,53 +2747,53 @@ cat("\n\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
 
 ##########################################################################
 
-# # # List of redundant columns to remove
-# redundant_columns <- c(
-#   "agency_name",
-#   "park_borough",
-#   "borough_boundaries",
-#   "location",
-#   "intersection_street_1",
-#   "intersection_street_2",
-#   "police_precinct",
-#   "duration",
-#   "postClosedUpdateDuration",
-#   "translated_borough_boundaries",
-#   "zip_codes"
-# )
-# 
-# cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
-# 
-# # Print the redundant columns vertically
-# index <- 1
-# for (column in redundant_columns) {
-#   cat("    ", index, "-", column, "\n")
-#   index <- index + 1
-# }
-# 
-# # Read the data into a data table object
-# d311 <- read.csv(data1File, header = TRUE, sep = ",")
-# 
-# # make columns names user friendly
-# d311 <- makeColNamesUserFriendly(d311)
-# 
-# # Calculate the current size of the data table object
-# original_size <- object.size(d311)
-# 
-# # Delete the redundant columns
-# d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
-# 
-# # Calculate the size of the new data table object
-# reduced_size <- object.size(d311_reduced)
-# 
-# # Compute the difference in size
-# size_reduction <- original_size - reduced_size
-# 
-# # Print the results
-# cat("Original size:", format(original_size, units = "auto"), "\n")
-# cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
-# cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
-#     round(size_reduction/original_size * 100, 1),  "%")
+# # List of redundant columns to remove
+redundant_columns <- c(
+  "agency_name",
+  "park_borough",
+  "borough_boundaries",
+  "location",
+  "intersection_street_1",
+  "intersection_street_2",
+  "police_precinct",
+  "duration",
+  "postClosedUpdateDuration",
+  "translated_borough_boundaries",
+  "zip_codes"
+)
+
+cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
+
+# Print the redundant columns vertically
+index <- 1
+for (column in redundant_columns) {
+  cat("    ", index, "-", column, "\n")
+  index <- index + 1
+}
+
+# Read the data into a data table object
+d311 <- fread(data1File, header = TRUE, sep = ",")
+
+# make columns names user friendly
+d311 <- makeColNamesUserFriendly(d311)
+
+# Calculate the current size of the data table object
+original_size <- object.size(d311)
+
+# Delete the redundant columns
+d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
+
+# Calculate the size of the new data table object
+reduced_size <- object.size(d311_reduced)
+
+# Compute the difference in size
+size_reduction <- original_size - reduced_size
+
+# Print the results
+cat("Original size:", format(original_size, units = "auto"), "\n")
+cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
+cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
+    round(size_reduction/original_size * 100, 1),  "%")
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
