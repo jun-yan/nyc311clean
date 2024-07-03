@@ -252,27 +252,21 @@ record high of 348,463 monthly service requests in August 2020 due to
 the COVID-19 pandemic, the 2021 expansion to include the MTA's city
 subway system, and a record 3.23 million service requests in
 2023. Today, the NYC 311 data system manages over 3 million service
-requests per year, covering issues such as street noise, illegal
-parking, heat and hot water, abandoned vehicles, and unsanitary
-conditions. This data is publicly accessible through the NYC Open Data
+requests per year. This data is publicly accessible through the NYC Open Data
 Portal, which provides tools for querying, grouping, aggregating,
 geo-mapping, visualizing, and exporting results.
 
 
-Despite its success, the 311 system faces several challenges, such as
+Despite its success, the 311 system faces several challenges:
 data timeliness, accuracy, and consistency, difficulties in
-correlating data over long periods, handling of personally
+correlating data over long periods, excluding personally
 identifiable information (PII), integration with stand-alone systems
-at selected NYC agencies, and managing API usage and load for numerous
+at selected NYC agencies, and managing API usagefor numerous
 third-party users. These challenges are addressed by various agency
 open data managers and the
 \href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology
   and Innovation (OTI)}, which provides technological support for the
-open data system. Data often needs to be exported and processed in
-external programs to address these issues, as observed in the
-examination of the large 311 dataset. Furthermore, the system must
-adapt to changes such as agency name changes and the introduction of
-new complaint types, which can complicate long-term data analysis.
+open data system. 
 
 
 The impact of NYC 311 data extends beyond operational efficiency; it
@@ -283,25 +277,15 @@ public. The data has been pivotal in providing advice on shelters
 during emergencies, handling inquiries during the COVID-19 pandemic,
 enforcing standards between landlords and tenants, reallocating taxi
 routes based on analyses by the Taxi and Limousine Commission (TLC),
-improving responsiveness for city agencies like Parks and Recreation,
-the Department of Transportation, and the Department of Sanitation,
-and addressing homelessness through initiatives like the Homeless
-Outreach and Mobile Engagement Street Action Teams (HOME-STAT). These
-applications demonstrate the transformative potential of open data in
-enhancing urban living and fostering a more responsive and transparent
-city government.
+improving responsiveness for city agencies, and addressing 
+homelessness through initiatives like the Homeless
+Outreach and Mobile Engagement Street Action Teams (HOME-STAT). 
 
+To begin, we looked at a 10-year period (2014-2023) to
+observe the data over a longer time-frame; see
+Figure~\ref{fig:10-yr-monthly}. During that time-frame,
+the number of 311 SRs grew by nearly 50\%.
 
-\begin{comment}
-\jy{FixME: this paragraph's location will be revisited later.}
-We extracted 311 SR data for the period of CY 2022--2023, a dataset of
-6.4 million SR records. This is a large dataset which enables 
-observation of some rarely seen events, data inaccuracies, 
-and logical inconsistencies. It provides enough data to 
-examine trends and data outlier analysis. We queried the data 
-directly from the NYC Open Data Portal and exported the 
-data for analysis with custom written R programs.
-\end{comment}
 
 %\begin{figure}[tbp]
 %	\centering
@@ -309,52 +293,6 @@ data for analysis with custom written R programs.
  %	\caption{10-year (2014-2023) Monthly SR Counts}
  % 	\label{fig:10-yr-monthly}
 %\end{figure}
-
-
-To begin, we looked at a 10-year period (2014-2023) to
-observe the data over a longer time-frame; see
-Figure~\ref{fig:10-yr-monthly}. During that time-frame,
-the number of 311 SRs grew by nearly 50\%. The summer months make
-up the highest days, and the winter months show the lowest activity.
-
-\begin{comment}
-\begin{table}[tbp]
-    \centering
-    \caption{Top 5 and Bottom 5 Days for SRs}
-    \label{tab:top-10-counts}
-    \begin{tabular}{@{}lll lll@{}}
-      \toprule
-      \multicolumn{2}{c}{Top 5 Days} & \multicolumn{2}{c}{Bottom 5 Days} \\
-      \cmidrule(r){1-2} \cmidrule(l){3-4}
-      Date & Count & Date & Count\\
-      \midrule
-      2020-08-04 & 24,415 & 2014-12-25 & 2965\\
-      2020-08-05 & 19,560 & 2015-12-25 & 3247\\
-      2023-09-29 & 17,962 & 2014-04-20 & 3287\\
-      2020-07-05 & 16,916 & 2015-12-26 & 3405\\
-      2020-06-21 & 15,883 & 2016-11-06 & 3419\\
-      \bottomrule
-    \end{tabular}
-\end{table}
-\end{comment}
-
-%Table~\ref{tab:top-10-counts} summarizes the top 5 and bottom 5 days
-i%n counts of SRs. 
-
-The highest daily SR count, 24,415, occurred on
-August 4, 2020, coinciding with the aftermath of Tropical Storm
-Isaias, highlighting the system's critical role during crises.
-
-% The second-highest count of 19,560 was the following day, 
-%reflecting the storm's continued impact. 
-
-Conversely, the lowest daily SR count, 2,965, was on Christmas Day,
-2014, with similar lows on other Christmas Days, indicating reduced
-activity during major holidays.
-
-% The data also shows fewer requests on weekends, such as 
-%April 20, 2014 (Easter Sunday), and November 6, 2016 (a non-holiday Sunday).
-
 
 %\begin{figure}[tbp]
 %	\centering
@@ -364,13 +302,12 @@ activity during major holidays.
 %\end{figure}
 
 
-Figure~\ref{fig:SRcountbyAgency} display the SR counts by agency with
-cumulative percentage. Two important fields in this analysis are the
-responsible NYC Agency and the type of complaint. Identifying the 
+Figure~\ref{fig:SRcountbyAgency} displays SR counts by Agency with
+cumulative percentage. Identifying the 
 responsible agency and type of complaint is essential 
-for identifying the accountable party and troubleshooting discrepancies. 
+for troubleshooting discrepancies. 
 This identification also assists in determining whether an issue is 
-specific to an agency or indicative of a broader, systemic problem. 
+specific to an Agency or indicative of a broader, systemic problem. 
 Six agencies account for 90\% of the complaints. These are the New York
 Police Department (NYPD), Housing Preservation and Development (HPD),
 New York City Department of Sanitation (DSNY), Department of
@@ -411,31 +348,11 @@ and Department of Parks and Recreation (DPR).
 \end{comment}
 
 
-The distribution of complaint types skews toward a few select
-categories, accompanied by a long tail. Figure~\ref{fig:SR_complaints}
-shows that the top 20 complaint types account for 70\% of the total
-220 different types. Notably, these top complaints include several
-variations of noise-related issues, which collectively represent 22\%
-of all complaints. When consolidated, noise complaints emerge as the
-most frequently occurring complaint type.
-
-% Table~\ref{tab:noisecomplaints}
-%provides a detailed breakdown of noise-related complaint types by
-%count and responsible agency. The most common noise complaint is
-%``Noise - Residential,'' with 675,502 complaints, accounting for 10.56\%
-%of all service requests, and primarily handled by the NYPD. Other
-%significant noise complaints include ``Noise - Street/Sidewalk"
-(%4.70\%), ``Noise - Commercial'' (2.02\%), and ``Noise - Vehicle"
-(%1.81\%), all managed by the NYPD. Additional categories such as
-%"Noise - Helicopter'' (1.33\%) fall under the jurisdiction of the EDC,
-%and ``Noise'' (1.57\%) is managed by the DEP. The prevalence of these
-%complaints underscores the critical role of the NYPD and other
-%agencies in addressing noise-related issues, reflecting the
-%significant impact of urban noise on residents' quality of life. This
-%data highlights the importance of efficient response and management
-%strategies to mitigate noise disturbances in New York City.
-
-
+Figure~\ref{fig:SR_complaints} shows that the top 20 complaint 
+types account for 70\% of the total 220 different types. Notably, 
+these top complaints include several variations of noise-related 
+issues, which collectively represent 22\% of all complaints, which
+when consolidated is the most frequently occurring complaint type.
 
 
 \section{Data Cleansing Issues} 
