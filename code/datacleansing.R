@@ -1,13 +1,13 @@
 #########################################################################
-install.packages("ggplot2")
-install.packages("campfin")
-install.packages("stringr")
-install.packages("stringdist")
-install.packages("dply(raw data")
-install.packages("styler")
-install.packages("ggpmisc")
-install.packages("lubridate")
-install.packages("data.table")
+# install.packages("ggplot2")
+# install.packages("campfin")
+# install.packages("stringr")
+# install.packages("stringdist")
+# install.packages("dply(raw data")
+# install.packages("styler")
+# install.packages("ggpmisc")
+# install.packages("lubridate")
+# install.packages("data.table")
 
 library(ggplot2)
 library(campfin)
@@ -19,7 +19,10 @@ library(ggpmisc)
 library(lubridate)
 library(data.table)
 
-sink("console_output.txt")
+sink("core_console_output.txt")
+
+# Set scipen option to a large value
+options(scipen = 999)
 
 data1File <- file.path("..", "..", "data", "311_2022-2023_AS_OF_01-31-2024.csv")
 chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "Core charts")
@@ -28,174 +31,6 @@ writeFilePath <- file.path("..", "..", "data", "smaller.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-01-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
-
-#########################################################################
-# Create the bar chart
-#########################################################################
-# Create the bar chart
-create_bar_chart <- function(
-    dataset,
-    x_col,
-    y_col,
-    chart_title,
-    sub_title,
-    x_axis_title,
-    y_axis_title,
-    print_out_title,
-    add_mean = FALSE,
-    add_median = FALSE,
-    add_sd = FALSE,
-    add_trendline = FALSE,
-    add_maximum = FALSE,
-    add_minimum = FALSE,
-    add_second_maximum = FALSE,
-    extra_line = NULL,
-    chart_file_name) 
-{
-  # Find the row with the maximum count
-  max_row <- dataset[which.max(dataset[[y_axis_title]]), ]
-  max_count <- max_row[[y_axis_title]]
-  total_count <- sum(dataset[[y_axis_title]], na.rm = TRUE)
-
-  # Find the row with the minimum count
-  min_row <- dataset[which.min(dataset[[y_axis_title]]), ]
-  min_count <- min_row[[y_axis_title]]
-
-  result <- calculate_values(max_count)
-  starting_value <- result$starting_value
-  increment <- result$increment
-  scaling_factor <- result$scaling_factor
-
-  # Calculate mean, median, and standard deviation if requested
-
-  mean_value <- round(mean(dataset[[y_axis_title]]), 0)
-  median_value <- round(median(dataset[[y_axis_title]]), 0)
-  sd_value <- round(sd(dataset[[y_axis_title]]), 0)
-
-  # Print the date and count for maximum value
-  cat("\n\n***", print_out_title, "SRs***")
-
-  # Change the first letter to lower case for print out purposes
-  print_out_title <- substr(print_out_title, 1, 1) %>%
-    tolower() %>%
-    paste(., substr(print_out_title, 2, nchar(print_out_title)), sep = "")
-
-  cat(
-    "\n", paste("Maximum", print_out_title, ":"), as.character(max_row[[x_col]]), "  ",
-    paste("Maximum", print_out_title, "count:"), format(max_count, big.mark = ",")
-  )
-
-  # Print the date and count for minimum value
-  cat(
-    "\n", paste("Minimum", print_out_title, ":"), as.character(min_row[[x_col]]), "  ",
-    paste("Minimum", print_out_title, "count: "), format(min_count, big.mark = ","), "\n"
-  )
-
-  # Print the date and count for minimum value
-  cat(
-    "\n", paste("Average", print_out_title, ":"), format(mean_value, big.mark = ","), "  ",
-    paste("Median", print_out_title, ":"), format(median_value, big.mark = ","),
-    paste("Std Dev", print_out_title, ":"), format(median_value, big.mark = ",")
-  )
-
-  # Create the bar chart
-  bar_chart <- ggplot(dataset, aes(x = .data[[x_col]], y = .data[[y_axis_title]])) +
-    geom_bar(stat = "identity", fill = "#117733") +
-    theme(
-      axis.title.x = element_text(vjust = 0, size = 11),
-      axis.title.y = element_text(vjust = 1, size = 11),
-      plot.title = element_text(hjust = 0.5, size = 13),
-      plot.subtitle = element_text(size = 9),
-      panel.background = element_rect(fill = "gray95", color = "gray95"),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold"),
-      axis.text.y = element_text(face = "bold")
-    ) +
-    geom_hline(
-      yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "gray40", linewidth = 0.3
-    ) +
-    ggtitle(chart_title,
-      subtitle = paste0(sub_title, format(total_count, big.mark = ","), sep = "")
-    ) +
-    labs(x = x_axis_title, y = NULL) +
-    annotate("text", x = max_row[[x_col]], y = max_count,
-             label = paste0("Max: ", format(max_count, big.mark = ",")),
-      size = 3.7, color = "black", vjust = -0.4, hjust = 0.5
-    )
-
-  # Add optional elements
-  if (!is.null(starting_value) && !is.null(max_count) && !is.null(increment)) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = seq(starting_value, max_count, by = increment),
-                 linetype = "dotted", color = "gray40")
-  }
-
-  
-  if (add_maximum) {
-    bar_chart <- bar_chart +
-      annotate("text", x = max_row[[x_col]], y = y_max_count,
-               label = paste0("Max: ", format(y_max_count, big.mark = ",")), 
-               size = 3.7, color = "black", vjust = -0.4, hjust = 0.5)
-  }
-  
-  if (add_second_maximum) {
-    # Order the data frame by the count column in descending order
-    ordered_by_count <- dataset[order(dataset[[y_col]], decreasing = TRUE), ]
-    # Select the second row
-    second_max <- ordered_by_count[2, ]
-    
-    bar_chart <- bar_chart +
-      annotate("text", x = second_max[[x_col]], y = second_max[[y_col]],
-               label = paste0("2^nd~'Highest: ", format(second_max[[y_col]], big.mark = ","), "'"), , 
-               size = 3.7, color = "black", vjust = -0.4, hjust = 0.05, parse = TRUE)
-  }
-  
-  if (add_minimum) { 
-    bar_chart <- bar_chart + 
-      annotate("text", x = min_row[[x_col]], y = y_min_count,
-               label = paste0("Min: ", format(y_min_count, big.mark = ",")),
-               size = 3.7, color = "black", vjust = -0.4, hjust = 0.5 )
-  }
-  
-  if (add_mean) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = mean_value, linetype = "twodash", color = "black", linewidth = 0.6) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value, label = "Average",
-               size = 3.7, color = "black", hjust = -0.5, vjust = -0.75)
-  }
-
-  if (add_median) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = median_value, linetype = "twodash", color = "black", linewidth = 0.6) +
-      annotate("text", x = min(dataset[[x_col]]), y = median_value, label = "Median",
-               size = 3.7, color = "black", hjust = -0.5, vjust = -0.75)
-  }
-
-  if (add_sd) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = mean_value + 3*sd_value, linetype = "longdash",
-                 color = "black", linewidth = 0.3) +
-      annotate("text", x = min(dataset[[x_col]]), y = mean_value + 3*sd_value, label = "+3 sigma",
-               size = 3.5, color = "black", hjust = -0.5, vjust = -0.75)
-  }
-
-  if(add_trendline) {
-    bar_chart <- bar_chart +
-      stat_poly_eq( color = "#D55E00" ) +
-      geom_smooth(method = "lm", span = 1, se = FALSE, color = "#D55E00", 
-                  linetype = "dashed", linewidth = 0.9)
-  }
-  
-  
-  if (!is.null(extra_line)) {
-    bar_chart <- bar_chart + extra_line
-  }
-  
-  # Print the bar chart
-  suppressMessages(print(bar_chart))
-  chart_path <- file.path(chart_directory_path, chart_file_name)
-  suppressMessages(ggsave(chart_path, plot = bar_chart, width = 10, height = 8))
-}
 
 #########################################################################
 # compute the Hamming distance between two strings. Determine if it meets the threshold.
@@ -306,7 +141,7 @@ cross_street_analysis <- function(
     agency_match_non_dup <- rank_by_agency(non_dup_streets)
 
     chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
-    chart_file_name <- paste0("non-matching", cross_street, "and", intersection_street, ".pdf", sep = "")
+    chart_file_name <- paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
     create_combo_chart(
       non_dup_streets,
       chart_title,
@@ -543,6 +378,7 @@ create_combo_chart <- function(
     dataset,
     chart_title,
     chart_file_name) {
+  
   # Create a frequency table of counts by "agency"
   count_table <- table(dataset$agency)
 
@@ -551,7 +387,6 @@ create_combo_chart <- function(
     agency = names(count_table),
     count = as.vector(count_table)
   )
-
   summary_df <- summary_df[order(summary_df$count, decreasing = TRUE), ]
 
   # Calculate percentage and cumulative percentage
@@ -579,66 +414,47 @@ create_combo_chart <- function(
   starting_value <- result$starting_value
   increment <- result$increment
   scaling_factor <- result$scaling_factor
-
+  
   # Create a combination chart
   combo_chart <- ggplot(summary_df) +
-    geom_bar(
-      aes(
-        x = reorder(agency, cumulative_percentage),
-        y = count
-      ),
-      stat = "identity",
-      fill = "#D55E00",
-      width = 0.55
-    ) +
-    geom_line(
-      aes(
-        x = reorder(agency, cumulative_percentage),
-        y = cumulative_percentage * max_count,
-        group = 1,
-      ),
-      colour = "black",
-      linewidth = 1,
-      linetype = "dotted",
-    ) +
-    geom_text(
-      aes(
-        label = round(count / scaling_factor, 1),
-        x = reorder(agency, cumulative_percentage),
-        y = count
-      ),
-      colour = "black", hjust = 0.5, vjust = -0.5, size = 3
-    ) +
-    geom_text(
-      aes(
-        label = round(cumulative_percentage, 2),
-        x = reorder(agency, cumulative_percentage),
-        y = max_count * cumulative_percentage
-      ),
-      colour = "black", hjust = 0.5, vjust = 1.7
-    ) +
-    geom_hline(
-      yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "black"
-    ) +
+    
+    geom_bar( aes( x = reorder(agency, cumulative_percentage), y = count),
+      stat = "identity", fill = "#D55E00", width = 0.55 ) +
+    
+    geom_line( aes( x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count,
+        group = 1,), colour = "black", linewidth = 1, linetype = "dotted", ) +
+    
+    geom_text( aes( label = round(count/scaling_factor, 1), x = reorder(agency, cumulative_percentage),
+        y = count ), colour = "black", hjust = 0.5, vjust = -0.5, size = 3.5 ) +
+    
+    geom_text( aes( label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
+        y = max_count * cumulative_percentage ), colour = "black", hjust = 0.5, vjust = 1.7 ) +
+    
+    geom_hline( yintercept = seq(starting_value, max_count, by = increment), 
+                linetype = "dotted", color = "gray40", linewidth = 0.45 ) +
+    
     theme(
       axis.title.x = element_text(vjust = 0, size = 11),
       axis.title.y.right = element_text(vjust = 1, size = 11, color = "black"),
       axis.title.y.left = element_blank(),
       axis.text.y.right = element_text(color = "black"),
-      axis.text.x = element_text(angle = 90, vjust = 0.35, hjust = 1, face = "bold"),
+      axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold"),
       plot.title = element_text(hjust = 0.5, size = 13),
       plot.subtitle = element_text(size = 9),
-      legend.position = "none" # Remove all legends
+      legend.position = "none",
+      plot.margin = margin(t = 5.5, r = 5.5, b = 5.5, l = 5.5)
     ) +
-    ggtitle(chart_title,
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " total=", 
-                       format(total_count, big.mark = ","), sep = "")
+    
+    ggtitle(
+      chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
+                                    " total=", format(total_count, big.mark = ","), sep = "")
     ) +
+    
     scale_y_continuous(
       breaks = seq(starting_value, max_count, by = increment),
       sec.axis = sec_axis(~ . / max_count, name = "Cumulative Percentage")
     ) +
+    
     labs(x = NULL, y = NULL)
 
   suppressMessages(print(combo_chart, row.names = FALSE, right = FALSE))
@@ -655,10 +471,10 @@ create_violin_chart <- function(
     chart_file_name) {
   
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
-    geom_jitter(width = 0.25, alpha = 0.4, color = "#2271B2", size = 1.9, shape = 17) +
+    geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2"", size = 1.9, shape = 17) +
     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
     geom_boxplot(width = 0.25, fill = "#D55E00", color = "black", alpha = 0.6, 
-                 outlier.colour = "black", outlier.size = 1) +
+                 outlier.colour = "black", outlier.size = 0.75) +
     labs(
       title = chart_title,
       x = x_axis_title,
@@ -678,58 +494,51 @@ create_violin_chart <- function(
 
 #########################################################################
 calculate_values <- function(max_count) {
-  # Set scipen option to a large value
-  options(scipen = 999)
-  thresholds <- c(
-    10,
-    100,
-    250,
-    500,
-    1000,
-    2500,
-    5000,
-    10000,
-    15000,
-    25000,
-    50000,
-    100000,
-    250000,
-    500000,
-    1000000,
-    2500000,
-    5000000,
-    10000000,
-    50000000,
-    100000000
-  )
+  
+  thresholds <- c(     50, 
+                       75, 
+                       250, 
+                       1000, 
+                       5000, 
+                       7500, 
+                       15000, 
+                       20000, 
+                       50000, 
+                       60000, 
+                       75000, 
+                       200000, 
+                       300000, 
+                       750000, 
+                       1000000, 
+                       1500000, 
+                       2000000, 
+                       5000000, 
+                       10000000 )
 
-  values <- matrix(c(
-    0, 1, 1,
-    0, 20, 1,
-    50, 50, 1,
-    100, 100, 1,
-    100, 200, 1,
-    250, 250, 1,
-    1000, 1000, 1,
-    1000, 2000, 1000,
-    2500, 2500, 1000,
-    5000, 5000, 1000,
-    5000, 10000, 100,
-    10000, 20000, 1000,
-    50000, 50000, 1000,
-    100000, 50000, 1000,
-    100000, 200000, 1000,
-    250000, 250000, 1000,
-    500000, 500000, 1000,
-    1000000, 1000000, 1000000,
-    5000000, 5000000, 1000000,
-    10000000, 20000000, 1000000
-  ), ncol = 3, byrow = TRUE)
+  values <- matrix(c( 10,10,1,
+                      25,25,1,
+                      50,50,1,
+                      250,250,1,
+                      1000,1000,1,
+                      2000,2000,1,
+                      2500,2500,1,
+                      5000,5000,1,
+                      10000,10000,1,
+                      15000,15000,1,
+                      25000,25000,1,
+                      50000,50000,1000,
+                      75000,75000,1000,
+                      150000,150000,1000,
+                      250000,250000,1000,
+                      300000,300000,1000,
+                      500000,500000,1000,
+                      1000000,1000000,1000,
+                      1000000,1000000,1000 ), 
+                   ncol = 3, byrow = TRUE)
 
   colnames(values) <- c("starting_value", "increment", "scaling_factor")
 
   index <- findInterval(max_count, thresholds)
-  index <- index + 1
 
   # Use format() to prevent scientific notation
   result <- lapply(values[index, ], format, scientific = FALSE)
@@ -757,14 +566,6 @@ filter_non_numeric_zipcodes <- function(df, zip_field) {
 ##  This leaves the column names with spaces replaced by an underscore "_", i.e. nicer names.
 makeColNamesUserFriendly <- function(dataset) {
 
-  ## Convert any number of consecutive "."s to an underscore.
-  # names(dataset) <- gsub(
-  #   x = names(dataset),
-  #   pattern = "(\\.)+",
-  #   replacement = "_"
-  # )
-
-  
   names(dataset) <- gsub(
     x = names(dataset),
     pattern = "(\\.|\\s)+",
@@ -1113,23 +914,13 @@ cityCouncilNYC <- makeColNamesUserFriendly(cityCouncilNYC)
 numCityCouncil <- nrow(cityCouncilNYC)
 
 #########################################################################
-# # Load the NYC Streets file
-# data4File <- file.path("..", "..", "data", "NYC_streets.csv")
-# NYC_streets <-
-#   fread(data4File,
-#     header = TRUE,
-#     colClasses = rep("character", ncol(read.csv(data4File)))
-#   )
-# NYC_streets <- makeColNamesUserFriendly(NYC_streets)
-# numNYC_streets <- nrow(NYC_streets)
-
-#########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
 d311 <-
   fread(data1File,
     header = TRUE,
     colClasses = rep("character", ncol(read.csv(data1File)))
   )
+original_size <- object.size(d311)
 
 # Convert data.table to data.frame
 d311 <- as.data.frame(d311)
@@ -1317,11 +1108,9 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
 print(blank_chart)
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
+
 ########################################################################
 # Remove specific columns using base R subsetting
-# Check memory usage before deleting columns
-mem_before <- memory.size()
-
 # Delete columns (example: dataset <- dataset[, -c(1:5)])
 d311 <- d311[, !names(d311) %in% c(
   "agency_name", 
@@ -1335,189 +1124,6 @@ d311 <- d311[, !names(d311) %in% c(
   "bridge_highway_direction",
   "road_ramp",
   "bridge_highway_segment")]
-
-gc()  #execute garbage collection to free up space
-
-# Check memory usage after deleting columns
-mem_after <- memory.size()
-
-# Calculate difference
-memory_freed <- mem_before - mem_after
-
-# Print results
-cat("Memory freed (MB):", memory_freed, "\n")
-
-########################################################################
-cat("\n***Sort data by different date-time components.")
-
-# Sort the dataset by different date-time components
-sorted_by_year <- d311 %>%
-  mutate(year = year(created_date)) %>%
-  group_by(year) %>%
-  summarize(count = n()) %>%
-  arrange(desc(year))
-
-sorted_by_month <- d311 %>%
-  mutate(month = month(created_date)) %>%
-  group_by(month) %>%
-  summarize(count = n()) %>%
-  arrange(match(month, month.abb))
-
-sorted_by_day_of_the_month <- d311 %>%
-  mutate(day = day(created_date)) %>%
-  group_by(day) %>%
-  summarize(count = n()) %>%
-  arrange(day)
-
-sorted_by_day_of_year <- d311 %>%
-  mutate(day_of_year = yday(created_date)) %>%
-  group_by(day_of_year) %>%
-  summarize(count = n()) %>%
-  arrange(day_of_year)
-
-sorted_by_daily_date <- d311 %>%
-  mutate(daily_date = make_date(year(created_date), month(created_date), day(created_date))) %>%
-  group_by(daily_date) %>%
-  summarize(count = n()) %>%
-  arrange(daily_date)
-
-sorted_by_month_year <- d311 %>%
-  mutate(month_year = floor_date(created_date, "month")) %>%
-  group_by(month_year) %>%
-  summarize(count = n()) %>%
-  arrange(month_year)
-
-sorted_by_daily_weekday <- d311 %>%
-  mutate(weekday = weekdays(created_date)) %>%
-  group_by(weekday) %>%
-  summarize(count = n()) %>%
-  arrange(match(weekday, c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"))) %>%
-  mutate(weekday = recode(weekday,
-    "Monday" = "1-Monday",
-    "Tuesday" = "2-Tuesday",
-    "Wednesday" = "3-Wednesday",
-    "Thursday" = "4-Thursday",
-    "Friday" = "5-Friday",
-    "Saturday" = "6-Saturday",
-    "Sunday" = "7-Sunday"
-  ))
-
-sorted_by_created_hour <- d311 %>%
-  mutate(hour = hour(created_date)) %>%
-  group_by(hour) %>%
-  summarize(count = n()) %>%
-  arrange(hour)
-
-sorted_by_closed_hour <- d311 %>%
-  filter(!is.na(closed_date)) %>%
-  mutate(hour = hour(closed_date)) %>%
-  group_by(hour) %>%
-  summarize(count = n()) %>%
-  arrange(hour)
-
-
-# SRs created by month-year
-SR_monthly <- create_bar_chart(
-  dataset = sorted_by_month_year,
-  x_col = "month_year",
-  chart_title = "Monthly SR count w/average",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Monthly",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  chart_file_name = "Month_Year_SR_count.pdf"
-)
-
-# SRs created by year-month-day (Jan 21, 2024)
-SR_daily <- create_bar_chart(
-  dataset = sorted_by_daily_date,
-  x_col = "daily_date",
-  chart_title = "Daily SR count w/average",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Daily",
-  add_mean = FALSE,
-  add_median = TRUE,
-  add_sd = TRUE,
-  chart_file_name = "Daily_Date_SR_count.pdf"
-)
-
-# SRs created by the day of the month (1-31)
-SR_day_of_the_month <- create_bar_chart(
-  dataset = sorted_by_day_of_the_month,
-  x_col = "day",
-  chart_title = "Day of the month SR count w/average",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Day_of_the_month",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  chart_file_name = "Day_of_the_month_SR_count.pdf"
-)
-
-# SRs created by the day of the year (1-365)
-SR_day_of_the_year <- create_bar_chart(
-  dataset = sorted_by_day_of_year,
-  x_col = "day_of_year",
-  chart_title = "Day of the year SR count w/average",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Day_of_the_year",
-  add_mean = FALSE,
-  add_median = TRUE,
-  add_sd = TRUE,
-  chart_file_name = "Day_of_the_year_SR_count.pdf"
-)
-
-# SRs created by the day of the year (1-365)
-SR_day_of_the_week <- create_bar_chart(
-  dataset = sorted_by_daily_weekday,
-  x_col = "weekday",
-  chart_title = "Day of the week SR count w/average",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Day_of_the_week",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  chart_file_name = "Day_of_the_week_SR_count.pdf"
-)
-
-SR_created_hourly_ <- create_bar_chart(
-  dataset = sorted_by_created_hour,
-  x_col = "hour",
-  chart_title = "SRs created by hour of the day",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Hourly created",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  chart_file_name = "Created_Hourly_SR_count.pdf"
-)
-
-SR_closed_hourly_ <- create_bar_chart(
-  dataset = sorted_by_closed_hour,
-  x_col = "hour",
-  chart_title = "SRs closed by hour of the day",
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = "count",
-  print_out_title = "Hourly closed",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = TRUE,
-  chart_file_name = "Closed_Hourly_SR_count.pdf"
-)
 
 #########################################################################
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
@@ -1537,8 +1143,8 @@ d311$agency[d311$agency == "NYC311-PRD"] <- "OTI"
 # Replace "DOITT" with "OTI" in the agency column
 d311$agency[d311$agency == "DOITT"] <- "OTI"
 
-# Replace "NYC311-PRD" with "OTI" in the agency column
-d311$agency[d311$agency == "NYC311-PRD"] <- "OTI"
+# # Replace "NYC311-PRD" with "OTI" in the agency column
+# d311$agency[d311$agency == "NYC311-PRD"] <- "OTI"
 
 sorted_by_agency <- rank_by_agency(d311)
 
@@ -2072,7 +1678,7 @@ if (num_rows_closedBeforeOpened > 0) {
   # Create boxplot of the (negative) duration values
   negativeDurationChart <- ggplot(
     data = large_neg_duration, aes(x = duration, y = factor(1))) +
-    geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
+    geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
     geom_boxplot(width = 0.25, fill = "#D55E00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
@@ -2085,7 +1691,7 @@ if (num_rows_closedBeforeOpened > 0) {
     )
 
   print(negativeDurationChart)
-  chart_path <- file.path(chart_directory_path, "negative_duration_SR.pdf")
+  chart_path <- file.path(chart_directory_path, "negative_duration_SR_boxplot.pdf")
   ggsave(chart_path, plot = negativeDurationChart, width = 10, height = 8)
 } else {
   cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
@@ -2185,7 +1791,7 @@ if (num_rows_future > 0) {
       data = closedinFuture,
       aes(x = future_days, y = factor(1))
     ) +
-      geom_jitter(color = "#2271B2", size = 2, shape = 17) +
+      geom_jitter(color = "#0072B2", size = 2, shape = 17) +
       geom_boxplot(
         outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
         fill = "#D55E00", size = 1, color = "black"
@@ -2211,138 +1817,138 @@ if (num_rows_future > 0) {
 }
 
 #########################################################################
-# Identify SRs created at midnight and noon
-# Extract hour, minute, and second components of closed_date for valid rows
-hour <- as.numeric(format(d311$created_date, "%H"))
-minute <- as.numeric(format(d311$created_date, "%M"))
-second <- as.numeric(format(d311$created_date, "%S"))
-
-# Identify rows with time exactly at midnight (00:00:00)
-midnight_created_rows <- hour == 0 & minute == 0 & second == 0
-noon_created_rows <- hour == 12 & minute == 0 & second == 0
-
-# Count the number of rows with time exactly at midnight
-midnight_created_count <- sum(midnight_created_rows)
-noon_created_count <- sum(noon_created_rows)
-
-midnight_created_data <- d311[midnight_created_rows, ]
-created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "agency")]
-
-noon_created_data <- d311[noon_created_rows, ]
-created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
-
-if (midnight_created_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(midnight_created_count, big.mark = ","),
-    "SRs that were 'created' at exactly midnight.\n"
-  )
-
-  sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
-
-  chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
-  chart_file_name <- "created_at_midnight_chart.pdf"
-
-  create_combo_chart(
-    created_at_midnight,
-    chart_title,
-    chart_file_name
-  )
-} else {
-  cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
-}
-
-if (noon_created_count > 0) {
-  cat(
-    "\n\nThere",
-    format(noon_created_count, big.mark = ","),
-    "SRs that were 'created' exactly at noon."
-  )
-
-  sorted_create_at_noon <- rank_by_agency(created_at_noon)
-
-  chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "created_at_noon_chart.pdf"
-  if (!is.null(sorted_create_at_noon)) {
-    create_combo_chart(
-      created_at_noon,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
-  }
-}
-
-#########################################################################
-# Identify SRs closed at midnight and noon
-
-# Remove N/A closed_date(s)
-valid_closed_date <- !is.na(d311$closed_date)
-valid_closed_data <- d311[valid_closed_date, ]
-
-# Extract hour, minute, and second components of closed_date for valid rows
-hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
-minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
-second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
-
-# Identify rows with time exactly at midnight (00:00:00)
-midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
-noon_closed_rows <- hour == 12 & minute == 0 & second == 0
-
-# Count the number of rows with time exactly at midnight
-midnight_closed_count <- sum(midnight_closed_rows)
-noon_closed_count <- sum(noon_closed_rows)
-
-midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
-closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "agency")]
-
-noon_closed_data <- valid_closed_data[noon_closed_rows, ]
-closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
-
-if (midnight_closed_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(midnight_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at midnight."
-  )
-
-  sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
-
-  chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
-  chart_file_name <- "closed_at_midnight_chart.pdf"
-  if (!is.null(sorted_closed_at_midnight)) {
-    create_combo_chart(
-      closed_at_midnight,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
-  }
-}
-
-if (noon_closed_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(noon_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at noon."
-  )
-
-  sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
-
-  chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "closed_at_noon_chart.pdf"
-  if (!is.null(sorted_closed_at_noon)) {
-    create_combo_chart(
-      closed_at_noon,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
-  }
-}
+# # Identify SRs created at midnight and noon
+# # Extract hour, minute, and second components of closed_date for valid rows
+# hour <- as.numeric(format(d311$created_date, "%H"))
+# minute <- as.numeric(format(d311$created_date, "%M"))
+# second <- as.numeric(format(d311$created_date, "%S"))
+# 
+# # Identify rows with time exactly at midnight (00:00:00)
+# midnight_created_rows <- hour == 0 & minute == 0 & second == 0
+# noon_created_rows <- hour == 12 & minute == 0 & second == 0
+# 
+# # Count the number of rows with time exactly at midnight
+# midnight_created_count <- sum(midnight_created_rows)
+# noon_created_count <- sum(noon_created_rows)
+# 
+# midnight_created_data <- d311[midnight_created_rows, ]
+# created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "agency")]
+# 
+# noon_created_data <- d311[noon_created_rows, ]
+# created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
+# 
+# if (midnight_created_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(midnight_created_count, big.mark = ","),
+#     "SRs that were 'created' at exactly midnight.\n"
+#   )
+# 
+#   sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
+# 
+#   chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
+#   chart_file_name <- "created_at_midnight_chart.pdf"
+# 
+#   create_combo_chart(
+#     created_at_midnight,
+#     chart_title,
+#     chart_file_name
+#   )
+# } else {
+#   cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
+# }
+# 
+# if (noon_created_count > 0) {
+#   cat(
+#     "\n\nThere",
+#     format(noon_created_count, big.mark = ","),
+#     "SRs that were 'created' exactly at noon."
+#   )
+# 
+#   sorted_create_at_noon <- rank_by_agency(created_at_noon)
+# 
+#   chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
+#   chart_file_name <- "created_at_noon_chart.pdf"
+#   if (!is.null(sorted_create_at_noon)) {
+#     create_combo_chart(
+#       created_at_noon,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
+#   }
+# }
+# 
+# #########################################################################
+# # Identify SRs closed at midnight and noon
+# 
+# # Remove N/A closed_date(s)
+# valid_closed_date <- !is.na(d311$closed_date)
+# valid_closed_data <- d311[valid_closed_date, ]
+# 
+# # Extract hour, minute, and second components of closed_date for valid rows
+# hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
+# minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
+# second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
+# 
+# # Identify rows with time exactly at midnight (00:00:00)
+# midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
+# noon_closed_rows <- hour == 12 & minute == 0 & second == 0
+# 
+# # Count the number of rows with time exactly at midnight
+# midnight_closed_count <- sum(midnight_closed_rows)
+# noon_closed_count <- sum(noon_closed_rows)
+# 
+# midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
+# closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "agency")]
+# 
+# noon_closed_data <- valid_closed_data[noon_closed_rows, ]
+# closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
+# 
+# if (midnight_closed_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(midnight_closed_count, big.mark = ","),
+#     "SRs that were 'closed' exactly at midnight."
+#   )
+# 
+#   sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
+# 
+#   chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
+#   chart_file_name <- "closed_at_midnight_chart.pdf"
+#   if (!is.null(sorted_closed_at_midnight)) {
+#     create_combo_chart(
+#       closed_at_midnight,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
+#   }
+# }
+# 
+# if (noon_closed_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(noon_closed_count, big.mark = ","),
+#     "SRs that were 'closed' exactly at noon."
+#   )
+# 
+#   sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
+# 
+#   chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
+#   chart_file_name <- "closed_at_noon_chart.pdf"
+#   if (!is.null(sorted_closed_at_noon)) {
+#     create_combo_chart(
+#       closed_at_noon,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
+#   }
+# }
 
 #########################################################################
 # Identify SRs with a 'due_date' that is before the 'created_date'
@@ -2378,7 +1984,6 @@ if (num_row_bad_due_date > 0) {
 #########################################################################
 # Identify SRs with a 'resolution_action_updated_date' that is > 30 days after 'closed_date'
 # Add the "postClosedUpdateDuration" column
-
 d311 <- d311 %>%
   mutate(
     postClosedUpdateDuration = ifelse(
@@ -2448,7 +2053,7 @@ if (num_row_updatedLate > 0) {
     sorted_updateLate <- rank_by_agency(updatedLate)
 
     chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage")
-    chart_file_name <- "postClosedBarChart.pdf"
+    chart_file_name <- "post_Closed_Bar_Chart.pdf"
     create_combo_chart(
       updatedLate,
       chart_title,
@@ -2458,7 +2063,7 @@ if (num_row_updatedLate > 0) {
     x_axis_name <- "Post_closed Resolution Update (days)"
     x_axis_field <- "postClosedUpdateDuration"
     chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
-    chart_file_name <- "post_closed_violin.pdf"
+    chart_file_name <- "post_closed_violin_chart.pdf"
     
     post_closed_violin_chart <- create_violin_chart(
       updatedLate,
@@ -2607,7 +2212,8 @@ nonMatchingZipcodes <- detect_duplicates(
 )
 
 if (!is.null(nonMatchingZipcodes)) {
-  sorted_zips <- rank_by_agency(nonMatchingZipcodes)
+# Unknown line of code
+  #  sorted_zips <- rank_by_agency(nonMatchingZipcodes)
 
   chart_title <- "non-matching between 'incident_zip' and 'zip_codes' by Agency & cumulative percentage"
   chart_file_name <- "non_matching_zip_code_chart.pdf"
@@ -2662,7 +2268,7 @@ if (num_row_neg_duration > 0) {
 }
 
 chart_title <- "Response time for 'Homeless Person Assistance (cleaned data)' SRs"
-chart_file_name <- "homeless_response_time_clean.pdf"
+chart_file_name <- "homeless_response_time_clean_violin.pdf"
 x_axis_name <- "Response time (days)"
 x_axis_field <- "duration"
 
@@ -2721,32 +2327,31 @@ address_fields <- c("intersection_street_1", "intersection_street_2",
                     "cross_street_1", "cross_street_2",
                     "street_name", "landmark", "taxi_pick_up_location")
 
-xcloned311 <- d311 # Create a copy of the data to avoid modifying the original
-
 # **********************
 # Apply normal_address function to each column in address_fields
-xcloned311[address_fields] <- lapply(xcloned311[address_fields], normal_address, 
-                                     abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
-
+#d311[address_fields] <- lapply(d311[address_fields], normal_address, 
+#                                     abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
 # **********************
 cross_street <- "street_name"
 intersection_street <- "landmark"
-z1 <- cross_street_analysis(xcloned311, cross_street, intersection_street)
+z1 <- cross_street_analysis(d311, cross_street, intersection_street)
 
 cross_street <- "cross_street_1"
 intersection_street <- "intersection_street_1"
-y1 <- cross_street_analysis(xcloned311, cross_street, intersection_street)
+y1 <- cross_street_analysis(d311, cross_street, intersection_street)
 
-cross_street <- "cross_street_2"
-intersection_street <- "intersection_street_2"
-y2 <- cross_street_analysis(xcloned311, cross_street, intersection_street)
+  cross_street <- "cross_street_2"
+  intersection_street <- "intersection_street_2"
+  y2 <- cross_street_analysis(d311, cross_street, intersection_street)
 
 #########################################################################
 
 cat("\n\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
 
 ##########################################################################
-
+cat("\nCurrent column names for d311 dataframe\n")
+print(names(d311))
+  
 # # List of redundant columns to remove
 redundant_columns <- c(
   "agency_name",
@@ -2772,13 +2377,7 @@ for (column in redundant_columns) {
 }
 
 # Read the data into a data table object
-d311 <- fread(data1File, header = TRUE, sep = ",")
-
-# make columns names user friendly
-d311 <- makeColNamesUserFriendly(d311)
-
-# Calculate the current size of the data table object
-original_size <- object.size(d311)
+#d311 <- fread(data1File, header = TRUE, sep = ",")
 
 # Delete the redundant columns
 d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
