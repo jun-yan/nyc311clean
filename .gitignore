@@ -1,0 +1,113 @@
+*~
+*.RData
+# *.rds
+*.dat
+*.Rproj
+*.aux
+*.glo
+*.idx
+*.log
+*.toc
+*.ist
+*.acn
+*.acr
+*.alg
+*.bbl
+*.blg
+*.dvi
+*.glg
+*.gls
+*.ilg
+*.ind
+*.lof
+*.lot
+*.maf
+*.mtc
+*.mtc1
+*.out
+*.nav
+*.snm
+*.synctex.gz
+*.docx
+_region_.tex
+main.pdf
+GodoyLucas.pdf
+PratesMarcos.pdf
+abstract.pdf
+
+manuscript/*.pdf
+  
+main-blind*
+main-full*
+
+jsm-comp/GodoyLucas-*
+  
+*.fls
+
+*.fdb_latexmk
+  
+*.sif
+
+## Shapefiles 
+# *.dbf
+# *.fix
+# *.prj
+# *.qix
+# *.shp
+# *.shx
+
+.DS_Store
+
+manuscript/auto
+  
+## emacs files
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Org-mode
+.org-id-locations
+*_archive
+
+# flymake-mode
+*_flymake.*
+
+# eshell files
+/eshell/history
+/eshell/lastdir
+
+# elpa packages
+/elpa/
+
+# reftex files
+*.rel
+
+# AUCTeX auto folder
+/auto/
+
+# cask packages
+.cask/
+dist/
+
+# Flycheck
+flycheck_*.el
+
+# server auth directory
+/server/
+
+# projectiles files
+.projectile
+
+# directory configuration
+.dir-locals.el
+
+# files from marcos' computer
+.fuse_hidden*
+
+# not needed to run applications
+simulation/data/aux
