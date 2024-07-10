@@ -12,8 +12,11 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
+setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
+
 main_data_file <- "2-year 2022-2023.csv"
 data1File <- file.path("..", "..", "data", main_data_file)
+
 
 # Extract the first two digits
 year_digits <- substr(main_data_file, 1, 2)
@@ -21,7 +24,6 @@ year_digits <- substr(main_data_file, 1, 2)
 if (year_digits != "10") {
   year_digits <- "2"
 }
-
 sink(paste0(year_digits, "-yr timeline_console_output.txt"))
 
 # Define the chart directory
@@ -290,7 +292,12 @@ d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %
 d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 
 d311 <- d311[!is.na(d311$created_date), ]
-num_years <- unique(d311$Year)
+
+
+# Extract the year from the created_date column
+years <- year(d311$created_date)
+
+num_years <- unique(years)
 numrows <- nrow(d311)
 
 cat("\nTotal rows:", format(numrows, big.mark = ","), "covering", length(num_years), "years")
