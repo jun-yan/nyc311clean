@@ -1,46 +1,12 @@
-\documentclass[12pt, titlepage]{article}
+\documentclass[linenumber]{jdsart}
 
-\usepackage[margin = 1in]{geometry}
-\usepackage{amsmath}
-\allowdisplaybreaks
-\usepackage{authblk}
-\usepackage{setspace}
-\usepackage{natbib}
-\usepackage{hyperref}\hypersetup{colorlinks=true, citecolor=blue}
-% \usepackage{parskip}
-\usepackage{textgreek}
-\usepackage{graphicx}
-\usepackage{booktabs} % For better looking tables
+\volume{0}
+\issue{0}
+\pubyear{2022}
+\articletype{research-article}
+\doi{0000}
+
 \usepackage{siunitx} % For alignment of numbers
-\usepackage{placeins}
-\usepackage{caption}  % For custom captions
-\usepackage{float}   % Required for the H specifier
-\usepackage{adjustbox}
-\usepackage[]{lineno}
-\usepackage{comment}
-\linenumbers*[1]
-
-%% patches to make lineno work better with amsmath
-\newcommand*\patchAmsMathEnvironmentForLineno[1]{%
-	\expandafter\let\csname old#1\expandafter\endcsname\csname
-	#1\endcsname
-	\expandafter\let\csname oldend#1\expandafter\endcsname\csname
-	end#1\endcsname
-	\renewenvironment{#1}%
-	{\linenomath\csname old#1\endcsname}%
-	{\csname oldend#1\endcsname\endlinenomath}}%
-\newcommand*\patchBothAmsMathEnvironmentsForLineno[1]{%
-	\patchAmsMathEnvironmentForLineno{#1}%
-	\patchAmsMathEnvironmentForLineno{#1*}}%
-\AtBeginDocument{%
-	\patchBothAmsMathEnvironmentsForLineno{equation}%
-	\patchBothAmsMathEnvironmentsForLineno{align}%
-	\patchBothAmsMathEnvironmentsForLineno{flalign}%
-	\patchBothAmsMathEnvironmentsForLineno{alignat}%
-	\patchBothAmsMathEnvironmentsForLineno{gather}%
-	\patchBothAmsMathEnvironmentsForLineno{multline}%
-}
-
 \sisetup{
     group-separator = {,},
     round-mode = places,
@@ -55,15 +21,6 @@
 % image path
 \graphicspath{{.}{./images}}
 
-% control floats
-\renewcommand\floatpagefraction{.9}
-\renewcommand\topfraction{.9}
-\renewcommand\bottomfraction{.9}
-\renewcommand\textfraction{.2}
-\setcounter{totalnumber}{50}
-\setcounter{topnumber}{50}
-\setcounter{bottomnumber}{50}
-
 \usepackage{xcolor}
 \newcommand{\dt}[1]{\textcolor{purple}{DT: (#1)}}
 \newcommand{\jy}[1]{\textcolor{cyan}{JY: (#1)}}
@@ -72,18 +29,24 @@
 %% \newcommand{\pkg}[1]{{\fontseries{m}\selectfont #1}}
 %% \newcommand\code[2][black]{\textcolor{#1}{\texttt{#2}}}
 
-\title{Principles for Open Data Curation: A Case Study with the New
-York City 311 Service Request Data}
-
-
-\author[1]{David Tussey}
-\author[2]{Jun Yan}
-\affil[1]{Former Executive Director, NYC DoITT}
-\affil[2]{Department of Statistics, University of Connecticut}
-
+\usepackage{comment}
+\usepackage{booktabs, textgreek}
 
 \begin{document}
-\maketitle
+
+\begin{frontmatter}
+  
+\title{Principles for Open Data Curation: A Case Study with the New
+York City 311 Service Request Data}
+\runtitle{Principles for Open Data Curation}
+
+\author[1]{\inits{D.}\fnms{David}~\snm{Tussey}}
+\author[2]{\inits{J.}\fnms{Jun}~\snm{Yan}}
+\address[1]{\institution{NYC DoITT}, \cny{USA}}
+\address[2]{Department of Statistics,
+  \institution{University of Connecticut}, \cny{USA}}
+
+
 
  \tableofcontents % Optional: Table of Contents
  \listoffigures % List of Figures
@@ -112,23 +75,23 @@ the ongoing utility of open data. The paper concludes with
 actionable recommendations for enhancing data curation and outlines
 general principles for the effective release of open data.
 
-\bigskip
-
-\noindent
-\textit{Keywords:}
-	Data cleansing;
-	Data Curation;
-	Data science;
-	NYC Open Data;
-	Open data;
-	Smart Cities;
-	Transparency;
 \end{abstract}
 
-\doublespacing
+\begin{keywords}
+  \kwd{Data cleansing}
+  \kwd{Data Curation}
+  \kwd{Data science}
+  \kwd{NYC Open Data}
+  \kwd{Open data}
+  \kwd{Smart Cities}
+  \kwd{Transparency}
+\end{keywords}
+
+\end{frontmatter}
 
 \section{INTRODUCTION} 
 \label{sec:intro}
+
 In the early 21st century, the open data movement began 
 to take shape, driven by the fundamental belief that 
 freely accessible data can transform both societies and 
@@ -345,7 +308,7 @@ most frequently occurring type of complaint.
 \begin{figure}[tbp]
  \centering
   \includegraphics[width=0.8\textwidth]{SR_by_Complaint_Type.pdf} 
-  \caption{Top 20 complaint\_type(s) and Cumulative Percentage} 
+  \caption{Top 20 complaint type(s) and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
 
@@ -621,7 +584,8 @@ SR application software; associated with perhaps setting an SR status
 to ``new'' or ``closed''. Unfortunately, that does not appear 
 to be the case as there are several anomalies with the various date 
 fields:
-	
+
+
 	
 \begin{itemize}
 	\item SRs with a closed\_date that occurs before the created\_date.
@@ -688,7 +652,7 @@ produce bizarre analytical results.
 
 \begin{figure}[tbp]
 	 \centering
-	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
+ 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
  \caption{Distribution of Negative Durations}
  \label{fig:negative-duration-violin}
 \end{figure}
@@ -799,7 +763,7 @@ at 00:00:00 and 12:00:00 respectively.
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest\_day.pdf}
+	\includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
 	\caption{SRs Closed Minute-by-Minute on Busiest Day}
 	\label{fig:busiestclosed}
 \end{figure}	
@@ -1215,7 +1179,7 @@ the data cleanliness issues addressed in this paper.
 
 \section{Discussion} \label{sec:discussion}
 
-\bibliographystyle{asa}
+\bibliographystyle{jds}
 \bibliography{ref}
 
 \end{document}
