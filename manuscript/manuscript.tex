@@ -32,6 +32,15 @@
 \usepackage{comment}
 \usepackage{booktabs, textgreek}
 
+%% float control
+\renewcommand\floatpagefraction{0.75}
+% \renewcommand\topfraction{.8}
+% \renewcommand\bottomfraction{.8}
+% \renewcommand\textfraction{.2}
+\setcounter{totalnumber}{50}
+\setcounter{topnumber}{50}
+\setcounter{bottomnumber}{50}
+
 \begin{document}
 
 \begin{frontmatter}
@@ -247,13 +256,20 @@ Figure~\ref{fig:10-yr-monthly}. During that time-frame,
 the number of 311 SRs grew by nearly 50\%.
 
 
+\jy{The 'title' in each figure could be removed because we have
+  captions. The fonts of the annotations in the figures need to be
+  increased. The code generating them need to be tidied for future
+  sharing.
+}
+
+
+
 \begin{figure}[tbp]
 	\centering
   	\includegraphics[width=0.8\textwidth]{10-year-trend_yearly.pdf}
  	\caption{10-year (2014-2023) Monthly SR Counts}
   	\label{fig:10-yr-monthly}
 \end{figure}
-
 
 
 Identifying the responsible agency is essential 
@@ -1198,6 +1214,47 @@ the data cleanliness issues addressed in this paper.
 
 
 \section{Discussion} \label{sec:discussion}
+
+Our study highlights the vital importance of robust data curation in
+maintaining the reliability and utility of open datasets, with a close
+examination of the NYC 311 data. As these datasets are applied across
+diverse fields such as public services and academic research, issues
+like inconsistencies, missing values, and formatting errors can
+significantly undermine the quality of insights. Trustworthy machine
+learning systems, which rely heavily on high-quality data, are
+particularly vulnerable to errors when data is not properly
+curated. For example, biases or inconsistencies in input data can
+compromise both the accuracy and fairness of predictive models
+\citep{rahm2000data}.
+
+
+This research further emphasizes the necessity of harmonizing data
+from multiple city agencies, particularly in resolving discrepancies
+in field names, formats, and definitions. Trustworthy machine learning
+depends on not only accurate and clean data but also consistent data
+across sources. This challenge becomes more acute in datasets spanning
+long time periods, where changes in agency structures or reporting
+standards can introduce subtle biases. As \citet{rahm2000data} noted,
+ensuring long-term data consistency is crucial for longitudinal
+studies and predictive modeling, as even minor shifts in data can
+result in significant deviations in outcomes.
+
+
+Finally, the intersection of data curation and machine learning for
+public policy applications opens new opportunities for enhancing
+governance. By improving data quality, machine learning models can
+more effectively predict trends, allocate resources, and identify
+issues such as service delays. The COVID-19 pandemic demonstrated the
+critical role of real-time, trustworthy data in responding to public
+needs. Without proper data curation, the accuracy and timeliness of
+machine learning insights would have been compromised, affecting
+crucial decision-making processes. Future efforts could focus on
+automating data curation within real-time data pipelines, ensuring
+that the data feeding into machine learning models remains both clean
+and reliable \citep{chu2016data}.
+
+
+
 
 \bibliographystyle{jds}
 \bibliography{ref}
