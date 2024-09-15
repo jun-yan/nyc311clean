@@ -183,29 +183,22 @@ principles tailored for government-released open data. These
 principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
 
-\jy{How about putting all these sections into one section on case
-  study? They can be subsections in the merged section.
-  After that, we can have a section on recommendations for open
-  data curation based on what we learn from the case study. For each
-  recommended principle, we can link to the specifics of the case
-  study.}
 
-The paper is organized as follows:
-Section~\ref{sec:data} `\textit{NYC 31 Service Request Data} offers a 
-look at the history of the 311system. Long-term trends are 
-presented in a 10-year data analysis (2014-2023).
-Section~\ref{sec:issues} \textit{Data Cleansing Issues} offers a 
-discussion of specific data cleansing issues impacting data quality and 
-curation efficiency. These issues include structural issues, compliance 
-with the Data Dictionary, and missing, blank, or N/A entries. We also
-explore field compliance with a domain of legal or acceptable values.
-Next we deal with several important issues surrounding logical inconsistencies 
-and concerning patterns found in the data. We also explore an issue of precision 
-versus accuracy. This section concludes by identifying duplicate/redundant data fields
-and Data Dictionary observation. Section~\ref{sec:recommendations} 
-\textit{Recommendations} provides actionable suggestions for 
-mitigating or resolving the identified issues. Section~\ref{sec:discussion} ``Discussions'' 
-concludes with an encapsulation of key insights and implications of our research.
+The paper is organized as follows. Section~\ref{sec:data} provides 
+an overview of the history of the NYC 311 SR system and presents 
+a summary of SR counts over the 10-year period from 2014 to 2023. 
+Section~\ref{sec:issues} delves into specific data cleansing 
+challenges affecting data quality and curation efficiency, 
+including structural problems, adherence to the data dictionary, 
+and the presence of missing, blank, or N/A entries. This section 
+also investigates field compliance with legal or acceptable values, 
+highlights logical inconsistencies, and examines concerning patterns 
+in the data. We explore the balance between precision and accuracy 
+and identify duplicate or redundant fields, along with observations 
+on the Data Dictionary. Section~\ref{sec:recommendations} offers 
+practical recommendations for mitigating or resolving these issues, 
+while Section~\ref{sec:discussion} encapsulates key insights and 
+discusses the broader implications of our findings.
 
 
 \section{NYC 311 Service Request Data} 
@@ -219,6 +212,8 @@ maintenance requests. Initially a phone-based call center, the system
 evolved into a comprehensive data management platform handling
 millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile app channels in 2009, a
+\jy{should we mention the system upgrade just before the pandemic to
+  document this historical event?}
 record high of 348,463 monthly service requests in August 2020 due to
 the COVID-19 pandemic, the 2021 expansion to include the MTA's city
 subway system, and a record 3.23 million service requests in
@@ -250,11 +245,31 @@ enforcing standards between landlords and tenants, reallocating taxi
 routes based on analyses by the Taxi and Limousine Commission (TLC),
 and improving responsiveness across City Agencies
 
-To begin, we looked at a 10-year period (2014-2023) to
-observe a longer time-frame; see
-Figure~\ref{fig:10-yr-monthly}. During that time-frame,
-the number of 311 SRs grew by nearly 50\%.
 
+\begin{figure}[tbp]
+	\centering
+  	\includegraphics[width=0.8\textwidth]{10-year-trend_yearly.pdf}
+ 	\caption{10-year (2014-2023) annual SR Counts.}
+  	\label{fig:10-yr}
+\end{figure}
+
+
+Our investigation focused on a 10-year period (2014--2023).
+Figure~\ref{fig:10-yr} shows the annual counts of NYC 311 SR over the
+10-year period from 2014 to 2023, revealing a clear upward trend in
+public engagement with the system. The most significant increase
+occurred in 2020, when the number of requests surged to 3.23 million
+due to the COVID-19 pandemic, illustrating the essential role of the
+311 system in supporting residents during times of crisis. Overall, SR
+counts increased by nearly 49.5\% between 2014 and 2023, reflecting
+growing public reliance on the system for addressing non-emergency
+issues. The steady rise in SRs can be attributed to the increased
+accessibility of the 311 system via online and mobile platforms, as
+well as heightened public awareness of the service. While the spike in
+2020 was exceptional, the broader trend indicates sustained growth in
+service request volume over the decade, highlighting the system's
+evolving role in managing both routine city operations and
+extraordinary events.
 
 \jy{The 'title' in each figure could be removed because we have
   captions. The fonts of the annotations in the figures need to be
@@ -263,24 +278,28 @@ the number of 311 SRs grew by nearly 50\%.
 }
 
 
-
-\begin{figure}[tbp]
-	\centering
-  	\includegraphics[width=0.8\textwidth]{10-year-trend_yearly.pdf}
- 	\caption{10-year (2014-2023) Monthly SR Counts}
-  	\label{fig:10-yr-monthly}
-\end{figure}
-
-
-Identifying the responsible agency is essential 
-for troubleshooting discrepancies. This identification also assists in 
-determining whether an issue is specific to an Agency or indicative 
-of a broader, systemic problem. Six agencies account for 90\% of 
-the complaints: New York Police Department (NYPD), 
+Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
+agency, showing the cumulative percentage of SRs handled by each
+agency over a given time period. This figure highlights that the
+distribution of SRs is concentrated among a few key agencies. The six
+largest agencies are New York Police Department (NYPD), 
 Housing Preservation and Development (HPD),
 New York City Department of Sanitation (DSNY), Department of
 Transportation (DOT), Department of Environmental Protection (DEP),
 and Department of Parks and Recreation (DPR).
+They collectively handle over 90\% of the total SR volume. This is
+indicative of the critical roles these agencies play in managing
+public concerns, ranging from noise complaints and housing issues to
+sanitation and transportation problems. The NYPD alone accounts for a
+substantial portion of the total SRs, underscoring its central role in
+addressing complaints related to public safety and order. The
+remaining 10\% distributed across a large number of smaller
+agencies. This concentration of requests points to the systemic
+reliance on a few key departments for resolving most non-emergency
+issues, further emphasizing the importance of optimizing data handling
+and curation processes within these high-volume agencies to ensure
+efficiency and responsiveness.
+
 
 \begin{figure}[tbp]
 	\centering
@@ -315,11 +334,6 @@ and Department of Parks and Recreation (DPR).
 \end{comment}
 
 
-Figure~\ref{fig:SR_complaints} shows that the top 20 complaint 
-types account for 70\% of the total 220 different types. Notably, 
-these top complaints include several variations of noise-related 
-issues, which collectively represent 22\% of all complaints, the 
-most frequently occurring type of complaint.
 
 \begin{figure}[tbp]
  \centering
@@ -327,6 +341,23 @@ most frequently occurring type of complaint.
   \caption{Top 20 complaint type(s) and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
+
+Figure~\ref{fig:SR_complaints}
+illustrates the top 20 complaint types, accounting for 70\% 
+of all Service Requests (SRs), and their cumulative percentage. The 
+distribution of complaints is skewed, with a small number of issues 
+dominating the total SR volume. Noise-related complaints, including 
+residential, commercial, and street noise, make up 22\% of all 
+complaints, making them the most frequent issue in the NYC 311 system. 
+Other prominent categories include illegal parking, heat/hot water 
+complaints, and blocked driveways. The cumulative percentage curve 
+shows that after the top 20, the remaining complaint types are spread 
+thinly across the remaining 30\% of SRs. This concentration suggests 
+that improving responses to the most frequent complaints could have 
+a significant impact on overall service efficiency and resident 
+satisfaction. It also provides insights into the operational 
+pressures faced by the city agencies responsible for handling these 
+high-volume complaints.
 
 
 \section{Data Cleansing Issues} 
