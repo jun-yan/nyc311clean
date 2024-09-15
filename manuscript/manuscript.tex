@@ -98,7 +98,7 @@ general principles for the effective release of open data.
 
 \end{frontmatter}
 
-\section{INTRODUCTION} 
+\section{Introduction} 
 \label{sec:intro}
 
 In the early 21st century, the open data movement began 
@@ -248,13 +248,18 @@ and improving responsiveness across City Agencies
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=0.8\textwidth]{10-year-trend_yearly.pdf}
+  	\includegraphics[width=0.7\textwidth]{10-year-trend_yearly.pdf}
  	\caption{10-year (2014-2023) annual SR Counts.}
   	\label{fig:10-yr}
 \end{figure}
 
 
-Our investigation focused on a 10-year period (2014--2023).
+Our investigation focused on a 10-year period (2014--2023), downloaded
+on \jy{Give date because the data is updated daily.}
+This version of the data is available as a supplement to facilitate
+reproducibility of the analysis presented in the sequel.
+\jy{How many total? file size? Somewhere we used only two years that
+  need to be clarified.}
 Figure~\ref{fig:10-yr} shows the annual counts of NYC 311 SR over the
 10-year period from 2014 to 2023, revealing a clear upward trend in
 public engagement with the system. The most significant increase
@@ -277,6 +282,11 @@ extraordinary events.
   sharing.
 }
 
+\jy{The plot sizes seem to be fixed in the generation code. That's why
+  the fonts are small when scaled. I'd generate them with approxiately
+  the expected sizes in the manuscript. I'd also use aspect ratio
+  0.618 (golden ratio).
+}
 
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 agency, showing the cumulative percentage of SRs handled by each
@@ -303,7 +313,7 @@ efficiency and responsiveness.
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
+	\includegraphics[width=0.7\textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
@@ -337,7 +347,7 @@ efficiency and responsiveness.
 
 \begin{figure}[tbp]
  \centering
-  \includegraphics[width=0.8\textwidth]{SR_by_Complaint_Type.pdf} 
+  \includegraphics[width=0.7\textwidth]{SR_by_Complaint_Type.pdf} 
   \caption{Top 20 complaint type(s) and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
@@ -393,46 +403,38 @@ learning models or other systems.
 % modifying, or deleting the dirty or coarse data.}
 % \end{quote}
 
-Many quality criteria are utilized in order to process high-quality 
-data, including:
-\begin{comment}
-\begin{itemize}
-	\item Data validation - this effort can span a number of criteria
-	
-	\begin{itemize}
-		\item Mandatory fields: Certain data fields cannot be empty.
-		
-		\item Data-types: Certain fields must be of the correct type, e.g. numeric, 
-		character, date, 5 numeric digits, etc. Typically these are specified 
-		in a Data Dictionary.
-		
-		\item Domain compliance:  Many data fields must adhere to a specific 
-		domain of values, e.g. statuses, state names, zip codes, gender.
-		 
-	\end{itemize}   
-	\item Structural errors to include naming conventions, 
-	 fields not in the Data Dictionary, or inconsistent data entry. For example 
-	 intermixing blanks, spaces, NA, N/A, and \textless{}NA\textgreater{} 
-	 all to indicate the absence of data.
-	 
-	\item Redundant, unnecessary, or irrelevant fields
-	
-	\item Logical inconsistencies such as related fields that violate the 
-	nature of that relationship, e.g. a ``due date'' that is before the ``created date''
-	
-	\item Accuracy versus precision
-\end{itemize}
-\end{comment}
 
-This purpose of this analysis effort is to identify the presence of 
-errors; not necessarily to correct them. A correction effort should
+Many quality criteria are employed to ensure high-quality data 
+processing. One of the primary efforts is data validation, which spans 
+several critical checks. For instance, mandatory fields must not be 
+left empty, ensuring that key information is always captured. 
+Additionally, certain fields must conform to specific data types, 
+such as numeric, character, or date formats, which are typically 
+outlined in a Data Dictionary. Another essential aspect of validation 
+is domain compliance, where fields must adhere to a predefined set of 
+values, such as statuses, state names, zip codes, or gender. Structural 
+errors also play a significant role in data quality, particularly when 
+naming conventions or data entries are inconsistent. Common issues 
+include fields that do not appear in the Data Dictionary or the 
+inconsistent use of blanks, spaces, NA, N/A, or ``<NA>'' to indicate 
+missing data. Furthermore, redundant or irrelevant fields can clutter 
+datasets, reducing efficiency. Logical inconsistencies are another 
+important consideration, such as related fields that violate expected 
+relationships, like a ``due date'' that precedes the ``created date.'' 
+Lastly, the balance between accuracy and precision is crucial, as both 
+must be carefully managed to ensure reliable and meaningful data.
+
+
+Here we identify the presence of issues in the NYC 311 SR open data;
+not necessarily to solve them. A solution effort should
 be undertaken only after an investigation as to the why and how 
-such errors came about, and a discussion as to whether or not it 
-even is an \textit{error}. 
+such issues came about, and a discussion as to whether or not it 
+is an \textit{error}. 
 
 
 \subsection{Structural Issues}
 \label{sec:structural}
+
 Structural issues refers to how data is organized, formatted, 
 or presented within a dataset. Structural issues can make 
 it difficult to analyze the data effectively. Here are some 
@@ -458,49 +460,51 @@ characteristics of the 311 SR data set:
 	supports 934 characters of input, including commas and special characters
 \end{itemize}
 
-The 311 SR \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}
- identifies 41 data columns (fields) and related information 
- for each column. However, when downloaded the data reveals 
- six additional fields that are not included in the Data Dictionary. 
-(Note that these fields do show up on the portal Column Manager widget
- as ``@computed\_region\_xxxx\_xxxx''.) To some extent one can infer 
- what the these @computed\_fields are and how they are determined, but
- not with certainty. Most importantly is the question, can these fields be reliably 
- used for analytical purposes?  These six ``computed'' fields are:
+The 311 SR 
+\href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} 
+identifies 41 data columns (fields) and provides related information 
+for each. However, upon downloading the data, six additional fields 
+appear that are not included in the Data Dictionary. These fields are 
+visible in the portal's Column Manager widget, labeled with the prefix 
+``@computed\_region.'' The additional fields include \texttt{zip\_codes}, 
+\texttt{community\_districts}, \texttt{borough\_boundaries}, 
+\texttt{city\_council\_districts}, \texttt{police\_precincts}, and 
+\texttt{police\_precinct}. While one can infer the meaning and 
+derivation of these computed fields to some extent, uncertainty remains. 
+The critical question is whether these fields can be reliably used for 
+analytical purposes reliable documentation. In particular, which one
+of the two percinct fields should one use? What is the difference
+between the computed zip codes and the incident zipcode among the 41
+documented variables?
 
-\begin{itemize}
-	\item zip\_codes
-	
-	\item community\_districts
-	
-	\item borough\_boundaries
-	
-	\item city\_council\_districts
-	
-	\item police\_precincts
-	
-	\item police\_precinct 
-\end{itemize}	
 
-		
-\subsection{Blank \& N/A data}
+\subsection{Missing Data}
 \label{sec:blanks}
 Understanding the absence of data by field is important 
 when undertaking analysis. For example, if you wanted to 
-determine if SRs were closed before or after their due\_date, 
-you would be challenged as 99.6\% of the due\_date field is 
+determine if SRs were closed before or after their
+\texttt{due\_date}, you would be challenged as 99.6\% of the
+\texttt{due\_date} field is
 blank. When counting fields for blank or N/A values, they appear 
-to divide into three groups: \textbf{Mostly Empty}, \textbf{Partially Empty}, 
+to divide into three groups:
+\textbf{Mostly Empty}, \textbf{Partially Empty}, 
 and \textbf{Few/None Empty}. 
-
-The Mostly Empty category ranges from 93-99.9\% blank 
-and includes such fields as taxi\_company due\_date, pickup\_location, and 
-landmark. The Partially Empty includes such fields as location\_type, borough, 
-and cross\_street. And the Few/None Empty includes created\_date, 
-complaint\_type, agency, and status. In some cases it may make 
-sense to inquiry as to why some fields are frequently blank. Here is a graphic 
+The Mostly Empty category ranges from 93--99.9\% blank 
+and includes such fields as
+\texttt{taxi\_company due\_date},
+\texttt{pickup\_location}, and \texttt{landmark}.
+The Partially Empty includes such fields as
+\texttt{location\_type}, \texttt{borough}, 
+and \texttt{cross\_street}. And the Few/None Empty includes
+\texttt{created\_date}, \texttt{complaint\_type},
+\texttt{agency}, and \texttt{status}. In some cases it may make
+sense to inquiry as to why some fields are frequently blank.
+Figure~\ref{fig:blank_fields} presents a graphic 
 depiction of total empty (blank \& N/As) for each fields illustrating
-the grouping into the Most, Partial, and Few categories. 
+the grouping into the Most, Partial, and Few categories.
+
+\jy{Can we lighten the color of the bar to make the pertentages more
+  legible?}
 
 
 \begin{figure}[tbp]
@@ -510,63 +514,38 @@ the grouping into the Most, Partial, and Few categories.
 	\label{fig:blank_fields}
 \end{figure}
 
-\begin{comment}
- \subsection{Validating Data for Acceptable Values}
- \label{sec:domain}
-Any analytic effort needs to be aware of fields which 
-contain invalid values. Typically such fields would be
-identified and removed from the analysis. Here are the results
-of selected field validation.
 
-\begin{itemize}
-	\item Latitude and Longitude fields fall within the geographic 
-	boundaries of New York City. 
-	
-	\item The unique\_key field was in-fact unique.
-	
-	\item Unfortunately, very few domains of acceptable 
-	values are specified in the Data Dictionary. The below 
-	fields were tested as complying with their domain as 
-	determined by public usage and historical datasets:
-	
-	\begin{itemize}
-		\item address\_type
-		\item status
-		\item borough, borough\_boundaries, \& park\_borough 
-		\item data\_channel
-		\item vehicle\_type
-		\item city\_council\_district
-	\end{itemize}	
-	
-\end{itemize}
-\end{comment}
+\subsection{Validating Data for Acceptable Values}
+\label{sec:domain}
+Any analytic effort must ensure that fields containing invalid values 
+are identified and removed from the analysis. Below are the results of 
+selected field validation. The latitude and longitude fields were 
+found to fall within the geographic boundaries of New York City, and 
+the \texttt{unique\_key} field was indeed unique, as required. 
+Unfortunately, the Data Dictionary specifies very few domains of 
+acceptable values. However, the following fields were tested and found 
+to comply with their expected domains, as determined by public usage 
+and historical datasets: \texttt{address\_type}, \texttt{status}, 
+\texttt{borough}, \texttt{borough\_boundaries}, \texttt{park\_borough}, 
+\texttt{data\_channel}, \texttt{vehicle\_type}, and 
+\texttt{city\_council\_district}. Some fields proved to be problematic 
+as to their compliance with a domain of legal values. 
 
+
+\paragraph{Zip Codes}
 \label{sec:zipcodesissues}
- \textbf{Issues with Zip Codes:} Some fields proved to be problematic 
- as to their compliance with a domain of legal values. For example, all zip codes 
- (two fields: zip\_codes and incident\_zip) should be valid as defined 
- by the USPS database containing all 37,946 valid zip codes. However,
- the computed field zip\_codes proved problematic with over 
-58\% (3.6 million) of the field entries being invalid. And while the more accurate 
-incident\_zip field has only .07\% invalid entries, it still contains
-4163 such errors; not insignificant. The breakdown of the invalid 
-entries in the zip\_code, sorted by Agency shows that the 
-distribution by percentage mirrors the overall breakdown of 
-SRs by Agency, potentially indicating a systemic problem.
-	
-
-\label{sec:case-study-zip-codes}
-\textbf{Case Study: Noise Complaints by Zip Code.}  Scenario: The NYC 
-Office of Nightlife (ONL) wants to know ``What are the top 10 
-zip codes for Noise Complaints over the last two years?'' ONL wants
-to assess the impact of recent efforts promoting a vibrant nightlife 
-in NYC while seeking to ease strained relations between bar 
-and club owners. Let's assume that this analysis 
-uses the zip\_codes field, one of the computed fields known to 
-have validity problems. We then repeat the analysis with the more 
-accurate incident\_zip field. Finally, we subject these two analysis effort 
-to validation against the USPS zip code database.
-
+All zip codes (two fields: \texttt{zip\_codes} and \texttt{incident\_zip}) 
+should be valid as defined by the USPS database, which contains 
+37,946 valid zip codes. However, the computed field \texttt{zip\_codes} 
+proved problematic, with over 58\% (3.6 million) of its entries being 
+invalid. Although the more accurate \texttt{incident\_zip} field has 
+only 0.07\% invalid entries, this still results in 4,163 errors, which 
+is not insignificant. The breakdown of invalid entries in the 
+\texttt{zip\_codes} field, sorted by Agency, shows that the
+\jy{Which agency? Missing a table? We could prepare a supplement where
+  we can put additional tables/figures without limit.}
+distribution by percentage mirrors the overall breakdown of SRs by 
+Agency, potentially indicating a systemic problem.
 
 \begin{table}[tbp]
     \centering
@@ -595,165 +574,173 @@ to validation against the USPS zip code database.
  	\label{tab:zipcodes}
 \end{table}
 
+Consider a case study with the NYC Office of Nightlife (ONL). Suppose 
+that ONL wants to know, "What are the top 10 zip codes for Noise 
+Complaints over the last two years?" ONL seeks to assess the impact 
+of recent efforts promoting a vibrant nightlife in NYC while also 
+easing tensions between bar and club owners. Assume this analysis uses 
+the \texttt{zip\_codes} field, one of the computed fields known to have 
+validity issues. The analysis is then repeated using the more accurate 
+\texttt{incident\_zip} field. Finally, both analyses are validated 
+against the USPS zip code database. The top 10 zip codes and their 
+validation results are summarized in Table~\ref{tab:zipcodes}. Six out 
+of the ten \texttt{zip\_codes} entries are invalid, closely matching 
+the overall dataset's 58\% invalid rate. In contrast, the 
+\texttt{incident\_zip} field is fully valid, consistent with the 
+overall \texttt{incident\_zip} validation rate of 99\%.
+It is possible that the computed \texttt{zip\_codes} may mean the zip
+code of something differnent from the incident. Without proper
+documentation, it is confusing to have it in the released data.
 
-As indicated, six out of ten zip\_codes are invalid, which corresponds closely 
-with what is observed in the overall dataset (58\% invalid). Whereas 
-the incident\_zip field is completely valid, in-line with the 
-overall incident\_zip validation percentage of 99\%.
 
-
+\paragraph{Police Precincts}
 \label{sec:police-precincts}
-\textbf{Issues with Police Precincts:} A curious case exists when 
-examining two (nearly) identical fields: police\_precincts and 
-police\_precinct. Both of those fields are among the computed fields 
-previously mentioned. Using 
+A curious case arises when examining two nearly identical fields: 
+\texttt{police\_precincts} and \texttt{police\_precinct}. Both fields 
+are among the computed fields previously mentioned. Using the 
 \href{https://www.nyc.gov/site/nypd/bureaus/patrol/precincts-landing.page}
-{NYPD Precinct listings} it is possible to determine the valid 
-police precincts. What we find is that both police\_precinct 
-and police\_precincts  have about 35\% invalid entries. Unfortunately, 
-it's not the same invalid entries. The police\_precincts field, 
-has 2,171,864 invalid entries (35\%). Similarly the 
-police\_precinct field has 2,171,778 invalid entries 
-(also 35\%), but not the same invalid entries. 
+{NYPD Precinct listings}, it is possible to determine the valid police 
+precincts. Upon validation, both \texttt{police\_precincts} and 
+\texttt{police\_precinct} contain about 35\% invalid entries. However, 
+the invalid entries are not identical. The \texttt{police\_precincts} 
+field has 2,171,864 invalid entries (35\%), while the 
+\texttt{police\_precinct} field has 2,171,778 invalid entries (also 
+35\%), but they do not match.
 
 
+
+\paragraph{Community Boards}
 \label{sec:communityboards}
-\textbf{Issues with Community Boards:} Community Boards are the most 
-local, grassroots form of City government; a vital connection 
-between communities, elected officials, and City agencies. Community 
-Boards often service as a measure of the equity of City services 
-throughout the five boroughs. In the 2022-2023 dataset there 
-are 27,276 invalid community\_board entries representing 0.43\% 
-of non-blank data. The distribution of invalid Community Boards 
-by Agency is not consistent with the overall SR Agency distribution,
-indicating that there are likely issues at key Agencies, in 
-this case Taxi \& Limo Commission (TLC), DPR, etc. 
+Community Boards are the most local, grassroots form of City government, 
+serving as a vital connection between communities, elected officials, 
+and City agencies. They often act as a measure of the equity of City 
+services across the five boroughs. In the 2022-2023 dataset, there are 
+27,276 invalid \texttt{community\_board} entries, representing 0.43\% 
+of non-blank data. The distribution of these invalid entries by Agency 
+is not consistent with the overall SR Agency 
+distribution. This suggests that issues may exist within specific key 
+Agencies, such as the Taxi \& Limousine Commission (TLC) and the 
+Department of Parks and Recreation (DPR).
 
 
+\paragraph{Community Districts}
 \label{sec:communitydistrict}
-\textbf{Issues with Community Districts:} Another of the computed fields 
-is community\_districts. Community Districts 
-are the geographic boundaries for the Community Boards, but differ as they
-are used by the Department of City Planning (DCP) for environmental, 
-socio-economic, and demographic purposes. It is a geographical 
-division rather than a City government division. Due to how the 
-community\_district data is formatted, it is not possible to 
-establish validity. However, we can determine that the dataset 
-contains 72 unique entries, while there are only 59 
-valid Community Districts. 
-	
+Another of the computed fields is \texttt{community\_districts}. 
+Community Districts define the geographic boundaries for the Community 
+Boards but differ in that they are used by the Department of City 
+Planning (DCP) for environmental, socio-economic, and demographic 
+purposes. They represent a geographical division rather than a City 
+government division. Due to the format of the \texttt{community\_district} 
+data, it is not possible to directly establish validity. However, the 
+dataset contains 72 unique entries, while only 59 valid Community 
+Districts exist.
 
+
+\paragraph{Date and Closed Date}
 \label{sec:negativeduration}
-\textbf{Issues with created\_date and closed\_date - Negative Durations:} For 
-the created\_date and closed\_date fields, one might 
-expect that these two fields are automatically populated by the 
-SR application software; associated with perhaps setting an SR status 
-to ``new'' or ``closed''. Unfortunately, that does not appear 
-to be the case as there are several anomalies with the various date 
-fields:
-
-
-	
+For the \texttt{created\_date} and \texttt{closed\_date} fields, one 
+might expect that these fields are automatically populated by the SR 
+application software when setting an SR status to ``new'' or ``closed.'' 
+Unfortunately, this does not seem to be the case, as several anomalies 
+exist in the date fields:
 \begin{itemize}
-	\item SRs with a closed\_date that occurs before the created\_date.
-
- 	\item created\_date(s) and closed\_date(s) in the far, far distant past.
-
- 	\item created\_date(s) and closed\_date(s) that match to the second.
-
-	\item A large number of SRs closed and/or created exactly at midnight 
-	or exactly at noon, to the second.
+    \item SRs with a \texttt{closed\_date} that occurs before the 
+    \texttt{created\_date}.
+    \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
+    the far distant past.
+    \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} that 
+    match to the second.
+    \item A large number of SRs closed and/or created exactly at midnight 
+    or noon, to the second.
 \end{itemize}
-	
-	
-Citizens, NYC Government Officials, and NYC Agencies especially use 
-the closed and created dates as a measure of the ``duration'' of the SR 
-and hence Agency responsiveness of a service. Duration, while 
-not directly present in the dataset, is easily 
-computed by (closed\_date - created\_date).
-	
-Closed-before-Created: There are 12,251 SRs that are closed before they 
-were created, thereby generating a nonsensical ``negative duration''. 
-While this is a small percentage overall (0.2\%) these errors can 
-have significant impact on response time analysis. Here is a sample:
 
+
+\subparagraph{Closed before Created: Negative Duration}
+Citizens, NYC Government Officials, and Agencies use the created and 
+closed dates to measure the ``duration'' of SRs, which reflects Agency 
+responsiveness. While duration is not directly present in the dataset, 
+it can be easily computed as the difference between
+\texttt{(closed\_date} and \texttt{created\_date}.
+There are 12,251 SRs where the \texttt{closed\_date} precedes the 
+\texttt{created\_date}, generating nonsensical ``negative durations.'' 
+Though this represents only 0.2\% of the dataset, these errors can 
+significantly impact response time analyses.
+Eight SRs with extremely large negative durations ($-$730 days), all 
+originating from the Department of Homeless Services (DHS), contain 
+an entry of ``1900-01-01'' as the \texttt{closed\_date}. This results 
+in negative durations exceeding $-$44,601 days (or 122 years). Such 
+anomalies, though rare, can significantly skew statistical results if 
+not addressed during data cleansing. As a result, these SR rows are 
+removed from the analysis. 
 
 \begin{table}[tbp]
-    \centering
-    \caption{Largest Negative Duration errors (days)}
-	    \begin{tabular}{l l l r l}
-	        \toprule
-	        \multicolumn{5}{c}{\textbf{Largest errors (days) excluding 
-	        extreme negative values}} \\
-	        \midrule
-	        \textbf{created\_date} & \textbf{closed\_date} & \textbf{duration} 
-	        & \textbf{agency} \\
-		        \midrule
-		        2023-01-27 14:40:00 & 2022-01-14 14:40:00 & -378.0 & DOT \\
-		        2023-01-18 10:06:00 & 2022-01-12 10:06:00 & -371.0 & DOT \\
-		        2023-01-27 14:36:00 & 2022-01-22 14:35:00 & -370.0 & DOT \\
-		        2023-01-11 11:10:00 & 2022-01-09 11:10:00 & -367.0 & DOT \\
-		        2023-12-18 03:13:00 & 2023-01-16 13:10:00 & -335.6 & DOT \\
-		        \bottomrule
-	    \end{tabular}
-    \label{tab:largest-errors}
+  \centering
+  \caption{Negative duraton of the largest magnitude (days) excluding
+    extreme negative values}
+  \begin{tabular}{l l l r l}
+    \toprule
+    {created\_date} & {closed\_date} & {duration} 
+    & \textbf{agency} \\
+    \midrule
+    2023-01-27 14:40:00 & 2022-01-14 14:40:00 & $-$378.0 & DOT \\
+    2023-01-18 10:06:00 & 2022-01-12 10:06:00 & $-$371.0 & DOT \\
+    2023-01-27 14:36:00 & 2022-01-22 14:35:00 & $-$370.0 & DOT \\
+    2023-01-11 11:10:00 & 2022-01-09 11:10:00 & $-$367.0 & DOT \\
+    2023-12-18 03:13:00 & 2023-01-16 13:10:00 & $-$335.6 & DOT \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:largest-errors}
 \end{table}
-
-	
-As noted, the largest errors are shown ``excluding extreme negative values''. We found 
-eight SRs with extremely large negative durations (\textless{} -730), all originating
-with DHS and all containing an entry of ``1900-01-01'' as the closed\_date. This 
-generates extremely large negative durations exceeding -44,601 
-days (-122 yrs). Such a large of an anomaly can significantly skew statistical 
-results, even though the number of occurrences is small. According, these 
-SR rows are removed from the analysis. Excluding these extreme negative
-values, an analysis shows the negative-duration issue is a DOT problem, 
-where 95\% of these types of errors occur. 
-	
-	
-This violin chart shows the broad spread of negative-duration SRs, albeit with 
-the extremely large negative-duration SR removed. While there are few 
-outliers, the magnitude of the negative-durations is troubling and can 
-produce bizarre analytical results.
 
 
 \begin{figure}[tbp]
 	 \centering
- 	 \includegraphics[width = \textwidth]{negative_duration_SR_violin.pdf}
+ 	 \includegraphics[width = 0.7\textwidth]{negative_duration_SR_violin.pdf}
  \caption{Distribution of Negative Durations}
  \label{fig:negative-duration-violin}
 \end{figure}
 
 
-\label{sec:homlessassistance}
-\textbf{Case Study: Homeless Person Assistance.} Scenario: DHS wants to know ``How 
-quickly have 311 SRs for ``Homeless Person Assistance'' been resolved 
-over the past two years?'' This is a typical request made by 
-both the public and City government; analogous to ``How quickly 
-is my Agency responding to ``critical'' requests, and does 
-that performance vary by Borough, Zip Code, etc. To conduct such an 
-analysis, we can use the tools on the Open Data Portal. Here are the steps:
+Excluding the extreme negative values, 
+Figure~\ref{fig:negative-duration-violin} shows the broad spread of 
+negative-duration SRs. While there are few outliers, the magnitude 
+of the negative durations is troubling and can produce bizarre 
+analytical results. Table~\ref{tab:largest-errors} summarizes the 
+negative durations of the largest magnitude (in days). The data 
+suggests that the negative duration issue is predominantly a problem 
+within the Department of Transportation (DOT), where 95\% of these 
+errors occur.
+
+
+% For illustration, consider a case study of homeless person
+% assistance. Suppose that DHS wants to know ``How 
+% quickly have 311 SRs for ``Homeless Person Assistance'' been resolved 
+% over the past two years?'' This is a typical request made by 
+% both the public and City government; analogous to ``How quickly 
+% is my Agency responding to ``critical'' requests, and does 
+% that performance vary by Borough, Zip Code, etc. To conduct such an 
+% analysis, we can use the tools on the Open Data Portal. Here are the steps:
 		
 		
-\begin{itemize}
-    \item Select created\_date from 2022-2023 and filter by complaint\_type = 
-    ``Homeless Person Assistance'' (this yields 55,000 SRs)
+% \begin{itemize}
+%     \item Select created\_date from 2022-2023 and filter by complaint\_type = 
+%     ``Homeless Person Assistance'' (this yields 55,000 SRs)
     
-    \item Compute the ``duration'' (closed\_date – created\_date)
+%     \item Compute the ``duration'' (closed\_date – created\_date)
     
-    \item Take an average of the ``duration'' field  which yields: \textbf{Answer:  -4.8 days}  
-\end{itemize}
+%     \item Take an average of the ``duration'' field  which yields: \textbf{Answer:  -4.8 days}  
+% \end{itemize}
 
 		
-Clearly that answer is nonsensical. How did such a simple task result 
-in an absurd answer? The answer lies in the computation of the ``duration'' 
-field. It turns out, there are eight DHS SRs that have a closed\_date 
-of ``1900-01-01''. Each of those SRs creates a negative duration of -44,602 
-days (-122 years). Those eight SRs are enough to drive the 
-average duration of 55,000 Homeless Assistance SRs to a negative 
-value; clearly incorrect. In this case, the median is a better measure 
-of central tendency. The median is  0.2 days (approx 5 hrs) which will
-surely please the DHS. 
+% Clearly that answer is nonsensical. How did such a simple task result 
+% in an absurd answer? The answer lies in the computation of the ``duration'' 
+% field. It turns out, there are eight DHS SRs that have a closed\_date 
+% of ``1900-01-01''. Each of those SRs creates a negative duration of -44,602 
+% days (-122 years). Those eight SRs are enough to drive the 
+% average duration of 55,000 Homeless Assistance SRs to a negative 
+% value; clearly incorrect. In this case, the median is a better measure 
+% of central tendency. The median is  0.2 days (approx 5 hrs) which will
+% surely please the DHS. 
 
 		
 %\begin{figure}[tbp]
@@ -762,19 +749,44 @@ surely please the DHS.
 %	 \caption{Homeless Assistance SR Durations}
 %	 \label{fig:homeless}
 %end{figure}
+
+\subparagraph{Resolution Action Update Date}
 	
-		
-\label{sec: zeroduration}		
-\textbf{Issues with created\_date \& closed\_date - Zero Durations:} A more 
-prevalent problem occurs when the closed\_date and created\_date 
-are exactly the same -- to the second. Accordingly, this creates 
-a \textbf{zero duration'}, again nonsensical. There are 191,141 
-such SRs representing 3.1\% of all non-blank data. 99\% of these zero duration 
-SRs occur in five Agencies:  (Dept of Mental Health \&Hygiene (DHMH), Dept 
-of Transportation (DOT), Dept of Business (DOB), Dept of Sanitation 
-(DSNY), and Dept of Environmental Protection (DEP). This Agency distribution
-is does not mirror the overall Agency distribution of SRs, likely indicating an 
-Agency-specific issue.
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width = 0.7\textwidth]{post_closed_violin_chart.pdf}
+  \caption{Post-closed resolution action update date(s) over 30 days.}
+  \label{fig:resolution-violin}
+\end{figure}
+
+\jy{Are these from 2-year or 10-year period? Need to clarify in
+  Section 2.}
+
+A similar issue occurs when resolution action update date is after the
+closing date. \jy{It might be possible, I think, if they allow updates
+  after a SR is closed.}
+When an SR is updated, the 311 software automatically populates the 
+\texttt{resolution\_action\_update\_date}. Some of these updates 
+occur long after the SR is closed. As shown in Figure~\ref{fig:resolution-violin}, 
+there are 7,460 SRs that were updated more than 30 days after the 
+\texttt{closed\_date}, but less than 730 days, to exclude infeasible 
+dates like 1900-01-01. The chart highlights the distribution of these 
+post-closure updates, with a notable concentration of updates within 
+the 30-to-90-day range. This pattern raises questions about whether 
+such delayed updates are standard operational practice or indicative 
+of a potential issue requiring further investigation. While the reason 
+for these delayed updates is unclear, they may impact the accuracy of 
+response time analyses if not properly accounted for.
+	
+\subparagraph{Same Created Date \& Closed Date: Zero Durations}
+A more prevalent issue occurs when the \texttt{closed\_date} and 
+\texttt{created\_date} are exactly the same, down to the second. This 
+creates a \textbf{zero duration}, which is also nonsensical. There 
+are 191,141 such SRs, representing 3.1\% of all non-blank data. 
+Ninety-nine percent of these zero-duration SRs occur in five agencies:
+DHMH, DOT, DOB, DSNY, and DEP.. 
+This distribution does not mirror the overall SR distribution by 
+agency, suggesting an agency-specific issue.
 	
 		
 %\begin{figure}[tbp]
@@ -784,92 +796,65 @@ Agency-specific issue.
 %	 \label{fig:zero-duration}
 %\end{figure}	
 
-		
-\label{sec:midnightandnoon}
-\textbf{Issues with created\_date \& closed\_date(s) - Midnight \& Noon:} Another 
-problem discovered with the created\_date and 
-closed\_date fields - there are an unusually large number of SRs 
-created or closed at exactly midnight (00:00:00) and exactly noon (12:00:00), 
-to the second. Normal distribution of SR creation and closure 
-largely follows the work-day clock with most  SRs created during 
-day-light hours, and fewer SRs 	created at night and the early hours 
-of morning. However, there are significantly greater numbers 
-of SR closed exactly at midnight and noon, as well as a significant 
-number of SRs created exactly at noon. Observations include:
-
-	
+\subparagraph{Created Date or Closed Date(s) at Midnight or Noon}
+Another issue found with the \texttt{created\_date} and 
+\texttt{closed\_date} fields is the unusually large number of SRs 
+created or closed at exactly midnight (00:00:00) or noon (12:00:00), 
+down to the second. Normally, SR creation and closure follow the 
+work-day schedule, with most SRs created during daylight hours and 
+fewer at night or in the early morning. However, there is a 
+significantly higher number of SRs closed exactly at midnight and noon, 
+as well as a large number created exactly at noon. Specific observations 
+include:
 \begin{itemize}
-	 \item There were 99,779 SRs created exactly at noon (12:00:00)
-	
-	 \item There were 235,347 SRs closed exactly at midnight (00:00:00)
-	 
-	\item There were 105,505 SRs closed exactly at noon. 
+    \item 99,779 SRs were created exactly at noon (12:00:00).
+    \item 235,347 SRs were closed exactly at midnight (00:00:00).
+    \item 105,505 SRs were closed exactly at noon.
 \end{itemize}
 
 
-A unique way to visualize this anomaly is to examine the busiest day 
-during this 2-year period (Friday, 2023-09-29). Then aggregate 
-the created\_date(s) by minute (with seconds equal to zero), providing
-a minute-by-minute look at SR creation on that one day. Note the spike 
-at exactly noon (12:00), well beyond the 3\textsigma line.
-
 \begin{figure}[tbp]
-	\centering
-	\includegraphics[width=\textwidth]
-	{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
-	\caption{SRs Created Minute-by-Minute on Busiest Day}
-	\label{fig:busiestcreated}
+  \centering
+  \includegraphics[width=0.7\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
+  \includegraphics[width=0.7\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
+  \caption{SRs Created and closed minute-by-minute on busiest day
+    during two year period \jy{give years}.}
+  \label{fig:busiest}
 \end{figure}	
 
-
-Repeat the same for the \# of SRs with closed\_date(s) 
-on the busiest day (Friday, 2023-09-29). Again, aggregated by 
-the minute (with seconds equal to zero). Note the spikes 
-at 00:00:00 and 12:00:00 respectively. 
-
-
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
-	\caption{SRs Closed Minute-by-Minute on Busiest Day}
-	\label{fig:busiestclosed}
-\end{figure}	
+Figure~\ref{fig:busiest} visualizes this anomaly by examining the 
+busiest day during this 2-year period (Friday, 2023-09-29). The 
+\texttt{created\_date} values are aggregated by minute (with seconds 
+equal to zero), providing a minute-by-minute look at SR creation on 
+that day. Notably, there is a spike exactly at noon (12:00), well 
+beyond the 3\textsigma{} line. \jy{May not want to mention 3 sigma as
+  here we have highly skewed count data.}
+The same analysis was repeated for 
+\texttt{closed\_date} values on the busiest day, aggregated by minute 
+(with seconds equal to zero). Spikes were observed at both 00:00:00 
+and 12:00:00.
 
 
-These unusual patterns of created \& closed SRs at exactly the hours 
-of midnight and noon likely indicates the presence of a bulk create/close 
-software process that perhaps automatically ``closes'' 
-(or ``creates'') a large number of SRs with a generated time-stamp of exactly 
-midnight (00:00:00) or noon (12:00:00). Such behavior distorts
- the duration of these SRs by providing inaccurate dates. The 
- distribution by Agency for this anomaly indicates 
- that \textgreater90\% of these ``created\_at\_noon'' SRs come from 
- just two Agencies: DOB and DSNY.  Further investigation
- reveals that  a single Agency, DSNY, is responsible 
- for \textgreater99\% of the SRs ``closed-exactly-at-noon''. 
-	
+These unusual patterns of SR creation and closure exactly at midnight 
+and noon suggest the presence of a bulk create/close software process 
+that automatically assigns time stamps of midnight (00:00:00) or noon 
+(12:00:00) to large batches of SRs. This behavior distorts the 
+calculated duration of these SRs by providing inaccurate dates. The 
+distribution by agency shows that over 90\% of the ``created-at-noon'' 
+SRs come from just two agencies: DOB and DSNY. Further investigation 
+reveals that a single agency, DSNY, is responsible for over 99\% of 
+the ``closed-at-noon'' SRs.
 
-\label{sec: resolutionaction}
-\textbf{Issues with resolution\_action\_update\_date:} When an 
-SR is updated, the 311 software automatically 
-populates the resolution\_action\_update\_date. Some of 
-those  updates are happening long after the SR is 
-closed. There are a total of 7460 SRs that are updated \textgreater30 days 
-after the closed\_date (and \textless{}730 days to avoid infeasible 
-dates such as 1900-01-01). It is not known if this is normal behavior
- or an area that requires further investigation. 
-	
-	
-\begin{figure}[tbp]
-	\centering
-	\includegraphics[width = \textwidth]{post_closed_violin_chart.pdf}
-	\caption{Post-Closed resolution\_action\_update\_date(s) \textgreater30 days}
-	\label{fig:resolution-violin}
-\end{figure}		
+
 
 	
 \subsection{Accuracy and precision}
 \label{sec:precision}
+
+\jy{This is caused by reading the number in as double
+  precision. Single precision would be good.}
+
+
 An question of precision vs. accuracy arises with the Latitude 
 and Longitude fields. Both Latitude are expressed as 
 a 14-decimal number, e.g. 40.86769186022511. Given 
@@ -881,152 +866,77 @@ the representation of the Latitude and Longitude fields is a
 classic case of 14-digit precision, but limited accuracy. 
 
 
+
 \subsection{Redundant \& Duplicate fields}
 \label{sec:duplicates}
-During this analysis, several redundant fields were observed which
-should be examined further for possible consolidation.
 
+During this analysis, several redundant fields were observed and should 
+be examined for possible consolidation.
 
-\label{sec:latlong}
-\textbf{latitude \& longitude and location:} The location 
-field is a 100\%pure concatenation of the latitude 
-and longitude fields with a comma and parenthesis 
-added. Thus the  location field seems questionable as the value, 
-and the data is arguably more difficult to 
-extract and use than the two individual fields. Example:  
+\textbf{Latitude/Longitude and Location:} The \texttt{location} field 
+is a pure concatenation of the latitude and longitude fields with a 
+comma and parentheses added. This makes the \texttt{location} field 
+arguably harder to use than the individual fields. For example:  
+\texttt{latitude}: 40.768456429488, \texttt{longitude}: $-$73.9575661888774, 
+and \texttt{location}: (40.768456429488, $-$73.95756618887745).
 
+\textbf{borough \& park\_borough:} These two fields are fully redundant, 
+as they are 100\% matches.
 
-\begin{itemize}
-	\item  latitude: 40.768456429488
-	
-	\item  longitude: -73.9575661888774
-	
-	\item  location: (40.768456429488, -73.95756618887745)
-\end{itemize}
+\textbf{borough \& borough\_boundaries:} These fields are 98.3\% matches. 
+This ``near-duplicate'' relationship creates a challenge in determining 
+which field is correct when discrepancies arise.
 
+\textbf{borough \& taxi\_company\_borough:} Despite their names, these 
+fields are almost entirely different, with only a 0.05\% match. The 
+\texttt{taxi\_company\_borough} field is used exclusively by the TLC, 
+indicating a need for consultation with TLC to understand the differing 
+uses.
 
-\label{sec:parkborough}
-\textbf{borough \&  park\_borough fields:} Borough and 
-park\_borough: These two fields are 100\% matches; fully redundant.
+\textbf{incident\_zip \& zip\_codes:} The \texttt{zip\_codes} field, 
+one of the computed fields, was found to have 56\% invalid entries, 
+while the \texttt{incident\_zip} field has a 99.93\% accuracy rate. 
+We recommend eliminating or masking the \texttt{zip\_codes} field 
+until its accuracy can be improved.
 
+\textbf{police\_precinct \& police\_precincts:} These two computed 
+fields are 99.9\% matches. Since the computational process is unknown, 
+it is unclear which field is more accurate. However, having two fields 
+with near-duplicity suggests that only one is necessary.
 
-\label{sec:boroughboundaries}
-\textbf{borough \& borough\_boundaries:} Borough and 
-borough\_boundary fields are a 98.3\% match. This 
-is an example of the the problem with two ``near-duplicate'' 
-fields; which field is correct when they disagree?
+\textbf{agency \& agency\_name:} The \texttt{agency} field contains 
+abbreviations of City agencies (e.g., NYPD, DOT), while 
+\texttt{agency\_name} contains the full names. Including both seems 
+redundant, especially given the space taken up by full names in the 
+CSV file.
 
+\textbf{landmark \& street\_name:} While the \texttt{landmark} field is 
+intended for noteworthy locations (e.g., parks, airports), most entries 
+are actually street names, with a 62\% match to \texttt{street\_name}. 
+Even non-matches (excluding blanks) appear to be similar, differing 
+only in spelling or formatting (e.g., ``NINTH AVE'' vs. ``9 AVE''). This 
+indicates a possible misuse of the \texttt{landmark} field.
 
-\label{sec:taxicompanyborough}
-\textbf{borough \& taxi\_company\_borough:} Borough and 
-taxi\_company\_borough fields that despite their names, are 
-nearly completely different with only a 0.05\% match, suggesting 
-that these two fields are used very differently. The taxi\_company\_borough
- field is used exclusively by the TLC which governs all cars for hire. Any
- discussion of duplication with other borough-related fields 
- should include a discussion with TLC as to the usage of these similar,
- but non-matching, fields.
- 
-
-\label{sec:zipcodes}
-\textbf{incident\_zip \& zip\_codes:} The zip\_code field is one 
-of the six computed fields and its validity 
- was previously explored and found to be 
- lacking; 56\% of the entries are invalid. The companion 
- field, incident\_zip, had an accuracy rate of 99.93\%. Our analysis
- indicates that the computed zip\_code field should be eliminated
- or masked from the public until such time as accuracy 
- issues can be addressed. 
-
-
-\label{sec:police} 
-\textbf{police\_precinct \& police\_precincts:} Both the 
-police\_precinct and police\_precincts are among the computed 
-fields not cited in the Data Dictionary. However, their usage is easy to 
-discern; they presumably represent the NYPD precinct 
-corresponding to the incident address. These two 
-fields are near-duplicates with 99.9\% of the entries 
-matching. Since the underlying computational process 
-is unknown, we are unable to determine which 
-field is ``more correct'' field. However having two fields with 99.9\% 
-duplicity indicates that perhaps only one police 
-precinct field is necessary.
-
-
-\label{sec:agencyname}
-\textbf{agency \& agency\_name:} The agency and agency\_name 
-fields, while not duplicates per se, have a 1:1 correspondence. The 
-Agency field contains abbreviations for the City agencies, e.g. NYPD, 
-DOT, HPD, DSNY, etc. The agency\_name field contains the full name 
-of these organizations. It seems redundant to include both as 
-the abbreviations are commonly used and well understood.
-
-
-\label{sec:landmark}
-\textbf{landmark \& street\_name:} The landmark field is listed 
-in the Data Dictionary as ``...any noteworthy location, 
-including but not limited to, parks, hospitals, airports, sports 
-facilities, performance spaces, etc.'' Our analysis
-found that was not the case. To be sure, many of the entries in 
-the landmark field do contain landmark names, e.g.``Pennsylvania 
-Station'', ``LaGuardia Airport'', etc.,  but the vast majority 
-of the entries are street names, e.g. ``Fenton Avenue'', ``Steinway 
-Street'', ``Broadway'', etc.. These entries are very similar to the 
-street\_name field with a 62\% match, enough to be indicative 
-of some level of duplicative usage. Even the non-matches 
-(excluding blanks) appear to be matches except for 
-minor spelling and nomenclature changes, 
-e.g. ``NINTH AVE'' \& ``9 AVE''. It's worth investigating what is going on
-with the usage of the landmark field.
-
-	
-\label{sec:cross-street}
 \textbf{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
-\& intersection\_street\_2: } There are two sets of street pairs provided 
-in addition to the incident\_address field. These pairs are:
+\& intersection\_street\_2:} These two sets of street pairs are used to 
+help identify the incident address. After applying address 
+standardization using the R \textit{campfin} package, we found 88\% of 
+these pairs to be duplicates, while 12\% do not match. This discrepancy 
+raises the question of which field should be trusted. It is possible 
+that the two pairs originated from different agencies that used 
+different variable names to represent the same information, but no 
+documentation exists to clarify this relationship.
 
+\paragraph{Near Match}
 
-\begin{itemize}
-	\item cross\_street\_1 \& intersection\_street\_1
-	
-	\item cross\_street\_2 \& intersection\_street\_2
-\end{itemize}
-
-	
-These two street pairs are used to assist in identifying the address, 
-as is common in New York City. These two street pairs
-have 88\% duplicates where both cross\_street\_1 matches 
-intersection\_street\_1 and cross\_street\_2 
-matches intersection\_street\_2. We believe only one of these
-street pairs are necessary, but which one? This illustrates the 
-problem of two similar data fields that largely, but not exactly, match. In
-this case there are 12\% that do not match; which field to trust?
-
-
-\textit{(Note: Address standardization was applied to  street 
-addresses using the R \textit{campfin} package. This standardization 
-prevents generating a non-match between locations such as 
-``240 E 69\textsuperscript{th} ST'' and ``240 E 69\textsuperscript{th} Street'' 
-which are clearly the same address save for formatting 
-and slight spelling differences.)}
-
-
-\textbf{Near matches:} In addition to the matching values, we 
-encountered a number of \textit{near-matches}; situations where the 
-cross\_street and intersection\_street are nearly, but not exactly, identical. 
-For example, HARMON DR and HARMON RD. To identify these near-matches 
-we measured the \href{https://en.wikipedia.org/wiki/Hamming_distance}
-\textit{Hamming Distance} between the two fields. The Hamming Distance is a 
-measure of how many letters must be changed for the two 
-fields to match. For this analysis, we chose a Hamming Distance of two (2).
- Here are some example results for near-matches for both 
- cross\_street\_1 and intersection\_street\_1. 
- (Cross\_street\_2 and intersection\_street\_2 show similar results.)
-
+\jy{This investigation could be relegated to on online supplement
+  given the low percentage of near-match. It's taking too much spaces
+  here.
+}
 
 \begin{table}[tbp]
     \centering
-     \caption{Near-matches for cross\_street\_1, intersection\_street\_1}
+     \caption{Examples of near-matches for cross\_street\_1 and intersection\_street\_1.}
      \label{tab:x1nearmatches}
 		\begin{tabular}{l l l r}
 	        \toprule
@@ -1062,107 +972,145 @@ fields to match. For this analysis, we chose a Hamming Distance of two (2).
 	    \end{tabular}
 \end{table}
 
+In addition to the matching values, we encountered a number of 
+\textit{near-matches}, situations where the \texttt{cross\_street} 
+and \texttt{intersection\_street} are nearly, but not exactly, identical. 
+An example of such a near-match is when one field reads ``HARMON DR'' 
+and the other reads ``HARMON RD.'' To identify these near-matches, 
+we applied the \href{https://en.wikipedia.org/wiki/Hamming_distance}
+{\textit{Hamming Distance}}, which measures the number of character 
+changes required to make the two fields identical. For this analysis, 
+we set the threshold for a near-match to a Hamming Distance of two (2).
 
-\subsection{Shrinking file size by removing duplicates}
- \label{sec:filesize}
-Shrinking file size by removing duplicates: By removing duplicate 
-and ``near-duplicate'' fields, it is possible to 
-shrink the file size by 12.3\% which for this large dataset equates to a 
-reduction of 395 Mb. A smaller file size means faster downloads, 
-less storage impact, as well as simplifying data analysis efforts.  
- 
- 
+
+Table~\ref{tab:x1nearmatches} provides examples of near-matches for 
+\texttt{cross\_street\_1} and \texttt{intersection\_street\_1}. These 
+entries show slight variations in the street name or number, such as 
+``WEST 168 ST'' and ``WEST 167 ST,'' both processed by DOT, where only 
+one character differs. Although these discrepancies may seem small, 
+they can have implications for data accuracy, particularly when 
+geocoding or matching locations for analysis purposes.
+
+
+Table~\ref{tab:summary1} presents a summary of the match and 
+near-match results for \texttt{cross\_street\_1} and 
+\texttt{intersection\_street\_1}. As the table shows, 88.15\% of the 
+entries are exact matches, while 25.4\% are blank but matching. 
+However, 11.85\% of the entries are non-matching, and a small fraction 
+(0.002\%) fall into the near-match category. Although this percentage 
+seems negligible, even a small number of near-matches can lead to 
+confusion or errors when analyzing location-based data, especially 
+if critical decisions rely on accurate street data. Address 
+standardization or correction processes may be necessary to resolve 
+these inconsistencies and improve the reliability of the data.
+
+
+\subsection{Storage}
+\label{sec:filesize}
+
+By removing duplicate and ``near-duplicate'' fields, it is possible to 
+shrink the file size by 12.3\%, which for this large dataset equates to 
+a reduction of 395 Mb. A smaller file size means faster downloads, 
+less storage impact, and simpler data analysis efforts.
 Below is a list of duplicate and near-duplicate fields. There are 
-some challenges with these proposed deletions, mostly with 
-the ``near duplicate'' fields.  For example, while the park\_borough is 
-a complete duplicate of the borough field, the 
-borough\_boundary field is only 98.3\% duplicate. Admittedly, 
-loosing 1.7\% of the data in those two fields is quite small, however
-for this large dataset that small percentage still amounts 
-to 110,715 non-matching occurrences. The authors  propose 
-deleting the following fields from the data set.
- 
- 
+challenges with these proposed deletions, especially with the 
+``near-duplicate'' fields. For example, while the \texttt{park\_borough} 
+is a complete duplicate of the \texttt{borough} field, the 
+\texttt{borough\_boundary} field is only 98.3\% similar. Although losing 
+1.7\% of the data is small, it still amounts to 110,715 non-matching 
+occurrences. The authors propose deleting the following fields:
+
 \begin{itemize}
-	\item agency\_name: Each row of data contains the agency field, 
-	which is an abbreviation of the Agency's name. The agency\_name 
-	abbreviations are clear, simple, and well understood.
-		    
-	\item park\_borough:  This field is a 100\% match with the 
-	borough field, thus no data loss. 
-		    
-	\item location:  The location field is a straight concatenation of 
-	the latitude and longitude fields, with a comma and parenthesis 
-	added. The data is a 100\% duplication of the latitude 
-	and longitude fields, thus no data loss.
-		    
-	\item police\_precinct: This field has a 99.95\% match with the 
-	police\_precincts fields. We are unable to determine which field 
-	is more correct, but feel that removal of one of the precinct fields 
-	is prudent and would result in minimal data loss.
-		   
-	\item borough\_boundaries (computed field): This field is one of 
-	the six computed fields. It has a 98.3\% match with the borough 
-	field.
-		    
-	\item cross\_street\_1 \& 2 and intersection\_street\_1 \& 2: These 
-	two pairs of fields each have an 88\% match. We would recommend 
-	deleting the two intersection\_street (1 \& 2) fields while acknowledging 
-	some loss of data in doing so.
-		     
-	\item zip\_codes(computed field):  This field is one of the six 
-	computed fields. However, this field has error rate of 58\% and 
-	as shown in the \ref{sec:case-study-zip-codes} can lead to 
-	dangerous mistakes when used for analytical purposes. We 
-	recommend deleting this field.
+    \item \textbf{agency\_name}: Each row contains the \texttt{agency} field, 
+    which uses abbreviations that are clear and well understood.
+    
+    \item \textbf{park\_borough}: A 100\% match with the \texttt{borough} field, 
+    leading to no data loss.
+    
+    \item \textbf{location}: A straight concatenation of latitude and longitude 
+    fields, offering no additional value beyond duplication.
+    
+    \item \textbf{police\_precinct}: This field has a 99.95\% match with 
+    \texttt{police\_precincts}. Removing one would result in minimal data loss.
+    
+    \item \textbf{borough\_boundaries (computed field)}: A 98.3\% match 
+    with the \texttt{borough} field.
+    
+    \item \textbf{cross\_street\_1 \& 2 and intersection\_street\_1 \& 2}: 
+    An 88\% match between these pairs. We recommend deleting the 
+    \texttt{intersection\_street\_1 \& 2} fields while acknowledging some 
+    data loss.
+    
+    \item \textbf{zip\_codes (computed field)}: This field has a 58\% error rate 
+    and, as discussed in \ref{sec:case-study-zip-codes}, can lead to significant 
+    analytical errors. We recommend deleting this field.
 \end{itemize}
- 	
- 	
-Additionally, it would be worth investigating if certain data fields are 
-in-fact useful, as the population of these fields is very scarce. For 
-example, the taxi\_company\_borough field is 99.94\% 
-blank. A similar situation exists for the road\_ramp field 
-(99.8\% blank), the vehicle\_type field (99.7\%blank), and 
-due\_date which is 99.6\% blank. Several additional several fields
-are mostly blank: bridge\_highway\_direction, bridge\_highway\_name, 
-bridge\_highway\_segment, and taxi\_pick\_up\_location; all 
-have \textgreater99\% blanks. Most of these latter fields 
-appear to used exclusively by the TLC.  
+
+Additionally, certain fields may not be useful due to their sparse population. 
+For example, the \texttt{taxi\_company\_borough} field is 99.94\% blank, 
+\texttt{road\_ramp} is 99.8\% blank, \texttt{vehicle\_type} is 99.7\% blank, 
+and \texttt{due\_date} is 99.6\% blank. Several other fields, such as 
+\texttt{bridge\_highway\_direction}, \texttt{bridge\_highway\_name}, 
+\texttt{bridge\_highway\_segment}, and \texttt{taxi\_pick\_up\_location}, 
+are over 99\% blank, with most used exclusively by the TLC.
 
 
-\subsection{Data Dictionary Observations} 
+Further reduction is possible by coding categorical 
+variables, such as \texttt{complaint\_type}, through methods like dropdown 
+menus or encoded categories. By using a dropdown menu for 
+\texttt{complaint\_type}, data entry can be standardized, reducing 
+inconsistencies caused by manual input errors. Additionally, categorical 
+variables with a limited set of possible values can be stored more 
+efficiently by assigning unique codes or numerical representations for 
+each category. For instance, instead of repeatedly storing the full text 
+for every complaint type (e.g., ``Noise - Residential,'' ``Noise - 
+Commercial''), a single code could represent each type. This not only 
+reduces file size but also improves data processing speed and efficiency 
+during analysis. Moreover, standardizing categorical inputs prevents 
+the inclusion of misspellings or unrecognized entries, ensuring cleaner 
+and more reliable data. This approach is particularly useful in large 
+datasets, where frequently repeated categorical variables can 
+significantly increase storage requirements. Encoding such fields 
+as dropdown options or coded variables can lead to faster query times 
+and more consistent data handling.
+
+
+
+\subsection{Data Dictionary} 
 \label{sec:datadictionary}
+
 The Data Dictionary could benefit from an update. We found several 
-discrepancies between the Data Dictionary and the 
-actual data which can potentially lead analytic efforts astray. 
+discrepancies between the Data Dictionary and the actual data, which 
+could potentially mislead analytic efforts.
 
 \begin{itemize}
-	\item While the Open Data portal lists the data types of the 
-	various fields, the Data Dictionary does not. Nor does it provide 
-	information on the specifics of various fields, such 
-	as constraints or the domain of legal values. For example, the 
-	incident\_zip field is specified as ``text''. That is probably not the 
-	best definition; perhaps	``categorical'' with a note indicating that 
-	the data can contain only numeric characters and is 
-	not subjected to arithmetic operations. 
-
-	\item Many of the domain of legal values are incomplete or 
-	inaccurate. For example, the Data Dictionary indicates that 
-	the status field has values of \textit{assigned, canceled, closed}, 
-	or \textit{pending}. However, we found additional status 
-	values of: \textit{in progress, started}, and \textit{unspecified}. 
-	Additionally, we found no SRs with a status of \textit{canceled}. 
-	Similarly, the address\_type field is indicated to have 
-	values \textit{address, blockface, intersection, latlong}, and 
-	\textit{placename}. We discovered the additional values of 
-	\textit{bbl} and \textit{unrecognized}. Additionally, no values of 
-	\textit{latlong} were observed. Other fields (facility\_type, 
-	vehicle\_type, taxi\_pick\_up\_location, road\_ramp, city) 
-	suffer similar inaccuracies in their specified domain of values as
-	shown in the Data Dictionary.
-	
-	\item As noted previously, there are six \textit{@computed} fields that
-	are present in the data, but not included in the Data Dictionary.
+    \item While the Open Data portal lists the data types of various 
+    fields, the Data Dictionary does not. Nor does it provide details 
+    on specific fields, such as constraints or the domain of legal 
+    values. For example, the \texttt{incident\_zip} field is specified 
+    as ``text.'' This may not be the most suitable definition; 
+    ``categorical,'' with a note that the data contains only numeric 
+    characters and is not subjected to arithmetic operations, might 
+    be a better description.
+    
+    \item Many of the domains of legal values are incomplete or 
+    inaccurate. For example, the Data Dictionary indicates that the 
+    \texttt{status} field has values of \textit{assigned, canceled, 
+    closed}, or \textit{pending}, but we also found values such as 
+    \textit{in progress, started}, and \textit{unspecified}. 
+    Additionally, no SRs were found with a status of 
+    \textit{canceled}. The \texttt{address\_type} field similarly 
+    lists values of \textit{address, blockface, intersection, latlong}, 
+    and \textit{placename}, but we found additional values such as 
+    \textit{bbl} and \textit{unrecognized}, and no \textit{latlong} 
+    values were observed. Other fields, like \texttt{facility\_type}, 
+    \texttt{vehicle\_type}, \texttt{taxi\_pick\_up\_location}, 
+    \texttt{road\_ramp}, and \texttt{city}, exhibit similar inaccuracies 
+    in their specified domain values.
+    
+  \item As mentioned earlier, six \texttt{@computed} fields that are
+    present in the data but not included in the Data Dictionary need
+    to be documented.
 \end{itemize}
 
 
