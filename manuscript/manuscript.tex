@@ -116,11 +116,10 @@ Data initiative, initiated in 2010, stands out as a comprehensive
 repository for global development data, available at
 \href{https://data.worldbank.org}{World Bank Open Data}. 
 These initiatives represent significant strides in democratizing data, 
-in breaking barriers that once kept valuable information 
+breaking down barriers that once kept valuable information 
 on government performance in silos. Their collective impact 
-is profound, extending beyond mere data sharing to 
-fostering a culture of openness that benefits individuals, 
-communities, governments, and economies worldwide 
+extends beyond mere data sharing to fostering a culture of openness 
+that benefits individuals, communities, governments, and economies worldwide 
 \citep{barns2016mine, wang2016adoption}.
 
 
@@ -144,38 +143,43 @@ transportation \citep{gerte2019understanding}, aiding in the
 understanding and addressing of complex urban challenges.
 
 
-The civil and research applications of open data critically depend on
-its quality, making data curation fundamental in the open data
-ecosystem. Among the earliest discussions,
-\citet{witt2009constructing} focused on developing data curation
-profiles tailored to specific contexts, setting a precedent for
-targeted data management strategies. Addressing broader challenges in
-data sharing and management, \citet{borgman2012conundrum} highlighted
-the complexities of research data distribution, emphasizing the need
-for robust strategies. This is complemented by \citet{hart2016ten},
-who outlined essential principles for effective data management,
-particularly emphasizing meticulous curation practices. In
-collaborative data management, \citet{beheshti2019datasynapse}
-underscored the significance of cooperative environments for managing
-and sharing social data effectively. This aspect gains further
-relevance in \citet{mclure2014data}, which delved into the specific
-practices and needs within data curation communities. The practical
-implications of data curation are vividly illustrated in public health
-and global challenges. \citet{cantor2018facets} demonstrated the
-utility of curated open data in evaluating community health
-determinants. The COVID-19 pandemic served as a real-world example,
-with \citet{shankar2021data} observing the critical role of collective
-data curation efforts in managing and responding to the
-crisis. Collectively, these studies highlight the multifaceted nature
-of data curation and emphasize its indispensable role in enhancing the
-applicability and value of open data across various domains.
+Data curation, the process of organizing, maintaining, and ensuring
+the quality of datasets, plays a crucial role in maximizing the
+utility of open data. Proper curation ensures that datasets remain
+consistent, accurate, and useful for diverse applications. For example, 
+curating data ensures it can be leveraged effectively for machine learning 
+systems, which require high-quality data to produce reliable insights
+\citep{polyzotis2019data, jain2020overview}. Poor 
+curation may result in issues such as missing data, formatting errors, or 
+inconsistent values that can lead to biased or inaccurate outcomes
+\citep{geiger2020garbage}.
+This is particularly critical in domains where machine learning is applied 
+to sensitive tasks, such as public health or policy
+\citep{rahm2000data}.
+
+
+Research into data curation has explored these challenges in depth. 
+Among the earliest discussions, \citet{witt2009constructing} focused 
+on developing data curation profiles tailored to specific contexts, 
+setting a precedent for targeted data management strategies. 
+Addressing broader challenges in data sharing and management, 
+\citet{borgman2012conundrum} highlighted the complexities of 
+research data distribution, emphasizing the need for robust 
+strategies. This is complemented by \citet{hart2016ten}, who outlined 
+essential principles for effective data management, particularly 
+emphasizing meticulous curation practices. The utility of curated 
+open data is vividly illustrated in public health and global challenges, 
+where \citet{cantor2018facets} demonstrated the utility of curated 
+data in evaluating community health determinants, and 
+\citet{shankar2021data} observed its critical role during the 
+COVID-19 pandemic in managing collective responses.
 
 
 The contributions of this paper are twofold. First, we delve into
 the specifics of data curation challenges using the NYC 311 Service
-Request (SR) Data as a case study. This renowned and frequently viewed 
-dataset serves as a prime example for examining key issues in data curation, 
-including data validity, consistency, and curation efficiency. 
+Request (SR) Data as a case study. This dataset serves as a prime 
+example for examining key issues in data curation, including data 
+validity, consistency, and curation efficiency. 
 We illustrate these points with live examples drawn from our 
 processing of the 311 SR data. Secondly, building upon insights 
 gained from this case study, we propose a set of data curation 
