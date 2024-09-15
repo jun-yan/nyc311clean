@@ -1187,43 +1187,48 @@ address the data cleanliness issues discussed in this paper.
 
 \section{Discussion} \label{sec:discussion}
 
-Our study highlights the vital importance of robust data curation in
-maintaining the reliability and utility of open datasets, with a close
-examination of the NYC 311 data. As these datasets are applied across
-diverse fields such as public services and academic research, issues
-like inconsistencies, missing values, and formatting errors can
-significantly undermine the quality of insights. Trustworthy machine
-learning systems, which rely heavily on high-quality data, are
-particularly vulnerable to errors when data is not properly
-curated. For example, biases or inconsistencies in input data can
-compromise both the accuracy and fairness of predictive models
-\citep{rahm2000data}.
+Our study highlights the critical role of robust data curation in
+ensuring the reliability and utility of open datasets, as demonstrated
+through the examination of the NYC 311 data. As these datasets are
+applied across diverse fields such as public services and academic
+research, inconsistencies, missing values, and formatting errors can
+significantly undermine the insights derived from them. Trustworthy
+machine learning systems, which rely heavily on high-quality data, are
+especially vulnerable to such issues. Errors in the underlying data,
+such as biases or inconsistencies, can compromise both the accuracy
+and fairness of predictive models, impacting real-world decisions in
+urban planning and policy \citep{rahm2000data, geiger2020garbage}.
 
 
 This research further emphasizes the necessity of harmonizing data
-from multiple city agencies, particularly in resolving discrepancies
-in field names, formats, and definitions. Trustworthy machine learning
-depends on not only accurate and clean data but also consistent data
-across sources. This challenge becomes more acute in datasets spanning
-long time periods, where changes in agency structures or reporting
-standards can introduce subtle biases. As \citet{rahm2000data} noted,
-ensuring long-term data consistency is crucial for longitudinal
-studies and predictive modeling, as even minor shifts in data can
-result in significant deviations in outcomes.
+across city agencies, particularly in resolving discrepancies in field
+names, formats, and definitions. Consistency in data is essential for
+trustworthy machine learning, where inconsistencies across sources can
+lead to distorted outcomes. This challenge is even more pronounced in
+datasets that span long time periods, as changes in agency structures
+or reporting standards can introduce subtle biases. Long-term data
+consistency is crucial for longitudinal studies and predictive
+modeling, as even minor data shifts can lead to significant deviations
+in model outcomes, as noted by \citet{rahm2000data} and
+\citet{borgman2012conundrum}.
 
 
 Finally, the intersection of data curation and machine learning for
-public policy applications opens new opportunities for enhancing
-governance. By improving data quality, machine learning models can
-more effectively predict trends, allocate resources, and identify
-issues such as service delays. The COVID-19 pandemic demonstrated the
-critical role of real-time, trustworthy data in responding to public
-needs. Without proper data curation, the accuracy and timeliness of
-machine learning insights would have been compromised, affecting
-crucial decision-making processes. Future efforts could focus on
-automating data curation within real-time data pipelines, ensuring
-that the data feeding into machine learning models remains both clean
-and reliable \citep{chu2016data}.
+public policy applications opens new avenues for improving governance.
+High-quality data enables machine learning models to better predict
+trends, allocate resources, and address service delivery issues, such
+as delays in responding to 311 complaints. The COVID-19 pandemic
+underscored the importance of real-time, trustworthy data in crisis
+management, where the accuracy and timeliness of data-driven insights
+were critical for public health responses. Without proper data
+curation, machine learning models used during the pandemic would have
+been compromised, affecting decisions on resource allocation and
+service provision \citep{wu2020subnational, kumar2020machine}.
+Future efforts could focus on automating data curation processes,
+particularly in real-time data pipelines, to ensure that the data used
+in machine learning models remains accurate, clean, and reliable
+\citep{chu2016data, zhang2019automating}.
+
 
 \section*{Supplementary Material}
 The NYC 311 SR data and code used to produce the results reportred in
