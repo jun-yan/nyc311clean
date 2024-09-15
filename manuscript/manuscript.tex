@@ -978,7 +978,8 @@ and \texttt{intersection\_street} are nearly, but not exactly, identical.
 An example of such a near-match is when one field reads ``HARMON DR'' 
 and the other reads ``HARMON RD.'' To identify these near-matches, 
 we applied the \href{https://en.wikipedia.org/wiki/Hamming_distance}
-{\textit{Hamming Distance}}, which measures the number of character 
+{\textit{Hamming Distance}}, which measures the number of character
+\jy{needs a quick definition and reference}
 changes required to make the two fields identical. For this analysis, 
 we set the threshold for a near-match to a Hamming Distance of two (2).
 
@@ -1041,8 +1042,8 @@ occurrences. The authors propose deleting the following fields:
     \texttt{intersection\_street\_1 \& 2} fields while acknowledging some 
     data loss.
     
-    \item \textbf{zip\_codes (computed field)}: This field has a 58\% error rate 
-    and, as discussed in \ref{sec:case-study-zip-codes}, can lead to significant 
+  \item \textbf{zip\_codes (computed field)}:
+    This field has a 58\% error rate and can lead to significant 
     analytical errors. We recommend deleting this field.
 \end{itemize}
 
@@ -1116,81 +1117,73 @@ could potentially mislead analytic efforts.
 
 \section{Recommendations} 
 \label{sec:recommendations}
-We propose the following recommendations by the Open Data Team to address
-the data cleanliness issues addressed in this paper.
-
+We propose the following recommendations for the Open Data Team to 
+address the data cleanliness issues discussed in this paper.
 
 \begin{itemize}
-	\item First, the Open Data Team will need 
-	to undertake a dedicated effort to investigate these 
-	data anomalies, confirm the veracity of the issue, 
-	and engage with the appropriate Agency Open Data 
-	Representatives to seek resolution. That effort will not 
-	be easy or fast, and in some cases software changes may  
-	be required. Coordination and mutual approval of any 
-	changes will be key, requiring solid support 
-	from senior leadership.
+\item  Undertake a dedicated effort 
+    to investigate these data anomalies, confirm the veracity of the 
+    issues, and collaborate with the appropriate Agency Open Data 
+    Representatives to find resolutions. This effort may be complex 
+    and require software changes. Coordination and mutual approval 
+    of changes will be key, requiring strong support from senior 
+    leadership.
 
-	\item Secondly, standards and protocols need to be 
-	identified, agreed to, and commitment obtained. For example, 
-	the domain of legal values, data accuracy, address normalization, 
-	data usage, data definitions, etc..
+    \item Standards and protocols should be established, agreed upon, 
+    and enforced. This includes defining the domain of legal values, 
+    ensuring data accuracy, implementing address normalization, 
+    clarifying data usage, and providing detailed data definitions.
 
-	\item Many of the data integrity issues could potentially be 
-	resolved through enforcement by software. For example, the 
-	software should be able to easily prevent invalid values, such as zip 
-	codes, and similarly for other data issues. One key area are is the 
-	created\_date and closed\_date which are frequently cited 
-	when determining responsiveness for various Agency services; software
-	could conceivably prevent illogical situations such as an SR being
-	``closed'' before it is ``opened''.
-	
-	\item The large spikes in SR closure and creation occurring at 
-	midnight and noon almost certainly point to an automated 
-	process from an external Agency integration. Such processes distort 
-	the accurate capture of an SR duration and should be eliminated in
-	favor of more accurate dates.
-	
-	\item As noted, there are six ``computed'' fields in the data export 
-	that are not identified in the Data Dictionary. Several of 
-	these computed fields suffer from significant data inaccuracies. We  
-	recommend updating the Data Dictionary at a minimum and 
-	possibly masking those fields from public usage until such time as 
-	their accuracy can be ascertained.
-	
-	\item Removal of duplicate fields should be examined. In some cases, such 
-	as the borough and park\_borough fields, the duplication is 100\%. In 
-	other cases, the duplication is in the 80-90\% range. These near-duplicate 
-	fields and 	their utility should be examined to determine if inclusion in the 
-	311 SR dataset is warranted. Our analysis indicates that as much as 12\% 
-	size reductions are achievable with a first pass, possibly more upon deeper
-	analysis.
-	
-	\item Fields with extremely low data presence, such as taxi\_company\_borough 
-	which is populated only 0.06\% of the time, should be evaluated 
-	to determine if their inclusion is warranted.
-	
-	\item The Data Dictionary is dated March 2023. The issues addressed 
-	in Section~\ref{sec:datadictionary} should be the bases for an update of
-	the Data Dictionary.
-	
-	\item Excessive precision in the latitude, longitude, and location 
-	fields is nonsensical.  We recommend no more than 
-	four decimal places (0.000X), representing a distance of approximately 
-	36.4 feet. Further decimal points strain credibility.
+    \item Resolve many potential data integrity issues
+    through enforcement by software. For instance, software should 
+    prevent invalid entries like erroneous zip codes. Similarly, fields 
+    like \texttt{created\_date} and \texttt{closed\_date}, which 
+    measure responsiveness, should have logic checks to prevent 
+    illogical sequences, such as an SR being ``closed'' before 
+    being ``opened.''
 
-	\item The 11 address-related address fields (incident\_address, 
-	street\_name, city, intersection\_street\_1 \& 2, cross\_street\_1 \& 2,  
-	landmark, road\_ramp, bridge\_highway\_segment, and 
-	taxi\_pick\_up\_location) should be standardized to USPS format. 
-	Software packages can easily perform this standardization. 
-	
-	\item There are multiple means by which missing data is 
-	represented. These include ``UNKNOWN'' , ``N/A'', ``NA'', ``na'', and 
-	a blank field, e.g. `` ''. Protocols should be established regarding 
-	how to represent missing data.
+    \item The large spikes in SR creation and closure at midnight and 
+    noon likely point to automated processes from external Agency 
+    integrations. These distortions should be eliminated in favor of 
+    capturing accurate SR durations with precise timestamps.
+
+    \item As discussed, there are six ``computed'' fields that are not 
+    listed in the Data Dictionary. Some of these fields contain 
+    significant inaccuracies. We recommend updating the Data 
+    Dictionary and, if necessary, masking these fields from public use 
+    until their accuracy is improved.
+
+    \item Duplicate fields should be reviewed for removal. In some 
+    cases, such as \texttt{borough} and \texttt{park\_borough}, the 
+    duplication is 100\%. In others, the match is 80-90\%. 
+    These near-duplicates should be assessed to determine their 
+    relevance in the 311 SR dataset. Initial analysis suggests that 
+    removing these fields could reduce file size by up to 12\%, with 
+    further reductions possible upon deeper review.
+
+    \item Fields with very low data presence, such as 
+    \texttt{taxi\_company\_borough}, populated only 0.06\% of the time, 
+    should be evaluated to determine if they are necessary.
+
+    \item The Data Dictionary, last updated in March 2023, should be 
+    revised based on the issues discussed in Section~\ref{sec:datadictionary}.
+
+    \item The precision of latitude, longitude, and location fields 
+    should be reduced. We recommend limiting precision to four 
+    decimal places (0.000X), which represents approximately 36.4 feet. 
+    More decimal points strain credibility.
+
+    \item The 11 address-related fields (\texttt{incident\_address}, 
+    \texttt{street\_name}, \texttt{city}, \texttt{intersection\_street\_1 \& 2}, 
+    \texttt{cross\_street\_1 \& 2}, \texttt{landmark}, \texttt{road\_ramp}, 
+    \texttt{bridge\_highway\_segment}, and \texttt{taxi\_pick\_up\_location}) 
+    should be standardized to USPS format. Software can easily 
+    perform this standardization.
+
+    \item There are multiple ways missing data is represented, such as 
+    ``UNKNOWN'', ``N/A'', ``NA'', ``na'', and blanks (`` ''). Protocols 
+    should be established to standardize the representation of missing data.
 \end{itemize}
-
 
 \section{Discussion} \label{sec:discussion}
 
