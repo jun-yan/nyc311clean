@@ -30,12 +30,12 @@ cat("\n***** Program initialization *****")
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "test_data.csv"
 data1File <- file.path("..", "..", "data", main_data_file)
 #data1File <- file.path("..", "..", "data", "test_data.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+max_closed_date <- as.POSIXct("2024-08-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
 chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "Core charts")
 
@@ -596,1020 +596,147 @@ zipRows <- nrow(USPSzipcodesOnly)
 
 #########################################################################
 # Load USPS official street abbreviations
+
 full_name <- c(
-  "ALLEE",
-  "ALLEY",
-  "ALLY",
-  "ALY",
-  "ANEX",
-  "ANNEX",
-  "ANNX",
-  "ANX",
-  "ARC",
-  "ARCADE",
-  "AV",
-  "AVE",
-  "AVEN",
-  "AVENU",
-  "AVENUE",
-  "AVN",
-  "AVNUE",
-  "BAYOO",
-  "BAYOU",
-  "BCH",
-  "BEACH",
-  "BEND",
-  "BND",
-  "BLF",
-  "BLUF",
-  "BLUFF",
-  "BLUFFS",
-  "BOT",
-  "BTM",
-  "BOTTM",
-  "BOTTOM",
-  "BLVD",
-  "BOUL",
-  "BOULEVARD",
-  "BOULV",
-  "BR",
-  "BRNCH",
-  "BRANCH",
-  "BRDGE",
-  "BRG",
-  "BRIDGE",
-  "BRK",
-  "BROOK",
-  "BROOKS",
-  "BURG",
-  "BURGS",
-  "BYP",
-  "BYPA",
-  "BYPAS",
-  "BYPASS",
-  "BYPS",
-  "CAMP",
-  "CP",
-  "CMP",
-  "CANYN",
-  "CANYON",
-  "CNYN",
-  "CAPE",
-  "CPE",
-  "CAUSEWAY",
-  "CAUSWA",
-  "CSWY",
-  "CEN",
-  "CENT",
-  "CENTER",
-  "CENTR",
-  "CENTRE",
-  "CNTER",
-  "CNTR",
-  "CTR",
-  "CENTERS",
-  "CIR",
-  "CIRC",
-  "CIRCL",
-  "CIRCLE",
-  "CRCL",
-  "CRCLE",
-  "CIRCLES",
-  "CLF",
-  "CLIFF",
-  "CLFS",
-  "CLIFFS",
-  "CLB",
-  "CLUB",
-  "COMMON",
-  "COMMONS",
-  "COR",
-  "CORNER",
-  "CORNERS",
-  "CORS",
-  "COURSE",
-  "CRSE",
-  "COURT",
-  "CT",
-  "COURTS",
-  "CTS",
-  "COVE",
-  "CV",
-  "COVES",
-  "CREEK",
-  "CRK",
-  "CRESCENT",
-  "CRES",
-  "CRSENT",
-  "CRSNT",
-  "CREST",
-  "CROSSING",
-  "CRSSNG",
-  "XING",
-  "CROSSROAD",
-  "CROSSROADS",
-  "CURVE",
-  "DALE",
-  "DL",
-  "DAM",
-  "DM",
-  "DIV",
-  "DIVIDE",
-  "DV",
-  "DVD",
-  "DR",
-  "DRIV",
-  "DRIVE",
-  "DRV",
-  "DRIVES",
-  "EST",
-  "ESTATE",
-  "ESTATES",
-  "ESTS",
-  "EXP",
-  "EXPR",
-  "EXPRESS",
-  "EXPRESSWAY",
-  "EXPW",
-  "EXPY",
-  "EXT",
-  "EXTENSION",
-  "EXTN",
-  "EXTNSN",
-  "EXTS",
-  "FALL",
-  "FALLS",
-  "FLS",
-  "FERRY",
-  "FRRY",
-  "FRY",
-  "FIELD",
-  "FLD",
-  "FIELDS",
-  "FLDS",
-  "FLAT",
-  "FLT",
-  "FLATS",
-  "FLTS",
-  "FORD",
-  "FRD",
-  "FORDS",
-  "FOREST",
-  "FORESTS",
-  "FRST",
-  "FORG",
-  "FORGE",
-  "FRG",
-  "FORGES",
-  "FORK",
-  "FRK",
-  "FORKS",
-  "FRKS",
-  "FORT",
-  "FRT",
-  "FT",
-  "FREEWAY",
-  "FREEWY",
-  "FRWAY",
-  "FRWY",
-  "FWY",
-  "GARDEN",
-  "GARDN",
-  "GRDEN",
-  "GRDN",
-  "GARDENS",
-  "GDNS",
-  "GRDNS",
-  "GATEWAY",
-  "GATEWY",
-  "GATWAY",
-  "GTWAY",
-  "GTWY",
-  "GLEN",
-  "GLN",
-  "GLENS",
-  "GREEN",
-  "GRN",
-  "GREENS",
-  "GROV",
-  "GROVE",
-  "GRV",
-  "GROVES",
-  "HARB",
-  "HARBOR",
-  "HARBR",
-  "HBR",
-  "HRBOR",
-  "HARBORS",
-  "HAVEN",
-  "HVN",
-  "HT",
-  "HTS",
-  "HIGHWAY",
-  "HIGHWY",
-  "HIWAY",
-  "HIWY",
-  "HWAY",
-  "HWY",
-  "HILL",
-  "HL",
-  "HILLS",
-  "HLS",
-  "HLLW",
-  "HOLLOW",
-  "HOLLOWS",
-  "HOLW",
-  "HOLWS",
-  "INLT",
-  "IS",
-  "ISLAND",
-  "ISLND",
-  "ISLANDS",
-  "ISLNDS",
-  "ISS",
-  "ISLE",
-  "ISLES",
-  "JCT",
-  "JCTION",
-  "JCTN",
-  "JUNCTION",
-  "JUNCTN",
-  "JUNCTON",
-  "JCTNS",
-  "JCTS",
-  "JUNCTIONS",
-  "KEY",
-  "KY",
-  "KEYS",
-  "KYS",
-  "KNL",
-  "KNOL",
-  "KNOLL",
-  "KNLS",
-  "KNOLLS",
-  "LK",
-  "LAKE",
-  "LKS",
-  "LAKES",
-  "LAND",
-  "LANDING",
-  "LNDG",
-  "LNDNG",
-  "LANE",
-  "LN",
-  "LGT",
-  "LIGHT",
-  "LIGHTS",
-  "LF",
-  "LOAF",
-  "LCK",
-  "LOCK",
-  "LCKS",
-  "LOCKS",
-  "LDG",
-  "LDGE",
-  "LODG",
-  "LODGE",
-  "LOOP",
-  "LOOPS",
-  "MALL",
-  "MNR",
-  "MANOR",
-  "MANORS",
-  "MNRS",
-  "MEADOW",
-  "MDW",
-  "MDWS",
-  "MEADOWS",
-  "MEDOWS",
-  "MEWS",
-  "MILL",
-  "MILLS",
-  "MISSN",
-  "MSSN",
-  "MOTORWAY",
-  "MNT",
-  "MT",
-  "MOUNT",
-  "MNTAIN",
-  "MNTN",
-  "MOUNTAIN",
-  "MOUNTIN",
-  "MTIN",
-  "MTN",
-  "MNTNS",
-  "MOUNTAINS",
-  "NCK",
-  "NECK",
-  "ORCH",
-  "ORCHARD",
-  "ORCHRD",
-  "OVAL",
-  "OVL",
-  "OVERPASS",
-  "PARK",
-  "PRK",
-  "PARKS",
-  "PARKWAY",
-  "PARKWY",
-  "PKWAY",
-  "PKWY",
-  "PKY",
-  "PARKWAYS",
-  "PKWYS",
-  "PASS",
-  "PASSAGE",
-  "PATH",
-  "PATHS",
-  "PIKE",
-  "PIKES",
-  "PINE",
-  "PINES",
-  "PNES",
-  "PL",
-  "PLAIN",
-  "PLN",
-  "PLAINS",
-  "PLNS",
-  "PLAZA",
-  "PLZ",
-  "PLZA",
-  "POINT",
-  "PT",
-  "POINTS",
-  "PTS",
-  "PORT",
-  "PRT",
-  "PORTS",
-  "PRTS",
-  "PR",
-  "PRAIRIE",
-  "PRR",
-  "RAD",
-  "RADIAL",
-  "RADIEL",
-  "RADL",
-  "RAMP",
-  "RANCH",
-  "RANCHES",
-  "RNCH",
-  "RNCHS",
-  "RAPID",
-  "RPD",
-  "RAPIDS",
-  "RPDS",
-  "REST",
-  "RST",
-  "RDG",
-  "RDGE",
-  "RIDGE",
-  "RDGS",
-  "RIDGES",
-  "RIV",
-  "RIVER",
-  "RVR",
-  "RIVR",
-  "RD",
-  "ROAD",
-  "ROADS",
-  "RDS",
-  "ROUTE",
-  "ROW",
-  "RUE",
-  "RUN",
-  "SHL",
-  "SHOAL",
-  "SHLS",
-  "SHOALS",
-  "SHOAR",
-  "SHORE",
-  "SHR",
-  "SHOARS",
-  "SHORES",
-  "SHRS",
-  "SKYWAY",
-  "SPG",
-  "SPNG",
-  "SPRING",
-  "SPRNG",
-  "SPGS",
-  "SPNGS",
-  "SPRINGS",
-  "SPRNGS",
-  "SPUR",
-  "SPURS",
-  "SQ",
-  "SQR",
-  "SQRE",
-  "SQU",
-  "SQUARE",
-  "SQRS",
-  "SQUARES",
-  "STA",
-  "STATION",
-  "STATN",
-  "STN",
-  "STRA",
-  "STRAV",
-  "STRAVEN",
-  "STRAVENUE",
-  "STRAVN",
-  "STRVN",
-  "STRVNUE",
-  "STREAM",
-  "STREME",
-  "STRM",
-  "STREET",
-  "STRT",
-  "ST",
-  "STR",
-  "STREETS",
-  "SMT",
-  "SUMIT",
-  "SUMITT",
-  "SUMMIT",
-  "TER",
-  "TERR",
-  "TERRACE",
-  "THROUGHWAY",
-  "TRACE",
-  "TRACES",
-  "TRCE",
-  "TRACK",
-  "TRACKS",
-  "TRAK",
-  "TRK",
-  "TRKS",
-  "TRAFFICWAY",
-  "TRAIL",
-  "TRAILS",
-  "TRL",
-  "TRLS",
-  "TRAILER",
-  "TRLR",
-  "TRLRS",
-  "TUNEL",
-  "TUNL",
-  "TUNLS",
-  "TUNNEL",
-  "TUNNELS",
-  "TUNNL",
-  "TRNPK",
-  "TURNPIKE",
-  "TURNPK",
-  "UNDERPASS",
-  "UN",
-  "UNION",
-  "UNIONS",
-  "VALLEY",
-  "VALLY",
-  "VLLY",
-  "VLY",
-  "VALLEYS",
-  "VLYS",
-  "VDCT",
-  "VIA",
-  "VIADCT",
-  "VIADUCT",
-  "VIEW",
-  "VW",
-  "VIEWS",
-  "VWS",
-  "VILL",
-  "VILLAG",
-  "VILLAGE",
-  "VILLG",
-  "VILLIAGE",
-  "VLG",
-  "VILLAGES",
-  "VLGS",
-  "VILLE",
-  "VL",
-  "VIS",
-  "VIST",
-  "VISTA",
-  "VST",
-  "VSTA",
-  "WALK",
-  "WALKS",
-  "WALL",
-  "WY",
-  "WAY",
-  "WAYS",
-  "WELL",
-  "WELLS",
-  "WLS"
+  "ALLEE", "ALLEY", "ALLY", "ANEX", "ANNEX", "ANNX", "APARTMENT",
+  "ARCADE", "AV", "AVEN", "AVENU", "AVENUE", "AVN", "AVNUE",
+  "BASEMENT", "BAYOO", "BAYOU", "BEACH", "BEND", "BL", "BLUF", "BLUFF", "BLUFFS", "BOT",
+  "BOTTM", "BOTTOM", "BOUL", "BOULEVARD", "BOULV", "BRANCH", "BRDG", "BRDGE", "BRIDGE",
+  "BRNCH", "BROOK", "BROOKS", "BUILDING", "BURG", "BURGS", "BYPA", "BYPAS",
+  "BYPASS", "BYPS", "CAMP", "CANYN", "CANYON", "CAPE", "CAUSEWAY", "CAUSWA",
+  "CEN", "CENT", "CENTER", "CENTERS", "CENTR", "CENTRE", "CIRC", "CIRCL",
+  "CIRCLE", "CIRCLES", "CLIFF", "CLIFFS", "CLUB", "CMP", "CNTER", "CNTR",
+  "CNYN", "COMMON", "COMMONS", "CORNER", "CORNERS", "COURSE", "COURT", "COURTS",
+  "COVE", "COVES", "CRCL", "CRCLE", "CREEK", "CRESCENT", "CREST", "CROSSING", "CROSSROAD",
+  "CROSSROADS", "CRSENT", "CRSNT", "CRSSNG", "CURVE", "DALE", "DAM", "DEPARTMENT", "DIV",
+  "DIVIDE", "DRIV", "DRIVE", "DRIVES", "DRIVEWAY", "DRV", "DVD", "E/B", "EAST", "EASTBOUND",
+  "END", "ESPLANADE", "ESTATE", "ESTATES", "ET", "EXIT", "EXP", "EXPR", "EXPRE",
+  "EXPRESS", "EXPRESSWAY", "EXPW", "EXTENSION", "EXTENSIONS", "EXTN", "EXTNSN", "FALL",
+  "FALLS", "FERRY", "FIELD", "FIELDS", "FLAT", "FLATS", "FLOOR", "FORD", "FORDS",
+  "FOREST", "FORESTS", "FORG", "FORGE", "FORGES", "FORK", "FORKS", "FORT",
+  "FREEWAY", "FREEWY", "FRONT", "FRRY", "FRT", "FRWAY", "FRWY", "FRWY",
+  "GARDEN", "GARDENS", "GARDN", "GATEWAY", "GATEWY", "GATWAY", "GLEN",
+  "GLENS", "GRDEN", "GRDN", "GRDNS", "GREEN", "GREENS", "GROV", "GROVE",
+  "GROVES", "GTWAY", "HANGER", "HARB", "HARBOR", "HARBORS", "HARBR", "HAVEN",
+  "HEIGHTS", "HGTS", "HIGHWAY", "HIGHWY", "HILL", "HILLS", "HIWAY", "HIWY",
+  "HLLW", "HOLLOW", "HOLLOWS", "HOLWS", "HRBOR", "HT", "HWAY", "INLET",
+  "ISLAND", "ISLANDS", "ISLES", "ISLND", "ISLNDS", "JCTION", "JCTN",
+  "JCTNS", "JUNCTION", "JUNCTIONS", "JUNCTN", "JUNCTON", "KEY", "KEYS",
+  "KNOL", "KNOLL", "KNOLLS", "LAKE", "LAKES", "LANDING", "LANE", "LDGE",
+  "LIGHT", "LIGHTS", "LNDNG", "LOAF", "LOBBY", "LOCK", "LOCKS", "LODG",
+  "LODGE", "LOOPS", "LOWER", "MANOR", "MANORS", "MDW", "MEADOW", "MEADOWS",
+  "MEDOWS", "MILL", "MILLS", "MISSION", "MISSN", "MNT", "MNTAIN", "MNTN",
+  "MNTNS", "MOTORWAY", "MOUNT", "MOUNTAIN", "MOUNTAINS", "MOUNTIN", "MSSN",
+  "MTIN", "N/B", "N/W", "NECK", "NORTH", "NORTHBOUND", "NORTHEAST", "NORTHWEST",
+  "OFFICE", "ORCHARD", "ORCHRD", "OVERPASS", "OVL", "OVPS", "PARKS", "PARKWAY",
+  "PARKWAYS", "PARKWY", "PASSAGE", "PATHS", "PATHWAY", "PENTHOUSE", "PIKES",
+  "PINE", "PINES", "PKWAY", "PKWYS", "PKY", "PLACE", "PLAIN", "PLAINS",
+  "PLAZA", "PLZA", "POINT", "POINTS", "PORT", "PORTS", "PRAIRIE", "PRK",
+  "PRR", "RAD", "RADIAL", "RADIEL", "RAILROAD", "RANCH", "RANCHES",
+  "RAPID", "RAPIDS", "RDGE", "REST", "RIDGE", "RIDGES", "RIVER", "RIVR",
+  "RNCHS", "ROAD", "ROADS", "ROADWAY", "ROOM", "ROUTE", "RVR", "RVR",
+  "S/B", "SHOAL", "SHOALS", "SHOAR", "SHOARS", "SHORE", "SHORES", "SKYWAY",
+  "SOUTH", "SOUTHEAST", "SOUTHWEST", "SPACE", "SPNG", "SPNGS", "SPRING",
+  "SPRINGS", "SPRNG", "SPRNGS", "SPURS", "SQR", "SQRE", "SQRS", "SQU",
+  "SQUARE", "SQUare", "STATION", "STATN", "STN", "STR", "STRAV",
+  "STRAVEN", "STRAVENUE", "STRAVN", "STREAM", "STREET", "STREETS", "STREME",
+  "STRT", "STRVN", "STRVNUE", "SUITE", "SUMIT", "SUMITT", "SUMMIT",
+  "TERR", "TERRACE", "THROUGHWAY", "THRWY", "THWY", "THWY", "TNPK", "TRACE",
+  "TRACES", "TRACK", "TRACKS", "TRAFFICWAY", "TRAIL", "TRAILER", "TRAILER",
+  "TRAILS", "TRK", "TRKS", "TRLRS", "TRLS", "TRNPK", "TUNEL", "TUNLS", "TUNNEL",
+  "TUNNELS", "TUNNL", "TURNPIKE", "TURNPK", "UNDERPASS", "UNION", "UNIONS", "UPPER",
+  "VALLEY", "VALLEYS", "VALLY", "VDCT", "VIADCT", "VIADUCT", "VIEW", "VIEWS",
+  "VILL", "VILLAG", "VILLAGE", "VILLAGES", "VILLE", "VILLG", "VILLIAGE",
+  "VIST", "VISTA", "VLLY", "VST", "VSTA",
+  "WALKS", "WELL", "WELLS", "WEST", "WY",
+  "LA", "APPROACH", "APP", "BOUNDARY", "BDN", "BNDY", "CONCOURSE", "GRANDCONCOURSE",
+  "PROMENADE", "THRUWAY", "AMERICA", "APR", "CNCRSE", "CRSE", "XTN",
+  "PARKWA", "UNP", "TENNIS CT"
 )
 
 abb_name <- c(
-  "ALY",
-  "ALY",
-  "ALY",
-  "ALY",
-  "ANX",
-  "ANX",
-  "ANX",
-  "ANX",
-  "ARC",
-  "ARC",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "BYU",
-  "BYU",
-  "BCH",
-  "BCH",
-  "BND",
-  "BND",
-  "BLF",
-  "BLF",
-  "BLF",
-  "BLFS",
-  "BTM",
-  "BTM",
-  "BTM",
-  "BTM",
-  "BLVD",
-  "BLVD",
-  "BLVD",
-  "BLVD",
-  "BR",
-  "BR",
-  "BR",
-  "BRG",
-  "BRG",
-  "BRG",
-  "BRK",
-  "BRK",
-  "BRKS",
-  "BG",
-  "BGS",
-  "BYP",
-  "BYP",
-  "BYP",
-  "BYP",
-  "BYP",
-  "CP",
-  "CP",
-  "CP",
-  "CYN",
-  "CYN",
-  "CYN",
-  "CPE",
-  "CPE",
-  "CSWY",
-  "CSWY",
-  "CSWY",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTRS",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIRS",
-  "CLF",
-  "CLF",
-  "CLFS",
-  "CLFS",
-  "CLB",
-  "CLB",
-  "CMN",
-  "CMNS",
-  "COR",
-  "COR",
-  "CORS",
-  "CORS",
-  "CRSE",
-  "CRSE",
-  "CT",
-  "CT",
-  "CTS",
-  "CTS",
-  "CV",
-  "CV",
-  "CVS",
-  "CRK",
-  "CRK",
-  "CRES",
-  "CRES",
-  "CRES",
-  "CRES",
-  "CRST",
-  "XING",
-  "XING",
-  "XING",
-  "XRD",
-  "XRDS",
-  "CURV",
-  "DL",
-  "DL",
-  "DM",
-  "DM",
-  "DV",
-  "DV",
-  "DV",
-  "DV",
-  "DR",
-  "DR",
-  "DR",
-  "DR",
-  "DRS",
-  "EST",
-  "EST",
-  "ESTS",
-  "ESTS",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXT",
-  "EXT",
-  "EXT",
-  "EXT",
-  "EXTS",
-  "FALL",
-  "FLS",
-  "FLS",
-  "FRY",
-  "FRY",
-  "FRY",
-  "FLD",
-  "FLD",
-  "FLDS",
-  "FLDS",
-  "FLT",
-  "FLT",
-  "FLTS",
-  "FLTS",
-  "FRD",
-  "FRD",
-  "FRDS",
-  "FRST",
-  "FRST",
-  "FRST",
-  "FRG",
-  "FRG",
-  "FRG",
-  "FRGS",
-  "FRK",
-  "FRK",
-  "FRKS",
-  "FRKS",
-  "FT",
-  "FT",
-  "FT",
-  "FWY",
-  "FWY",
-  "FWY",
-  "FWY",
-  "FWY",
-  "GDN",
-  "GDN",
-  "GDN",
-  "GDN",
-  "GDNS",
-  "GDNS",
-  "GDNS",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GLN",
-  "GLN",
-  "GLNS",
-  "GRN",
-  "GRN",
-  "GRNS",
-  "GRV",
-  "GRV",
-  "GRV",
-  "GRVS",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBRS",
-  "HVN",
-  "HVN",
-  "HTS",
-  "HTS",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HL",
-  "HL",
-  "HLS",
-  "HLS",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "INLT",
-  "IS",
-  "IS",
-  "IS",
-  "ISS",
-  "ISS",
-  "ISS",
-  "ISLE",
-  "ISLE",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCTS",
-  "JCTS",
-  "JCTS",
-  "KY",
-  "KY",
-  "KYS",
-  "KYS",
-  "KNL",
-  "KNL",
-  "KNL",
-  "KNLS",
-  "KNLS",
-  "LK",
-  "LK",
-  "LKS",
-  "LKS",
-  "LAND",
-  "LNDG",
-  "LNDG",
-  "LNDG",
-  "LN",
-  "LN",
-  "LGT",
-  "LGT",
-  "LGTS",
-  "LF",
-  "LF",
-  "LCK",
-  "LCK",
-  "LCKS",
-  "LCKS",
-  "LDG",
-  "LDG",
-  "LDG",
-  "LDG",
-  "LOOP",
-  "LOOP",
-  "MALL",
-  "MNR",
-  "MNR",
-  "MNRS",
-  "MNRS",
-  "MDW",
-  "MDWS",
-  "MDWS",
-  "MDWS",
-  "MDWS",
-  "MEWS",
-  "ML",
-  "MLS",
-  "MSN",
-  "MSN",
-  "MTWY",
-  "MT",
-  "MT",
-  "MT",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTNS",
-  "MTNS",
-  "NCK",
-  "NCK",
-  "ORCH",
-  "ORCH",
-  "ORCH",
-  "OVAL",
-  "OVAL",
-  "OPAS",
-  "PARK",
-  "PARK",
-  "PARK",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PASS",
-  "PSGE",
-  "PATH",
-  "PATH",
-  "PIKE",
-  "PIKE",
-  "PNE",
-  "PNES",
-  "PNES",
-  "PL",
-  "PLN",
-  "PLN",
-  "PLNS",
-  "PLNS",
-  "PLZ",
-  "PLZ",
-  "PLZ",
-  "PT",
-  "PT",
-  "PTS",
-  "PTS",
-  "PRT",
-  "PRT",
-  "PRTS",
-  "PRTS",
-  "PR",
-  "PR",
-  "PR",
-  "RADL",
-  "RADL",
-  "RADL",
-  "RADL",
-  "RAMP",
-  "RNCH",
-  "RNCH",
-  "RNCH",
-  "RNCH",
-  "RPD",
-  "RPD",
-  "RPDS",
-  "RPDS",
-  "RST",
-  "RST",
-  "RDG",
-  "RDG",
-  "RDG",
-  "RDGS",
-  "RDGS",
-  "RIV",
-  "RIV",
-  "RIV",
-  "RIV",
-  "RD",
-  "RD",
-  "RDS",
-  "RDS",
-  "RTE",
-  "ROW",
-  "RUE",
-  "RUN",
-  "SHL",
-  "SHL",
-  "SHLS",
-  "SHLS",
-  "SHR",
-  "SHR",
-  "SHR",
-  "SHRS",
-  "SHRS",
-  "SHRS",
-  "SKWY",
-  "SPG",
-  "SPG",
-  "SPG",
-  "SPG",
-  "SPGS",
-  "SPGS",
-  "SPGS",
-  "SPGS",
-  "SPUR",
-  "SPUR",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQS",
-  "SQS",
-  "STA",
-  "STA",
-  "STA",
-  "STA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRM",
-  "STRM",
-  "STRM",
-  "ST",
-  "ST",
-  "ST",
-  "ST",
-  "STS",
-  "SMT",
-  "SMT",
-  "SMT",
-  "SMT",
-  "TER",
-  "TER",
-  "TER",
-  "TRWY",
-  "TRCE",
-  "TRCE",
-  "TRCE",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRFY",
-  "TRL",
-  "TRL",
-  "TRL",
-  "TRL",
-  "TRLR",
-  "TRLR",
-  "TRLR",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TPKE",
-  "TPKE",
-  "TPKE",
-  "UPAS",
-  "UN",
-  "UN",
-  "UNS",
-  "VLY",
-  "VLY",
-  "VLY",
-  "VLY",
-  "VLYS",
-  "VLYS",
-  "VIA",
-  "VIA",
-  "VIA",
-  "VIA",
-  "VW",
-  "VW",
-  "VWS",
-  "VWS",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLGS",
-  "VLGS",
-  "VL",
-  "VL",
-  "VIS",
-  "VIS",
-  "VIS",
-  "VIS",
-  "VIS",
-  "WALK",
-  "WALK",
-  "WALL",
-  "WAY",
-  "WAY",
-  "WAYS",
-  "WL",
-  "WLS",
-  "WLS"
+  "ALY", "ALY", "ALY", "ANX", "ANX", "ANX", "APT", "ARC", "AVE", "AVE", "AVE",
+  "AVE", "AVE", "AVE", "BSMT", "BYU", "BYU", "BCH", "BND", "BLVD", "BLF", "BLF",
+  "BLFS", "BTM", "BTM", "BTM", "BLVD", "BLVD", "BLVD", "BR", "BRG", "BRG", "BRG",
+  "BR", "BRK", "BRKS", "BLDG", "BG", "BGS", "BYP", "BYP", "BYP", "BYP",
+  "CP", "CYN", "CYN", "CPE", "CSWY", "CSWY", "CTR", "CTR", "CTR", "CTRS", "CTR",
+  "CTR", "CIR", "CIR", "CIR", "CIRS", "CLF", "CLFS", "CLB", "CP", "CTR", "CTR",
+  "CYN", "CMN", "CMNS", "COR", "CORS", "CRSE", "CT", "CTS", "CV", "CVS", "CIR",
+  "CIR", "CRK", "CRES", "CRST", "XING", "XRD", "XRDS", "CRES", "CRES", "XING",
+  "CURV", "DL", "DM", "DEPT", "DV", "DV", "DR", "DR", "DRS", "DRWY", "DR", "DV",
+  "EB", "E", "EB", "END", "ESPL", "EST", "ESTS", "EX", "EX", "EXPY", "EXPY", "EXPY",
+  "EXPY", "EXPY", "EXPY", "EXT", "EXTS", "EXT", "EXT", "FLS", "FLS", "FRY", "FLD",
+  "FLDS", "FLT", "FLTS", "FL", "FRD", "FRDS", "FRST", "FRST", "FRG", "FRG", "FRGS",
+  "FRK", "FRKS", "FT", "FWY", "FWY", "FRNT", "FRY", "FT", "FWY", "FWY", "FWY",
+  "GDN", "GDNS", "GDN", "GTWY", "GTWY", "GTWY", "GLN", "GLNS", "GDN", "GDN",
+  "GDNS", "GRN", "GRNS", "GRV", "GRV", "GRVS", "GTWY",
+  "HNGR", "HBR", "HBR", "HBRS", "HBR", "HVN", "HTS", "HTS",
+  "HWY", "HWY", "HL", "HLS", "HWY", "HWY", "HOLW",
+  "HOLW", "HOLW", "HOLW", "HBR", "HTS", "HWY",
+  "INLT", "IS", "ISS", "ISLE", "IS", "ISS",
+  "JCT", "JCT", "JCTS", "JCT", "JCTS", "JCT", "JCT",
+  "KY", "KYS", "KNL", "KNL", "KNLS",
+  "LK", "LKS", "LNDG", "LN", "LDG", "LGT", "LGTS", "LNDG", "LF", "LBBY",
+  "LCK", "LCKS", "LDG", "LDG", "LOOP", "LOWR",
+  "MNR", "MNRS", "MDWS", "MDW", "MDWS", "MDWS", "ML", "MLS", "MSN",
+  "MSN", "MT", "MTN", "MTN", "MTNS", "MTWY", "MT", "MTN", "MTNS", "MTN", "MSN", "MTN",
+  "NB", "NW", "NCK", "N", "NB", "NE", "NW",
+  "OFC", "ORCH", "ORCH", "OPAS", "OVAL", "OPAS",
+  "PARK", "PKWY", "PKWY", "PKWY", "PSGE", "PATH", "PWY", "PH", "PIKE", "PNE",
+  "PNES", "PKWY", "PKWY", "PKWY", "PL", "PLN", "PLNS", "PLZ", "PLZ", "PT",
+  "PTS", "PRT", "PRTS", "PR", "PARK", "PR",
+  "RADL", "RADL", "RADL", "RR", "RNCH", "RNCH",
+  "RPD", "RPDS", "RDG", "RST", "RDG", "RDGS", "RIV", "RIV", "RNCH", "RD",
+  "RDS", "RDWY", "RM", "RTE", "RIV", "RIV",
+  "SB", "SHL", "SHLS", "SHR", "SHRS", "SHR", "SHRS", "SKWY", "S", "SE", "SW",
+  "SPC", "SPG", "SPGS", "SPG", "SPGS", "SPG", "SPGS", "SPUR", "SQ", "SQ",
+  "SQS", "SQ", "SQ", "SQS", "STA", "STA", "STA", "ST", "STRA", "STRA",
+  "STRA", "STRA", "STRM", "ST", "STS", "STRM", "ST", "STRA", "STRA", "STE",
+  "SMT", "SMT", "SMT",
+  "TER", "TER", "TRWY", "TRWY", "TRWY", "TRWY", "TPKE", "TRCE", "TRCE", "TRAK",
+  "TRAK", "TRFY", "TRL", "TRLR", "TRLR", "TRL", "TRAK", "TRAK", "TRLR", "TRL",
+  "TPKE", "TUNL", "TUNL", "TUNL", "TUNL", "TUNL", "TPKE", "TPKE",
+  "UPAS", "UN", "UNS", "UPPR",
+  "VLY", "VLYS", "VLY", "VIA", "VIA", "VIA", "VW", "VWS", "VLG", "VLG", "VLG",
+  "VLGS", "VL", "VLG", "VLG", "VIS", "VIS", "VLY", "VIS", "VIS",
+  "WALK", "WL", "WLS", "W", "WAY",
+  "LN", "APPR", "APPR", "BDY", "BDY", "BDY", "CONCRS", "GRAND CONCRS",
+  "PROM", "TRWY", "AMERICAS", "APPR", "CONCRS", "CRES", "EXT",
+  "PKWY", "UPAS", "TENNIS COURT"
 )
-
 USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
 numAbbreviations <- nrow(USPSabbreviations)
+
+#########################################################################
+# Load the Police Precinct reference file
+precinct_names <- c(
+  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+  "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+  "21", "22", "23", "24", "25", "26", "27", "28", "29",
+  "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+  "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "50", "51"
+)
+precinctsNYPD <- data.frame(nypd_precinct <- precinct_names)
+precinctsNYPD <- make_column_names_user_friendly(precinctsNYPD)
+numPrecincts <- nrow(precinctsNYPD)
+
+#########################################################################
+# Load the NYC City Council file
+city_council_names <- c(
+  "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+  "11", "12", "13", "14", "15", "16", "17", "18", "19", "20",
+  "21", "22", "23", "24", "25", "26", "27", "28", "29",
+  "30", "31", "32", "33", "34", "35", "36", "37", "38", "39",
+  "40", "41", "42", "43", "44", "45", "46", "47", "48", "49",
+  "50", "51"
+)
+
+cityCouncilNYC <- data.frame(NYC_city_council = city_council_names)
+cityCouncilNYC <- make_column_names_user_friendly(cityCouncilNYC)
+numCityCouncil <- nrow(cityCouncilNYC)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -1619,6 +746,9 @@ d311 <-
     colClasses = rep("character", ncol(read.csv(data1File)))
   )
 original_size <- object.size(d311)
+
+# Convert data.table to data.frame
+#d311 <- as.data.frame(d311)
 
 # make columns names user friendly
 d311 <- make_column_names_user_friendly(d311)
@@ -1775,7 +905,7 @@ increment <- result$increment
 
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
-  geom_bar(stat = "identity", fill = "#D55E00") +
+  geom_bar(stat = "identity", fill = "#117733") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
@@ -1789,7 +919,7 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
     angle = -70
-  ), size = 4) +
+  )) +
   geom_hline(
     yintercept = seq(starting_value, max_count, by = increment),
     linetype = "dotted", color = "gray40"
@@ -1804,6 +934,22 @@ print(blank_chart)
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
 
+########################################################################
+# Remove specific columns using base R subsetting
+# Delete columns (example: dataset <- dataset[, -c(1:5)])
+# d311 <- d311[, !names(d311) %in% c(
+#   "agency_name", 
+#   "descriptor", 
+#   "resolution_description", 
+#   "bbl", 
+#   "x_coordinate_state_plane ",
+#   "y_coordinate_state_plane ",
+#   "park_facility_name",
+#   "bridge_highway_name",
+#   "bridge_highway_direction",
+#   "road_ramp",
+#   "bridge_highway_segment")]
+# 
 #########################################################################
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
 d311 <- consolidate_agencies((d311))
@@ -1960,6 +1106,21 @@ if (num_row_invalid_incident_zip_rows == 0) {
 }
 
 #########################################################################
+# Call the function for "zip_codes" field
+invalid_zip_codes_rows <- filter_non_numeric_zipcodes(d311, "zip_codes")
+
+num_row_invalid_zip_codes_rows <- nrow(invalid_zip_codes_rows)
+if (num_row_invalid_zip_codes_rows == 0) {
+  cat("\nAll 'zip_codes' entries are 5 numeric digits.")
+} else {
+  cat("\nThere are", num_row_invalid_zip_codes_rows, "non-numeric, non-5 digit 'incident_zip' entries.")
+
+  selected_columns <- invalid_zip_codes_rows %>%
+    select(unique_key, all_of(incident_zip), all_of(agency))
+  print(head(selected_columns, 10), row.names = FALSE, right = FALSE)
+}
+
+#########################################################################
 # determine if various fields are numeric values
 
 x_coordinateNum <- areAllNumbers(d311$x_coordinate_state_plane)
@@ -1979,6 +1140,43 @@ cat("\n\nAre all values in 'latitude' numbers?", latitudeNum)
 
 longitudeNum <- areAllNumbers(d311$longitude)
 cat("\n\nAre all values in 'longitude' numbers?", longitudeNum)
+
+community_districtsNum <- areAllNumbers(d311$community_districts)
+cat(
+  "\n\nAre all values in 'community_districts' numbers?",
+  areAllNumbers(community_districtsNum)
+)
+
+borough_boundariesNum <- areAllNumbers(d311$borough_boundaries)
+cat(
+  "\n\nAre all values in 'borough_boundaries' numbers?",
+  borough_boundariesNum
+)
+
+city_council_districtsNum <-
+  areAllNumbers(d311$city_council_districts)
+cat(
+  "\n\nAre all values in 'city_council_district' numbers?",
+  city_council_districtsNum
+)
+
+police_precinctsNum <- areAllNumbers(d311$police_precincts)
+cat(
+  "\n\nAre all values in 'police_precincts' numbers?",
+  police_precinctsNum
+)
+
+if ("police_precinct" %in% colnames(d311)) {
+  # Code to execute if "police_precinct" column is present
+  police_precinctNum <- areAllNumbers(d311$police_precinct)
+  cat(
+    "\n\nAre all values in '*police_precinct*' numbers?",
+    police_precinctNum, "\n"
+  )
+} else {
+  # Code to execute if "police_precinct" column is not present
+  cat("\n\nThe '***police_precinct***' column does not exist in this dataset.")
+}
 
 #########################################################################
 
@@ -2063,7 +1261,7 @@ statusResults <-
     )
   ), "status")
 
-# check if borough, taxi_company_borough, and park_borough contain only allowable values
+# check if borough, borough_boundaries, taxi_company_borough, and park_borough contain only allowable values
 boroughResults <-
   are_valid_values(d311$borough, data.frame(
     values = c(
@@ -2075,6 +1273,9 @@ boroughResults <-
       "UNSPECIFIED"
     )
   ), "borough")
+
+borough_boundariesResults <-
+  are_valid_values(d311$borough_boundaries, data.frame(values = c("1", "2", "3", "4", "5")), "borough_boundaries")
 
 park_boroughResults <-
   are_valid_values(d311$park_borough, data.frame(
@@ -2116,6 +1317,27 @@ vehicle_typeResults <-
       "VAN"
     )
   ), "vehicle_type")
+
+city_councilResults <-
+  are_valid_values(d311$city_council_districts, cityCouncilNYC, "city_council_districts")
+
+police_precinctResults <-
+  are_valid_values(d311$police_precincts, precinctsNYPD, "police_precincts")
+if (!police_precinctResults[[1]]) {
+  chart_title <- "Invalid 'police_precincts' by Agnecy & cumulative percentage"
+  chart_file_name <- "invalid_police_precincts.pdf"
+  police_precincts_dataset <- police_precinctResults[[3]]
+  create_combo_chart(police_precincts_dataset, chart_title, chart_file_name)
+}
+
+police_precinctResults2 <-
+  are_valid_values(d311$police_precinct, precinctsNYPD, "police_precinct")
+if (!police_precinctResults2[[1]]) {
+  chart_title <- "Invalid 'police_precinct' by Agnecy & cumulative percentage"
+  chart_file_name <- "invalid_police_precinct.pdf"
+  police_precinct_dataset <- police_precinctResults2[[3]]
+  create_combo_chart(police_precinct_dataset, chart_title, chart_file_name)
+}
 
 #########################################################################
 # check for allowable values in the 'community_board' field
@@ -2161,6 +1383,17 @@ if (!incident_zip_results[[1]]) {
   chart_file_name <- "invalid_incident_zip.pdf"
   incident_zip_dataset <- incident_zip_results[[3]]
   create_combo_chart(incident_zip_dataset, chart_title, chart_file_name)
+}
+
+###################################################
+# Check for invalid zip codes in d311$zip_codes using USPSzipcodesOnly
+
+zipcodes_results <- are_valid_values(d311$zip_codes, USPSzipcodesOnly, "zip_codes")
+if (!zipcodes_results[[1]]) {
+  chart_title <- "Invalid zipcodes by Agnecy & cumulative percentage"
+  chart_file_name <- "invalid_izipcodes.pdf"
+  zipcodes_dataset <- zipcodes_results[[3]]
+  create_combo_chart(zipcodes_dataset, chart_title, chart_file_name)
 }
 
 #########################################################################
@@ -2701,6 +1934,41 @@ if (!is.null(nonMatching_park_borough)) {
 }
 
 #########################################################################
+# check to see if there are any non-matches between 'borough' and 'borough_boundaries'
+# translate 'borough_boundaries' to character to check against 'borough'
+d311 <- d311 %>%
+  mutate(translated_borough_boundaries = case_when(
+    # Order the conditions based on the frequency of values in the dataset
+    # 2 (Brooklyn) is the most frequent, followed by 3 (Queens), 4 (Manhattan), and 5 (Bronx)
+    # This ordering is meant to optimize performance for this large dataset (>3 million rows)
+    borough_boundaries == 2 ~ "BROOKLYN",
+    borough_boundaries == 3 ~ "QUEENS",
+    borough_boundaries == 4 ~ "MANHATTAN",
+    borough_boundaries == 5 ~ "BRONX",
+    borough_boundaries == 1 ~ "STATEN ISLAND", # Staten Island is the least frequent
+    TRUE ~ as.character(borough_boundaries) # Keep the original value if not 1-5
+  ))
+
+reference_field <- "borough"
+duplicate_field <- "translated_borough_boundaries"
+nonMatching_translatedborough_boundaries <- detect_duplicates(
+  d311,
+  reference_field,
+  duplicate_field
+)
+
+if (!is.null(nonMatching_translatedborough_boundaries)) {
+  sorted_translated_borough <- rank_by_agency(nonMatching_translatedborough_boundaries)
+  chart_title <- "non-matching between 'borough' and 'borough_boundaries' by Agency & cumulative percentage"
+  chart_file_name <- "non_matching_borough_boundaries_chart.pdf"
+  x <- create_combo_chart(
+    nonMatching_translatedborough_boundaries,
+    chart_title,
+    chart_file_name
+  )
+}
+
+#########################################################################
 # check to see if there are any non-matches between 'borough' and 'taxi_company_borough'
 reference_field <- "borough"
 duplicate_field <- "taxi_company_borough"
@@ -2717,6 +1985,48 @@ if (!is.null(nonMatching_taxi_company_borough)) {
   chart_file_name <- "non_matching_taxi_company_borough_chart.pdf"
   create_combo_chart(
     nonMatching_taxi_company_borough,
+    chart_title,
+    chart_file_name
+  )
+}
+
+#########################################################################
+# check to see if there are non-matches between ‘police_precincts’ and '***police_precinct***’
+if ("police_precinct" %in% colnames(d311)) {
+  reference_field <- "police_precincts"
+  duplicate_field <- "police_precinct"
+  nonMatchingPolicePrecinct <- detect_duplicates(
+    d311,
+    reference_field,
+    duplicate_field
+  )
+
+  if (!is.null(nonMatchingPolicePrecinct)) {
+    sorted_precinct <- rank_by_agency(nonMatchingPolicePrecinct)
+  }
+} else {
+  cat("\nThe 'police_precinct' column does not are in this dataset.\n")
+}
+
+#########################################################################
+# check to see if there are any non-matches between 'incident_zip' and 'zipcodes'
+reference_field <- "incident_zip"
+duplicate_field <- "zip_codes"
+
+nonMatchingZipcodes <- detect_duplicates(
+  d311,
+  reference_field,
+  duplicate_field
+)
+
+if (!is.null(nonMatchingZipcodes)) {
+# Unknown line of code
+  #  sorted_zips <- rank_by_agency(nonMatchingZipcodes)
+
+  chart_title <- "non-matching between 'incident_zip' and 'zip_codes' by Agency & cumulative percentage"
+  chart_file_name <- "non_matching_zip_code_chart.pdf"
+  create_combo_chart(
+    nonMatchingZipcodes,
     chart_title,
     chart_file_name
   )
@@ -2800,6 +2110,21 @@ print(top_10_incident_zip, row.names = FALSE, right = FALSE)
 
 invalid_rows1 <- top_10_incident_zip[!top_10_incident_zip$valid, ]
 
+# Check top ten 'zip_codes'
+zip_codes_count <- table(na.omit(noise_complaints$zip_codes))
+top_zip_codes <- data.frame(zip_codes = names(zip_codes_count), count = as.numeric(zip_codes_count))
+top_zip_codes <- top_zip_codes[order(top_zip_codes$count, decreasing = TRUE), ]
+total_complaints2 <- sum(top_zip_codes$count)
+# top_zip_codes$percentage <- round((top_zip_codes$count / total_complaints2) * 100, 2)
+top_10_zip_codes <- head(top_zip_codes, 10)
+
+invalid_zip_codes <- unique(zipcodes_results[[2]])
+invalid_values_present2 <- top_10_zip_codes$zip_code %in% invalid_zip_codes
+
+top_10_zip_codes$valid <- !invalid_values_present2
+cat("\nTop 10 noise complaint zip codes  using 'zip_codes' field, displaying validity.\n")
+print(top_10_zip_codes, row.names = FALSE, right = FALSE)
+
 #########################################################################
 
 ##### CROSS STREET/INTERSECTION STREET ANALYSYS #####
@@ -2839,12 +2164,15 @@ print(names(d311))
 redundant_columns <- c(
   "agency_name",
   "park_borough",
+  "borough_boundaries",
+  "location",
   "intersection_street_1",
   "intersection_street_2",
-  "location",
+  "police_precinct",
   "duration",
   "postClosedUpdateDuration",
-  "translated_borough_boundaries"
+  "translated_borough_boundaries",
+  "zip_codes"
 )
 
 cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
@@ -2855,6 +2183,9 @@ for (column in redundant_columns) {
   cat("    ", index, "-", column, "\n")
   index <- index + 1
 }
+
+# Read the data into a data table object
+#d311 <- fread(data1File, header = TRUE, sep = ",")
 
 # Delete the redundant columns
 d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
