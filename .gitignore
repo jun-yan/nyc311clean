@@ -30,10 +30,6 @@
 *.synctex.gz
 *.docx
 _region_.tex
-main.pdf
-GodoyLucas.pdf
-PratesMarcos.pdf
-abstract.pdf
 
 manuscript/*.pdf
   
@@ -111,3 +107,5 @@ flycheck_*.el
 
 # not needed to run applications
 simulation/data/aux
+
+**.pdf
