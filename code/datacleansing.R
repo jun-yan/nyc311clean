@@ -53,6 +53,8 @@ lapply(files, source)
 options(scipen = 10)
 
 sink("../../console_output/core_console_output.txt")
+cat("\nExecution begins at:", formattedStartTime)
+cat("\n***** Program initialization *****")
 
 options(digits = 14) # Set the number of decimal places to 14
 
@@ -592,1024 +594,20 @@ USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
-zipRows <- nrow(USPSzipcodesOnly)
+num_zipcode_rows <- nrow(USPSzipcodesOnly)
 
 #########################################################################
-# Load USPS official street abbreviations
-full_name <- c(
-  "ALLEE",
-  "ALLEY",
-  "ALLY",
-  "ALY",
-  "ANEX",
-  "ANNEX",
-  "ANNX",
-  "ANX",
-  "ARC",
-  "ARCADE",
-  "AV",
-  "AVE",
-  "AVEN",
-  "AVENU",
-  "AVENUE",
-  "AVN",
-  "AVNUE",
-  "BAYOO",
-  "BAYOU",
-  "BCH",
-  "BEACH",
-  "BEND",
-  "BND",
-  "BLF",
-  "BLUF",
-  "BLUFF",
-  "BLUFFS",
-  "BOT",
-  "BTM",
-  "BOTTM",
-  "BOTTOM",
-  "BLVD",
-  "BOUL",
-  "BOULEVARD",
-  "BOULV",
-  "BR",
-  "BRNCH",
-  "BRANCH",
-  "BRDGE",
-  "BRG",
-  "BRIDGE",
-  "BRK",
-  "BROOK",
-  "BROOKS",
-  "BURG",
-  "BURGS",
-  "BYP",
-  "BYPA",
-  "BYPAS",
-  "BYPASS",
-  "BYPS",
-  "CAMP",
-  "CP",
-  "CMP",
-  "CANYN",
-  "CANYON",
-  "CNYN",
-  "CAPE",
-  "CPE",
-  "CAUSEWAY",
-  "CAUSWA",
-  "CSWY",
-  "CEN",
-  "CENT",
-  "CENTER",
-  "CENTR",
-  "CENTRE",
-  "CNTER",
-  "CNTR",
-  "CTR",
-  "CENTERS",
-  "CIR",
-  "CIRC",
-  "CIRCL",
-  "CIRCLE",
-  "CRCL",
-  "CRCLE",
-  "CIRCLES",
-  "CLF",
-  "CLIFF",
-  "CLFS",
-  "CLIFFS",
-  "CLB",
-  "CLUB",
-  "COMMON",
-  "COMMONS",
-  "COR",
-  "CORNER",
-  "CORNERS",
-  "CORS",
-  "COURSE",
-  "CRSE",
-  "COURT",
-  "CT",
-  "COURTS",
-  "CTS",
-  "COVE",
-  "CV",
-  "COVES",
-  "CREEK",
-  "CRK",
-  "CRESCENT",
-  "CRES",
-  "CRSENT",
-  "CRSNT",
-  "CREST",
-  "CROSSING",
-  "CRSSNG",
-  "XING",
-  "CROSSROAD",
-  "CROSSROADS",
-  "CURVE",
-  "DALE",
-  "DL",
-  "DAM",
-  "DM",
-  "DIV",
-  "DIVIDE",
-  "DV",
-  "DVD",
-  "DR",
-  "DRIV",
-  "DRIVE",
-  "DRV",
-  "DRIVES",
-  "EST",
-  "ESTATE",
-  "ESTATES",
-  "ESTS",
-  "EXP",
-  "EXPR",
-  "EXPRESS",
-  "EXPRESSWAY",
-  "EXPW",
-  "EXPY",
-  "EXT",
-  "EXTENSION",
-  "EXTN",
-  "EXTNSN",
-  "EXTS",
-  "FALL",
-  "FALLS",
-  "FLS",
-  "FERRY",
-  "FRRY",
-  "FRY",
-  "FIELD",
-  "FLD",
-  "FIELDS",
-  "FLDS",
-  "FLAT",
-  "FLT",
-  "FLATS",
-  "FLTS",
-  "FORD",
-  "FRD",
-  "FORDS",
-  "FOREST",
-  "FORESTS",
-  "FRST",
-  "FORG",
-  "FORGE",
-  "FRG",
-  "FORGES",
-  "FORK",
-  "FRK",
-  "FORKS",
-  "FRKS",
-  "FORT",
-  "FRT",
-  "FT",
-  "FREEWAY",
-  "FREEWY",
-  "FRWAY",
-  "FRWY",
-  "FWY",
-  "GARDEN",
-  "GARDN",
-  "GRDEN",
-  "GRDN",
-  "GARDENS",
-  "GDNS",
-  "GRDNS",
-  "GATEWAY",
-  "GATEWY",
-  "GATWAY",
-  "GTWAY",
-  "GTWY",
-  "GLEN",
-  "GLN",
-  "GLENS",
-  "GREEN",
-  "GRN",
-  "GREENS",
-  "GROV",
-  "GROVE",
-  "GRV",
-  "GROVES",
-  "HARB",
-  "HARBOR",
-  "HARBR",
-  "HBR",
-  "HRBOR",
-  "HARBORS",
-  "HAVEN",
-  "HVN",
-  "HT",
-  "HTS",
-  "HIGHWAY",
-  "HIGHWY",
-  "HIWAY",
-  "HIWY",
-  "HWAY",
-  "HWY",
-  "HILL",
-  "HL",
-  "HILLS",
-  "HLS",
-  "HLLW",
-  "HOLLOW",
-  "HOLLOWS",
-  "HOLW",
-  "HOLWS",
-  "INLT",
-  "IS",
-  "ISLAND",
-  "ISLND",
-  "ISLANDS",
-  "ISLNDS",
-  "ISS",
-  "ISLE",
-  "ISLES",
-  "JCT",
-  "JCTION",
-  "JCTN",
-  "JUNCTION",
-  "JUNCTN",
-  "JUNCTON",
-  "JCTNS",
-  "JCTS",
-  "JUNCTIONS",
-  "KEY",
-  "KY",
-  "KEYS",
-  "KYS",
-  "KNL",
-  "KNOL",
-  "KNOLL",
-  "KNLS",
-  "KNOLLS",
-  "LK",
-  "LAKE",
-  "LKS",
-  "LAKES",
-  "LAND",
-  "LANDING",
-  "LNDG",
-  "LNDNG",
-  "LANE",
-  "LN",
-  "LGT",
-  "LIGHT",
-  "LIGHTS",
-  "LF",
-  "LOAF",
-  "LCK",
-  "LOCK",
-  "LCKS",
-  "LOCKS",
-  "LDG",
-  "LDGE",
-  "LODG",
-  "LODGE",
-  "LOOP",
-  "LOOPS",
-  "MALL",
-  "MNR",
-  "MANOR",
-  "MANORS",
-  "MNRS",
-  "MEADOW",
-  "MDW",
-  "MDWS",
-  "MEADOWS",
-  "MEDOWS",
-  "MEWS",
-  "MILL",
-  "MILLS",
-  "MISSN",
-  "MSSN",
-  "MOTORWAY",
-  "MNT",
-  "MT",
-  "MOUNT",
-  "MNTAIN",
-  "MNTN",
-  "MOUNTAIN",
-  "MOUNTIN",
-  "MTIN",
-  "MTN",
-  "MNTNS",
-  "MOUNTAINS",
-  "NCK",
-  "NECK",
-  "ORCH",
-  "ORCHARD",
-  "ORCHRD",
-  "OVAL",
-  "OVL",
-  "OVERPASS",
-  "PARK",
-  "PRK",
-  "PARKS",
-  "PARKWAY",
-  "PARKWY",
-  "PKWAY",
-  "PKWY",
-  "PKY",
-  "PARKWAYS",
-  "PKWYS",
-  "PASS",
-  "PASSAGE",
-  "PATH",
-  "PATHS",
-  "PIKE",
-  "PIKES",
-  "PINE",
-  "PINES",
-  "PNES",
-  "PL",
-  "PLAIN",
-  "PLN",
-  "PLAINS",
-  "PLNS",
-  "PLAZA",
-  "PLZ",
-  "PLZA",
-  "POINT",
-  "PT",
-  "POINTS",
-  "PTS",
-  "PORT",
-  "PRT",
-  "PORTS",
-  "PRTS",
-  "PR",
-  "PRAIRIE",
-  "PRR",
-  "RAD",
-  "RADIAL",
-  "RADIEL",
-  "RADL",
-  "RAMP",
-  "RANCH",
-  "RANCHES",
-  "RNCH",
-  "RNCHS",
-  "RAPID",
-  "RPD",
-  "RAPIDS",
-  "RPDS",
-  "REST",
-  "RST",
-  "RDG",
-  "RDGE",
-  "RIDGE",
-  "RDGS",
-  "RIDGES",
-  "RIV",
-  "RIVER",
-  "RVR",
-  "RIVR",
-  "RD",
-  "ROAD",
-  "ROADS",
-  "RDS",
-  "ROUTE",
-  "ROW",
-  "RUE",
-  "RUN",
-  "SHL",
-  "SHOAL",
-  "SHLS",
-  "SHOALS",
-  "SHOAR",
-  "SHORE",
-  "SHR",
-  "SHOARS",
-  "SHORES",
-  "SHRS",
-  "SKYWAY",
-  "SPG",
-  "SPNG",
-  "SPRING",
-  "SPRNG",
-  "SPGS",
-  "SPNGS",
-  "SPRINGS",
-  "SPRNGS",
-  "SPUR",
-  "SPURS",
-  "SQ",
-  "SQR",
-  "SQRE",
-  "SQU",
-  "SQUARE",
-  "SQRS",
-  "SQUARES",
-  "STA",
-  "STATION",
-  "STATN",
-  "STN",
-  "STRA",
-  "STRAV",
-  "STRAVEN",
-  "STRAVENUE",
-  "STRAVN",
-  "STRVN",
-  "STRVNUE",
-  "STREAM",
-  "STREME",
-  "STRM",
-  "STREET",
-  "STRT",
-  "ST",
-  "STR",
-  "STREETS",
-  "SMT",
-  "SUMIT",
-  "SUMITT",
-  "SUMMIT",
-  "TER",
-  "TERR",
-  "TERRACE",
-  "THROUGHWAY",
-  "TRACE",
-  "TRACES",
-  "TRCE",
-  "TRACK",
-  "TRACKS",
-  "TRAK",
-  "TRK",
-  "TRKS",
-  "TRAFFICWAY",
-  "TRAIL",
-  "TRAILS",
-  "TRL",
-  "TRLS",
-  "TRAILER",
-  "TRLR",
-  "TRLRS",
-  "TUNEL",
-  "TUNL",
-  "TUNLS",
-  "TUNNEL",
-  "TUNNELS",
-  "TUNNL",
-  "TRNPK",
-  "TURNPIKE",
-  "TURNPK",
-  "UNDERPASS",
-  "UN",
-  "UNION",
-  "UNIONS",
-  "VALLEY",
-  "VALLY",
-  "VLLY",
-  "VLY",
-  "VALLEYS",
-  "VLYS",
-  "VDCT",
-  "VIA",
-  "VIADCT",
-  "VIADUCT",
-  "VIEW",
-  "VW",
-  "VIEWS",
-  "VWS",
-  "VILL",
-  "VILLAG",
-  "VILLAGE",
-  "VILLG",
-  "VILLIAGE",
-  "VLG",
-  "VILLAGES",
-  "VLGS",
-  "VILLE",
-  "VL",
-  "VIS",
-  "VIST",
-  "VISTA",
-  "VST",
-  "VSTA",
-  "WALK",
-  "WALKS",
-  "WALL",
-  "WY",
-  "WAY",
-  "WAYS",
-  "WELL",
-  "WELLS",
-  "WLS"
-)
+# Load the USPS zipcode file
+data3File <- file.path("..", "..", "data", "USPSabb.csv")
+USPSabbreviations <-
+  read.csv(data3File,
+           header = TRUE,
+           colClasses = rep("character"))
 
-abb_name <- c(
-  "ALY",
-  "ALY",
-  "ALY",
-  "ALY",
-  "ANX",
-  "ANX",
-  "ANX",
-  "ANX",
-  "ARC",
-  "ARC",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "AVE",
-  "BYU",
-  "BYU",
-  "BCH",
-  "BCH",
-  "BND",
-  "BND",
-  "BLF",
-  "BLF",
-  "BLF",
-  "BLFS",
-  "BTM",
-  "BTM",
-  "BTM",
-  "BTM",
-  "BLVD",
-  "BLVD",
-  "BLVD",
-  "BLVD",
-  "BR",
-  "BR",
-  "BR",
-  "BRG",
-  "BRG",
-  "BRG",
-  "BRK",
-  "BRK",
-  "BRKS",
-  "BG",
-  "BGS",
-  "BYP",
-  "BYP",
-  "BYP",
-  "BYP",
-  "BYP",
-  "CP",
-  "CP",
-  "CP",
-  "CYN",
-  "CYN",
-  "CYN",
-  "CPE",
-  "CPE",
-  "CSWY",
-  "CSWY",
-  "CSWY",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTR",
-  "CTRS",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIR",
-  "CIRS",
-  "CLF",
-  "CLF",
-  "CLFS",
-  "CLFS",
-  "CLB",
-  "CLB",
-  "CMN",
-  "CMNS",
-  "COR",
-  "COR",
-  "CORS",
-  "CORS",
-  "CRSE",
-  "CRSE",
-  "CT",
-  "CT",
-  "CTS",
-  "CTS",
-  "CV",
-  "CV",
-  "CVS",
-  "CRK",
-  "CRK",
-  "CRES",
-  "CRES",
-  "CRES",
-  "CRES",
-  "CRST",
-  "XING",
-  "XING",
-  "XING",
-  "XRD",
-  "XRDS",
-  "CURV",
-  "DL",
-  "DL",
-  "DM",
-  "DM",
-  "DV",
-  "DV",
-  "DV",
-  "DV",
-  "DR",
-  "DR",
-  "DR",
-  "DR",
-  "DRS",
-  "EST",
-  "EST",
-  "ESTS",
-  "ESTS",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXPY",
-  "EXT",
-  "EXT",
-  "EXT",
-  "EXT",
-  "EXTS",
-  "FALL",
-  "FLS",
-  "FLS",
-  "FRY",
-  "FRY",
-  "FRY",
-  "FLD",
-  "FLD",
-  "FLDS",
-  "FLDS",
-  "FLT",
-  "FLT",
-  "FLTS",
-  "FLTS",
-  "FRD",
-  "FRD",
-  "FRDS",
-  "FRST",
-  "FRST",
-  "FRST",
-  "FRG",
-  "FRG",
-  "FRG",
-  "FRGS",
-  "FRK",
-  "FRK",
-  "FRKS",
-  "FRKS",
-  "FT",
-  "FT",
-  "FT",
-  "FWY",
-  "FWY",
-  "FWY",
-  "FWY",
-  "FWY",
-  "GDN",
-  "GDN",
-  "GDN",
-  "GDN",
-  "GDNS",
-  "GDNS",
-  "GDNS",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GTWY",
-  "GLN",
-  "GLN",
-  "GLNS",
-  "GRN",
-  "GRN",
-  "GRNS",
-  "GRV",
-  "GRV",
-  "GRV",
-  "GRVS",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBR",
-  "HBRS",
-  "HVN",
-  "HVN",
-  "HTS",
-  "HTS",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HWY",
-  "HL",
-  "HL",
-  "HLS",
-  "HLS",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "HOLW",
-  "INLT",
-  "IS",
-  "IS",
-  "IS",
-  "ISS",
-  "ISS",
-  "ISS",
-  "ISLE",
-  "ISLE",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCT",
-  "JCTS",
-  "JCTS",
-  "JCTS",
-  "KY",
-  "KY",
-  "KYS",
-  "KYS",
-  "KNL",
-  "KNL",
-  "KNL",
-  "KNLS",
-  "KNLS",
-  "LK",
-  "LK",
-  "LKS",
-  "LKS",
-  "LAND",
-  "LNDG",
-  "LNDG",
-  "LNDG",
-  "LN",
-  "LN",
-  "LGT",
-  "LGT",
-  "LGTS",
-  "LF",
-  "LF",
-  "LCK",
-  "LCK",
-  "LCKS",
-  "LCKS",
-  "LDG",
-  "LDG",
-  "LDG",
-  "LDG",
-  "LOOP",
-  "LOOP",
-  "MALL",
-  "MNR",
-  "MNR",
-  "MNRS",
-  "MNRS",
-  "MDW",
-  "MDWS",
-  "MDWS",
-  "MDWS",
-  "MDWS",
-  "MEWS",
-  "ML",
-  "MLS",
-  "MSN",
-  "MSN",
-  "MTWY",
-  "MT",
-  "MT",
-  "MT",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTN",
-  "MTNS",
-  "MTNS",
-  "NCK",
-  "NCK",
-  "ORCH",
-  "ORCH",
-  "ORCH",
-  "OVAL",
-  "OVAL",
-  "OPAS",
-  "PARK",
-  "PARK",
-  "PARK",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PKWY",
-  "PASS",
-  "PSGE",
-  "PATH",
-  "PATH",
-  "PIKE",
-  "PIKE",
-  "PNE",
-  "PNES",
-  "PNES",
-  "PL",
-  "PLN",
-  "PLN",
-  "PLNS",
-  "PLNS",
-  "PLZ",
-  "PLZ",
-  "PLZ",
-  "PT",
-  "PT",
-  "PTS",
-  "PTS",
-  "PRT",
-  "PRT",
-  "PRTS",
-  "PRTS",
-  "PR",
-  "PR",
-  "PR",
-  "RADL",
-  "RADL",
-  "RADL",
-  "RADL",
-  "RAMP",
-  "RNCH",
-  "RNCH",
-  "RNCH",
-  "RNCH",
-  "RPD",
-  "RPD",
-  "RPDS",
-  "RPDS",
-  "RST",
-  "RST",
-  "RDG",
-  "RDG",
-  "RDG",
-  "RDGS",
-  "RDGS",
-  "RIV",
-  "RIV",
-  "RIV",
-  "RIV",
-  "RD",
-  "RD",
-  "RDS",
-  "RDS",
-  "RTE",
-  "ROW",
-  "RUE",
-  "RUN",
-  "SHL",
-  "SHL",
-  "SHLS",
-  "SHLS",
-  "SHR",
-  "SHR",
-  "SHR",
-  "SHRS",
-  "SHRS",
-  "SHRS",
-  "SKWY",
-  "SPG",
-  "SPG",
-  "SPG",
-  "SPG",
-  "SPGS",
-  "SPGS",
-  "SPGS",
-  "SPGS",
-  "SPUR",
-  "SPUR",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQ",
-  "SQS",
-  "SQS",
-  "STA",
-  "STA",
-  "STA",
-  "STA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRA",
-  "STRM",
-  "STRM",
-  "STRM",
-  "ST",
-  "ST",
-  "ST",
-  "ST",
-  "STS",
-  "SMT",
-  "SMT",
-  "SMT",
-  "SMT",
-  "TER",
-  "TER",
-  "TER",
-  "TRWY",
-  "TRCE",
-  "TRCE",
-  "TRCE",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRAK",
-  "TRFY",
-  "TRL",
-  "TRL",
-  "TRL",
-  "TRL",
-  "TRLR",
-  "TRLR",
-  "TRLR",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TUNL",
-  "TPKE",
-  "TPKE",
-  "TPKE",
-  "UPAS",
-  "UN",
-  "UN",
-  "UNS",
-  "VLY",
-  "VLY",
-  "VLY",
-  "VLY",
-  "VLYS",
-  "VLYS",
-  "VIA",
-  "VIA",
-  "VIA",
-  "VIA",
-  "VW",
-  "VW",
-  "VWS",
-  "VWS",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLG",
-  "VLGS",
-  "VLGS",
-  "VL",
-  "VL",
-  "VIS",
-  "VIS",
-  "VIS",
-  "VIS",
-  "VIS",
-  "WALK",
-  "WALK",
-  "WALL",
-  "WAY",
-  "WAY",
-  "WAYS",
-  "WL",
-  "WLS",
-  "WLS"
-)
-
-USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
+#USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
-numAbbreviations <- nrow(USPSabbreviations)
+num_abbreviaton_row <- nrow(USPSabbreviations)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -1775,7 +773,7 @@ increment <- result$increment
 
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
-  geom_bar(stat = "identity", fill = "#D55E00") +
+  geom_bar(stat = "identity", fill = "#117733") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
@@ -2391,139 +1389,139 @@ if (num_rows_future > 0) {
   cat("\n\nThere are no SRs with a 'closed_date' in the future.\n")
 }
 
-########################################################################
-# Identify SRs created at midnight and noon
-# Extract hour, minute, and second components of closed_date for valid rows
-hour <- as.numeric(format(d311$created_date, "%H"))
-minute <- as.numeric(format(d311$created_date, "%M"))
-second <- as.numeric(format(d311$created_date, "%S"))
-
-# Identify rows with time exactly at midnight (00:00:00)
-midnight_created_rows <- hour == 0 & minute == 0 & second == 0
-noon_created_rows <- hour == 12 & minute == 0 & second == 0
-
-# Count the number of rows with time exactly at midnight
-midnight_created_count <- sum(midnight_created_rows)
-noon_created_count <- sum(noon_created_rows)
-
-midnight_created_data <- d311[midnight_created_rows, ]
-created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "agency")]
-
-noon_created_data <- d311[noon_created_rows, ]
-created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
-
-if (midnight_created_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(midnight_created_count, big.mark = ","),
-    "SRs that were 'created' at exactly midnight.\n"
-  )
-
-  sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
-
-  chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
-  chart_file_name <- "created_at_midnight_chart.pdf"
-
-  create_combo_chart(
-    created_at_midnight,
-    chart_title,
-    chart_file_name
-  )
-} else {
-  cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
-}
-
-if (noon_created_count > 0) {
-  cat(
-    "\n\nThere",
-    format(noon_created_count, big.mark = ","),
-    "SRs that were 'created' exactly at noon."
-  )
-
-  sorted_create_at_noon <- rank_by_agency(created_at_noon)
-
-  chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "created_at_noon_chart.pdf"
-  if (!is.null(sorted_create_at_noon)) {
-    create_combo_chart(
-      created_at_noon,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
-  }
-}
-
-#########################################################################
-# Identify SRs closed at midnight and noon
-
-# Remove N/A closed_date(s)
-valid_closed_date <- !is.na(d311$closed_date)
-valid_closed_data <- d311[valid_closed_date, ]
-
-# Extract hour, minute, and second components of closed_date for valid rows
-hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
-minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
-second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
-
-# Identify rows with time exactly at midnight (00:00:00)
-midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
-noon_closed_rows <- hour == 12 & minute == 0 & second == 0
-
-# Count the number of rows with time exactly at midnight
-midnight_closed_count <- sum(midnight_closed_rows)
-noon_closed_count <- sum(noon_closed_rows)
-
-midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
-closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "agency")]
-
-noon_closed_data <- valid_closed_data[noon_closed_rows, ]
-closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
-
-if (midnight_closed_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(midnight_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at midnight."
-  )
-
-  sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
-
-  chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
-  chart_file_name <- "closed_at_midnight_chart.pdf"
-  if (!is.null(sorted_closed_at_midnight)) {
-    create_combo_chart(
-      closed_at_midnight,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
-  }
-}
-
-if (noon_closed_count > 0) {
-  cat(
-    "\n\nThere are",
-    format(noon_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at noon."
-  )
-
-  sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
-
-  chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "closed_at_noon_chart.pdf"
-  if (!is.null(sorted_closed_at_noon)) {
-    create_combo_chart(
-      closed_at_noon,
-      chart_title,
-      chart_file_name
-    )
-  } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
-  }
-}
+# ########################################################################
+# # Identify SRs created at midnight and noon
+# # Extract hour, minute, and second components of closed_date for valid rows
+# hour <- as.numeric(format(d311$created_date, "%H"))
+# minute <- as.numeric(format(d311$created_date, "%M"))
+# second <- as.numeric(format(d311$created_date, "%S"))
+# 
+# # Identify rows with time exactly at midnight (00:00:00)
+# midnight_created_rows <- hour == 0 & minute == 0 & second == 0
+# noon_created_rows <- hour == 12 & minute == 0 & second == 0
+# 
+# # Count the number of rows with time exactly at midnight
+# midnight_created_count <- sum(midnight_created_rows)
+# noon_created_count <- sum(noon_created_rows)
+# 
+# midnight_created_data <- d311[midnight_created_rows, ]
+# created_at_midnight <- midnight_created_data[, c("unique_key", "created_date", "agency")]
+# 
+# noon_created_data <- d311[noon_created_rows, ]
+# created_at_noon <- noon_created_data[, c("unique_key", "created_date", "agency")]
+# 
+# if (midnight_created_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(midnight_created_count, big.mark = ","),
+#     "SRs that were 'created' at exactly midnight.\n"
+#   )
+# 
+#   sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
+# 
+#   chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
+#   chart_file_name <- "created_at_midnight_chart.pdf"
+# 
+#   create_combo_chart(
+#     created_at_midnight,
+#     chart_title,
+#     chart_file_name
+#   )
+# } else {
+#   cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
+# }
+# 
+# if (noon_created_count > 0) {
+#   cat(
+#     "\n\nThere",
+#     format(noon_created_count, big.mark = ","),
+#     "SRs that were 'created' exactly at noon."
+#   )
+# 
+#   sorted_create_at_noon <- rank_by_agency(created_at_noon)
+# 
+#   chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
+#   chart_file_name <- "created_at_noon_chart.pdf"
+#   if (!is.null(sorted_create_at_noon)) {
+#     create_combo_chart(
+#       created_at_noon,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
+#   }
+# }
+# 
+# #########################################################################
+# # Identify SRs closed at midnight and noon
+# 
+# # Remove N/A closed_date(s)
+# valid_closed_date <- !is.na(d311$closed_date)
+# valid_closed_data <- d311[valid_closed_date, ]
+# 
+# # Extract hour, minute, and second components of closed_date for valid rows
+# hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
+# minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
+# second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
+# 
+# # Identify rows with time exactly at midnight (00:00:00)
+# midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
+# noon_closed_rows <- hour == 12 & minute == 0 & second == 0
+# 
+# # Count the number of rows with time exactly at midnight
+# midnight_closed_count <- sum(midnight_closed_rows)
+# noon_closed_count <- sum(noon_closed_rows)
+# 
+# midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
+# closed_at_midnight <- midnight_closed_data[, c("unique_key", "created_date", "agency")]
+# 
+# noon_closed_data <- valid_closed_data[noon_closed_rows, ]
+# closed_at_noon <- noon_closed_data[, c("unique_key", "created_date", "agency")]
+# 
+# if (midnight_closed_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(midnight_closed_count, big.mark = ","),
+#     "SRs that were 'closed' exactly at midnight."
+#   )
+# 
+#   sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
+# 
+#   chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
+#   chart_file_name <- "closed_at_midnight_chart.pdf"
+#   if (!is.null(sorted_closed_at_midnight)) {
+#     create_combo_chart(
+#       closed_at_midnight,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
+#   }
+# }
+# 
+# if (noon_closed_count > 0) {
+#   cat(
+#     "\n\nThere are",
+#     format(noon_closed_count, big.mark = ","),
+#     "SRs that were 'closed' exactly at noon."
+#   )
+# 
+#   sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
+# 
+#   chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
+#   chart_file_name <- "closed_at_noon_chart.pdf"
+#   if (!is.null(sorted_closed_at_noon)) {
+#     create_combo_chart(
+#       closed_at_noon,
+#       chart_title,
+#       chart_file_name
+#     )
+#   } else {
+#     cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
+#   }
+# }
 
 #########################################################################
 # Identify SRs with a 'due_date' that is before the 'created_date'
@@ -2779,28 +1777,6 @@ homeless_violin_chart <- create_violin_chart(
 )
 
 #########################################################################
-# Case study involving noise complaints by zipcode.
-cat("\n\n***Case study analyzing noise complaints using the two different zip code fields***\n")
-noise_complaints <- d311[grepl("^NOISE", d311$complaint_type), ]
-
-# check top ten 'incident_zip's
-incident_zip_counts <- table(na.omit(noise_complaints$incident_zip))
-top_incident_zip <- data.frame(incident_zip = names(incident_zip_counts), count = as.numeric(incident_zip_counts))
-top_incident_zip <- top_incident_zip[order(top_incident_zip$count, decreasing = TRUE), ]
-total_complaints1 <- sum(top_incident_zip$count)
-
-top_10_incident_zip <- head(top_incident_zip, 10)
-
-invalid_incident_zip <- unique(incident_zip_results[[2]])
-invalid_values_present1 <- top_10_incident_zip$incident_zip %in% invalid_incident_zip
-
-top_10_incident_zip$valid <- !invalid_values_present1
-cat("\nTop 10 Noise complaint zip codes using 'incident_zip' field, displaying validity.\n")
-print(top_10_incident_zip, row.names = FALSE, right = FALSE)
-
-invalid_rows1 <- top_10_incident_zip[!top_10_incident_zip$valid, ]
-
-#########################################################################
 
 ##### CROSS STREET/INTERSECTION STREET ANALYSYS #####
 
@@ -2891,6 +1867,9 @@ cat("\nExecution ends at:", formatted_end_time)
 cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
 
 #########################################################################
-cat("\n *****END OF PROGRAM*****")
-#########################################################################
 sink()
+cat("\nExecution ends at:", formatted_end_time)
+cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
+
+#########################################################################
+cat("\n *****END OF PROGRAM*****")

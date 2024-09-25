@@ -12,6 +12,11 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
+
+programStart <- as.POSIXct(Sys.time())
+formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
+cat("\nExecution begins at:", formattedStartTime)
+
 cat("\n***** Program initialization *****")
 
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
@@ -44,10 +49,7 @@ files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 # Source each file
 lapply(files, source)
 
-sink(paste0(year_digits, "-yr timeline_console_output.txt"))
-
-programStart <- as.POSIXct(Sys.time())
-formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
+sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
 cat("\nExecution begins at:", formattedStartTime)
 
 #########################################################################
@@ -966,6 +968,140 @@ SR_closed_time_of_day <- create_bar_chart(
   chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_hour_of_day.pdf")
 )
 
+########################################################################
+# Identify SRs created at midnight and noon
+
+hour <- as.numeric(format(d311$created_date, "%H"))
+minute <- as.numeric(format(d311$created_date, "%M"))
+second <- as.numeric(format(d311$created_date, "%S"))
+
+# Identify rows with time exactly at midnight (00:00:00)
+midnight_created_rows <- hour == 0 & minute == 0 & second == 0
+noon_created_rows <- hour == 12 & minute == 0 & second == 0
+
+# Count the number of rows with time exactly at midnight
+midnight_created_count <- sum(midnight_created_rows)
+noon_created_count <- sum(noon_created_rows)
+
+midnight_created_data <- d311[midnight_created_rows, ]
+created_at_midnight <- midnight_created_data[, c("created_date", "agency")]
+
+noon_created_data <- d311[noon_created_rows, ]
+created_at_noon <- noon_created_data[, c("created_date", "agency")]
+
+if (midnight_created_count > 0) {
+  cat(
+    "\n\nThere are",
+    format(midnight_created_count, big.mark = ","),
+    "SRs that were 'created' at exactly midnight.\n"
+  )
+  
+  sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
+  
+  chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
+  chart_file_name <- "created_at_midnight_chart.pdf"
+  
+  create_combo_chart(
+    created_at_midnight,
+    chart_title,
+    chart_file_name
+  )
+} else {
+  cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
+}
+
+if (noon_created_count > 0) {
+  cat(
+    "\n\nThere",
+    format(noon_created_count, big.mark = ","),
+    "SRs that were 'created' exactly at noon."
+  )
+  
+  sorted_create_at_noon <- rank_by_agency(created_at_noon)
+  
+  chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
+  chart_file_name <- "created_at_noon_chart.pdf"
+  if (!is.null(sorted_create_at_noon)) {
+    create_combo_chart(
+      created_at_noon,
+      chart_title,
+      chart_file_name
+    )
+  } else {
+    cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
+  }
+}
+
+#########################################################################
+# Identify SRs closed at midnight and noon
+
+# Remove N/A closed_date(s)
+valid_closed_date <- !is.na(d311$closed_date)
+valid_closed_data <- d311[valid_closed_date, ]
+
+# Extract hour, minute, and second components of closed_date for valid rows
+hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
+minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
+second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
+
+# Identify rows with time exactly at midnight (00:00:00)
+midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
+noon_closed_rows <- hour == 12 & minute == 0 & second == 0
+
+# Count the number of rows with time exactly at midnight
+midnight_closed_count <- sum(midnight_closed_rows)
+noon_closed_count <- sum(noon_closed_rows)
+
+midnight_closed_data <- valid_closed_data[midnight_closed_rows, ]
+closed_at_midnight <- midnight_closed_data[, c("created_date", "agency")]
+
+noon_closed_data <- valid_closed_data[noon_closed_rows, ]
+closed_at_noon <- noon_closed_data[, c("created_date", "agency")]
+
+if (midnight_closed_count > 0) {
+  cat(
+    "\n\nThere are",
+    format(midnight_closed_count, big.mark = ","),
+    "SRs that were 'closed' exactly at midnight."
+  )
+  
+  sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
+  
+  chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
+  chart_file_name <- "closed_at_midnight_chart.pdf"
+  if (!is.null(sorted_closed_at_midnight)) {
+    create_combo_chart(
+      closed_at_midnight,
+      chart_title,
+      chart_file_name
+    )
+  } else {
+    cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
+  }
+}
+
+if (noon_closed_count > 0) {
+  cat(
+    "\n\nThere are",
+    format(noon_closed_count, big.mark = ","),
+    "SRs that were 'closed' exactly at noon."
+  )
+  
+  sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
+  
+  chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
+  chart_file_name <- "closed_at_noon_chart.pdf"
+  if (!is.null(sorted_closed_at_noon)) {
+    create_combo_chart(
+      closed_at_noon,
+      chart_title,
+      chart_file_name
+    )
+  } else {
+    cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
+  }
+}
+
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
 duration <- difftime(programStop, programStart, units = "secs")
@@ -980,7 +1116,21 @@ if (duration > 3600) {
   cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
 }
 
-#########################################################################
 cat("\n *****END OF PROGRAM*****")
 #########################################################################
 sink()
+
+programStop <- as.POSIXct(Sys.time())
+duration <- difftime(programStop, programStart, units = "secs")
+
+if (duration > 3600) {
+  duration <- duration / 3600 # Convert to hours
+  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "hours\n")
+} else if (duration > 60) {
+  duration <- duration / 60 # Convert to minutes
+  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "minutes\n")
+} else {
+  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
+}
+
+cat("\n *****END OF PROGRAM*****")
