@@ -1,9 +1,9 @@
-# install.packages("ggplot2")
-# install.packages("scales")
-# install.packages("dplyr")
-# install.packages('zoo')
-# install.packages("ggpmisc")
-# install.packages("lubridate")
+install.packages("ggplot2")
+install.packages("scales")
+install.packages("dplyr")
+install.packages('zoo')
+install.packages("ggpmisc")
+install.packages("lubridate")
 
 library(ggplot2)
 library(scales)
@@ -32,7 +32,7 @@ year_digits <- substr(main_data_file, 1, 2)
 if (year_digits != "10") { year_digits <- "2"} 
   # Set path for the chart directory
 
-chart_prefix <- paste0(year_digits, "-year trends")
+chart_prefix <- paste0(year_digits, "-year")
 chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", chart_prefix)
 
 file_name_prefix <- chart_prefix #to name individual chart files
@@ -49,7 +49,7 @@ files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 # Source each file
 lapply(files, source)
 
-sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
+#sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
 cat("\nExecution begins at:", formattedStartTime)
 
 #########################################################################
@@ -127,7 +127,6 @@ print_threshold <- nrow(sorted_by_agency)
 sorted_by_agency <- as.data.frame(sorted_by_agency)
 print(head(sorted_by_agency, print_threshold), row.names = FALSE, right = FALSE)
 
-#source("functions/create_combo_chart.R")
 chart_title <- "Complaints by Agency"
 chart_file_name <- "Complains_by_Agency.pdf"
 

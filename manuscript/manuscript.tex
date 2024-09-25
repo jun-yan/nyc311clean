@@ -1,5 +1,6 @@
 \documentclass[linenumber]{jdsart}
-
+ \usepackage{setspace}
+ 
 \volume{0}
 \issue{0}
 \pubyear{2022}
@@ -41,6 +42,8 @@
 \setcounter{topnumber}{50}
 \setcounter{bottomnumber}{50}
 
+
+\doublespacing
 \begin{document}
 
 \begin{frontmatter}
@@ -66,16 +69,18 @@ York City 311 Service Request Data}
 \begin{abstract}
 In the early 21st century, the open data movement began to transform 
 societies and governments by promoting transparency,
-innovation, and public engagement. New York City (NYC) has been at
+innovation, and public engagement. The City of New York (NYC) has been at
 the forefront of this movement since the enactment of the Open 
-Data Law in 2012, which led to the creation of the NYC Open Data
+Data Law in 2012, leading to the creation of the NYC Open Data
 portal. This portal now hosts 2,700 datasets from 80 city agencies,
 serving as a crucial resource for research across various domains, 
 including health, urban development, and transportation. The 
 success of these initiatives highlights the importance of data 
 curation in ensuring the utility and reliability of open datasets.
+
+
 This paper examines the challenges of open data curation through a
-case study of the NYC 311 Service Request (SR), addressing issues 
+case study of the NYC 311 Service Request (SR) dataset, addressing issues 
 of data validity, consistency, and curation efficiency. Based on 
 insights from this case study, we propose a set of data curation 
 principles tailored for government-released open data. These principles 
@@ -117,13 +122,13 @@ repository for global development data, available at
 \href{https://data.worldbank.org}{World Bank Open Data}. 
 These initiatives represent significant strides in democratizing data, 
 breaking down barriers that once kept valuable information 
-on government performance in silos. Their collective impact 
+regarding government performance in silos. Their collective impact 
 extends beyond mere data sharing to fostering a culture of openness 
 that benefits individuals, communities, governments, and economies worldwide 
 \citep{barns2016mine, wang2016adoption}.
 
 
-New York City (NYC) has emerged as a leader in the open data movement,
+The City of New York (NYC) has emerged as a leader in the open data movement,
 marked by the enactment of the Open Data Law in 2012
 \citep{zuiderwijk2014open}. This landmark legislation led to the
 creation of the \href{https://opendata.cityofnewyork.us}{NYC Open Data
@@ -158,7 +163,7 @@ to sensitive tasks, such as public health or policy
 \citep{rahm2000data}.
 
 
-Research into data curation has explored these challenges in depth. 
+Research into data curation has explored these challenges in\mbox{-}depth. 
 Among the earliest discussions, \citet{witt2009constructing} focused 
 on developing data curation profiles tailored to specific contexts, 
 setting a precedent for targeted data management strategies. 
@@ -194,8 +199,9 @@ a summary of SR counts over the 10-year period from 2014 to 2023.
 Section~\ref{sec:issues} delves into specific data cleansing 
 challenges affecting data quality and curation efficiency, 
 including structural problems, adherence to the data dictionary, 
-and the presence of missing, blank, or N/A entries. This section 
-also investigates field compliance with legal or acceptable values, 
+and the presence of missing, blank, or N/A entries. This section
+utilizes 311 SR data over a a 2-year period from 2022-2023.  It 
+ investigates field compliance with reference or acceptable values, 
 highlights logical inconsistencies, and examines concerning patterns 
 in the data. We explore the balance between precision and accuracy 
 and identify duplicate or redundant fields, along with observations 
@@ -216,18 +222,20 @@ maintenance requests. Initially a phone-based call center, the system
 evolved into a comprehensive data management platform handling
 millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile app channels in 2009, a
-\jy{should we mention the system upgrade just before the pandemic to
-  document this historical event?}
 record high of 348,463 monthly service requests in August 2020 due to
 the COVID-19 pandemic, the 2021 expansion to include the MTA's city
 subway system, and a record 3.23 million service requests in
-2023. Today, the NYC 311 data system manages over 3 million service
-requests per year. This data is publicly accessible through the NYC Open Data
+2023. 
+
+
+Today, the NYC 311 data system manages over 3 million service
+requests (SRs) per year. This data is publicly accessible through the NYC Open Data
 Portal, which provides tools for querying, grouping, aggregating,
 geo-mapping, visualizing, and exporting results. The
 \href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology
-  and Innovation (OTI)}, which provides technological support for the
-open data system. 
+  and Innovation (OTI)}, provides technological support for the
+open data system and data portal. Input data is sourced from 17 different
+NYC Agencies. 
 
 \begin{comment}
 Despite its success, the 311 system faces several challenges:
@@ -258,27 +266,41 @@ and improving responsiveness across City Agencies
 \end{figure}
 
 
-Our investigation focused on a 10-year period (2014--2023), downloaded
-on \jy{Give date because the data is updated daily.}
-This version of the data is available as a supplement to facilitate
-reproducibility of the analysis presented in the sequel.
-\jy{How many total? file size? Somewhere we used only two years that
-  need to be clarified.}
-Figure~\ref{fig:10-yr} shows the annual counts of NYC 311 SR over the
+Our investigation utilizes two 311 SR datasets covering 10-years and 2-years.
+The 10-year period (2014--2023), downloaded on 15 September 2024, 
+contains only three columns (created\_date, closed\_date, and 
+agency). This dataset is used to analyze long-term 
+trends and observe certain dating anomalies, such as SRs 
+closeing trends. This 10-year dataset is approximately 
+1.4 GB in size. Instructions on dowloading this file 
+from the NYC Open Data Portal are available in the supplemental material.
+
+
+Additionally, this investigation uses a 2-year dataset for the period
+2022-2023, also downloaded on 15 September 2024. This data set 
+contains the full 41 columns of 311 SR data and is used to conduct 
+more detailed analysis in areas such as data consistency, 
+data validity, redundant fields, etc.. The size of this 2-year dataset 
+is quite large at 3.7GB. Instructions on downloading this file
+ from the NYC Open Data Portal are available in the supplemental material.
+
+
+Figure~\ref{fig:10-yr} shows  annual counts of 311 SRs over the
 10-year period from 2014 to 2023, revealing a clear upward trend in
-public engagement with the system. The most significant increase
-occurred in 2020, when the number of requests surged to 3.23 million
-due to the COVID-19 pandemic, illustrating the essential role of the
+public engagement. As indicated, the most significant increase
+in activity occurred in 2020, when the number of requests surged to 3.23 million
+during the COVID-19 pandemic, illustrating the essential role of the
 311 system in supporting residents during times of crisis. Overall, SR
-counts increased by nearly 49.5\% between 2014 and 2023, reflecting
-growing public reliance on the system for addressing non-emergency
-issues. The steady rise in SRs can be attributed to the increased
-accessibility of the 311 system via online and mobile platforms, as
-well as heightened public awareness of the service. While the spike in
-2020 was exceptional, the broader trend indicates sustained growth in
-service request volume over the decade, highlighting the system's
-evolving role in managing both routine city operations and
-extraordinary events.
+counts increased by 49.5\% between 2014 and 2023, reflecting
+growing public reliance on the system. (During this 10-year time 
+period, the population of NYC grew just 0.6\%.) The steady 
+rise in SRs can be attributed to the increased accessibility of 
+the 311 system via online and mobile platforms, as well as 
+heightened public awareness  and utilziation of the service. 
+While the spike in 2020 was exceptional, the broader trend 
+indicates sustained growth in service request volume over 
+the decade, highlighting the system's evolving role in managing 
+both routine city operations and extraordinary events.
 
 \jy{The 'title' in each figure could be removed because we have
   captions. The fonts of the annotations in the figures need to be
@@ -315,12 +337,21 @@ and curation processes within these high-volume agencies to ensure
 efficiency and responsiveness.
 
 
+<<<<<<< Updated upstream
 \begin{figure}[tbp]
 	\centering
 	\includegraphics[width=0.7\textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
+=======
+%\begin{figure}[tbp]
+%	\centering
+%	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
+ % 	\caption{SR counts by Agency with Cumulative Percentage}
+%	\label{fig:SRcountbyAgency}
+%\end{figure}
+>>>>>>> Stashed changes
 
 
 \begin{comment}
@@ -818,6 +849,34 @@ include:
 \end{itemize}
 
 
+<<<<<<< Updated upstream
+=======
+A unique way to visualize this anomaly is to examine the busiest day 
+during this 2-year period (Friday, 2023-09-29). Then aggregate 
+the created\_date(s) by minute (with seconds equal to zero), providing
+a minute-by-minute look at SR creation on that one day. Note the spike 
+at exactly noon (12:00), well beyond the 3\textsigma line.
+
+
+\begin{figure}[tbp]
+    \centering
+    \begin{minipage}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
+        \caption{SRs Created Minute-by-Minute on Busiest Day}
+        \label{fig:busiestcreated}
+    \end{minipage}%
+    \begin{minipage}{0.5\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
+        \caption{SRs Closed Minute-by-Minute on Busiest Day}
+        \label{fig:busiestclosed}
+    \end{minipage}
+\end{figure}
+
+
+
+>>>>>>> Stashed changes
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.7\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
