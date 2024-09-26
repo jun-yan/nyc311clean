@@ -363,7 +363,7 @@ create_boxplot <- function(
     chart_file_name) {
   
     boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
-      geom_jitter(color = "#2271B2", alpha = 0.4, size = 1.9, shape = 17) +
+      geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
       geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "black") +
       theme(
         legend.position = "none", plot.title = element_text(hjust = 0.5),
@@ -387,7 +387,7 @@ create_violin_chart <- function(
   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
     geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2", size = 1.9, shape = 17) +
     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
-    geom_boxplot(width = 0.25, fill = "#D55E00", color = "black", alpha = 0.6, 
+    geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.6, 
                  outlier.colour = "black", outlier.size = 0.75) +
     labs(
       title = chart_title,
@@ -773,7 +773,7 @@ increment <- result$increment
 
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
-  geom_bar(stat = "identity", fill = "#117733") +
+  geom_bar(stat = "identity", fill = "#009E73") +
   theme(
     axis.title.x = element_text(vjust = 0, size = 11),
     axis.title.y = element_text(vjust = 1, size = 11),
@@ -792,7 +792,8 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
     yintercept = seq(starting_value, max_count, by = increment),
     linetype = "dotted", color = "gray40"
   ) +
-  ggtitle("Number and % of blank/missing fields per column",
+#  ggtitle("Number and % of blank/missing fields per column",
+  ggtitle(NULL,
     subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
   ) +
   labs(y = NULL, x = NULL)
@@ -808,7 +809,8 @@ d311 <- consolidate_agencies((d311))
 
 sorted_by_agency <- rank_by_agency(d311)
 
-chart_title <- "SR count by Agency & cumulative percentage"
+#chart_title <- "SR count by Agency & cumulative percentage"
+chart_title <- NULL
 chart_file_name <- "SRs_by_Agency.pdf"
 
 create_combo_chart(
@@ -882,7 +884,8 @@ cat(
 colnames(d311)[colnames(d311) == "agency"] <- "temp_agency"
 colnames(d311)[colnames(d311) == "complaint_type"] <- "agency"
 
-chart_title <- "Top 20 Complaints and cumulative percentage"
+#chart_title <- "Top 20 Complaints and cumulative percentage"
+chart_title <- NULL
 chart_file_name <- "SR_by_Complaint_Type.pdf"
 
 create_combo_chart(
@@ -1237,7 +1240,8 @@ if (num_rows_closedBeforeOpened > 0) {
 
   x_axis_label <- "Negative duration (days)"
   x_axis_field <- "duration"
-  chart_title <- "Closed before Created (negative duration days)"
+#  chart_title <- "Closed before Created (negative duration days)"
+  chart_title <- NULL
   chart_file_name <- "negative_duration_SR_violin.pdf"
   
   negativeDurationViolin <- create_violin_chart(
@@ -1252,7 +1256,7 @@ if (num_rows_closedBeforeOpened > 0) {
   negativeDurationChart <- ggplot(
     data = large_neg_duration, aes(x = duration, y = factor(1))) +
     geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
-    geom_boxplot(width = 0.25, fill = "#D55E00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
+    geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
       plot.subtitle = element_text(size = 9)
@@ -1367,7 +1371,7 @@ if (num_rows_future > 0) {
       geom_jitter(color = "#0072B2", size = 2, shape = 17) +
       geom_boxplot(
         outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
-        fill = "#D55E00", size = 1, color = "black"
+        fill = "#E69F00", size = 1, color = "black"
       ) +
       theme(
         legend.position = "none",
@@ -1635,7 +1639,8 @@ if (num_row_updatedLate > 0) {
 
     x_axis_name <- "Post_closed Resolution Update (days)"
     x_axis_field <- "postClosedUpdateDuration"
-    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
+#    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
+    chart_title <- NULL
     chart_file_name <- "post_closed_violin_chart.pdf"
     
     post_closed_violin_chart <- create_violin_chart(

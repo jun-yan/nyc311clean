@@ -242,7 +242,7 @@ Despite its success, the 311 system faces several challenges:
 data timeliness, accuracy, and consistency, difficulties in
 correlating data over long periods, excluding personally
 identifiable information (PII), integration with stand-alone systems
-at selected NYC agencies, and managing API usagefor numerous
+at selected NYC agencies, and managing API usage for numerous
 third-party users. These challenges are addressed by various agency
 open data managers and 
 \end{comment}
@@ -270,19 +270,20 @@ Our investigation utilizes two 311 SR datasets covering 10-years and 2-years.
 The 10-year period (2014--2023), downloaded on 15 September 2024, 
 contains only three columns (created\_date, closed\_date, and 
 agency). This dataset is used to analyze long-term 
-trends and observe certain dating anomalies, such as SRs 
-closeing trends. This 10-year dataset is approximately 
-1.4 GB in size. Instructions on dowloading this file 
-from the NYC Open Data Portal are available in the supplemental material.
+trends and observe certain dating anomalies. The 10-year dataset is approximately 
+1.4 GB in size and contains over 27 million rows, each row representing one SR.
+ Instructions on downloading this file from the NYC Open Data Portal 
+ are available in the supplemental material.
 
 
-Additionally, this investigation uses a 2-year dataset for the period
-2022-2023, also downloaded on 15 September 2024. This data set 
-contains the full 41 columns of 311 SR data and is used to conduct 
-more detailed analysis in areas such as data consistency, 
-data validity, redundant fields, etc.. The size of this 2-year dataset 
-is quite large at 3.7GB. Instructions on downloading this file
- from the NYC Open Data Portal are available in the supplemental material.
+Additionally, this investigation uses a 2-year dataset covering the period
+2022--2023, also downloaded on 15 September 2024. This data set 
+contains the full 41 columns of 311 SR data available from the portal, 
+and is used to conduct detailed analysis in areas such as data consistency, 
+data validity, redundant fields, etc.. This 2-year dataset 
+is quite large at 3.7GB. It contains over 6 million rows of SRs. Instructions 
+on downloading this file from the NYC Open Data Portal are 
+available in the supplemental material.
 
 
 Figure~\ref{fig:10-yr} shows  annual counts of 311 SRs over the
@@ -296,102 +297,61 @@ growing public reliance on the system. (During this 10-year time
 period, the population of NYC grew just 0.6\%.) The steady 
 rise in SRs can be attributed to the increased accessibility of 
 the 311 system via online and mobile platforms, as well as 
-heightened public awareness  and utilziation of the service. 
+heightened public awareness  and utilization of the service. 
 While the spike in 2020 was exceptional, the broader trend 
 indicates sustained growth in service request volume over 
 the decade, highlighting the system's evolving role in managing 
 both routine city operations and extraordinary events.
 
-\jy{The 'title' in each figure could be removed because we have
-  captions. The fonts of the annotations in the figures need to be
-  increased. The code generating them need to be tidied for future
-  sharing.
-}
-
 \jy{The plot sizes seem to be fixed in the generation code. That's why
-  the fonts are small when scaled. I'd generate them with approxiately
+  the fonts are small when scaled. I'd generate them with approximately
   the expected sizes in the manuscript. I'd also use aspect ratio
   0.618 (golden ratio).
 }
 
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 agency, showing the cumulative percentage of SRs handled by each
-agency over a given time period. This figure highlights that the
+agency over a the 2-year time frame. Note that the
 distribution of SRs is concentrated among a few key agencies. The six
 largest agencies are New York Police Department (NYPD), 
 Housing Preservation and Development (HPD),
 New York City Department of Sanitation (DSNY), Department of
 Transportation (DOT), Department of Environmental Protection (DEP),
 and Department of Parks and Recreation (DPR).
-They collectively handle over 90\% of the total SR volume. This is
+Collectively they handle over 90\% of the total SR volume. This is
 indicative of the critical roles these agencies play in managing
 public concerns, ranging from noise complaints and housing issues to
 sanitation and transportation problems. The NYPD alone accounts for a
 substantial portion of the total SRs, underscoring its central role in
-addressing complaints related to public safety and order. The
-remaining 10\% distributed across a large number of smaller
-agencies. This concentration of requests points to the systemic
-reliance on a few key departments for resolving most non-emergency
-issues, further emphasizing the importance of optimizing data handling
-and curation processes within these high-volume agencies to ensure
+addressing complaints related to public safety. The
+remaining 10\% is distributed across a number of other
+agencies. This concentration of SRs points to a
+reliance on a few key departments to resolve most non-emergency
+issues (e.g. non 911 calls). Accordingly, this underscores 
+the necessity for optimal data handling and curation processes 
+within these high-volume agencies in order to ensure 
 efficiency and responsiveness.
 
 
-<<<<<<< Updated upstream
 \begin{figure}[tbp]
 	\centering
 	\includegraphics[width=0.7\textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
-=======
-%\begin{figure}[tbp]
-%	\centering
-%	\includegraphics[width=0.8\textwidth]{SRs_by_Agency.pdf}
- % 	\caption{SR counts by Agency with Cumulative Percentage}
-%	\label{fig:SRcountbyAgency}
-%\end{figure}
->>>>>>> Stashed changes
-
-
-\begin{comment}
-\begin{table}[tbp]
-  \centering
-  \caption{Noise-related complaints\_type(s) by count with Agency}
-  \label{tab:noisecomplaints}
-  \begin{tabular}{@{}lS[table-format=7.0,round-mode=places,
-    round-precision=0]S[table-format=2.2,round-mode=places,
-    round-precision=2]l@{}} % 'l' for left-aligned, 'S' for siunitx number alignment
-    \toprule
-    \textbf{complaint\_type} & \textbf{Count} & \textbf{Percentage} & \textbf{Agency} \\ 
-    \midrule
-    Noise - Residential        & 675502 & 10.56 & NYPD  \\ 
-    Noise - Street/Sidewalk    & 300507 &  4.70 & NYPD  \\ 
-    Noise - Commercial         & 128892 &  2.02 & NYPD  \\ 
-    Noise - Vehicle            & 115956 &  1.81 & NYPD  \\ 
-    Noise                      & 100413 &  1.57 & DEP   \\ 
-    Noise - Helicopter         &  85345 &  1.33 & EDC   \\ 
-    Noise - Park               &  16620 &  0.26 & NYPD  \\ 
-    Noise - House of Worship &   2757 &  0.04 & NYPD  \\ 
-    \bottomrule
-  \end{tabular}
-\end{table}
-\end{comment}
-
-
 
 \begin{figure}[tbp]
  \centering
   \includegraphics[width=0.7\textwidth]{SR_by_Complaint_Type.pdf} 
-  \caption{Top 20 complaint type(s) and Cumulative Percentage} 
+  \caption{Top 20 complaint types and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
 
 Figure~\ref{fig:SR_complaints}
 illustrates the top 20 complaint types, accounting for 70\% 
-of all Service Requests (SRs), and their cumulative percentage. The 
+of all SRs and their cumulative percentage. Note that the 
 distribution of complaints is skewed, with a small number of issues 
-dominating the total SR volume. Noise-related complaints, including 
+dominating total SR volume. Noise-related complaints, including 
 residential, commercial, and street noise, make up 22\% of all 
 complaints, making them the most frequent issue in the NYC 311 system. 
 Other prominent categories include illegal parking, heat/hot water 
@@ -418,26 +378,14 @@ standardizing data formats \citep[e.g.,][]{cody2017cody,
   van2018statistical}. In the context of open data, cleansing is
 especially important as open datasets often come from diverse,
 uncoordinated sources, leading to variations in data quality,
-completeness, and consistency. Without proper cleansing, the utility
-of open data can be severely limited, affecting its reliability for
+completeness, and consistency. Without thorough data cleansing, the utility
+of open data can be quite limited, affecting its reliability for
 research, policy-making, and innovation. The main purpose of cleansing
 open data is to ensure that it is accurate, consistent, and usable
 across multiple platforms and by various stakeholders. This improves
 the trustworthiness of the data and enables better decision-making,
 more accurate analysis, and the integration of data into machine
 learning models or other systems.
-
-
-% What is data cleansing?  Wikipedia 
-% \href{https://en.wikipedia.org/wiki/Data_cleansing}{Data Cleansing} 
-% offers this definition. 
-
-% \begin{quote}\textit{Data cleansing or data cleaning is the process of detecting and 
-% correcting (or removing) corrupt or inaccurate records from a record set, 
-% table, or database and refers to identifying incomplete, incorrect, 
-% inaccurate or irrelevant parts of the data and then replacing, 
-% modifying, or deleting the dirty or coarse data.}
-% \end{quote}
 
 
 Many quality criteria are employed to ensure high-quality data 
@@ -456,16 +404,16 @@ inconsistent use of blanks, spaces, NA, N/A, or ``<NA>'' to indicate
 missing data. Furthermore, redundant or irrelevant fields can clutter 
 datasets, reducing efficiency. Logical inconsistencies are another 
 important consideration, such as related fields that violate expected 
-relationships, like a ``due date'' that precedes the ``created date.'' 
+relationships, such as a ``due date'' that precedes the ``created date.'' 
 Lastly, the balance between accuracy and precision is crucial, as both 
 must be carefully managed to ensure reliable and meaningful data.
 
 
 Here we identify the presence of issues in the NYC 311 SR open data;
-not necessarily to solve them. A solution effort should
+not attempting to solve them. A solution effort should
 be undertaken only after an investigation as to the why and how 
 such issues came about, and a discussion as to whether or not it 
-is an \textit{error}. 
+is an actual \textit{error} or holds some other status.
 
 
 \subsection{Structural Issues}
@@ -477,17 +425,14 @@ it difficult to analyze the data effectively. Here are some
 characteristics of the 311 SR data set:
 
 \begin{itemize}
-	\item There are 47 columns of data for each row, exportable as a CSV file.
+	\item There are 41 columns of data for each row, exportable as a CSV file.
+	Each row represents one Service Request. 
 	
 	\item There are four date fields (created, closed, updated, due).
 	
-	\item There are three borough fields; two of which appear to be duplicates.
-	
-	\item Two zip code fields, but not duplicates
-	
+	\item There are two borough fields; one of which appear to be a duplicate.
+		
 	\item Seven street fields; two pair of which appear to be duplicates
-	
-	\item Two Police Precinct fields; not duplicates
 	
 	\item In addition to the incident\_address, there are five additional location fields: 
 	lat/long, street\_name, landmark, NY State plane, and Block \#
@@ -499,19 +444,20 @@ characteristics of the 311 SR data set:
 The 311 SR 
 \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} 
 identifies 41 data columns (fields) and provides related information 
-for each. However, upon downloading the data, six additional fields 
-appear that are not included in the Data Dictionary. These fields are 
-visible in the portal's Column Manager widget, labeled with the prefix 
+for each. However, there are six additional fields that can be
+optionally downloaded. These fields are 
+visible in the portal's ``Column manager'' widget, labeled with the prefix 
 ``@computed\_region.'' The additional fields include \texttt{zip\_codes}, 
 \texttt{community\_districts}, \texttt{borough\_boundaries}, 
 \texttt{city\_council\_districts}, \texttt{police\_precincts}, and 
-\texttt{police\_precinct}. While one can infer the meaning and 
-derivation of these computed fields to some extent, uncertainty remains. 
-The critical question is whether these fields can be reliably used for 
-analytical purposes reliable documentation. In particular, which one
-of the two percinct fields should one use? What is the difference
-between the computed zip codes and the incident zipcode among the 41
-documented variables?
+\texttt{police\_precinct}. While one can likely infer the meaning and 
+derivation of these computed fields, uncertainty remains as to
+their derivation and usage. These six fields are not included in
+the Data Dictionary. Our analysis has shown that these six 
+fields have numerous data validity issues. Liaison with the 
+NYC Open Data Teams leads us to treat these six fields 
+as experimental and not for suitable for normal use. Accordingly, 
+we will not address these fields in our analysis.
 
 
 \subsection{Missing Data}
@@ -572,16 +518,12 @@ as to their compliance with a domain of legal values.
 \label{sec:zipcodesissues}
 All zip codes (two fields: \texttt{zip\_codes} and \texttt{incident\_zip}) 
 should be valid as defined by the USPS database, which contains 
-37,946 valid zip codes. However, the computed field \texttt{zip\_codes} 
-proved problematic, with over 58\% (3.6 million) of its entries being 
-invalid. Although the more accurate \texttt{incident\_zip} field has 
-only 0.07\% invalid entries, this still results in 4,163 errors, which 
-is not insignificant. The breakdown of invalid entries in the 
-\texttt{zip\_codes} field, sorted by Agency, shows that the
-\jy{Which agency? Missing a table? We could prepare a supplement where
-  we can put additional tables/figures without limit.}
-distribution by percentage mirrors the overall breakdown of SRs by 
-Agency, potentially indicating a systemic problem.
+37,946 valid zip codes. The \texttt{incident\_zip} field has 
+only 0.07\% invalid entries, this still results in 4,163 errors; 
+not insignificant. If you sort the invalid entries by Agency, 
+the distribution by percentage mirrors the \texttt{overall} 
+breakdown of SRs by Agency, potentially 
+indicating a systemic problem.
 
 \begin{table}[tbp]
     \centering
@@ -825,13 +767,6 @@ This distribution does not mirror the overall SR distribution by
 agency, suggesting an agency-specific issue.
 	
 		
-%\begin{figure}[tbp]
-%	 \centering
-%	 \includegraphics[width = \textwidth]{zero_duration_SR.pdf}
-%	 \caption{SRs with Zero Durations by Agency}
-%	 \label{fig:zero-duration}
-%\end{figure}	
-
 \subparagraph{Created Date or Closed Date(s) at Midnight or Noon}
 Another issue found with the \texttt{created\_date} and 
 \texttt{closed\_date} fields is the unusually large number of SRs 
@@ -849,8 +784,6 @@ include:
 \end{itemize}
 
 
-<<<<<<< Updated upstream
-=======
 A unique way to visualize this anomaly is to examine the busiest day 
 during this 2-year period (Friday, 2023-09-29). Then aggregate 
 the created\_date(s) by minute (with seconds equal to zero), providing
@@ -876,7 +809,6 @@ at exactly noon (12:00), well beyond the 3\textsigma line.
 
 
 
->>>>>>> Stashed changes
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=0.7\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
@@ -1048,7 +980,7 @@ changes required to make the two fields identical. For this analysis,
 we set the threshold for a near-match to a Hamming Distance of two (2).
 
 
-Table~\ref{tab:x1nearmatches} provides examples of near-matches for 
+Table~\ref{tab:x1near-matches} provides examples of near-matches for 
 \texttt{cross\_street\_1} and \texttt{intersection\_street\_1}. These 
 entries show slight variations in the street name or number, such as 
 ``WEST 168 ST'' and ``WEST 167 ST,'' both processed by DOT, where only 
@@ -1300,7 +1232,7 @@ Engagement with data scientists and statisticians is key to improving
 data curation strategies. These experts can help design and refine 
 curation processes, such as creating algorithms for automatic data 
 cleaning, identifying inconsistent data entries, and ensuring the 
-dataset’s structure is maintained over time. Their expertise is also 
+dataset(s) structure is maintained over time. Their expertise is also 
 critical in developing protocols for validating incoming data, correcting 
 errors in real-time, and ensuring consistency across multiple data sources. 
 Feedback from statisticians and data scientists, such as the issues reported 
@@ -1434,7 +1366,7 @@ in machine learning models remains accurate, clean, and reliable
 
 
 \section*{Supplementary Material}
-The NYC 311 SR data and code used to produce the results reportred in
+The NYC 311 SR data and code used to produce the results reported in
 this paper are available [FixMe].
 \jy{need to think: we need to keep a copy of the downloaded data;
   if the data portal changes and our code may not work.}

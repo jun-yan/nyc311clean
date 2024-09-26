@@ -1,9 +1,9 @@
-install.packages("ggplot2")
-install.packages("scales")
-install.packages("dplyr")
-install.packages('zoo')
-install.packages("ggpmisc")
-install.packages("lubridate")
+# install.packages("ggplot2")
+# install.packages("scales")
+# install.packages("dplyr")
+# install.packages('zoo')
+# install.packages("ggpmisc")
+# install.packages("lubridate")
 
 library(ggplot2)
 library(scales)
@@ -22,7 +22,7 @@ cat("\n***** Program initialization *****")
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
-main_data_file <- "10-year 2014-2023.csv"
+main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 
 data1File <- file.path("..", "..", "data", main_data_file)
 
@@ -49,7 +49,7 @@ files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 # Source each file
 lapply(files, source)
 
-#sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
+sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
 cat("\nExecution begins at:", formattedStartTime)
 
 #########################################################################
@@ -85,12 +85,12 @@ d311 <- consolidate_agencies((d311))
 # Remove any rows where the created_date is missing. This is a required field.
 d311 <- d311[!is.na(d311$created_date), ]
 
+# Filter out rows with NA values in the created_date column
+d311 <- d311[!is.na(d311$created_date), ]
+
 # Convert character date-time strings to datetime objects with America/New_York timezone
 d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-
-# Filter out rows with NA values in the created_date column
-d311 <- d311[!is.na(d311$created_date), ]
 
 #########################################################################
 # Collect macro statistics from the dataset
@@ -253,14 +253,14 @@ chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", se
 extra_line <- annotate("text",
   x = as.numeric(min_year$Year), y = max_year$count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#D55E00", vjust = -2, hjust = 0.06
+  size = 3.7, color = "#E69F00", vjust = -2, hjust = 0.06
 )
 
 SR_yearly <- create_bar_chart(
   yearly_df,
   x_col = "Year",
   y_col = "count",
-  chart_title = "Yearly SR count (w/trendline)",
+  chart_title = NULL,
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,
@@ -316,7 +316,7 @@ extra_line1 <- scale_x_date(
 extra_line2 <- annotate("text",
   x = min_month$YearMonth, y = max_month$count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#D55E00", vjust = -1, hjust = 3.85
+  size = 5, color = "#E69F00", vjust = -1, hjust = 3
 )
 
 SR_monthly <- create_bar_chart(
@@ -393,7 +393,7 @@ extra_line <- scale_x_date(
 extra_line2 <- annotate("text",
   x = earliest_day, y = max_count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#D55E00", vjust = -1, hjust = -0.23
+  size = 3.7, color = "#E69F00", vjust = -1, hjust = -0.23
 )
 
 SR_daily <- create_bar_chart(
@@ -506,7 +506,8 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart(
   minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-  chart_title = paste("SRs 'created' by Exact Minute-of-the-busiest-Day (00 secs) on", max_date),
+#  chart_title = paste("SRs 'created' by Exact Minute-of-the-busiest-Day (00 secs) on", max_date),
+  chart_title = NULL,
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,
@@ -633,7 +634,8 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart(
   minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-  chart_title = paste("SRs 'closed' by Exact Minute-of-the-busiest-Day (00:00) on", max_date),
+#  chart_title = paste("SRs 'closed' by Exact Minute-of-the-busiest-Day (00:00) on", max_date),
+  chart_title = NULL,
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,

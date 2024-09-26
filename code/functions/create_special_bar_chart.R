@@ -8,7 +8,7 @@ create_special_bar_chart <- function(data, x_col, y_col, chart_title, subtitle_p
   
   # Create the bar chart with vertical X-axis labels
   chart <- ggplot(data, aes(x = !!sym(x_col), y = !!sym(y_col))) +
-    geom_bar(stat = "identity", fill = "#117733") +
+    geom_bar(stat = "identity", fill = "#009E73") +
     scale_x_discrete() +
     scale_y_continuous(labels = y_axis_labels) +
     theme(
