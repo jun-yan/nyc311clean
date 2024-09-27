@@ -15,8 +15,10 @@ create_bar_chart <- function(
     add_minimum = FALSE,
     add_second_maximum = FALSE,
     extra_line = NULL,
-    chart_file_name = NULL            # Default NULL means no file saving
-) {
+    chart_file_name = NULL,
+    horizontal_adjustment_max = 1,
+    vertical_adjustment_max = -1)            # Default NULL means no file saving)
+{
   # Find the row with the maximum count
   max_row <- dataset[which.max(dataset[[y_col]]), ]
   y_max_count <- max_row[[y_col]]
@@ -65,22 +67,23 @@ create_bar_chart <- function(
   
   # Create the bar chart
   bar_chart <- ggplot(dataset, aes(x = .data[[x_col]], y = .data[[y_col]])) +
+    
     geom_bar(stat = "identity", fill = "#009E73") +
+    
     scale_x +
-    # theme(
-    #   axis.title.x = element_text(vjust = 0, size = 11),
-    #   axis.title.y = element_text(vjust = 1, size = 11),
-    #   plot.title = element_text(hjust = 0.5, size = 13),
-    #   plot.subtitle = element_text(size = 9),
-    #   panel.background = element_rect(fill = "gray95", color = "gray95"),
-    #   axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold"),
-    #   axis.text.y = element_text(face = "bold"),
-    #   legend.position = "none" # Remove legend
-    # ) +
+    
+    theme(
+      axis.title = element_text(size = 7),
+      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold", size = 8),
+      axis.text.y = element_text(face = "bold", size = 7),
+      plot.title = element_text(hjust = 0.5, size = 12),
+      plot.subtitle = element_text(size = 6),
+      aspect.ratio = 0.618033 ) +
+    
     geom_hline(
       yintercept = seq(starting_value, y_max_count, by = increment),
-      linetype = "dotted", color = "gray40", linewidth = 0.5
-    ) +
+      linetype = "dotted", color = "gray40", linewidth = 0.3) +
+    
     ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = "")) +
     labs(x = x_axis_title, y = y_axis_title)
   
@@ -89,13 +92,14 @@ create_bar_chart <- function(
       annotate("text",
                x = max_row[[x_col]], y = y_max_count,
                label = paste0("Max: ", format(y_max_count, big.mark = ",")),
-               size = 5, color = "black", vjust = -0.4, hjust = 0.5
-      )
+               size = 4.25, color = "black", 
+               vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max)
   }
   
   if (add_second_maximum) {
     # Order the data frame by the count column in descending order
     ordered_by_count <- dataset[order(dataset[[y_col]], decreasing = TRUE), ]
+    
     # Select the second row
     second_max <- ordered_by_count[2, ]
     
@@ -103,8 +107,7 @@ create_bar_chart <- function(
       annotate("text",
                x = second_max[[x_col]], y = second_max[[y_col]],
                label = paste0("2^nd~'Highest: ", format(second_max[[y_col]], big.mark = ","), "'"), ,
-               size = 6, color = "black", vjust = -0.4, hjust = 0.05, parse = TRUE
-      )
+               size = 4.25, color = "black", vjust = -0.4, hjust = 0.05, parse = TRUE )
   }
   
   if (add_minimum) {
@@ -112,8 +115,7 @@ create_bar_chart <- function(
       annotate("text",
                x = min_row[[x_col]], y = y_min_count,
                label = paste0("Min: ", format(y_min_count, big.mark = ",")),
-               size = 6, color = "black", vjust = -0.4, hjust = 0.5
-      )
+               size = 4.25, color = "black", vjust = -0.4, hjust = 0.5 )
   }
   
   if (add_mean) {
@@ -121,9 +123,8 @@ create_bar_chart <- function(
       geom_hline(yintercept = y_mean_value, linetype = "twodash", color = "black", linewidth = 0.75) +
       annotate("text",
                x = min(dataset[[x_col]]), y = y_mean_value,
-               label = paste0("Average: ", format(round(y_mean_value, 0), big.mark = ",")),
-               size = 7, color = "black", hjust = -0.5, vjust = -0.75
-      )
+               label = paste0("Avg: ", format(round(y_mean_value, 0), big.mark = ",")),
+               size = 4.5, color = "black", hjust = -0.5, vjust = -0.75 )
   }
   
   if (add_median) {
@@ -132,70 +133,46 @@ create_bar_chart <- function(
       annotate("text",
                x = min(dataset[[x_col]]), y = y_median_value,
                label = paste0("Median: ", format(round(y_median_value, 0), big.mark = ",")),
-               size = 7, color = "black", hjust = -0.5, vjust = -0.75
-      )
+               size = 4.5, color = "black", hjust = -0.5, vjust = -0.75 )
   }
   
   if (add_sd) {
     bar_chart <- bar_chart +
-      geom_hline(
-        yintercept = round(y_mean_value + 3 * y_sd_value, 0), linetype = "longdash",
-        color = "black", linewidth = 0.3
-      ) +
+      geom_hline( yintercept = round(y_mean_value + 3 * y_sd_value, 0), 
+                  linetype = "longdash", color = "black", linewidth = 0.3 ) +
       annotate("text",
                x = min(dataset[[x_col]]), y = y_mean_value + 3 * y_sd_value,
-               label = "+3 sigma", size = 6, color = "black", hjust = -0.5, vjust = -0.75
-      )
+               label = "+3 sigma", size = 4, color = "black", hjust = -0.5, vjust = -0.75 )
   }
   
   if (add_trendline) {
     bar_chart <- bar_chart +
-    stat_poly_eq(color = "#E69F00") +
+    stat_poly_eq(color = "#661100") +
     geom_smooth(
-    method = "lm", span = 1, se = FALSE, color = "#E69F00",
-    linetype = "dashed", linewidth = 1.3
-      )
+    method = "lm", span = 1, se = FALSE, color = "#661100",
+    linetype = "dashed", linewidth = 1.3 )
   }
   
   if (!is.null(extra_line)) {
     bar_chart <- bar_chart + extra_line
   }
   
-  bar_chart <- bar_chart + 
-    theme(
-      axis.title.x = element_text(vjust = 0, size = 14),   # Increase font size
-      axis.title.y = element_text(vjust = 1, size = 14),
-      axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1, face = "bold", size = 12),
-      axis.text.y = element_text(face = "bold", size = 12),
-      plot.title = element_text(hjust = 0.5, size = 16),   # Adjust title size
-      plot.subtitle = element_text(size = 12)
-    )
-  
-  bar_chart <- bar_chart + theme(aspect.ratio = 1 / 1.618)
-  
-  
-  
   # Print the bar chart
-  suppressMessages(print(bar_chart))
+    print(bar_chart)
   
   # Save the chart to a file if chart_file_name is provided
-  if (!is.null(chart_file_name)) {
     chart_path <- file.path(chart_directory_path, chart_file_name)
     
-    # Define aspect ratio (golden ratio)
-    width <- 10  # Adjust to match manuscript
-    height <- width / 1.618
+  # Define aspect ratio (golden ratio)
+    chart_width <- 10  # Adjust to match manuscript
+    chart_height <- chart_width / 1.618
     
-    # Save the plot with adjusted size and DPI
+  # Save the plot with adjusted size and DPI
     ggsave(
       filename = chart_file_name,
       plot = bar_chart,
       path = chart_directory_path,
-      width = width,
-      height = height,
-      dpi = 300  # High resolution for manuscripts
-    )
-    
-#    suppressMessages(ggsave(chart_path, plot = bar_chart, width = 10, height = 8))
-  }
+      width = chart_width,
+      height = chart_height,
+      dpi = 300 )  # High resolution for manuscripts
 }

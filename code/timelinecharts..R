@@ -22,7 +22,7 @@ cat("\n***** Program initialization *****")
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "10-year 2014-2023.csv"
 
 data1File <- file.path("..", "..", "data", main_data_file)
 
@@ -50,6 +50,7 @@ files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 lapply(files, source)
 
 sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
+
 cat("\nExecution begins at:", formattedStartTime)
 
 #########################################################################
@@ -118,6 +119,8 @@ cat("\nData contains SRs created from",
 earliest_title<- format(earliest_date, "%Y-%m-%d")
 latest_title<- format(latest_date, "%Y-%m-%d")
 
+chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
+
 #########################################################################
 # Sort by Agency and rank
 sorted_by_agency <- rank_by_agency(d311)
@@ -131,9 +134,9 @@ chart_title <- "Complaints by Agency"
 chart_file_name <- "Complains_by_Agency.pdf"
 
 create_combo_chart(
-  d311,
-  chart_title,
-  chart_file_name
+  dataset = d311,
+  chart_title = NULL,
+  chart_file_name = chart_file_name
 )
  
 # ########################################################################
@@ -244,37 +247,40 @@ cat("\nGrowth over", nrow(yearly_df), "years is", percentage_growth, "%")
 cat("\nYearly Summary:\n")
 print(yearly_df, row.names = FALSE, right = FALSE)
 
-yearly_df$Year <- as.numeric(yearly_df$Year)
-earliest_year <- min(yearly_df$Year)
 
-chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
+if (nrow(yearly_df) > 2) {  #skip if only 1-2 years. Not enough data to be meaningful.
+  
+  yearly_df$Year <- as.numeric(yearly_df$Year)
+  earliest_year <- min(yearly_df$Year)
 
-# Define the extra line
-extra_line <- annotate("text",
-  x = as.numeric(min_year$Year), y = max_year$count,
-  label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#E69F00", vjust = -2, hjust = 0.06
-)
+  chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
 
-SR_yearly <- create_bar_chart(
-  yearly_df,
-  x_col = "Year",
-  y_col = "count",
-  chart_title = NULL,
-  sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  print_out_title = "Yearly",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = TRUE,
-  add_maximum = FALSE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_yearly.pdf")
-)
+  # Define the extra line
+  extra_line <- annotate("text",
+    x = as.numeric(min_year$Year), y = max_year$count,
+    label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
+    size = 3.7, color = "#E69F00", vjust = -1, hjust = 0.1 )
+
+  SR_yearly <- create_bar_chart(
+    yearly_df,
+    x_col = "Year",
+    y_col = "count",
+    chart_title = NULL,
+    sub_title = chart_sub_title,
+    x_axis_title = NULL,
+    y_axis_title = NULL,
+    print_out_title = "Yearly",
+    add_mean = TRUE,
+    add_median = FALSE,
+    add_sd = FALSE,
+    add_trendline = TRUE,
+    add_maximum = FALSE,
+    add_minimum = FALSE,
+    add_second_maximum = FALSE,
+    extra_line = extra_line,
+    chart_file_name = paste0(file_name_prefix, "-trend_yearly.pdf")
+  )
+}
 
 #########################################################################
 # Overall monthly summary
@@ -307,17 +313,16 @@ end_date <- max(monthly_df$YearMonth)
 # Ensure YearMonth is a Date object
 monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
 
-extra_line1 <- scale_x_date(
-  labels = date_format("%Y-%m"),
-  breaks = seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "6 months"),
-  expand = c(0, 0)
-)
+# extra_line1 <- scale_x_date(
+#   labels = date_format("%Y-%m"),
+#   breaks = seq(min(monthly_df$YearMonth), max(monthly_df$YearMonth), by = "6 months"),
+#   expand = c(0, 0)
+# )
 
-extra_line2 <- annotate("text",
+extra_line <- annotate("text",
   x = min_month$YearMonth, y = max_month$count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 5, color = "#E69F00", vjust = -1, hjust = 3
-)
+  size = 5, color = "#661100", vjust = 1, hjust = 1 )
 
 SR_monthly <- create_bar_chart(
   monthly_df,
@@ -331,12 +336,14 @@ SR_monthly <- create_bar_chart(
   add_mean = TRUE,
   add_median = FALSE,
   add_sd = FALSE,
-  add_trendline = TRUE,
+  add_trendline = FALSE,
   add_maximum = TRUE,
   add_minimum = FALSE,
   add_second_maximum = FALSE,
-  extra_line = extra_line2,
-  chart_file_name = paste0(file_name_prefix, "-trend_monthly.pdf")
+  extra_line = extra_line,
+  chart_file_name = paste0(file_name_prefix, "-trend_monthly.pdf"),
+  horizontal_adjustment_max = 1.3,
+  vertical_adjustment_max = 1
 )
 
 #########################################################################
@@ -393,14 +400,14 @@ extra_line <- scale_x_date(
 extra_line2 <- annotate("text",
   x = earliest_day, y = max_count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#E69F00", vjust = -1, hjust = -0.23
+  size = 3.7, color = "#E69F00", vjust = 0.75, hjust = -2
 )
 
 SR_daily <- create_bar_chart(
   daily_df,
   x_col = "created_date",
   y_col = "count",
-  chart_title = "Daily SR count (w/trendline)",
+  chart_title = "Daily SR count",
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,
@@ -408,13 +415,221 @@ SR_daily <- create_bar_chart(
   add_mean = FALSE,
   add_median = TRUE,
   add_sd = TRUE,
-  add_trendline = TRUE,
+  add_trendline = FALSE,
   add_maximum = TRUE,
   add_minimum = FALSE,
   add_second_maximum = FALSE,
-  extra_line = extra_line2,
+  extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_daily.pdf")
 )
+
+#########################################################################
+# Overall calendar month summary (Jan, Feb, Mar, etc.)
+calendar_month_summary_stats <- calculate_summary_stats(calendar_month_df, "count")
+# # Accessing the results
+mean_count <- calendar_month_summary_stats$mean
+median_count <- calendar_month_summary_stats$median
+standard_deviation <- calendar_month_summary_stats$sd
+
+# Number of days in each month, with February as 28.2 days
+days_in_month <- c(
+  "January" = 31, "February" = 28.2, "March" = 31, "April" = 30,
+  "May" = 31, "June" = 30, "July" = 31, "August" = 31,
+  "September" = 30, "October" = 31, "November" = 30, "December" = 31
+)
+
+max_calendar_month <- calendar_month_df[which.max(calendar_month_df$count), ]
+max_calendar_month_name <- as.character(calendar_month_df$Month[which.max(calendar_month_df$count)])
+max_calendar_month$Month <- as.character(month.name[max_calendar_month$Month])
+max_calendar_count <- max_calendar_month$count
+
+# Get the number of days for the max_calendar_month
+days_for_max_month <- days_in_month[max_calendar_month$Month]
+cat(
+  "\n\nCalendar month with maximum count:", max_calendar_month$Month,
+  "with", format(max_calendar_count, big.mark = ","), "SRs"
+)
+cat("\nPer day count (maximum):", round(max_calendar_month$count / days_for_max_month, 0))
+
+min_calendar_month <- calendar_month_df[which.min((calendar_month_df$count)), ]
+min_calendar_month_name <- as.character(calendar_month_df$Month[which.min(calendar_month_df$count)])
+min_calendar_month$Month <- as.character(month.name[min_calendar_month$Month])
+min_calendar_count <- min_calendar_month$count
+
+# Get the number of days for the min_calendar_month
+days_for_min_month <- days_in_month[min_calendar_month$Month]
+cat(
+  "\n\nCalendar month with minimum count:", min_calendar_month$Month,
+  "with", format(min_calendar_count, big.mark = ","), "SRs"
+)
+cat("\nPer day count (minimum):", round(min_calendar_month$count / days_for_min_month, 0))
+
+# Add the count_per_day column
+calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month[calendar_month_df$Month], 0)
+
+# Order the dataframe by Month
+calendar_month_df <- calendar_month_df[order(calendar_month_df$Month), ]
+
+cat("\n\nSRs by calendar month, ordered by calendar\n")
+print(calendar_month_df, row.names = FALSE, right = FALSE)
+
+# Order the dataframe by total count
+calendar_month_df <- calendar_month_df %>%
+  arrange(desc(count))
+cat("\nSRs by calendar month, ordered by count\n")
+print(calendar_month_df, row.names = FALSE, right = FALSE)
+
+# Order the dataframe by count_per_day
+calendar_month_df <- calendar_month_df %>%
+  arrange(desc(count_per_day))
+cat("\nSRs by calendar month, ordered by SRs/day\n")
+print(calendar_month_df, row.names = FALSE, right = FALSE)
+
+# Calendar month chart
+SR_calendar_month <- create_special_bar_chart(
+  data = calendar_month_df,
+  x_col = "Month",
+  y_col = "count",
+  chart_title = "SRs by Calendar Month",
+  sub_title = chart_sub_title,
+  earliest_x_value = "January",
+  max_x_value = max_calendar_month_name,
+  chart_file_name = paste0(file_name_prefix, "-trend_by_calendar_month.pdf")
+)
+
+#########################################################################
+# Overall day-of-the-year summary (Jan 1st, Jan 2nd, Jan 3rd, etc.)
+
+# Assuming day_counts_df is already sorted by date
+day_counts_df <- day_counts_df %>%
+  arrange(as.Date(paste0("2024/", day_of_year), format = "%Y/%m/%d")) %>%
+  mutate(day_number = row_number())
+
+day_count_summary_stats <- calculate_summary_stats(day_counts_df, "count")
+
+# Accessing the results
+mean_count <- day_count_summary_stats$mean
+median_count <- day_count_summary_stats$median
+standard_deviation <- day_count_summary_stats$sd
+
+cat(
+  "\nAverage day-of-the-year count:", format(mean_count, big.mark = ","),
+  "  Standard deviation(\u03C3):", format(standard_deviation, big.mark = ",")
+)
+cat("\nMedian:", format(median_count, big.mark = ","))
+
+max_day_of_the_year <- day_counts_df[which.max(day_counts_df$count), ]
+max_day_of_the_year$day_of_year <- as.character(max_day_of_the_year$day_of_year)
+
+# Sort the dataframe by count in ascending order
+sorted_day_counts_df <- day_counts_df[order(day_counts_df$count), ]
+
+# Get the 2nd minimum day of the year
+second_min_day_of_the_year <- sorted_day_counts_df[2, ]
+
+# Add the day of the week as a character
+second_min_day_of_the_year$DayOfWeek <- as.character(second_min_day_of_the_year$day_of_year)
+
+# Print the result
+cat(
+  "\nDay of the year with the 2nd minimum count:", second_min_day_of_the_year$day_of_year,
+  "with", format(second_min_day_of_the_year$count, big.mark = ","), "SRs\n"
+)
+
+cat("\nDay-of-the-Year Summary:")
+
+# Convert day_of_year to character
+day_counts_df$day_of_year <- as.character(day_counts_df$day_of_year)
+
+# Format the columns for better alignment
+formatted_day_counts_df <- data.frame(
+  day_of_year = format(day_counts_df$day_of_year, width = max(nchar(day_counts_df$day_of_year))),
+  count = format(day_counts_df$count, width = max(nchar(day_counts_df$count)))
+)
+
+day_counts_df <- day_counts_df[order(-day_counts_df$count), ]
+
+# Print the Day-of-the-Calendar Year Summary with custom order
+cat("\nTop 10 days\n")
+print(head(day_counts_df, n = 10), right = TRUE)
+
+#day_counts_df <- day_counts_df[order(day_counts_df$count), ]
+
+cat("\nBottom 10 days\n")
+print(tail(day_counts_df, n = 10), right = TRUE)
+
+days_to_chart <- day_counts_df %>%
+  select(count, day_number)
+
+SR_day_of_the_year <- create_bar_chart(
+  dataset = days_to_chart,
+  x_col = "day_number",
+  y_col = "count",
+  chart_title = "SRs by Day-of-the-Year",
+  sub_title = chart_sub_title,                   
+  x_axis_title = NULL,              
+  y_axis_title = NULL,              
+  print_out_title = "SR_day_of_the_year", 
+  add_mean = TRUE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = NULL,
+  chart_file_name = paste0(file_name_prefix, "-trend_by_day_of_year.pdf"),
+  horizontal_adjustment_max = 1.2,
+  vertical_adjustment_max = 1.5)    
+
+#########################################################################
+# Overall day-of-the-week summary
+
+day_of_week_summary_stats <- calculate_summary_stats(day_of_week_df, "count")
+
+# Accessing the results
+mean_count <- day_of_week_summary_stats$mean
+median_count <- day_of_week_summary_stats$median
+standard_deviation <- day_of_week_summary_stats$sd
+
+day_of_week_df$day_of_week <- as.character(day_of_week_df$day_of_week)
+
+max_day_of_the_week <- day_of_week_df[which.max(day_of_week_df$count), ]
+cat(
+  "\nDay-of-the-week maximum:", max_day_of_the_week$day_of_week,
+  "with", format(max_day_of_the_week$count, big.mark = ","), "SRs"
+)
+
+min_day_of_the_week <- day_of_week_df[which.min((day_of_week_df$count)), ]
+cat(
+  "\nDay-of-the-week minimum:", min_day_of_the_week$day_of_week,
+  "with", format(min_day_of_the_week$count, big.mark = ","), "SRs"
+)
+
+cat("\n\nDay-of-the-Week Summary:\n")
+print(day_of_week_df, row.names = FALSE, right = FALSE)
+
+# Add a new column 'week_day' with row counts
+day_of_week_df <- day_of_week_df %>%
+  mutate(week_day = row_number())
+
+# Convert the 'day_of_week' column to a factor
+day_of_week_df$day_of_week <- factor(day_of_week_df$day_of_week)
+
+# Day of the week chart
+SR_day_of_the_week <- create_special_bar_chart(
+  dataset = day_of_week_df,
+  x_col = "day_of_week",
+  y_col = "count",
+  chart_title = "SRs by Day-of-the-Week",
+  sub_title = chart_sub_title,
+  earliest_x_value = "1-Monday",
+  max_x_value = max_day_of_the_week$day_of_week,
+  x_angle = 60,
+  chart_file_name = paste0(file_name_prefix, "-trend_by_day_of_week.pdf"),
+  horizontal_adjustment_max = 0.5,
+  vertical_adjustment_max = 0.2
+  )
 
 #########################################################################
 # Determine the # of SRs created exactly on the hour with 00 minutes and 00 seconds.
@@ -648,207 +863,10 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf"),
+  horizontal_adjustment_max = -1,
+  vertical_adjustment_max = 1
 )
-
-#########################################################################
-# Overall calendar month summary (Jan, Feb, Mar, etc.)
-calendar_month_summary_stats <- calculate_summary_stats(calendar_month_df, "count")
-# # Accessing the results
-mean_count <- calendar_month_summary_stats$mean
-median_count <- calendar_month_summary_stats$median
-standard_deviation <- calendar_month_summary_stats$sd
-
-# Number of days in each month, with February as 28.2 days
-days_in_month <- c(
-  "January" = 31, "February" = 28.2, "March" = 31, "April" = 30,
-  "May" = 31, "June" = 30, "July" = 31, "August" = 31,
-  "September" = 30, "October" = 31, "November" = 30, "December" = 31
-)
-
-max_calendar_month <- calendar_month_df[which.max(calendar_month_df$count), ]
-max_calendar_month_name <- as.character(calendar_month_df$Month[which.max(calendar_month_df$count)])
-max_calendar_month$Month <- as.character(month.name[max_calendar_month$Month])
-max_calendar_count <- max_calendar_month$count
-
-# Get the number of days for the max_calendar_month
-days_for_max_month <- days_in_month[max_calendar_month$Month]
-cat(
-  "\n\nCalendar month with maximum count:", max_calendar_month$Month,
-  "with", format(max_calendar_count, big.mark = ","), "SRs"
-)
-cat("\nPer day count (maximum):", round(max_calendar_month$count / days_for_max_month, 0))
-
-min_calendar_month <- calendar_month_df[which.min((calendar_month_df$count)), ]
-min_calendar_month_name <- as.character(calendar_month_df$Month[which.min(calendar_month_df$count)])
-min_calendar_month$Month <- as.character(month.name[min_calendar_month$Month])
-min_calendar_count <- min_calendar_month$count
-
-# Get the number of days for the min_calendar_month
-days_for_min_month <- days_in_month[min_calendar_month$Month]
-cat(
-  "\n\nCalendar month with minimum count:", min_calendar_month$Month,
-  "with", format(min_calendar_count, big.mark = ","), "SRs"
-)
-cat("\nPer day count (minimum):", round(min_calendar_month$count / days_for_min_month, 0))
-
-# Add the count_per_day column
-calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month[calendar_month_df$Month], 0)
-
-# Order the dataframe by Month
-calendar_month_df <- calendar_month_df[order(calendar_month_df$Month), ]
-
-cat("\n\nSRs by calendar month, ordered by calendar\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
-
-# Order the dataframe by total count
-calendar_month_df <- calendar_month_df %>%
-  arrange(desc(count))
-cat("\nSRs by calendar month, ordered by count\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
-
-# Order the dataframe by count_per_day
-calendar_month_df <- calendar_month_df %>%
-  arrange(desc(count_per_day))
-cat("\nSRs by calendar month, ordered by SRs/day\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
-
-# Calendar month chart
-SR_calendar_month <- create_special_bar_chart(
-  data = calendar_month_df,
-  x_col = "Month",
-  y_col = "count",
-  chart_title = "SRs by Calendar Month",
-  subtitle_prefix = "",
-  earliest_x_value = "January",
-  max_x_value = max_calendar_month_name
-)
-
-# Print the bar chart
-suppressMessages(print(SR_calendar_month))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend_by_calendar_month.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_calendar_month, width = 10, height = 8))
-
-#########################################################################
-# Overall day-of-the-year summary (Jan 1st, Jan 2nd, Jan 3rd, etc.)
-
-day_count_summary_stats <- calculate_summary_stats(day_counts_df, "count")
-
-# Accessing the results
-mean_count <- day_count_summary_stats$mean
-median_count <- day_count_summary_stats$median
-standard_deviation <- day_count_summary_stats$sd
-
-cat(
-  "\nAverage day-of-the-year count:", format(mean_count, big.mark = ","),
-  "  Standard deviation(\u03C3):", format(standard_deviation, big.mark = ",")
-)
-cat("\nMedian:", format(median_count, big.mark = ","))
-
-max_day_of_the_year <- day_counts_df[which.max(day_counts_df$count), ]
-max_day_of_the_year$day_of_year <- as.character(max_day_of_the_year$day_of_year)
-
-# Sort the dataframe by count in ascending order
-sorted_day_counts_df <- day_counts_df[order(day_counts_df$count), ]
-
-# Get the 2nd minimum day of the year
-second_min_day_of_the_year <- sorted_day_counts_df[2, ]
-
-# Add the day of the week as a character
-second_min_day_of_the_year$DayOfWeek <- as.character(second_min_day_of_the_year$day_of_year)
-
-# Print the result
-cat(
-  "\nDay of the year with the 2nd minimum count:", second_min_day_of_the_year$day_of_year,
-  "with", format(second_min_day_of_the_year$count, big.mark = ","), "SRs\n"
-)
-
-cat("\nDay-of-the-Year Summary:")
-
-# Convert day_of_year to character
-day_counts_df$day_of_year <- as.character(day_counts_df$day_of_year)
-
-# Format the columns for better alignment
-formatted_day_counts_df <- data.frame(
-  day_of_year = format(day_counts_df$day_of_year, width = max(nchar(day_counts_df$day_of_year))),
-  count = format(day_counts_df$count, width = max(nchar(day_counts_df$count)))
-)
-
-day_counts_df <- day_counts_df[order(-day_counts_df$count), ]
-
-# Print the Day-of-the-Calendar Year Summary with custom order
-cat("\nTop 10 days\n")
-print(head(day_counts_df, n = 10), right = FALSE)
-
-#day_counts_df <- day_counts_df[order(day_counts_df$count), ]
-
-cat("\nBottom 10 days\n")
-print(tail(day_counts_df, n = 10), right = FALSE)
-
-# Day of the year chart
-SR_day_of_the_year <- create_special_bar_chart(
-  data = day_counts_df,
-  x_col = "day_of_year",
-  y_col = "count",
-  chart_title = "SRs by Day-of-the-Year",
-  subtitle_prefix = "",
-  earliest_x_value = min(day_counts_df$day_of_year),
-  max_x_value = max_day_of_the_year$day_of_year,
-  x_angle = 90,
-  y_axis_labels = scales::comma
-)
-
-# Print the bar chart
-suppressMessages(print(SR_day_of_the_year))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend_by_day_of_year.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_day_of_the_year, width = 10, height = 8))
-
-#########################################################################
-# Overall day-of-the-week summary
-
-day_of_week_summary_stats <- calculate_summary_stats(day_of_week_df, "count")
-
-# Accessing the results
-mean_count <- day_of_week_summary_stats$mean
-median_count <- day_of_week_summary_stats$median
-standard_deviation <- day_of_week_summary_stats$sd
-
-
-
-day_of_week_df$day_of_week <- as.character(day_of_week_df$day_of_week)
-
-max_day_of_the_week <- day_of_week_df[which.max(day_of_week_df$count), ]
-cat(
-  "\nDay-of-the-week maximum:", max_day_of_the_week$day_of_week,
-  "with", format(max_day_of_the_week$count, big.mark = ","), "SRs"
-)
-
-min_day_of_the_week <- day_of_week_df[which.min((day_of_week_df$count)), ]
-cat(
-  "\nDay-of-the-week minimum:", min_day_of_the_week$day_of_week,
-  "with", format(min_day_of_the_week$count, big.mark = ","), "SRs"
-)
-
-cat("\n\nDay-of-the-Week Summary:\n")
-print(day_of_week_df, row.names = FALSE, right = FALSE)
-
-
-# Day of the week chart
-SR_day_of_the_week <- create_special_bar_chart(
-  data = day_of_week_df,
-  x_col = "day_of_week",
-  y_col = "count",
-  chart_title = "SRs by Day-of-the-Week",
-  subtitle_prefix = "",
-  earliest_x_value = "1-Monday",
-  max_x_value = max_day_of_the_week$day_of_week,
-  x_angle = 60
-)
-
-# Print the bar chart
-suppressMessages(print(SR_day_of_the_week))
-chart_path <- file.path(chart_directory_path, paste0(file_name_prefix, "-trend_by_day_of_week.pdf"))
-suppressMessages(ggsave(chart_path, plot = SR_day_of_the_week, width = 10, height = 8))
 
 #########################################################################
 # Overall created time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
@@ -896,7 +914,7 @@ max_hour_of_the_day$created_hour <- as.numeric(max_hour_of_the_day$created_hour)
 extra_line <- annotate("text",
   x = max_hour_of_the_day$created_hour, y = max_count,
   label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-  size = 3.7, color = "black", vjust = -0.7, hjust = -0.1
+  size = 4, color = "black", vjust = -0.7, hjust = -0.1
 )
 
 SR_created_time_of_day <- create_bar_chart(
@@ -946,7 +964,7 @@ max_hour_of_the_day$closed_hour <- as.numeric(max_hour_of_the_day$closed_hour)
 extra_line <- annotate("text",
   x = max_hour_of_the_day$closed_hour, y = max_count,
   label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-  size = 3.7, color = "black", vjust = -0.7, hjust = 0.1
+  size = 3.7, color = "black", vjust = -0.7, hjust = -.5
 )
 
 SR_closed_time_of_day <- create_bar_chart(

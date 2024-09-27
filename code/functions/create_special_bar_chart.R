@@ -1,47 +1,88 @@
-create_special_bar_chart <- function(data, x_col, y_col, chart_title, subtitle_prefix, earliest_x_value, max_x_value, x_angle = 60, y_axis_labels = scales::comma) {
-  max_count <- max(data[[y_col]], na.rm = TRUE)
-  total_count <- sum(data[[y_col]], na.rm = TRUE)
+create_special_bar_chart <- function(
+    dataset, 
+    x_col, 
+    y_col, 
+    chart_title = "Bar Chart", 
+    sub_title = "", 
+    earliest_x_value, 
+    max_x_value, 
+    x_angle = 60, 
+    y_axis_labels = scales::comma,
+    chart_file_name = NULL,
+    horizontal_adjustment_max = 0.5,
+    vertical_adjustment_max = -1)    
+{
   
-  result <- calculate_values(max_count)
+  # Find the max y value
+  y_max_count <- max(dataset[[y_col]])
+  y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
+  
+  result <- calculate_values(y_max_count)
   starting_value <- result$starting_value
   increment <- result$increment
   
-  # Create the bar chart with vertical X-axis labels
-  chart <- ggplot(data, aes(x = !!sym(x_col), y = !!sym(y_col))) +
+#  cat("\nStarting Value", starting_value, " Increment", increment, "\n")
+  
+  # Calculate mean, median, and standard deviation if requested
+  y_mean_value <- round(mean(dataset[[y_col]]), 0)
+  y_median_value <- round(median(dataset[[y_col]]), 0)
+  y_sd_value <- round(sd(dataset[[y_col]]), 0)
+  
+  x_position <- levels(dataset[[x_col]])[floor(length(levels(dataset[[x_col]])) / 2)]
+  
+  # Create the ggplot chart
+  special_bar_chart <- ggplot(dataset, aes(x = !!sym(x_col), y = !!sym(y_col))) +
+    
     geom_bar(stat = "identity", fill = "#009E73") +
+    
     scale_x_discrete() +
+    
     scale_y_continuous(labels = y_axis_labels) +
+    
     theme(
-      axis.title.x = element_text(vjust = 0, size = 11),
-      axis.title.y = element_text(vjust = 1, size = 11),
-      plot.title = element_text(hjust = 0.5, size = 13),
-      plot.subtitle = element_text(size = 9),
+      axis.title = element_text(size = 7),
+      plot.title = element_text(hjust = 0.5, size = 12),
+      plot.subtitle = element_text(size = 6),
       panel.background = element_rect(fill = "gray95", color = "gray95"),
       axis.text.x = element_text(angle = x_angle, vjust = 0.5, hjust = 0.5, face = "bold"),
-      axis.text.y = element_text(face = "bold")
-    ) +
-    ggtitle(chart_title,
-            subtitle = paste(
-              subtitle_prefix, "(", earliest_title, "--", latest_title, ")",
-              "total=", format(total_count, big.mark = "," )
-            )
-    ) +
+      axis.text.y = element_text(face = "bold"),
+      aspect.ratio = 0.618033 ) +
+
+    ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = "")) +
+    
+    geom_hline(yintercept = y_mean_value, linetype = "twodash", color = "black", 
+               linewidth = 0.6 ) +
+    
+    annotate("text",
+             x = x_position, y = y_mean_value,
+             label = paste0("Avg: ", format(round(y_mean_value, 0), big.mark = ",")),
+             size = 4.5, color = "black", hjust = -3, vjust =-0.8 ) +
+    
+    annotate("text",
+             x = max_x_value, y = y_max_count,
+             label = paste0("Max: ", format(y_max_count, big.mark = ","), sep = ""),
+             size = 4.5, color = "black", 
+             vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max ) +
+      
     geom_hline(
-      yintercept = seq(starting_value, max_count, by = increment),
-      linetype = "dotted", color = "gray40"
-    ) +
-    geom_hline(yintercept = mean_count, linetype = "twodash", color = "black", linewidth = 0.6) +
-    annotate("text",
-             x = earliest_x_value, y = mean_count,
-             label = paste0("Average: ", format(round(mean_count, 0), big.mark = ",")),
-             size = 4, hjust = -0.5, vjust = -0.75
-    ) +
-    annotate("text",
-             x = max_x_value, y = max_count,
-             label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-             size = 4, color = "black", vjust = -0.7, hjust = 0.5
-    ) +
+        yintercept = seq(starting_value, y_max_count, by=increment),
+        linetype = "dotted", color = "gray40", linewidth = 0.3) +
+    
     labs(x = NULL, y = NULL)
   
-  return(chart)
+  # Save the plot with adjusted size and DPI
+  # Define aspect ratio (golden ratio)
+  chart_width <- 10  # Adjust to match manuscript
+  chart_height <- chart_width / 1.618
+  
+  # Print the bar chart
+  suppressMessages(print(special_bar_chart))
+  
+  ggsave(
+    filename = chart_file_name,
+    plot = special_bar_chart,
+    path = chart_directory_path,
+    width = chart_width,
+    height = chart_height,
+    dpi = 300 )  # High resolution for manuscripts
 }

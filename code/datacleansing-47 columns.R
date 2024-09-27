@@ -30,14 +30,14 @@ cat("\n***** Program initialization *****")
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
-main_data_file <- "test_data.csv"
+main_data_file <- "47-columns.csv"
 data1File <- file.path("..", "..", "data", main_data_file)
 #data1File <- file.path("..", "..", "data", "test_data.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-08-31 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "Core charts")
+chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "Core charts-47")
 
 writeFilePath <- file.path("..", "..", "data", "smaller.csv")
 
@@ -52,7 +52,9 @@ lapply(files, source)
 # Set scipen option to a large value
 options(scipen = 10)
 
-sink("../../console_output/core_console_output.txt")
+sink("../../console_output/47_core_console_output.txt")
+cat("\nExecution begins at:", formattedStartTime)
+cat("\n***** Program initialization *****")
 
 options(digits = 14) # Set the number of decimal places to 14
 
@@ -2222,6 +2224,13 @@ cat("\nExecution ends at:", formatted_end_time)
 cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
 
 #########################################################################
-cat("\n *****END OF PROGRAM*****")
-#########################################################################
 sink()
+
+formatted_end_time <- format(program_end, "%Y-%m-%d %H:%M:%S")
+cat("\nExecution ends at:", formatted_end_time)
+cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
+
+#########################################################################
+cat("\n *****END OF PROGRAM*****")
+
+#########################################################################

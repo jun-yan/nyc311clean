@@ -4,7 +4,8 @@
 create_combo_chart <- function(
     dataset,
     chart_title = NULL,
-    chart_file_name = NULL) {
+    chart_file_name = NULL) 
+{
   
   # Create a frequency table of counts by "agency"
   count_table <- table(dataset$agency)
@@ -12,8 +13,8 @@ create_combo_chart <- function(
   # Create the summary dataframe
   summary_df <- data.frame(
     agency = names(count_table),
-    count = as.vector(count_table)
-  )
+    count = as.vector(count_table))
+  
   summary_df <- summary_df[order(summary_df$count, decreasing = TRUE), ]
   
   # Calculate percentage and cumulative percentage
@@ -49,7 +50,6 @@ create_combo_chart <- function(
   result <- calculate_values(max_count) # Call the 'calculate_values' function for scaling parameters
   starting_value <- result$starting_value
   increment <- result$increment
-  scaling_factor <- result$scaling_factor
   
   # Create a combination chart
   combo_chart <- ggplot(summary_df) +
@@ -60,57 +60,35 @@ create_combo_chart <- function(
     geom_line( aes( x = reorder(agency, cumulative_percentage), y = cumulative_percentage*max_count,
                     group = 1,), colour = "black", linewidth = 1, linetype = "dotted", ) +
     
-    geom_text( aes( label = round(count/scaling_factor, 1), x = reorder(agency, cumulative_percentage),
-                    y = count ), colour = "black", hjust = 0.5, vjust = -0.5, size = 3.5 ) +
+    geom_text( aes( label = count, x = reorder(agency, cumulative_percentage),
+                    y = count ), colour = "black", hjust = 0.5, vjust = -0.5, size = 3 ) +
     
     geom_text( aes( label = round(cumulative_percentage, 2), x = reorder(agency, cumulative_percentage),
-                    y = max_count * cumulative_percentage ), colour = "black", hjust = 0.5, vjust = 1.7 ) +
+                    y = max_count * cumulative_percentage ), size = 3, colour = "black", hjust = 0.5, vjust = 1.7 ) +
     
     geom_hline( yintercept = seq(starting_value, max_count, by = increment), 
-                linetype = "dotted", color = "gray40", linewidth = 0.45 ) +
+                linetype = "dotted", color = "gray40", linewidth = 0.4 ) +
     
-    # theme(
-    #   axis.title.x = element_text(vjust = 0, size = 11),
-    #   axis.title.y.right = element_text(vjust = 1, size = 11, color = "black"),
-    #   axis.title.y.left = element_blank(),
-    #   axis.text.y.right = element_text(color = "black"),
-    #   axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold"),
-    #   plot.title = element_text(hjust = 0.5, size = 13),
-    #   plot.subtitle = element_text(size = 9),
-    #   legend.position = "none",
-    #   plot.margin = margin(t = 5.5, r = 5.5, b = 5.5, l = 5.5)
-    # ) +
+    ggtitle( chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
+                                    " total=", format(total_count, big.mark = ","), sep = "")) +
     
-    ggtitle(
-      chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
-                                    " total=", format(total_count, big.mark = ","), sep = "")
-    ) +
-    scale_y_continuous(
-      breaks = seq(starting_value, max_count, by = increment),
-      sec.axis = sec_axis(~ . / max_count 
-                          #                          name = "Cumulative Percentage"
-      )
-    ) +
+    scale_y_continuous( breaks = seq(starting_value, max_count, by = increment), sec.axis = sec_axis(~ . / max_count )) +
     
-    labs(x = NULL, y = NULL)
+    labs(x = NULL, y = NULL) +
   
-  combo_chart <- combo_chart + theme(
-    axis.title.x = element_text(vjust = 0, size = 14),  # Increase font size
-    axis.title.y.right = element_text(vjust = 1, size = 14, color = "black"),
-    axis.text.y.right = element_text(color = "black", size = 12),
-    axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 12),
-    plot.title = element_text(hjust = 0.5, size = 16),  # Adjust title size
-    plot.subtitle = element_text(size = 12)
-  )
+    theme(
+      axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 7),
+      axis.text.y = element_text(face = "bold", size = 7),  # Bold the left y-axis text
+      axis.text.y.right = element_text(color = "black", face = "bold", size = 7),
+      plot.title = element_text(hjust = 0.5, size = 12),
+      plot.subtitle = element_text(size = 6),
+      aspect.ratio = 0.618033 )
   
-  combo_chart <- combo_chart + theme(aspect.ratio = 1 / 1.618)
-  
-  
-  suppressMessages(print(combo_chart, row.names = FALSE, right = FALSE))
+  print(combo_chart, row.names = FALSE, right = FALSE)
   chart_path <- file.path(chart_directory_path, chart_file_name)
   
   # Define aspect ratio based on the golden ratio (approximately 1.618)
-  width <- 8  # Adjust as needed
-  height <- width / 1.618  # Golden ratio
-  suppressMessages(ggsave(chart_path, plot = combo_chart, width = width, height = height, dpi = 300))
+  chart_width <- 10  # Adjust as needed
+  chart_height <- chart_width / 1.618  # Golden ratio
+  ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
