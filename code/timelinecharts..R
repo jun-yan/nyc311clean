@@ -541,11 +541,11 @@ cat("\nDay-of-the-Year Summary:")
 # Convert day_of_year to character
 day_counts_df$day_of_year <- as.character(day_counts_df$day_of_year)
 
-# Format the columns for better alignment
+# # Format the columns for better alignment
 formatted_day_counts_df <- data.frame(
-  day_of_year = format(day_counts_df$day_of_year, width = max(nchar(day_counts_df$day_of_year))),
-  count = format(day_counts_df$count, width = max(nchar(day_counts_df$count)))
-)
+   day_of_year = format(day_counts_df$day_of_year, width = max(nchar(day_counts_df$day_of_year))),
+   count = format(day_counts_df$count, width = max(nchar(day_counts_df$count)))
+ )
 
 day_counts_df <- day_counts_df[order(-day_counts_df$count), ]
 
@@ -941,7 +941,7 @@ SR_created_time_of_day <- create_bar_chart(
 # Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 max_hour_of_the_day <- closed_hour_of_day_df[which.max(closed_hour_of_day_df$count), ]
 max_hour_of_the_day$closed_hour <- as.character(max_hour_of_the_day$closed_hour)
-max_count <- max_hour_of_the_day$count
+max_count <- formatted_day_counts_df- max_hour_of_the_day$count
 cat(
   "\nHour of the day with maximum 'closed' count is hour #:", max_hour_of_the_day$closed_hour,
   "with", format(max_hour_of_the_day$count, big.mark = ","), "SRs"

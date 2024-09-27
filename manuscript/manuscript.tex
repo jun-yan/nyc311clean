@@ -265,7 +265,7 @@ and improving responsiveness across City Agencies
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=0.7\textwidth]{10-year-trend_yearly.pdf}
+  	\includegraphics[width = \textwidth]{10-year-trend_yearly.pdf}
  	\caption{10-year (2014-2023) annual SR Counts.}
   	\label{fig:10-yr}
 \end{figure}
@@ -308,11 +308,6 @@ indicates sustained growth in service request volume over
 the decade, highlighting the system's evolving role in managing 
 both routine city operations and extraordinary events.
 
-\jy{The plot sizes seem to be fixed in the generation code. That's why
-  the fonts are small when scaled. I'd generate them with approximately
-  the expected sizes in the manuscript. I'd also use aspect ratio
-  0.618 (golden ratio).
-}
 
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 agency, showing the cumulative percentage of SRs handled by each
@@ -340,14 +335,14 @@ efficiency and responsiveness.
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width=0.7\textwidth]{SRs_by_Agency.pdf}
+	\includegraphics[width = \textwidth]{SRs_by_Agency.pdf}
   	\caption{SR counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
 
 \begin{figure}[tbp]
  \centering
-  \includegraphics[width=0.7\textwidth]{SR_by_Complaint_Type.pdf} 
+  \includegraphics[width = \textwidth]{SR_by_Complaint_Type.pdf} 
   \caption{Top 20 complaint types and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
@@ -490,9 +485,6 @@ Figure~\ref{fig:blank_fields} presents a graphic
 depiction of total empty (blank \& N/As) for each fields illustrating
 the grouping into the Most, Partial, and Few categories.
 
-\jy{Can we lighten the color of the bar to make the pertentages more
-  legible?}
-
 
 \begin{figure}[tbp]
 	\centering
@@ -521,102 +513,14 @@ as to their compliance with a domain of legal values.
 
 \paragraph{Zip Codes}
 \label{sec:zipcodesissues}
-All zip codes (two fields: \texttt{zip\_codes} and \texttt{incident\_zip}) 
+All zip codes ( \texttt{incident\_zip}) 
 should be valid as defined by the USPS database, which contains 
-37,946 valid zip codes. The \texttt{incident\_zip} field has 
+44,173 valid zip codes. The \texttt{incident\_zip} field has 
 only 0.07\% invalid entries, this still results in 4,163 errors; 
 not insignificant. If you sort the invalid entries by Agency, 
 the distribution by percentage mirrors the \texttt{overall} 
 breakdown of SRs by Agency, potentially 
 indicating a systemic problem.
-
-\begin{table}[tbp]
-    \centering
-    \caption{Comparison of Top Ten Zip Codes Lists}
-	    \begin{tabular}{@{}lS[table-format=6.0,round-mode=places,
-	    round-precision=0]c@{\hskip 0.5cm}@{}lS[table-format=6.0,
-	    round-mode=places,round-precision=0]c@{}}
-		\toprule
-	 	\multicolumn{3}{c}{\textbf{zip\_codes}} & \multicolumn{3}{c}{\textbf{incident\_zip}} \\
-	      \cmidrule(r){1-3} \cmidrule(l){4-6}
-	      \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} 
-	      & \textbf{Zip Code} & \textbf{Count} & \textbf{Valid?} \\
-	      \midrule
-	        11275 & 104556 & FALSE & 10466 & 104562 & TRUE \\
-	        12420 & 27503 & TRUE & 10023 & 27972 & TRUE \\
-	        12428 & 26564 & TRUE & 10031 & 25548 & TRUE \\
-	        10935 & 25508 & FALSE & 10457 & 25066 & TRUE \\
-	        10934 & 23448 & FALSE & 10453 & 24752 & TRUE \\
-	        10931 & 22381 & TRUE & 10456 & 24751 & TRUE \\
-	        10930 & 22121 & TRUE & 10452 & 22527 & TRUE \\
-	        17613 & 21963 & FALSE & 10025 & 21705 & TRUE \\
-	        10936 & 21707 & FALSE & 10458 & 21689 & TRUE \\
-	        11606 & 21435 & FALSE & 10032 & 20622 & TRUE \\
-	      \bottomrule
-	    	\end{tabular}
- 	\label{tab:zipcodes}
-\end{table}
-
-Consider a case study with the NYC Office of Nightlife (ONL). Suppose 
-that ONL wants to know, "What are the top 10 zip codes for Noise 
-Complaints over the last two years?" ONL seeks to assess the impact 
-of recent efforts promoting a vibrant nightlife in NYC while also 
-easing tensions between bar and club owners. Assume this analysis uses 
-the \texttt{zip\_codes} field, one of the computed fields known to have 
-validity issues. The analysis is then repeated using the more accurate 
-\texttt{incident\_zip} field. Finally, both analyses are validated 
-against the USPS zip code database. The top 10 zip codes and their 
-validation results are summarized in Table~\ref{tab:zipcodes}. Six out 
-of the ten \texttt{zip\_codes} entries are invalid, closely matching 
-the overall dataset's 58\% invalid rate. In contrast, the 
-\texttt{incident\_zip} field is fully valid, consistent with the 
-overall \texttt{incident\_zip} validation rate of 99\%.
-It is possible that the computed \texttt{zip\_codes} may mean the zip
-code of something differnent from the incident. Without proper
-documentation, it is confusing to have it in the released data.
-
-
-\paragraph{Police Precincts}
-\label{sec:police-precincts}
-A curious case arises when examining two nearly identical fields: 
-\texttt{police\_precincts} and \texttt{police\_precinct}. Both fields 
-are among the computed fields previously mentioned. Using the 
-\href{https://www.nyc.gov/site/nypd/bureaus/patrol/precincts-landing.page}
-{NYPD Precinct listings}, it is possible to determine the valid police 
-precincts. Upon validation, both \texttt{police\_precincts} and 
-\texttt{police\_precinct} contain about 35\% invalid entries. However, 
-the invalid entries are not identical. The \texttt{police\_precincts} 
-field has 2,171,864 invalid entries (35\%), while the 
-\texttt{police\_precinct} field has 2,171,778 invalid entries (also 
-35\%), but they do not match.
-
-
-
-\paragraph{Community Boards}
-\label{sec:communityboards}
-Community Boards are the most local, grassroots form of City government, 
-serving as a vital connection between communities, elected officials, 
-and City agencies. They often act as a measure of the equity of City 
-services across the five boroughs. In the 2022-2023 dataset, there are 
-27,276 invalid \texttt{community\_board} entries, representing 0.43\% 
-of non-blank data. The distribution of these invalid entries by Agency 
-is not consistent with the overall SR Agency 
-distribution. This suggests that issues may exist within specific key 
-Agencies, such as the Taxi \& Limousine Commission (TLC) and the 
-Department of Parks and Recreation (DPR).
-
-
-\paragraph{Community Districts}
-\label{sec:communitydistrict}
-Another of the computed fields is \texttt{community\_districts}. 
-Community Districts define the geographic boundaries for the Community 
-Boards but differ in that they are used by the Department of City 
-Planning (DCP) for environmental, socio-economic, and demographic 
-purposes. They represent a geographical division rather than a City 
-government division. Due to the format of the \texttt{community\_district} 
-data, it is not possible to directly establish validity. However, the 
-dataset contains 72 unique entries, while only 59 valid Community 
-Districts exist.
 
 
 \paragraph{Date and Closed Date}
@@ -678,7 +582,7 @@ removed from the analysis.
 
 \begin{figure}[tbp]
 	 \centering
- 	 \includegraphics[width = 0.7\textwidth]{negative_duration_SR_violin.pdf}
+ 	 \includegraphics[width=\textwidth]{negative_duration_SR_violin.pdf}
  \caption{Distribution of Negative Durations}
  \label{fig:negative-duration-violin}
 \end{figure}
@@ -737,13 +641,11 @@ errors occur.
 	
 \begin{figure}[tbp]
   \centering
-  \includegraphics[width = 0.7\textwidth]{post_closed_violin_chart.pdf}
+  \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
   \caption{Post-closed resolution action update date(s) over 30 days.}
   \label{fig:resolution-violin}
 \end{figure}
 
-\jy{Are these from 2-year or 10-year period? Need to clarify in
-  Section 2.}
 
 A similar issue occurs when resolution action update date is after the
 closing date. \jy{It might be possible, I think, if they allow updates
@@ -884,26 +786,11 @@ and \texttt{location}: (40.768456429488, $-$73.95756618887745).
 \textbf{borough \& park\_borough:} These two fields are fully redundant, 
 as they are 100\% matches.
 
-\textbf{borough \& borough\_boundaries:} These fields are 98.3\% matches. 
-This ``near-duplicate'' relationship creates a challenge in determining 
-which field is correct when discrepancies arise.
-
 \textbf{borough \& taxi\_company\_borough:} Despite their names, these 
 fields are almost entirely different, with only a 0.05\% match. The 
 \texttt{taxi\_company\_borough} field is used exclusively by the TLC, 
 indicating a need for consultation with TLC to understand the differing 
 uses.
-
-\textbf{incident\_zip \& zip\_codes:} The \texttt{zip\_codes} field, 
-one of the computed fields, was found to have 56\% invalid entries, 
-while the \texttt{incident\_zip} field has a 99.93\% accuracy rate. 
-We recommend eliminating or masking the \texttt{zip\_codes} field 
-until its accuracy can be improved.
-
-\textbf{police\_precinct \& police\_precincts:} These two computed 
-fields are 99.9\% matches. Since the computational process is unknown, 
-it is unclear which field is more accurate. However, having two fields 
-with near-duplicity suggests that only one is necessary.
 
 \textbf{agency \& agency\_name:} The \texttt{agency} field contains 
 abbreviations of City agencies (e.g., NYPD, DOT), while 
@@ -1011,16 +898,10 @@ these inconsistencies and improve the reliability of the data.
 \label{sec:filesize}
 
 By removing duplicate and ``near-duplicate'' fields, it is possible to 
-shrink the file size by 12.3\%, which for this large dataset equates to 
-a reduction of 395 Mb. A smaller file size means faster downloads, 
+shrink the file size by 39.5\%, which for this large dataset equates to 
+a reduction of 1.4 Gb, which is significant. A smaller file size means faster downloads, 
 less storage impact, and simpler data analysis efforts.
-Below is a list of duplicate and near-duplicate fields. There are 
-challenges with these proposed deletions, especially with the 
-``near-duplicate'' fields. For example, while the \texttt{park\_borough} 
-is a complete duplicate of the \texttt{borough} field, the 
-\texttt{borough\_boundary} field is only 98.3\% similar. Although losing 
-1.7\% of the data is small, it still amounts to 110,715 non-matching 
-occurrences. The authors propose deleting the following fields:
+Below is a list of duplicate and near-duplicate fields. 
 
 \begin{itemize}
     \item \textbf{agency\_name}: Each row contains the \texttt{agency} field, 
@@ -1031,21 +912,12 @@ occurrences. The authors propose deleting the following fields:
     
     \item \textbf{location}: A straight concatenation of latitude and longitude 
     fields, offering no additional value beyond duplication.
-    
-    \item \textbf{police\_precinct}: This field has a 99.95\% match with 
-    \texttt{police\_precincts}. Removing one would result in minimal data loss.
-    
-    \item \textbf{borough\_boundaries (computed field)}: A 98.3\% match 
-    with the \texttt{borough} field.
-    
+     
     \item \textbf{cross\_street\_1 \& 2 and intersection\_street\_1 \& 2}: 
     An 88\% match between these pairs. We recommend deleting the 
-    \texttt{intersection\_street\_1 \& 2} fields while acknowledging some 
-    data loss.
+    \texttt{intersection\_street\_1 \& 2} fields while acknowledging the
+    concomitant data loss.
     
-  \item \textbf{zip\_codes (computed field)}:
-    This field has a 58\% error rate and can lead to significant 
-    analytical errors. We recommend deleting this field.
 \end{itemize}
 
 Additionally, certain fields may not be useful due to their sparse population. 
@@ -1112,7 +984,8 @@ could potentially mislead analytic efforts.
     
   \item As mentioned earlier, six \texttt{@computed} fields that are
     present in the data but not included in the Data Dictionary need
-    to be documented.
+    to be documented and perhaps labelled as ``experimental'' or
+    ``not for official use''.
 \end{itemize}
 
 
@@ -1130,11 +1003,7 @@ public services, research, and other applications.
 \paragraph{Principle 1: Ensuring Consistency Across Agencies and Time}
 A key challenge in government-released datasets is the 
 harmonization of data fields across various agencies and 
-maintaining this consistency over time. As seen in the NYC 
-311 data, discrepancies in field names, formats, and definitions, 
-such as those between \texttt{police\_precinct} and 
-\texttt{police\_precincts}, can introduce significant 
-inconsistencies. To address this, agencies should adopt 
+maintaining this consistency over time. To address this, agencies should adopt 
 standardized naming conventions and formats across all datasets. 
 Regular audits and data harmonization processes should be 
 implemented to ensure consistency across long-term datasets, 
@@ -1146,7 +1015,7 @@ inconsistent analyses.
 \paragraph{Principle 2: Guaranteeing Accuracy and Validity in Data Entry}
 Data accuracy and validity are fundamental to the utility of 
 open datasets. In the NYC 311 data, issues such as 
-invalid zip codes (e.g., 58\% invalid \texttt{zip\_codes} entries) and 
+invalid zip codes and 
 nonsensical date entries (e.g., negative durations) highlight the need 
 for rigorous validation processes. Governments should establish 
 clear protocols for data entry, ensuring that fields are populated with 
@@ -1164,7 +1033,7 @@ encoding categorical variables, agencies can significantly reduce
 file sizes and improve the efficiency of data analysis. In the NYC 
 311 dataset, for example, redundant fields such as \texttt{borough} 
 and \texttt{park\_borough} could be consolidated without any data 
-loss, saving space and reducing file size by up to 12.3\%. Another 
+loss, saving space and reducing file size. Another 
 example is the \texttt{taxi\_company\_borough} field, which is 99.94\% 
 blank and should be evaluated to determine if its inclusion is 
 necessary. Similarly, categorical variables like \texttt{complaint\_type} 
@@ -1177,8 +1046,8 @@ Clear and accurate documentation is essential for the effective use
 of government-released datasets. The NYC 311 data revealed several 
 issues where the Data Dictionary did not accurately reflect the 
 actual data, such as missing field descriptions for computed fields. 
-Updating the Data Dictionary to include descriptions of all fields, 
-especially computed fields like \texttt{@computed\_region\_xxxx}, 
+As mentioned, updating the Data Dictionary to include descriptions of all fields, 
+including the computed fields, e.g. \texttt{@computed\_region\_xxxx}, 
 would improve transparency and usability. Regular updates should 
 be made to ensure that any changes in data structure or content are 
 reflected. This practice enhances the ability of external users, 
@@ -1193,8 +1062,8 @@ at exactly midnight or noon likely stem from automated processes that
 distort the accurate capture of SR durations. By implementing 
 real-time validation tools, governments can prevent such anomalies 
 from entering the dataset. Automated systems can be designed to 
-flag inconsistencies, incorrect values, or illogical sequences, such 
-as invalid \texttt{incident\_zip} values or illogical date entries. 
+flag inconsistencies, incorrect values, or illogical sequences, or 
+illogical date entries. 
 Automation can also facilitate faster detection and correction of 
 errors, reducing the need for manual intervention and ensuring 
 the data remains clean and reliable as it is continuously updated.
@@ -1203,12 +1072,8 @@ the data remains clean and reliable as it is continuously updated.
 Transparency is a core tenet of open data, and governments must ensure 
 that datasets are not only accurate but also accessible and easily 
 understandable. This involves providing clear metadata and making 
-datasets available in user-friendly formats. For example, in the NYC 
-311 dataset, fields like \texttt{@computed\_region\_xxxx\_xxxx} and 
-the distinction between \texttt{incident\_zip} and \texttt{zip\_codes} 
-can be confusing for non-expert users. These fields should be clearly 
-documented, explaining how they are calculated and how they differ. 
-Additionally, governments should communicate transparently about 
+datasets available in user-friendly formats. Additionally, 
+governments should communicate transparently about 
 data quality issues, such as notifying the public when errors in SR 
 fields (e.g., erroneous closed dates) are discovered and explaining 
 how such issues will be resolved. By ensuring transparency and 
@@ -1373,9 +1238,6 @@ in machine learning models remains accurate, clean, and reliable
 \section*{Supplementary Material}
 The NYC 311 SR data and code used to produce the results reported in
 this paper are available [FixMe].
-\jy{need to think: we need to keep a copy of the downloaded data;
-  if the data portal changes and our code may not work.}
-
 
 
 \bibliographystyle{jds}
