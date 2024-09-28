@@ -270,6 +270,16 @@ and improving responsiveness across City Agencies
   	\label{fig:10-yr}
 \end{figure}
 
+\jy{If the 10-year data was only used for Figure~\ref{fig:10-yr}, we
+  could remove this figure and just describe it in text. This would
+  avoid the confusion of which dataset was used in the analyses in the
+  sequel.}
+
+\jy{If we keep the 10-year data, we might as well make some dynamic
+  visualization over time. For example, Figure 2/3 could have multiple
+  panels such that we can see several 2-year decompositions over
+  time.}
+
 
 Our investigation utilizes two 311 SR datasets covering 10-years and 2-years.
 The 10-year period (2014--2023), downloaded on 15 September 2024, 
@@ -346,6 +356,12 @@ efficiency and responsiveness.
   \caption{Top 20 complaint types and Cumulative Percentage} 
   \label{fig:SR_complaints}
 \end{figure}
+
+\jy{Currently we have 9 figures and 3 tables, which are too many for
+  an article. Some journal (e.g., Biometrics) requires no more than 6
+  tables/figures combines. We need to more selective in presenting
+  figures/tables, perhaps no more than 8 combined?
+}
 
 Figure~\ref{fig:SR_complaints}
 illustrates the top 20 complaint types, accounting for 70\% 
@@ -755,7 +771,10 @@ the ``closed-at-noon'' SRs.
 \label{sec:precision}
 
 \jy{This is caused by reading the number in as double
-  precision. Single precision would be good.}
+  precision. Single precision would be good. The raw csv file only
+  have 7 digits after the decimal point, e.g.,
+  $(40.769737, -73.91244)$.
+  }
 
 
 An question of precision vs. accuracy arises with the Latitude 
@@ -791,12 +810,27 @@ fields are almost entirely different, with only a 0.05\% match. The
 \texttt{taxi\_company\_borough} field is used exclusively by the TLC, 
 indicating a need for consultation with TLC to understand the differing 
 uses.
+\jy{The taxi\_company\_borough may mean the borough of the location of
+  the taxi company, which can be irrelevant to the borough where the
+  incident was reported.. Such information could be useful only when
+  studying TLC related SRs. It'd be better to use a second table to
+  store such TLC dependent information.}
 
 \textbf{agency \& agency\_name:} The \texttt{agency} field contains 
 abbreviations of City agencies (e.g., NYPD, DOT), while 
 \texttt{agency\_name} contains the full names. Including both seems 
 redundant, especially given the space taken up by full names in the 
 CSV file.
+
+\jy{In my Chance article, we found an agency
+  `DEPARTMENT OF CONSUMER AND WORKER PROTECTION', which occurred 361
+  times in May 2023. It was the only one that does not look like an
+  acronym. Did this occur in the two-year data?
+  I wonder if this has been fixed lately.}
+
+\jy{A related question is whether the data quality has improved over
+  the years}
+  
 
 \textbf{landmark \& street\_name:} While the \texttt{landmark} field is 
 intended for noteworthy locations (e.g., parks, airports), most entries 
