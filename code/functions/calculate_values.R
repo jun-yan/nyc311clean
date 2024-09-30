@@ -1,4 +1,5 @@
 #########################################################################
+
 calculate_values <- function(X, base = 25) {
 #    cat("\nX =", X)
     # Special handling for small values
@@ -21,3 +22,5 @@ calculate_values <- function(X, base = 25) {
     result <- list(starting_value = increment, increment = increment)
     return(result)
   }
+
+#########################################################################

@@ -58,236 +58,236 @@ cat("\n***** Program initialization *****")
 
 options(digits = 14) # Set the number of decimal places to 14
 
-#########################################################################
-# compute the Hamming distance between two strings. Determine if it meets the threshold.
-hamming_distance <- function(string1, string2) {
-  if (nchar(string1) != nchar(string2)) {
-    stop("Strings must be of equal length")
-  }
-  num_diff <- sum(as.numeric(charToRaw(string1)) != as.numeric(charToRaw(string2)))
-  return(num_diff)
-}
-
-#########################################################################
-cross_street_analysis <- function(
-    dataset,
-    cross_street,
-    intersection_street) {
-  # Remove extra blanks
-  dataset <- dataset %>%
-    mutate(
-      across(
-        all_of(cross_street),
-        ~ str_replace_all(., "\\s+", " ")
-      ),
-      across(
-        all_of(intersection_street),
-        ~ str_replace_all(., "\\s+", " ")
-      )
-    )
-
-  # Find rows where the two fields are equal (cross_street1 & intersection_street)
-  equal_streets <- subset(dataset,
-    dataset[[cross_street]] == dataset[[intersection_street]],
-    select = c(cross_street, intersection_street, "agency")
-  )
-
-  num_rows_equal <- nrow(equal_streets)
-
-  # Find rows where the two fields are equal and non-blank (cross_street1 & intersection_street)
-  equal_streets_non_blank <- subset(
-    equal_streets,
-    !is.na(equal_streets[[cross_street]]) &
-      !is.na(equal_streets[[intersection_street]]) &
-
-      equal_streets[[cross_street]] != "" &
-      equal_streets[[intersection_street]] != ""
-  )
-
-  num_rows_equal_non_blank <- nrow(equal_streets_non_blank)
-
-  # find rows where both cross_street and intersection_street are not blank. Use later.
-  both_xsteet_non_blank <-
-    subset(dataset, dataset[[cross_street]] != "" &
-      dataset[[intersection_street]] != "",
-    select = c(cross_street, intersection_street, "agency")
-    )
-
-  num_rows_both_non_blank <- nrow(both_xsteet_non_blank)
-
-  # find rows where cross_street is blank, but intersection_street is not blank. Use later.
-  cross_street_blank <- subset(dataset, dataset[[cross_street]] == "" &
-    dataset[[intersection_street]] != "",
-  select = c(cross_street, intersection_street, "agency")
-  )
-
-  num_rows_cross_street_blank <- nrow(cross_street_blank)
-
-  # find rows where intersection_street is blank, but cross_street is not blank
-  intersection_street_blank <- subset(dataset, dataset[[intersection_street]] == "" &
-    dataset[[cross_street]] != "",
-  select = c(cross_street, intersection_street, "agency")
-  )
-
-  num_rows_intersection_street_blank <- nrow(intersection_street_blank)
-
-  # find rows where both cross_street and intersection_street are blank
-  both_blank <- subset(dataset, dataset[[cross_street]] == "" &
-    dataset[[intersection_street]] == "",
-  select = c(cross_street, intersection_street, "agency")
-  )
-
-  num_rows_both_blank <- nrow(both_blank)
-
-  ####################
-  # Check for non-matching fields between cross_street and intersection_street
-  non_dup_streets <- detect_duplicates(
-    dataset,
-    cross_street,
-    intersection_street
-  )
-  num_rows_non_dup <- nrow(non_dup_streets)
-
-  non_dup_streets_non_blank <- non_dup_streets[non_dup_streets[[cross_street]] != "" &
-                              non_dup_streets[[intersection_street]] != "", ]
-  
-  num_rows_non_dup_non_blank <- nrow(non_dup_streets_non_blank)
-
-  cat("\nSample of matching",cross_street, "&", intersection_street, ":\n")
-  random_sample_equal <- equal_streets_non_blank %>% sample_n(min(num_rows_equal_non_blank, 10)) # random sample
-  print(random_sample_equal, row.names = FALSE, right = FALSE)
-
-  cat("\nSample of non-matching", cross_street, "&", intersection_street, ":\n")
-  random_sample_non_dup <- non_dup_streets_non_blank %>% sample_n(min(num_rows_non_dup_non_blank, 10)) # random sample
-  print(random_sample_non_dup, row.names = FALSE, right = FALSE)
-
-  non_dup_streets <- non_dup_streets[, -which(names(non_dup_streets) == "unique_key")]
-
-  if (num_rows_non_dup > 0) {
-    agency_match_non_dup <- rank_by_agency(non_dup_streets)
-
-    chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
-    chart_file_name <- paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
-    create_combo_chart(
-      non_dup_streets,
-      chart_title,
-      chart_file_name
-    )
-  }
-
-  ####################
-  # cross_street is blank, but intersection_street is not blank
-
-  cat(
-    "\n\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
-    "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
-    round((num_rows_cross_street_blank / num_rows_d311 * 100), 2), "% of total rows."
-  )
-
-  cat(
-    "\n\nSample where '", cross_street, "'is blank but '", intersection_street, "'is not blank:\n"
-  )
-  random_sample <- cross_street_blank %>% sample_n(min(num_rows_cross_street_blank, 5)) # random sample
-  print(random_sample, row.names = FALSE, right = FALSE)
-  agency_cross_street_blank <- rank_by_agency(cross_street_blank)
-
-
-  ####################
-  # intersection_street is blank, but cross_street is not blank
-
-  cat(
-    "\n\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
-    "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
-    round(num_rows_intersection_street_blank / num_rows_d311 * 100, 2),
-    "% of total rows."
-  )
-
-  cat(
-    "\n\nSample where '", cross_street, "' is not blank but '", intersection_street, "' is blank:\n"
-  )
-  random_sample <- intersection_street_blank %>% sample_n(min(num_rows_intersection_street_blank, 5)) # random sample
-  print(random_sample, row.names = FALSE, right = FALSE)
-  agency_intersection_street_blank <- rank_by_agency(intersection_street_blank)
-
-  ####################
-  # Check for almost matches, using a Hamming distance of 2 characters different
-  almost_match <-
-    subset(
-      non_dup_streets,
-      non_dup_streets[[cross_street]] != "" &
-        non_dup_streets[[intersection_street]] != "" &
-        nchar(non_dup_streets[[cross_street]]) == nchar(non_dup_streets[[intersection_street]])
-    )
-
-  threshold <- 2
-
-  cat(
-    "\n\nA near-match is when two addresses have no more than",
-    threshold, "characters different (Hamming Distance).\n"
-  )
-
-  # Calculate Hamming distance for each row
-  almost_match$hamming_distance <- mapply(
-    hamming_distance,
-    almost_match[[cross_street]],
-    almost_match[[intersection_street]]
-  )
-
-  # Identify rows where the Hamming distance is less than the threshold
-  matches_meeting_threshold <- subset(almost_match, hamming_distance <= threshold)
-  num_rows_matches_meeting_threshold <- nrow(matches_meeting_threshold)
-
-  cat(
-    "\nThere are ", num_rows_matches_meeting_threshold, "near-matches between",
-    cross_street, "and", intersection_street
-  )
-  if (num_rows_matches_meeting_threshold > 0) {
-    cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
-    random_sample_almost_match <- matches_meeting_threshold %>%
-      sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
-    print(random_sample_almost_match, row.names = FALSE, right = FALSE)
-  }
-
-  ####################
-  # summary of cross_street and intersection_street columns
-  summary_street <-
-    data.frame(
-      category = c(
-        "Matching -- non-blank",
-        "Matching -- both blank",
-        "Non-matching",
-        paste(cross_street, "blank", sep = "_"),
-        paste(intersection_street, "blank", sep = "_"),
-        "Near-match"
-      ),
-      count = c(
-        num_rows_equal - num_rows_both_blank,
-        num_rows_both_blank,
-        num_rows_non_dup,
-        num_rows_cross_street_blank,
-        num_rows_intersection_street_blank,
-        num_rows_matches_meeting_threshold
-      )
-    )
-
-  summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_d311) * 100, 2)
-  summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_d311) * 100, 2)
-  summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_d311) * 100, 2)
-  summary_street$percentage[4] <- "N/A"
-  summary_street$percentage[5] <- "N/A"
-  summary_street$percentage[6] <- round((num_rows_matches_meeting_threshold / num_rows_d311) * 100, 6)
-
-  if (num_rows_matches_meeting_threshold == 0) {
-    summary_street$percentage[6] <- "N/A"
-  }
-
-  cat("\nSummary of'", cross_street, "' and '", intersection_street, "':\n")
-  names(summary_street)[1:3] <- c("category", "count", "percentage")
-  print(summary_street, row.names = FALSE, right = FALSE)
-  return(intersection_street_blank)
-}
-
-#########################################################################
+# #########################################################################
+# # compute the Hamming distance between two strings. Determine if it meets the threshold.
+# hamming_distance <- function(string1, string2) {
+#   if (nchar(string1) != nchar(string2)) {
+#     stop("Strings must be of equal length")
+#   }
+#   num_diff <- sum(as.numeric(charToRaw(string1)) != as.numeric(charToRaw(string2)))
+#   return(num_diff)
+# }
+# 
+# # #########################################################################
+# cross_street_analysis <- function(
+#     dataset,
+#     cross_street,
+#     intersection_street) {
+#   # Remove extra blanks
+#   dataset <- dataset %>%
+#     mutate(
+#       across(
+#         all_of(cross_street),
+#         ~ str_replace_all(., "\\s+", " ")
+#       ),
+#       across(
+#         all_of(intersection_street),
+#         ~ str_replace_all(., "\\s+", " ")
+#       )
+#     )
+# 
+#   # Find rows where the two fields are equal (cross_street1 & intersection_street)
+#   equal_streets <- subset(dataset,
+#     dataset[[cross_street]] == dataset[[intersection_street]],
+#     select = c(cross_street, intersection_street, "agency")
+#   )
+# 
+#   num_rows_equal <- nrow(equal_streets)
+# 
+#   # Find rows where the two fields are equal and non-blank (cross_street1 & intersection_street)
+#   equal_streets_non_blank <- subset(
+#     equal_streets,
+#     !is.na(equal_streets[[cross_street]]) &
+#       !is.na(equal_streets[[intersection_street]]) &
+# 
+#       equal_streets[[cross_street]] != "" &
+#       equal_streets[[intersection_street]] != ""
+#   )
+# 
+#   num_rows_equal_non_blank <- nrow(equal_streets_non_blank)
+# 
+#   # find rows where both cross_street and intersection_street are not blank. Use later.
+#   both_xsteet_non_blank <-
+#     subset(dataset, dataset[[cross_street]] != "" &
+#       dataset[[intersection_street]] != "",
+#     select = c(cross_street, intersection_street, "agency")
+#     )
+# 
+#   num_rows_both_non_blank <- nrow(both_xsteet_non_blank)
+# 
+#   # find rows where cross_street is blank, but intersection_street is not blank. Use later.
+#   cross_street_blank <- subset(dataset, dataset[[cross_street]] == "" &
+#     dataset[[intersection_street]] != "",
+#   select = c(cross_street, intersection_street, "agency")
+#   )
+# 
+#   num_rows_cross_street_blank <- nrow(cross_street_blank)
+# 
+#   # find rows where intersection_street is blank, but cross_street is not blank
+#   intersection_street_blank <- subset(dataset, dataset[[intersection_street]] == "" &
+#     dataset[[cross_street]] != "",
+#   select = c(cross_street, intersection_street, "agency")
+#   )
+# 
+#   num_rows_intersection_street_blank <- nrow(intersection_street_blank)
+# 
+#   # find rows where both cross_street and intersection_street are blank
+#   both_blank <- subset(dataset, dataset[[cross_street]] == "" &
+#     dataset[[intersection_street]] == "",
+#   select = c(cross_street, intersection_street, "agency")
+#   )
+# 
+#   num_rows_both_blank <- nrow(both_blank)
+# 
+#   ####################
+#   # Check for non-matching fields between cross_street and intersection_street
+#   non_dup_streets <- detect_duplicates(
+#     dataset,
+#     cross_street,
+#     intersection_street
+#   )
+#   num_rows_non_dup <- nrow(non_dup_streets)
+# 
+#   non_dup_streets_non_blank <- non_dup_streets[non_dup_streets[[cross_street]] != "" &
+#                               non_dup_streets[[intersection_street]] != "", ]
+#   
+#   num_rows_non_dup_non_blank <- nrow(non_dup_streets_non_blank)
+# 
+#   cat("\nSample of matching",cross_street, "&", intersection_street, ":\n")
+#   random_sample_equal <- equal_streets_non_blank %>% sample_n(min(num_rows_equal_non_blank, 10)) # random sample
+#   print(random_sample_equal, row.names = FALSE, right = FALSE)
+# 
+#   cat("\nSample of non-matching", cross_street, "&", intersection_street, ":\n")
+#   random_sample_non_dup <- non_dup_streets_non_blank %>% sample_n(min(num_rows_non_dup_non_blank, 10)) # random sample
+#   print(random_sample_non_dup, row.names = FALSE, right = FALSE)
+# 
+#   non_dup_streets <- non_dup_streets[, -which(names(non_dup_streets) == "unique_key")]
+# 
+#   if (num_rows_non_dup > 0) {
+#     agency_match_non_dup <- rank_by_agency(non_dup_streets)
+# 
+#     chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
+#     chart_file_name <- paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
+#     create_combo_chart(
+#       non_dup_streets,
+#       chart_title,
+#       chart_file_name
+#     )
+#   }
+# 
+#   ####################
+#   # cross_street is blank, but intersection_street is not blank
+# 
+#   cat(
+#     "\n\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
+#     "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
+#     round((num_rows_cross_street_blank / num_rows_d311 * 100), 2), "% of total rows."
+#   )
+# 
+#   cat(
+#     "\n\nSample where '", cross_street, "'is blank but '", intersection_street, "'is not blank:\n"
+#   )
+#   random_sample <- cross_street_blank %>% sample_n(min(num_rows_cross_street_blank, 5)) # random sample
+#   print(random_sample, row.names = FALSE, right = FALSE)
+#   agency_cross_street_blank <- rank_by_agency(cross_street_blank)
+# 
+# 
+#   ####################
+#   # intersection_street is blank, but cross_street is not blank
+# 
+#   cat(
+#     "\n\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
+#     "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
+#     round(num_rows_intersection_street_blank / num_rows_d311 * 100, 2),
+#     "% of total rows."
+#   )
+# 
+#   cat(
+#     "\n\nSample where '", cross_street, "' is not blank but '", intersection_street, "' is blank:\n"
+#   )
+#   random_sample <- intersection_street_blank %>% sample_n(min(num_rows_intersection_street_blank, 5)) # random sample
+#   print(random_sample, row.names = FALSE, right = FALSE)
+#   agency_intersection_street_blank <- rank_by_agency(intersection_street_blank)
+# 
+#   ####################
+#   # Check for almost matches, using a Hamming distance of 2 characters different
+#   almost_match <-
+#     subset(
+#       non_dup_streets,
+#       non_dup_streets[[cross_street]] != "" &
+#         non_dup_streets[[intersection_street]] != "" &
+#         nchar(non_dup_streets[[cross_street]]) == nchar(non_dup_streets[[intersection_street]])
+#     )
+# 
+#   threshold <- 2
+# 
+#   cat(
+#     "\n\nA near-match is when two addresses have no more than",
+#     threshold, "characters different (Hamming Distance).\n"
+#   )
+# 
+#   # Calculate Hamming distance for each row
+#   almost_match$hamming_distance <- mapply(
+#     hamming_distance,
+#     almost_match[[cross_street]],
+#     almost_match[[intersection_street]]
+#   )
+# 
+#   # Identify rows where the Hamming distance is less than the threshold
+#   matches_meeting_threshold <- subset(almost_match, hamming_distance <= threshold)
+#   num_rows_matches_meeting_threshold <- nrow(matches_meeting_threshold)
+# 
+#   cat(
+#     "\nThere are ", num_rows_matches_meeting_threshold, "near-matches between",
+#     cross_street, "and", intersection_street
+#   )
+#   if (num_rows_matches_meeting_threshold > 0) {
+#     cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
+#     random_sample_almost_match <- matches_meeting_threshold %>%
+#       sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
+#     print(random_sample_almost_match, row.names = FALSE, right = FALSE)
+#   }
+# 
+#   ####################
+#   # summary of cross_street and intersection_street columns
+#   summary_street <-
+#     data.frame(
+#       category = c(
+#         "Matching -- non-blank",
+#         "Matching -- both blank",
+#         "Non-matching",
+#         paste(cross_street, "blank", sep = "_"),
+#         paste(intersection_street, "blank", sep = "_"),
+#         "Near-match"
+#       ),
+#       count = c(
+#         num_rows_equal - num_rows_both_blank,
+#         num_rows_both_blank,
+#         num_rows_non_dup,
+#         num_rows_cross_street_blank,
+#         num_rows_intersection_street_blank,
+#         num_rows_matches_meeting_threshold
+#       )
+#     )
+# 
+#   summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_d311) * 100, 2)
+#   summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_d311) * 100, 2)
+#   summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_d311) * 100, 2)
+#   summary_street$percentage[4] <- "N/A"
+#   summary_street$percentage[5] <- "N/A"
+#   summary_street$percentage[6] <- round((num_rows_matches_meeting_threshold / num_rows_d311) * 100, 6)
+# 
+#   if (num_rows_matches_meeting_threshold == 0) {
+#     summary_street$percentage[6] <- "N/A"
+#   }
+# 
+#   cat("\nSummary of'", cross_street, "' and '", intersection_street, "':\n")
+#   names(summary_street)[1:3] <- c("category", "count", "percentage")
+#   print(summary_street, row.names = FALSE, right = FALSE)
+#   return(intersection_street_blank)
+# }
+# 
+# #########################################################################
 # Take a reference field and an identified duplicate field, and print a sample
 # The call the "rank_by_agency" function
 print_sample_nonmatching <- function(
@@ -308,269 +308,269 @@ print_sample_nonmatching <- function(
   return(rank_by_agency(dataset))
 }
 
-#########################################################################
-detect_duplicates <- function(
-    dataset,
-    reference_field,
-    duplicate_field) {
-  
-  #Identify matching fields including blanks and NA values
-  rows_condition_0 <- dataset[[reference_field]] == dataset[[duplicate_field]]
-
-  rows_condition_1 <- dataset[[reference_field]] != dataset[[duplicate_field]]
-
-  all_non_matching_rows <- rows_condition_1
-  non_matching_fields <- dataset[all_non_matching_rows, ]
-  num_non_matching_fields <- nrow(non_matching_fields)
-  non_matching_percentage <- round((num_non_matching_fields / num_rows_d311) * 100, 2)
-  non_matching_fields <- non_matching_fields %>%
-    select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
-
-  all_matching_rows <- rows_condition_0
-  matching_fields <- dataset[all_matching_rows, ]
-  num_matching_fields <- nrow(matching_fields)
-  matching_percentage <- round((num_matching_fields / num_rows_d311) * 100, 2)
-  matching_fields <- matching_fields %>%
-    select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
-
-  if (num_non_matching_fields > 0) {
-  
-    if (num_matching_fields > 0) {
-    cat(
-      "\n\nThere are",
-      format(num_matching_fields, big.mark = ","),
-      "matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-      matching_percentage, "% of data.\n")
-    }
-    cat(
-      "\nThere are",
-      format(num_non_matching_fields, big.mark = ","),
-      "non-matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-      non_matching_percentage, "% of data.\n")
-    
-  return(non_matching_fields)
-  }
-  else {
-  cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
-  }
-}
-
-#########################################################################
-create_boxplot <- function(
-    dataset,
-    x_axis_title,
-    chart_title,
-    chart_file_name) {
-  
-    boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
-      geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
-      geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "black") +
-      theme(
-        legend.position = "none", plot.title = element_text(hjust = 0.5),
-        plot.subtitle = element_text(size = 9)
-      ) +
-      labs(
-        title = chart_title, x = x_axis_title, y = "",
-        subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
-      )
-  suppressMessages(print(boxplot_chart))
-}
-
-#########################################################################
-create_violin_chart <- function(
-    dataset,
-    x_axis_title,
-    x_axis_field,
-    chart_title,
-    chart_file_name) {
-  
-  violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
-    geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2", size = 1.9, shape = 17) +
-    geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
-    geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.6, 
-                 outlier.colour = "black", outlier.size = 0.75) +
-    labs(
-      title = chart_title,
-      x = x_axis_title,
-      y = "",
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
-                       format(nrow(dataset), big.mark = ","), sep = "")
-    ) +
-    theme(
-      plot.title = element_text(size = 13, hjust = 0.5),
-      plot.subtitle = element_text(size = 9)
-    )
-
-  suppressMessages(print(violin_chart))
-  chart_path <- file.path(chart_directory_path, chart_file_name)
-  suppressMessages(ggsave(chart_path, plot = violin_chart, width = 10, height = 8))
-}
-
-#########################################################################
-# Function to filter rows with non-numeric or non-5-digit zip codes for a specific field
-filter_non_numeric_zipcodes <- function(df, zip_field) {
-
-  # Define a logical condition to filter rows based on the selected field
-  condition <- !is.na(df[[zip_field]]) & df[[zip_field]] != "" &
-    !grepl("^[0-9]{5}$", df[[zip_field]])
-
-  # Use the condition to subset the DataFrame
-  invalid_rows <- df[condition, ]
-  return(invalid_rows)
-}
-
-#########################################################################
-# Function to check if a column contains valid dates
-areAllDates <- function(dateField) {
-
-  # remove blank and NAs
-  allDates <-
-    suppressWarnings(!is.na(as.Date(dateField[dateField != ""], format = "%m/%d/%Y %I:%M:%S %p")))
-
-  if (!all(allDates)) {
-    # find indices of values that are not dates
-    not_date_indices <-
-      which(is.na(as.Date(dateField[dateField], format = "%m/%d/%Y %I:%M:%S %p")))
-
-    cat("Values that are not dates: ")
-    print(dateField[not_date_indices], row.names = FALSE, right = FALSE)
-  }
-  return(all(allDates))
-}
-
-#########################################################################
-# Validate that number fields are all numeric
-areAllNumbers <- function(numberField) {
-  
-  # Identify the non-blank values using nzchar()
-  non_blank_indices <- which(nzchar(numberField))
-
-  # Subset the vector to keep only the non-blank values
-  numberField <- numberField[non_blank_indices]
-
-  # remove blank and NAs
-  allNumbers <-
-    suppressWarnings(!is.na(as.numeric(numberField[numberField != ""])))
-
-  if (!all(allNumbers)) {
-    # find indices of values that are not numeric
-    non_numeric_values <-
-      numberField[grepl("[^[:digit:]]", numberField)]
-
-    cat(
-      "Non-numeric values in the vector: ",
-      non_numeric_values,
-      "\n"
-    )
-  }
-  return(all(allNumbers))
-}
-
-#########################################################################
-areFiveDigits2 <- function(zipcodes) {
-  
-  # Remove blank values and <NA> values
-  non_blank_zipcodes <- zipcodes[!(nzchar(zipcodes) | is.na(zipcodes))]
-
-  # Identify non-numeric and non-5-digit zipcodes using regular expression
-  zipcode_pattern <- "^\\d{5}$"
-
-  # identify non-compliant zipcodes
-  not_valid_zipcodes <-
-    non_blank_zipcodes[!grepl(zipcode_pattern, non_blank_zipcodes)]
-
-  if (length(not_valid_zipcodes) > 0) {
-    cat(
-      "\n\n*****Non 5-digit and/or non-numeric zipcodes found: ",
-      not_valid_zipcodes
-    )
-    return(FALSE)
-  }
-  return(TRUE)
-}
-
-#########################################################################
-# Validate that all fields are in the list of allowable values
-are_valid_values <- function(
-    dataset,
-    listValidValues,
-    field_name) {
-  # Subset the vector to keep only the non-blank values
-  dataset <- dataset[nzchar(dataset) & !is.na(dataset) & dataset != ""]
-
-  # determine valid values
-  check_list <- (dataset %in% listValidValues[, 1])
-  inList <- dataset[check_list]
-  notInList <- dataset[!check_list]
-  num_invalid <- length(notInList)
-
-  if (num_invalid > 0) {
-    invalid_d311_rows <- d311[(d311[[field_name]] %in% notInList), ]
-
-    # retrieve the number of blank fields for calculation purposes
-    number_of_blank_entries <-
-      missingDataPerColumn$blanks[missingDataPerColumn$field == field_name]
-    percentage_invalid <- round((num_invalid / (num_rows_d311 - number_of_blank_entries)) * 100, 2)
-    unique_invalid <- length(unique(notInList))
-    cat(
-      "\n\nThere are",
-      format(num_invalid, big.mark = ","),
-      "invalid", field_name, "entries \nrepresenting",
-      percentage_invalid,
-      "% of non-blank data,\n"
-    )
-    cat(
-      "comprised of",
-      unique_invalid,
-      "different", field_name, "entries.\n"
-    )
-
-    # Sort the table in descending order
-    sorted_invalid_table <-
-      sort(table(notInList), decreasing = TRUE)
-
-    # Convert the table to a data frame and calculate the percentage column
-    invalid_df <-
-      data.frame(
-        invlaid_names = names(sorted_invalid_table),
-        count = as.numeric(sorted_invalid_table)
-      )
-    invalid_df$percentage <- round(prop.table(invalid_df$count) * 100, 2)
-    invalid_df <- invalid_df[order(invalid_df$percentage, invalid_df$invlaid_names, decreasing = TRUE), ]
-    invalid_df$cumulative_percentage <- cumsum(invalid_df$percentage)
-
-    # Print the top 10 values
-    cat("\nTop Ten invalid '", field_name, "':\n")
-    print(head(invalid_df, 10), right = FALSE)
-    chart_title <-
-      x <- rank_by_agency(invalid_d311_rows)
-    results <- list(all(check_list), notInList, invalid_d311_rows)
-    return(results)
-  } else {
-    cat("\n\nAll values of '", field_name, "'are valid.")
-    results <- list(all(check_list), notInList)
-    return(results)
-  }
-}
-
-#########################################################################
-# Function to check if a column is a valid date format
-check_date_format <- function(column_name) {
-  date_column <- d311[[column_name]]
-  date_check <- try(as.Date(date_column, format = "%m/%d/%Y %I:%M:%S %p"))
-
-  if (inherits(date_check, "try-error")) {
-    invalid_dates <- date_column[!grepl("^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2} [APMapm]{2}$", date_column)]
-    if (length(invalid_dates) > 0) {
-      print(paste("Invalid dates in", column_name, ":", invalid_dates, sep = ""))
-    }
-    return(paste("Field '", column_name, "' is not in a valid date format", sep = ""))
-  } else {
-    return(paste("Field '", column_name, "' is in a valid date format", sep = ""))
-  }
-}
-
-#########################################################################
+# #########################################################################
+# detect_duplicates <- function(
+#     dataset,
+#     reference_field,
+#     duplicate_field) {
+#   
+#   #Identify matching fields including blanks and NA values
+#   rows_condition_0 <- dataset[[reference_field]] == dataset[[duplicate_field]]
+# 
+#   rows_condition_1 <- dataset[[reference_field]] != dataset[[duplicate_field]]
+# 
+#   all_non_matching_rows <- rows_condition_1
+#   non_matching_fields <- dataset[all_non_matching_rows, ]
+#   num_non_matching_fields <- nrow(non_matching_fields)
+#   non_matching_percentage <- round((num_non_matching_fields / num_rows_d311) * 100, 2)
+#   non_matching_fields <- non_matching_fields %>%
+#     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
+# 
+#   all_matching_rows <- rows_condition_0
+#   matching_fields <- dataset[all_matching_rows, ]
+#   num_matching_fields <- nrow(matching_fields)
+#   matching_percentage <- round((num_matching_fields / num_rows_d311) * 100, 2)
+#   matching_fields <- matching_fields %>%
+#     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
+# 
+#   if (num_non_matching_fields > 0) {
+#   
+#     if (num_matching_fields > 0) {
+#     cat(
+#       "\n\nThere are",
+#       format(num_matching_fields, big.mark = ","),
+#       "matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
+#       matching_percentage, "% of data.\n")
+#     }
+#     cat(
+#       "\nThere are",
+#       format(num_non_matching_fields, big.mark = ","),
+#       "non-matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
+#       non_matching_percentage, "% of data.\n")
+#     
+#   return(non_matching_fields)
+#   }
+#   else {
+#   cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
+#   }
+# }
+# 
+# # #########################################################################
+# create_boxplot <- function(
+#     dataset,
+#     x_axis_title,
+#     chart_title,
+#     chart_file_name) {
+#   
+#     boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
+#       geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
+#       geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "black") +
+#       theme(
+#         legend.position = "none", plot.title = element_text(hjust = 0.5),
+#         plot.subtitle = element_text(size = 9)
+#       ) +
+#       labs(
+#         title = chart_title, x = x_axis_title, y = "",
+#         subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
+#       )
+#   suppressMessages(print(boxplot_chart))
+# }
+# 
+# # #########################################################################
+# create_violin_chart <- function(
+#     dataset,
+#     x_axis_title,
+#     x_axis_field,
+#     chart_title,
+#     chart_file_name) {
+#   
+#   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
+#     geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2", size = 1.9, shape = 17) +
+#     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
+#     geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.6, 
+#                  outlier.colour = "black", outlier.size = 0.75) +
+#     labs(
+#       title = chart_title,
+#       x = x_axis_title,
+#       y = "",
+#       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
+#                        format(nrow(dataset), big.mark = ","), sep = "")
+#     ) +
+#     theme(
+#       plot.title = element_text(size = 13, hjust = 0.5),
+#       plot.subtitle = element_text(size = 9)
+#     )
+# 
+#   suppressMessages(print(violin_chart))
+#   chart_path <- file.path(chart_directory_path, chart_file_name)
+#   suppressMessages(ggsave(chart_path, plot = violin_chart, width = 10, height = 8))
+# }
+# 
+# # #########################################################################
+# # Function to filter rows with non-numeric or non-5-digit zip codes for a specific field
+# filter_non_numeric_zipcodes <- function(df, zip_field) {
+# 
+#   # Define a logical condition to filter rows based on the selected field
+#   condition <- !is.na(df[[zip_field]]) & df[[zip_field]] != "" &
+#     !grepl("^[0-9]{5}$", df[[zip_field]])
+# 
+#   # Use the condition to subset the DataFrame
+#   invalid_rows <- df[condition, ]
+#   return(invalid_rows)
+# }
+# 
+# # #########################################################################
+# # Function to check if a column contains valid dates
+# areAllDates <- function(dateField) {
+# 
+#   # remove blank and NAs
+#   allDates <-
+#     suppressWarnings(!is.na(as.Date(dateField[dateField != ""], format = "%m/%d/%Y %I:%M:%S %p")))
+# 
+#   if (!all(allDates)) {
+#     # find indices of values that are not dates
+#     not_date_indices <-
+#       which(is.na(as.Date(dateField[dateField], format = "%m/%d/%Y %I:%M:%S %p")))
+# 
+#     cat("Values that are not dates: ")
+#     print(dateField[not_date_indices], row.names = FALSE, right = FALSE)
+#   }
+#   return(all(allDates))
+# }
+# 
+# # #########################################################################
+# # Validate that number fields are all numeric
+# areAllNumbers <- function(numberField) {
+#   
+#   # Identify the non-blank values using nzchar()
+#   non_blank_indices <- which(nzchar(numberField))
+# 
+#   # Subset the vector to keep only the non-blank values
+#   numberField <- numberField[non_blank_indices]
+# 
+#   # remove blank and NAs
+#   allNumbers <-
+#     suppressWarnings(!is.na(as.numeric(numberField[numberField != ""])))
+# 
+#   if (!all(allNumbers)) {
+#     # find indices of values that are not numeric
+#     non_numeric_values <-
+#       numberField[grepl("[^[:digit:]]", numberField)]
+# 
+#     cat(
+#       "Non-numeric values in the vector: ",
+#       non_numeric_values,
+#       "\n"
+#     )
+#   }
+#   return(all(allNumbers))
+# }
+# 
+# # #########################################################################
+# areFiveDigits2 <- function(zipcodes) {
+#   
+#   # Remove blank values and <NA> values
+#   non_blank_zipcodes <- zipcodes[!(nzchar(zipcodes) | is.na(zipcodes))]
+# 
+#   # Identify non-numeric and non-5-digit zipcodes using regular expression
+#   zipcode_pattern <- "^\\d{5}$"
+# 
+#   # identify non-compliant zipcodes
+#   not_valid_zipcodes <-
+#     non_blank_zipcodes[!grepl(zipcode_pattern, non_blank_zipcodes)]
+# 
+#   if (length(not_valid_zipcodes) > 0) {
+#     cat(
+#       "\n\n*****Non 5-digit and/or non-numeric zipcodes found: ",
+#       not_valid_zipcodes
+#     )
+#     return(FALSE)
+#   }
+#   return(TRUE)
+# }
+# 
+# # #########################################################################
+# # Validate that all fields are in the list of allowable values
+# are_valid_values <- function(
+#     dataset,
+#     listValidValues,
+#     field_name) {
+#   # Subset the vector to keep only the non-blank values
+#   dataset <- dataset[nzchar(dataset) & !is.na(dataset) & dataset != ""]
+# 
+#   # determine valid values
+#   check_list <- (dataset %in% listValidValues[, 1])
+#   inList <- dataset[check_list]
+#   notInList <- dataset[!check_list]
+#   num_invalid <- length(notInList)
+# 
+#   if (num_invalid > 0) {
+#     invalid_d311_rows <- d311[(d311[[field_name]] %in% notInList), ]
+# 
+#     # retrieve the number of blank fields for calculation purposes
+#     number_of_blank_entries <-
+#       missingDataPerColumn$blanks[missingDataPerColumn$field == field_name]
+#     percentage_invalid <- round((num_invalid / (num_rows_d311 - number_of_blank_entries)) * 100, 2)
+#     unique_invalid <- length(unique(notInList))
+#     cat(
+#       "\n\nThere are",
+#       format(num_invalid, big.mark = ","),
+#       "invalid", field_name, "entries \nrepresenting",
+#       percentage_invalid,
+#       "% of non-blank data,\n"
+#     )
+#     cat(
+#       "comprised of",
+#       unique_invalid,
+#       "different", field_name, "entries.\n"
+#     )
+# 
+#     # Sort the table in descending order
+#     sorted_invalid_table <-
+#       sort(table(notInList), decreasing = TRUE)
+# 
+#     # Convert the table to a data frame and calculate the percentage column
+#     invalid_df <-
+#       data.frame(
+#         invlaid_names = names(sorted_invalid_table),
+#         count = as.numeric(sorted_invalid_table)
+#       )
+#     invalid_df$percentage <- round(prop.table(invalid_df$count) * 100, 2)
+#     invalid_df <- invalid_df[order(invalid_df$percentage, invalid_df$invlaid_names, decreasing = TRUE), ]
+#     invalid_df$cumulative_percentage <- cumsum(invalid_df$percentage)
+# 
+#     # Print the top 10 values
+#     cat("\nTop Ten invalid '", field_name, "':\n")
+#     print(head(invalid_df, 10), right = FALSE)
+#     chart_title <-
+#       x <- rank_by_agency(invalid_d311_rows)
+#     results <- list(all(check_list), notInList, invalid_d311_rows)
+#     return(results)
+#   } else {
+#     cat("\n\nAll values of '", field_name, "'are valid.")
+#     results <- list(all(check_list), notInList)
+#     return(results)
+#   }
+# }
+# 
+# # #########################################################################
+# # Function to check if a column is a valid date format
+# check_date_format <- function(column_name) {
+#   date_column <- d311[[column_name]]
+#   date_check <- try(as.Date(date_column, format = "%m/%d/%Y %I:%M:%S %p"))
+# 
+#   if (inherits(date_check, "try-error")) {
+#     invalid_dates <- date_column[!grepl("^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2} [APMapm]{2}$", date_column)]
+#     if (length(invalid_dates) > 0) {
+#       print(paste("Invalid dates in", column_name, ":", invalid_dates, sep = ""))
+#     }
+#     return(paste("Field '", column_name, "' is not in a valid date format", sep = ""))
+#   } else {
+#     return(paste("Field '", column_name, "' is in a valid date format", sep = ""))
+#   }
+# }
+# 
+# #########################################################################
 # File contains column names in the "header" line.
 # The R "read.csv" function uses a "." to replace the spaces in column names.
 # This makes the column names into legal variables, but the "." can cause problems elsewhere.
@@ -666,12 +666,78 @@ d311[, columns_to_upper] <- lapply(d311[, columns_to_upper], toupper)
 cat("\n\n**********DATA SUMMARY**********\n")
 
 #########################################################################
+# d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+# d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+# d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+# d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
+#   format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"
+# )
+
+# Consolidate Agency names
+d311 <- consolidate_agencies((d311))
+
+#########################################################################
+# Filter out rows with NA values in the created_date column
+d311 <- d311[!is.na(d311$created_date), ]
+
+dst_rows_created <- filter_dst_rows(d311, "created_date")
+head(dst_rows_created, 50)
+
+# Apply the function to closed_date
+dst_rows_closed <- filter_dst_rows(d311, "closed_date")
+head(dst_rows_closed, 50)
+
+dst_rows_resolution <- filter_dst_rows(d311, "resolution_action_updated_date")
+head(dst_rows_resolution, 50)
+
+dst_rows_due <- filter_dst_rows(d311, "due_date")
+head(dst_rows_due, 50)
+
+# Step 1: Get the indices of the rows in dst_rows_created
+created_indices_to_remove <- which(d311$created_date %in% dst_rows_created$created_date)
+closed_indices_to_remove <- which(d311$closed_date %in% dst_rows_closed$closed_date)
+resolution_indices_to_remove <- which(d311$resolution_action_updated_date %in% dst_rows_resolution$resolution_action_updated_date)
+due_indices_to_remove <- which(d311$due_date %in% dst_rows_due$due_date)
+
+# Step 3: Combine the indices (since some rows might overlap between created_date and closed_date)
+all_indices_to_remove <- unique(c(
+  if (exists("created_indices_to_remove")) created_indices_to_remove else NULL,
+  if (exists("closed_indices_to_remove")) closed_indices_to_remove else NULL,
+  if (exists("resolution_indices_to_remove")) resolution_indices_to_remove else NULL,
+  if (exists("due_indices_to_remove")) due_indices_to_remove else NULL
+))
+
+# Step 4: Remove these rows from d311
+d311 <- d311[-all_indices_to_remove, ]
+num_rows_d311 <- nrow(d311)
+
+# Check the result
+cat("\nNumber of rows removed for invalid DST times is:", length(all_indices_to_remove),
+    "which is", (length(all_indices_to_remove)/num_rows_d311)*100, "% of the overall dataset.\n")
+
+
+# Convert character date-time strings to datetime objects with America/New_York timezone
+# d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+# d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+
+# Test if each date field is in POSIXct format
 d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
-  format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"
-)
+                                                  format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+
+# # Coerce class to POSIXct to avoid the POSIXt class (a subclass of POSIXct)
+# class(d311$created_date) <- "POSIXct"
+# class(d311$closed_date) <- "POSIXct"
+# class(d311$due_date) <- "POSIXct"
+# class(d311$resolution_action_updated_date) <- "POSIXct"
+
+# Specify the date columns to adjust
+date_columns <- c("created_date", "closed_date", "resolution_action_updated_date", "due_date")
+
+# Call the function on your dataframe d311
+d311 <- adjust_feb_29_to_28(d311, date_columns)
 
 #########################################################################
 mandatory_cols <- c(
@@ -885,13 +951,11 @@ colnames(d311)[colnames(d311) == "agency"] <- "temp_agency"
 colnames(d311)[colnames(d311) == "complaint_type"] <- "agency"
 
 #chart_title <- "Top 20 Complaints and cumulative percentage"
-chart_title <- NULL
 chart_file_name <- "SR_by_Complaint_Type.pdf"
 
 create_combo_chart(
-  d311,
-  chart_title,
-  chart_file_name
+  dataset = d311,
+  chart_file_name = chart_file_name
 )
 
 # Restore column names
@@ -918,14 +982,8 @@ print(sortedStatus, row.names = FALSE, right = FALSE)
 cat("\n\n**********VALIDATING DATA TYPES**********\n")
 
 #########################################################################
-# Test if each date field is in POSIXct format
-d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
-  format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"
-)
-# Coerce class to POSIXct to avoid the POSIXt class (a subclass of POSIXct)
+# # Test if each date field is in POSIXct format
+# # Coerce class to POSIXct to avoid the POSIXt class (a subclass of POSIXct)
 class(d311$created_date) <- "POSIXct"
 class(d311$closed_date) <- "POSIXct"
 class(d311$due_date) <- "POSIXct"
@@ -944,7 +1002,7 @@ if (is_posixct) {
 }
 
 #########################################################################
-# determine if the incident_zip and zip_codes fields contain 5 numeric digits
+# determine if the incident_zip field contain 5 numeric digits
 # Call the function for "incident_zip" field
 invalid_incident_zip_rows <- filter_non_numeric_zipcodes(d311, "incident_zip")
 
@@ -1630,22 +1688,22 @@ if (num_row_neg_duration > 0) {
     sep = ""
   )
   cat("\n\nMaximum response time:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
+  
+  chart_title <- "Response time for 'Homeless Person Assistance (cleaned data)' SRs"
+  chart_file_name <- "homeless_response_time_clean_violin.pdf"
+  x_axis_name <- "Response time (days)"
+  x_axis_field <- "duration"
+  
+  homeless_violin_chart <- create_violin_chart(
+    homeless_assistance_SRs,
+    x_axis_name,
+    x_axis_field,
+    chart_title,
+    chart_file_name
+  )
 } else {
   cat("\n\nThere are no negative duration Homeless Person Assistance SRs to remove.")
 }
-
-chart_title <- "Response time for 'Homeless Person Assistance (cleaned data)' SRs"
-chart_file_name <- "homeless_response_time_clean_violin.pdf"
-x_axis_name <- "Response time (days)"
-x_axis_field <- "duration"
-
-homeless_violin_chart <- create_violin_chart(
-  homeless_assistance_SRs,
-  x_axis_name,
-  x_axis_field,
-  chart_title,
-  chart_file_name
-)
 
 #########################################################################
 

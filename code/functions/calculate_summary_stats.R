@@ -1,3 +1,5 @@
+#########################################################################
+
 # Define the function to calculate summary statistics
 calculate_summary_stats <- function(df, column_name) {
   mean_value <- round(mean(df[[column_name]], na.rm = TRUE), 0)
@@ -6,3 +8,5 @@ calculate_summary_stats <- function(df, column_name) {
   
   return(list(mean = mean_value, median = median_value, sd = sd_value))
 }
+
+#########################################################################

@@ -1,4 +1,5 @@
 #########################################################################
+
 # This function takes a subset of the d311 dataframe and summarizes it by "agency"
 # It also computes the cumulative percentage for a histogram overlayed on the bar chart
 create_combo_chart <- function(
@@ -92,3 +93,5 @@ create_combo_chart <- function(
   chart_height <- chart_width / 1.618  # Golden ratio
   ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
+
+#########################################################################

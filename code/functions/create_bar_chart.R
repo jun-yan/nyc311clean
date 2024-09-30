@@ -1,3 +1,5 @@
+#########################################################################
+
 create_bar_chart <- function(
     dataset,
     x_col,
@@ -176,3 +178,5 @@ create_bar_chart <- function(
       height = chart_height,
       dpi = 300 )  # High resolution for manuscripts
 }
+
+#########################################################################

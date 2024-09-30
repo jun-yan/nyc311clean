@@ -12,7 +12,6 @@ library(zoo)
 library(ggpmisc)
 library(lubridate)
 
-
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 cat("\nExecution begins at:", formattedStartTime)
@@ -63,6 +62,8 @@ d311 <-
     colClasses = rep("character", ncol(read.csv(data1File)))
   )
 
+num_rows <- nrow(d311)
+
 #########################################################################
 # Preparing data for consistency and normalization
 
@@ -71,27 +72,52 @@ d311 <- make_column_names_user_friendly(d311)
 
 d311 <- d311[, c("created_date", "closed_date", "agency")]
 
-# Filter out rows with NA values in the created_date column
 d311 <- d311[!is.na(d311$created_date), ]
 
 # Convert character fields to upper case to facilitate comparisons
 columns_to_upper <- c( "agency" )
-
-# Convert selected columns to uppercase
 d311[columns_to_upper] <- lapply(d311[columns_to_upper], toupper)
 
 # Consolidate Agency names
 d311 <- consolidate_agencies((d311))
 
-# Remove any rows where the created_date is missing. This is a required field.
-d311 <- d311[!is.na(d311$created_date), ]
-
 # Filter out rows with NA values in the created_date column
 d311 <- d311[!is.na(d311$created_date), ]
 
+dst_rows_created <- filter_dst_rows(d311, "created_date")
+head(dst_rows_created, 50)
+
+# Apply the function to closed_date
+dst_rows_closed <- filter_dst_rows(d311, "closed_date")
+head(dst_rows_closed, 50)
+
+# Step 1: Get the indices of the rows in dst_rows_created
+created_indices_to_remove <- which(d311$created_date %in% dst_rows_created$created_date)
+
+# Step 2: Get the indices of the rows in dst_rows_closed
+closed_indices_to_remove <- which(d311$closed_date %in% dst_rows_closed$closed_date)
+
+# Step 3: Combine the indices (since some rows might overlap between created_date and closed_date)
+all_indices_to_remove <- unique(c(
+  if (exists("created_indices_to_remove")) created_indices_to_remove else NULL,
+  if (exists("closed_indices_to_remove")) closed_indices_to_remove else NULL
+))
+
+# Step 4: Remove these rows from d311
+d311 <- d311[-all_indices_to_remove, ]
+num_rows <- nrow(d311)
+
+# Check the result
+cat("\nNumber of rows removed for invalid DST times is:", length(all_indices_to_remove),
+    "which is", (length(all_indices_to_remove)/num_rows)*100, "% of the overall dataset.\n")
+
 # Convert character date-time strings to datetime objects with America/New_York timezone
-d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+
+# Call the function on your dataframe d311
+date_columns <- c("created_date", "closed_date")
+d311 <- adjust_feb_29_to_28(d311, date_columns)
 
 #########################################################################
 # Collect macro statistics from the dataset
@@ -100,9 +126,8 @@ d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p"
 years <- year(d311$created_date)
 
 num_years <- unique(years)
-numrows <- nrow(d311)
 
-cat("\nTotal rows:", format(numrows, big.mark = ","), "covering", length(num_years), "years")
+cat("\nTotal rows:", format(num_rows, big.mark = ","), "covering", length(num_years), "years")
 
 #########################################################################
 # Calculate the earliest and latest dates directly
@@ -278,7 +303,7 @@ if (nrow(yearly_df) > 2) {  #skip if only 1-2 years. Not enough data to be meani
     add_minimum = FALSE,
     add_second_maximum = FALSE,
     extra_line = extra_line,
-    chart_file_name = paste0(file_name_prefix, "-trend_yearly.pdf")
+    chart_file_name = paste0(file_name_prefix, "-trend_SRs_yearly.pdf")
   )
 }
 
@@ -341,7 +366,7 @@ SR_monthly <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_monthly.pdf"),
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf"),
   horizontal_adjustment_max = 1.3,
   vertical_adjustment_max = 1
 )
@@ -400,7 +425,7 @@ extra_line <- scale_x_date(
 extra_line2 <- annotate("text",
   x = earliest_day, y = max_count,
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#E69F00", vjust = 0.75, hjust = -2
+  size = 3.7, color = "#E69F00", vjust = 0.6, hjust = -2
 )
 
 SR_daily <- create_bar_chart(
@@ -420,7 +445,9 @@ SR_daily <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_daily.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_daily.pdf"),
+  horizontal_adjustment_max = 1.2,
+  vertical_adjustment_max = 0.8
 )
 
 #########################################################################
@@ -494,7 +521,7 @@ SR_calendar_month <- create_special_bar_chart(
   sub_title = chart_sub_title,
   earliest_x_value = "January",
   max_x_value = max_calendar_month_name,
-  chart_file_name = paste0(file_name_prefix, "-trend_by_calendar_month.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf")
 )
 
 #########################################################################
@@ -502,7 +529,7 @@ SR_calendar_month <- create_special_bar_chart(
 
 # Assuming day_counts_df is already sorted by date
 day_counts_df <- day_counts_df %>%
-  arrange(as.Date(paste0("2024/", day_of_year), format = "%Y/%m/%d")) %>%
+  arrange(as.Date(paste0("2022/", day_of_year), format = "%Y/%m/%d")) %>%
   mutate(day_number = row_number())
 
 day_count_summary_stats <- calculate_summary_stats(day_counts_df, "count")
@@ -578,7 +605,7 @@ SR_day_of_the_year <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_by_day_of_year.pdf"),
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_year.pdf"),
   horizontal_adjustment_max = 1.2,
   vertical_adjustment_max = 1.5)    
 
@@ -626,7 +653,7 @@ SR_day_of_the_week <- create_special_bar_chart(
   earliest_x_value = "1-Monday",
   max_x_value = max_day_of_the_week$day_of_week,
   x_angle = 60,
-  chart_file_name = paste0(file_name_prefix, "-trend_by_day_of_week.pdf"),
+  chart_file_name = paste0(file_name_prefix, "-trend_by_day_of_the_week.pdf"),
   horizontal_adjustment_max = 0.5,
   vertical_adjustment_max = 0.2
   )
@@ -670,7 +697,7 @@ SR_created_by_top_of_hour <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SR_created_on_hour.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf")
 )
 
 #########################################################################
@@ -721,8 +748,8 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart(
   minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-#  chart_title = paste("SRs 'created' by Exact Minute-of-the-busiest-Day (00 secs) on", max_date),
-  chart_title = NULL,
+  chart_title = paste("SRs 'created' by Exact Minute-of-the-busiest-Day (00 secs) on", max_date),
+#  chart_title = NULL,
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,
@@ -735,7 +762,7 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SR_created_by_minute_of_busiest_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf")
 )
 
 #########################################################################
@@ -803,7 +830,7 @@ SR_closed_by_top_of_hour <- create_bar_chart(
   add_minimum = FALSE,
   extra_line = extra_line,
   add_second_maximum = TRUE,
-  chart_file_name = paste0(file_name_prefix, "-trend_SR_closed_on_hour.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf")
 )
 
 #########################################################################
@@ -849,8 +876,8 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart(
   minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-#  chart_title = paste("SRs 'closed' by Exact Minute-of-the-busiest-Day (00:00) on", max_date),
-  chart_title = NULL,
+  chart_title = paste("SRs 'closed' by Exact Minute-of-the-busiest-Day (00:00) on", max_date),
+#  chart_title = NULL,
   sub_title = chart_sub_title,
   x_axis_title = NULL,
   y_axis_title = NULL,
@@ -863,7 +890,7 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_minute_of_busiest_day.pdf"),
+  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),
   horizontal_adjustment_max = -1,
   vertical_adjustment_max = 1
 )
@@ -934,30 +961,35 @@ SR_created_time_of_day <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_created_by_hour_of_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf")
 )
 
 #########################################################################
 # Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 max_hour_of_the_day <- closed_hour_of_day_df[which.max(closed_hour_of_day_df$count), ]
 max_hour_of_the_day$closed_hour <- as.character(max_hour_of_the_day$closed_hour)
-max_count <- formatted_day_counts_df- max_hour_of_the_day$count
+#max_count <- formatted_day_counts_df- max_hour_of_the_day$count
 cat(
-  "\nHour of the day with maximum 'closed' count is hour #:", max_hour_of_the_day$closed_hour,
-  "with", format(max_hour_of_the_day$count, big.mark = ","), "SRs"
+  "\nHour of the day with maximum 'closed' count is hour:", 
+  sprintf("%02d:00", as.integer(max_hour_of_the_day$closed_hour)),  # Convert character to integer and format as HH:00
+  "with", format(as.numeric(max_hour_of_the_day$count), big.mark = ","), "SRs"
 )
 
 min_hour_of_the_day <- closed_hour_of_day_df[which.min(closed_hour_of_day_df$count), ]
 min_hour_of_the_day$closed_hour <- as.character(min_hour_of_the_day$closed_hour)
 cat(
-  "\nHour of the day with the minimum 'closed' count is hour #:", min_hour_of_the_day$closed_hour,
-  "with", format(min_hour_of_the_day$count, big.mark = ","), "SRs\n"
+  "\nHour of the day with the minimum 'closed' count is hour:", 
+  sprintf("%02d:00", as.integer(min_hour_of_the_day$closed_hour)),  # Convert character to integer and format as HH:00
+  "with", format(as.numeric(min_hour_of_the_day$count), big.mark = ","), "SRs\n"
 )
 
 cat("\nHour-of-the-day 'closed' Summary:\n")
 
-# Print the closed hour-of-the-day Summary
-print(closed_hour_of_day_df, row.names = FALSE, right = FALSE)
+# Create a new column to format closed_hour as HH:00
+closed_hour_of_day_df$closed_hour_formatted <- sprintf("%02d:00", as.integer(closed_hour_of_day_df$closed_hour))
+
+# Print the dataframe with formatted closed_hour and counts
+print(closed_hour_of_day_df[, c("closed_hour_formatted", "count")], row.names = FALSE, right = FALSE)
 
 max_hour_of_the_day$closed_hour <- as.numeric(max_hour_of_the_day$closed_hour)
 
@@ -984,7 +1016,7 @@ SR_closed_time_of_day <- create_bar_chart(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SR_closed_by_hour_of_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf")
 )
 
 ########################################################################
@@ -1039,7 +1071,7 @@ if (noon_created_count > 0) {
   sorted_create_at_noon <- rank_by_agency(created_at_noon)
   
   chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "created_at_noon_chart.pdf"
+  chart_file_name <- "SRs_created_at_noon_by_Agency.pdf"
   if (!is.null(sorted_create_at_noon)) {
     create_combo_chart(
       created_at_noon,
@@ -1109,7 +1141,7 @@ if (noon_closed_count > 0) {
   sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
   
   chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
-  chart_file_name <- "closed_at_noon_chart.pdf"
+  chart_file_name <- "SRs_closed_at_noon_by_Agency.pdf"
   if (!is.null(sorted_closed_at_noon)) {
     create_combo_chart(
       closed_at_noon,

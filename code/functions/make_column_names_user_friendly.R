@@ -1,3 +1,5 @@
+#########################################################################
+
 make_column_names_user_friendly<- function(dataset) {
   
   names(dataset) <- gsub(
@@ -19,3 +21,5 @@ make_column_names_user_friendly<- function(dataset) {
   ## Return the revised column names
   return(dataset)
 }
+
+#########################################################################
