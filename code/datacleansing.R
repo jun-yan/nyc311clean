@@ -7,7 +7,8 @@
 # install.packages("styler")
 # install.packages("ggpmisc")
 # install.packages("lubridate")
-#install.packages("data.table")
+# install.packages("data.table")
+# install.packages("sf")
 
 library(ggplot2)
 library(campfin)
@@ -18,6 +19,11 @@ library(scales)
 library(ggpmisc)
 library(lubridate)
 library(data.table)
+library(sf)
+
+#########################################################################
+
+main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
@@ -30,9 +36,7 @@ cat("\n***** Program initialization *****")
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 data1File <- file.path("..", "..", "data", main_data_file)
-#data1File <- file.path("..", "..", "data", "test_data.csv")
 
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
@@ -58,527 +62,14 @@ cat("\n***** Program initialization *****")
 
 options(digits = 14) # Set the number of decimal places to 14
 
-# #########################################################################
-# # compute the Hamming distance between two strings. Determine if it meets the threshold.
-# hamming_distance <- function(string1, string2) {
-#   if (nchar(string1) != nchar(string2)) {
-#     stop("Strings must be of equal length")
-#   }
-#   num_diff <- sum(as.numeric(charToRaw(string1)) != as.numeric(charToRaw(string2)))
-#   return(num_diff)
-# }
-# 
-# # #########################################################################
-# cross_street_analysis <- function(
-#     dataset,
-#     cross_street,
-#     intersection_street) {
-#   # Remove extra blanks
-#   dataset <- dataset %>%
-#     mutate(
-#       across(
-#         all_of(cross_street),
-#         ~ str_replace_all(., "\\s+", " ")
-#       ),
-#       across(
-#         all_of(intersection_street),
-#         ~ str_replace_all(., "\\s+", " ")
-#       )
-#     )
-# 
-#   # Find rows where the two fields are equal (cross_street1 & intersection_street)
-#   equal_streets <- subset(dataset,
-#     dataset[[cross_street]] == dataset[[intersection_street]],
-#     select = c(cross_street, intersection_street, "agency")
-#   )
-# 
-#   num_rows_equal <- nrow(equal_streets)
-# 
-#   # Find rows where the two fields are equal and non-blank (cross_street1 & intersection_street)
-#   equal_streets_non_blank <- subset(
-#     equal_streets,
-#     !is.na(equal_streets[[cross_street]]) &
-#       !is.na(equal_streets[[intersection_street]]) &
-# 
-#       equal_streets[[cross_street]] != "" &
-#       equal_streets[[intersection_street]] != ""
-#   )
-# 
-#   num_rows_equal_non_blank <- nrow(equal_streets_non_blank)
-# 
-#   # find rows where both cross_street and intersection_street are not blank. Use later.
-#   both_xsteet_non_blank <-
-#     subset(dataset, dataset[[cross_street]] != "" &
-#       dataset[[intersection_street]] != "",
-#     select = c(cross_street, intersection_street, "agency")
-#     )
-# 
-#   num_rows_both_non_blank <- nrow(both_xsteet_non_blank)
-# 
-#   # find rows where cross_street is blank, but intersection_street is not blank. Use later.
-#   cross_street_blank <- subset(dataset, dataset[[cross_street]] == "" &
-#     dataset[[intersection_street]] != "",
-#   select = c(cross_street, intersection_street, "agency")
-#   )
-# 
-#   num_rows_cross_street_blank <- nrow(cross_street_blank)
-# 
-#   # find rows where intersection_street is blank, but cross_street is not blank
-#   intersection_street_blank <- subset(dataset, dataset[[intersection_street]] == "" &
-#     dataset[[cross_street]] != "",
-#   select = c(cross_street, intersection_street, "agency")
-#   )
-# 
-#   num_rows_intersection_street_blank <- nrow(intersection_street_blank)
-# 
-#   # find rows where both cross_street and intersection_street are blank
-#   both_blank <- subset(dataset, dataset[[cross_street]] == "" &
-#     dataset[[intersection_street]] == "",
-#   select = c(cross_street, intersection_street, "agency")
-#   )
-# 
-#   num_rows_both_blank <- nrow(both_blank)
-# 
-#   ####################
-#   # Check for non-matching fields between cross_street and intersection_street
-#   non_dup_streets <- detect_duplicates(
-#     dataset,
-#     cross_street,
-#     intersection_street
-#   )
-#   num_rows_non_dup <- nrow(non_dup_streets)
-# 
-#   non_dup_streets_non_blank <- non_dup_streets[non_dup_streets[[cross_street]] != "" &
-#                               non_dup_streets[[intersection_street]] != "", ]
-#   
-#   num_rows_non_dup_non_blank <- nrow(non_dup_streets_non_blank)
-# 
-#   cat("\nSample of matching",cross_street, "&", intersection_street, ":\n")
-#   random_sample_equal <- equal_streets_non_blank %>% sample_n(min(num_rows_equal_non_blank, 10)) # random sample
-#   print(random_sample_equal, row.names = FALSE, right = FALSE)
-# 
-#   cat("\nSample of non-matching", cross_street, "&", intersection_street, ":\n")
-#   random_sample_non_dup <- non_dup_streets_non_blank %>% sample_n(min(num_rows_non_dup_non_blank, 10)) # random sample
-#   print(random_sample_non_dup, row.names = FALSE, right = FALSE)
-# 
-#   non_dup_streets <- non_dup_streets[, -which(names(non_dup_streets) == "unique_key")]
-# 
-#   if (num_rows_non_dup > 0) {
-#     agency_match_non_dup <- rank_by_agency(non_dup_streets)
-# 
-#     chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
-#     chart_file_name <- paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
-#     create_combo_chart(
-#       non_dup_streets,
-#       chart_title,
-#       chart_file_name
-#     )
-#   }
-# 
-#   ####################
-#   # cross_street is blank, but intersection_street is not blank
-# 
-#   cat(
-#     "\n\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
-#     "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
-#     round((num_rows_cross_street_blank / num_rows_d311 * 100), 2), "% of total rows."
-#   )
-# 
-#   cat(
-#     "\n\nSample where '", cross_street, "'is blank but '", intersection_street, "'is not blank:\n"
-#   )
-#   random_sample <- cross_street_blank %>% sample_n(min(num_rows_cross_street_blank, 5)) # random sample
-#   print(random_sample, row.names = FALSE, right = FALSE)
-#   agency_cross_street_blank <- rank_by_agency(cross_street_blank)
-# 
-# 
-#   ####################
-#   # intersection_street is blank, but cross_street is not blank
-# 
-#   cat(
-#     "\n\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
-#     "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
-#     round(num_rows_intersection_street_blank / num_rows_d311 * 100, 2),
-#     "% of total rows."
-#   )
-# 
-#   cat(
-#     "\n\nSample where '", cross_street, "' is not blank but '", intersection_street, "' is blank:\n"
-#   )
-#   random_sample <- intersection_street_blank %>% sample_n(min(num_rows_intersection_street_blank, 5)) # random sample
-#   print(random_sample, row.names = FALSE, right = FALSE)
-#   agency_intersection_street_blank <- rank_by_agency(intersection_street_blank)
-# 
-#   ####################
-#   # Check for almost matches, using a Hamming distance of 2 characters different
-#   almost_match <-
-#     subset(
-#       non_dup_streets,
-#       non_dup_streets[[cross_street]] != "" &
-#         non_dup_streets[[intersection_street]] != "" &
-#         nchar(non_dup_streets[[cross_street]]) == nchar(non_dup_streets[[intersection_street]])
-#     )
-# 
-#   threshold <- 2
-# 
-#   cat(
-#     "\n\nA near-match is when two addresses have no more than",
-#     threshold, "characters different (Hamming Distance).\n"
-#   )
-# 
-#   # Calculate Hamming distance for each row
-#   almost_match$hamming_distance <- mapply(
-#     hamming_distance,
-#     almost_match[[cross_street]],
-#     almost_match[[intersection_street]]
-#   )
-# 
-#   # Identify rows where the Hamming distance is less than the threshold
-#   matches_meeting_threshold <- subset(almost_match, hamming_distance <= threshold)
-#   num_rows_matches_meeting_threshold <- nrow(matches_meeting_threshold)
-# 
-#   cat(
-#     "\nThere are ", num_rows_matches_meeting_threshold, "near-matches between",
-#     cross_street, "and", intersection_street
-#   )
-#   if (num_rows_matches_meeting_threshold > 0) {
-#     cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
-#     random_sample_almost_match <- matches_meeting_threshold %>%
-#       sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
-#     print(random_sample_almost_match, row.names = FALSE, right = FALSE)
-#   }
-# 
-#   ####################
-#   # summary of cross_street and intersection_street columns
-#   summary_street <-
-#     data.frame(
-#       category = c(
-#         "Matching -- non-blank",
-#         "Matching -- both blank",
-#         "Non-matching",
-#         paste(cross_street, "blank", sep = "_"),
-#         paste(intersection_street, "blank", sep = "_"),
-#         "Near-match"
-#       ),
-#       count = c(
-#         num_rows_equal - num_rows_both_blank,
-#         num_rows_both_blank,
-#         num_rows_non_dup,
-#         num_rows_cross_street_blank,
-#         num_rows_intersection_street_blank,
-#         num_rows_matches_meeting_threshold
-#       )
-#     )
-# 
-#   summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_d311) * 100, 2)
-#   summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_d311) * 100, 2)
-#   summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_d311) * 100, 2)
-#   summary_street$percentage[4] <- "N/A"
-#   summary_street$percentage[5] <- "N/A"
-#   summary_street$percentage[6] <- round((num_rows_matches_meeting_threshold / num_rows_d311) * 100, 6)
-# 
-#   if (num_rows_matches_meeting_threshold == 0) {
-#     summary_street$percentage[6] <- "N/A"
-#   }
-# 
-#   cat("\nSummary of'", cross_street, "' and '", intersection_street, "':\n")
-#   names(summary_street)[1:3] <- c("category", "count", "percentage")
-#   print(summary_street, row.names = FALSE, right = FALSE)
-#   return(intersection_street_blank)
-# }
-# 
-# #########################################################################
-# Take a reference field and an identified duplicate field, and print a sample
-# The call the "rank_by_agency" function
-print_sample_nonmatching <- function(
-    dataset,
-    reference_field = NULL,
-    duplicate_field = NULL) {
-  dataset <- selected_columns
-  # Remove the NAs for better display purposes
-  dataset <- dataset[dataset[[duplicate_field]] != "" | !is.na(dataset[[duplicate_field]]), ]
-
-  if (nrow(dataset) > 0 & !is.null(reference_field) & !is.null(duplicate_field)) {
-    cat("\nSample of non-matching", reference_field, "and", duplicate_field, " (excluding blanks):\n")
-    sample_threshold <- 10
-    print(sample_n(dataset, min(nrow(dataset), sample_threshold)),
-      row.names = FALSE, right = FALSE
-    )
-  }
-  return(rank_by_agency(dataset))
-}
-
-# #########################################################################
-# detect_duplicates <- function(
-#     dataset,
-#     reference_field,
-#     duplicate_field) {
-#   
-#   #Identify matching fields including blanks and NA values
-#   rows_condition_0 <- dataset[[reference_field]] == dataset[[duplicate_field]]
-# 
-#   rows_condition_1 <- dataset[[reference_field]] != dataset[[duplicate_field]]
-# 
-#   all_non_matching_rows <- rows_condition_1
-#   non_matching_fields <- dataset[all_non_matching_rows, ]
-#   num_non_matching_fields <- nrow(non_matching_fields)
-#   non_matching_percentage <- round((num_non_matching_fields / num_rows_d311) * 100, 2)
-#   non_matching_fields <- non_matching_fields %>%
-#     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
-# 
-#   all_matching_rows <- rows_condition_0
-#   matching_fields <- dataset[all_matching_rows, ]
-#   num_matching_fields <- nrow(matching_fields)
-#   matching_percentage <- round((num_matching_fields / num_rows_d311) * 100, 2)
-#   matching_fields <- matching_fields %>%
-#     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
-# 
-#   if (num_non_matching_fields > 0) {
-#   
-#     if (num_matching_fields > 0) {
-#     cat(
-#       "\n\nThere are",
-#       format(num_matching_fields, big.mark = ","),
-#       "matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-#       matching_percentage, "% of data.\n")
-#     }
-#     cat(
-#       "\nThere are",
-#       format(num_non_matching_fields, big.mark = ","),
-#       "non-matches between '", reference_field, "' and '", duplicate_field, "'\nrepresenting",
-#       non_matching_percentage, "% of data.\n")
-#     
-#   return(non_matching_fields)
-#   }
-#   else {
-#   cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
-#   }
-# }
-# 
-# # #########################################################################
-# create_boxplot <- function(
-#     dataset,
-#     x_axis_title,
-#     chart_title,
-#     chart_file_name) {
-#   
-#     boxplot_chart <- ggplot(data = dataset, aes(x = duration, y = factor(1))) +
-#       geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
-#       geom_boxplot(width = 0.2, fill = "#E69F00", alpha = 0.7, color = "black") +
-#       theme(
-#         legend.position = "none", plot.title = element_text(hjust = 0.5),
-#         plot.subtitle = element_text(size = 9)
-#       ) +
-#       labs(
-#         title = chart_title, x = x_axis_title, y = "",
-#         subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(dataset), sep = "")
-#       )
-#   suppressMessages(print(boxplot_chart))
-# }
-# 
-# # #########################################################################
-# create_violin_chart <- function(
-#     dataset,
-#     x_axis_title,
-#     x_axis_field,
-#     chart_title,
-#     chart_file_name) {
-#   
-#   violin_chart <- ggplot(data = dataset, aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
-#     geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2", size = 1.9, shape = 17) +
-#     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
-#     geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.6, 
-#                  outlier.colour = "black", outlier.size = 0.75) +
-#     labs(
-#       title = chart_title,
-#       x = x_axis_title,
-#       y = "",
-#       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
-#                        format(nrow(dataset), big.mark = ","), sep = "")
-#     ) +
-#     theme(
-#       plot.title = element_text(size = 13, hjust = 0.5),
-#       plot.subtitle = element_text(size = 9)
-#     )
-# 
-#   suppressMessages(print(violin_chart))
-#   chart_path <- file.path(chart_directory_path, chart_file_name)
-#   suppressMessages(ggsave(chart_path, plot = violin_chart, width = 10, height = 8))
-# }
-# 
-# # #########################################################################
-# # Function to filter rows with non-numeric or non-5-digit zip codes for a specific field
-# filter_non_numeric_zipcodes <- function(df, zip_field) {
-# 
-#   # Define a logical condition to filter rows based on the selected field
-#   condition <- !is.na(df[[zip_field]]) & df[[zip_field]] != "" &
-#     !grepl("^[0-9]{5}$", df[[zip_field]])
-# 
-#   # Use the condition to subset the DataFrame
-#   invalid_rows <- df[condition, ]
-#   return(invalid_rows)
-# }
-# 
-# # #########################################################################
-# # Function to check if a column contains valid dates
-# areAllDates <- function(dateField) {
-# 
-#   # remove blank and NAs
-#   allDates <-
-#     suppressWarnings(!is.na(as.Date(dateField[dateField != ""], format = "%m/%d/%Y %I:%M:%S %p")))
-# 
-#   if (!all(allDates)) {
-#     # find indices of values that are not dates
-#     not_date_indices <-
-#       which(is.na(as.Date(dateField[dateField], format = "%m/%d/%Y %I:%M:%S %p")))
-# 
-#     cat("Values that are not dates: ")
-#     print(dateField[not_date_indices], row.names = FALSE, right = FALSE)
-#   }
-#   return(all(allDates))
-# }
-# 
-# # #########################################################################
-# # Validate that number fields are all numeric
-# areAllNumbers <- function(numberField) {
-#   
-#   # Identify the non-blank values using nzchar()
-#   non_blank_indices <- which(nzchar(numberField))
-# 
-#   # Subset the vector to keep only the non-blank values
-#   numberField <- numberField[non_blank_indices]
-# 
-#   # remove blank and NAs
-#   allNumbers <-
-#     suppressWarnings(!is.na(as.numeric(numberField[numberField != ""])))
-# 
-#   if (!all(allNumbers)) {
-#     # find indices of values that are not numeric
-#     non_numeric_values <-
-#       numberField[grepl("[^[:digit:]]", numberField)]
-# 
-#     cat(
-#       "Non-numeric values in the vector: ",
-#       non_numeric_values,
-#       "\n"
-#     )
-#   }
-#   return(all(allNumbers))
-# }
-# 
-# # #########################################################################
-# areFiveDigits2 <- function(zipcodes) {
-#   
-#   # Remove blank values and <NA> values
-#   non_blank_zipcodes <- zipcodes[!(nzchar(zipcodes) | is.na(zipcodes))]
-# 
-#   # Identify non-numeric and non-5-digit zipcodes using regular expression
-#   zipcode_pattern <- "^\\d{5}$"
-# 
-#   # identify non-compliant zipcodes
-#   not_valid_zipcodes <-
-#     non_blank_zipcodes[!grepl(zipcode_pattern, non_blank_zipcodes)]
-# 
-#   if (length(not_valid_zipcodes) > 0) {
-#     cat(
-#       "\n\n*****Non 5-digit and/or non-numeric zipcodes found: ",
-#       not_valid_zipcodes
-#     )
-#     return(FALSE)
-#   }
-#   return(TRUE)
-# }
-# 
-# # #########################################################################
-# # Validate that all fields are in the list of allowable values
-# are_valid_values <- function(
-#     dataset,
-#     listValidValues,
-#     field_name) {
-#   # Subset the vector to keep only the non-blank values
-#   dataset <- dataset[nzchar(dataset) & !is.na(dataset) & dataset != ""]
-# 
-#   # determine valid values
-#   check_list <- (dataset %in% listValidValues[, 1])
-#   inList <- dataset[check_list]
-#   notInList <- dataset[!check_list]
-#   num_invalid <- length(notInList)
-# 
-#   if (num_invalid > 0) {
-#     invalid_d311_rows <- d311[(d311[[field_name]] %in% notInList), ]
-# 
-#     # retrieve the number of blank fields for calculation purposes
-#     number_of_blank_entries <-
-#       missingDataPerColumn$blanks[missingDataPerColumn$field == field_name]
-#     percentage_invalid <- round((num_invalid / (num_rows_d311 - number_of_blank_entries)) * 100, 2)
-#     unique_invalid <- length(unique(notInList))
-#     cat(
-#       "\n\nThere are",
-#       format(num_invalid, big.mark = ","),
-#       "invalid", field_name, "entries \nrepresenting",
-#       percentage_invalid,
-#       "% of non-blank data,\n"
-#     )
-#     cat(
-#       "comprised of",
-#       unique_invalid,
-#       "different", field_name, "entries.\n"
-#     )
-# 
-#     # Sort the table in descending order
-#     sorted_invalid_table <-
-#       sort(table(notInList), decreasing = TRUE)
-# 
-#     # Convert the table to a data frame and calculate the percentage column
-#     invalid_df <-
-#       data.frame(
-#         invlaid_names = names(sorted_invalid_table),
-#         count = as.numeric(sorted_invalid_table)
-#       )
-#     invalid_df$percentage <- round(prop.table(invalid_df$count) * 100, 2)
-#     invalid_df <- invalid_df[order(invalid_df$percentage, invalid_df$invlaid_names, decreasing = TRUE), ]
-#     invalid_df$cumulative_percentage <- cumsum(invalid_df$percentage)
-# 
-#     # Print the top 10 values
-#     cat("\nTop Ten invalid '", field_name, "':\n")
-#     print(head(invalid_df, 10), right = FALSE)
-#     chart_title <-
-#       x <- rank_by_agency(invalid_d311_rows)
-#     results <- list(all(check_list), notInList, invalid_d311_rows)
-#     return(results)
-#   } else {
-#     cat("\n\nAll values of '", field_name, "'are valid.")
-#     results <- list(all(check_list), notInList)
-#     return(results)
-#   }
-# }
-# 
-# # #########################################################################
-# # Function to check if a column is a valid date format
-# check_date_format <- function(column_name) {
-#   date_column <- d311[[column_name]]
-#   date_check <- try(as.Date(date_column, format = "%m/%d/%Y %I:%M:%S %p"))
-# 
-#   if (inherits(date_check, "try-error")) {
-#     invalid_dates <- date_column[!grepl("^\\d{2}/\\d{2}/\\d{4} \\d{2}:\\d{2}:\\d{2} [APMapm]{2}$", date_column)]
-#     if (length(invalid_dates) > 0) {
-#       print(paste("Invalid dates in", column_name, ":", invalid_dates, sep = ""))
-#     }
-#     return(paste("Field '", column_name, "' is not in a valid date format", sep = ""))
-#   } else {
-#     return(paste("Field '", column_name, "' is in a valid date format", sep = ""))
-#   }
-# }
-# 
-# #########################################################################
+#########################################################################
+#########################################################################
 # File contains column names in the "header" line.
 # The R "read.csv" function uses a "." to replace the spaces in column names.
 # This makes the column names into legal variables, but the "." can cause problems elsewhere.
 # The function "make_column_names_user_friendly" replaces the "." with an underscore "_".
 # thus simplifying the field names. Additionally, the field names
 # are converted to upper case.
-#########################################################################
-
 
 #########################################################################
 # Load the USPS zipcode file
@@ -666,13 +157,6 @@ d311[, columns_to_upper] <- lapply(d311[, columns_to_upper], toupper)
 cat("\n\n**********DATA SUMMARY**********\n")
 
 #########################################################################
-# d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-# d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-# d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-# d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
-#   format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York"
-# )
-
 # Consolidate Agency names
 d311 <- consolidate_agencies((d311))
 
@@ -680,58 +164,12 @@ d311 <- consolidate_agencies((d311))
 # Filter out rows with NA values in the created_date column
 d311 <- d311[!is.na(d311$created_date), ]
 
-dst_rows_created <- filter_dst_rows(d311, "created_date")
-head(dst_rows_created, 50)
-
-# Apply the function to closed_date
-dst_rows_closed <- filter_dst_rows(d311, "closed_date")
-head(dst_rows_closed, 50)
-
-dst_rows_resolution <- filter_dst_rows(d311, "resolution_action_updated_date")
-head(dst_rows_resolution, 50)
-
-dst_rows_due <- filter_dst_rows(d311, "due_date")
-head(dst_rows_due, 50)
-
-# Step 1: Get the indices of the rows in dst_rows_created
-created_indices_to_remove <- which(d311$created_date %in% dst_rows_created$created_date)
-closed_indices_to_remove <- which(d311$closed_date %in% dst_rows_closed$closed_date)
-resolution_indices_to_remove <- which(d311$resolution_action_updated_date %in% dst_rows_resolution$resolution_action_updated_date)
-due_indices_to_remove <- which(d311$due_date %in% dst_rows_due$due_date)
-
-# Step 3: Combine the indices (since some rows might overlap between created_date and closed_date)
-all_indices_to_remove <- unique(c(
-  if (exists("created_indices_to_remove")) created_indices_to_remove else NULL,
-  if (exists("closed_indices_to_remove")) closed_indices_to_remove else NULL,
-  if (exists("resolution_indices_to_remove")) resolution_indices_to_remove else NULL,
-  if (exists("due_indices_to_remove")) due_indices_to_remove else NULL
-))
-
-# Step 4: Remove these rows from d311
-d311 <- d311[-all_indices_to_remove, ]
-num_rows_d311 <- nrow(d311)
-
-# Check the result
-cat("\nNumber of rows removed for invalid DST times is:", length(all_indices_to_remove),
-    "which is", (length(all_indices_to_remove)/num_rows_d311)*100, "% of the overall dataset.\n")
-
-
-# Convert character date-time strings to datetime objects with America/New_York timezone
-# d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
-# d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
-
-# Test if each date field is in POSIXct format
-d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
-                                                  format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
-
-# # Coerce class to POSIXct to avoid the POSIXt class (a subclass of POSIXct)
-# class(d311$created_date) <- "POSIXct"
-# class(d311$closed_date) <- "POSIXct"
-# class(d311$due_date) <- "POSIXct"
-# class(d311$resolution_action_updated_date) <- "POSIXct"
+# Convert each date field to POSIXct format in UTC
+d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date, 
+                                        format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
 
 # Specify the date columns to adjust
 date_columns <- c("created_date", "closed_date", "resolution_action_updated_date", "due_date")
@@ -774,14 +212,28 @@ latest_title <- format(as.Date(latest_date_formatted), format = "%Y-%m-%d")
 
 chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
 
+#########################################################################
+# consolidate Agencies (DCA, DOITT, NYC311-PRD)
+d311 <- consolidate_agencies((d311))
+
+sorted_by_agency <- rank_by_agency(d311)
+
+#chart_title <- "SR count by Agency & cumulative percentage"
+create_combo_chart(
+  dataset = d311,
+  chart_title = NULL,
+  chart_file_name = "SRs_by_Agency.pdf"
+)
+
 # Display the results
 cat("\nNumber of rows in the 311 SR data set:", format(num_rows_d311, big.mark = ","))
-cat("\n\nNumber of columns in the 311 SR data set:", format(num_columns_d311, big.mark = ","))
-cat("\n\nData contains SRs created from", earliest_date_formatted, "through", latest_date_formatted, "\n")
+cat("\nNumber of columns in the 311 SR data set:", format(num_columns_d311, big.mark = ","))
+cat("\nNumber of Agencies represented:", length(unique(d311$agency)) )
+cat("\n\nData contains SRs created from", earliest_date_formatted, "through", latest_date_formatted)
 
 #########################################################################
 
-cat("\n**********BLANK and NA ENTRIES BY COLUMN**********")
+cat("\n\n**********BLANK and N/A ENTRIES BY COLUMN**********")
 
 #########################################################################
 # calculate the number of blank and N/A data entries.
@@ -833,10 +285,6 @@ print(missingDataPerColumn, row.names = FALSE, right = FALSE)
 max_count <- max(missingDataPerColumn$blanks)
 total_count <- sum(missingDataPerColumn$count)
 
-result <- calculate_values(max_count)
-starting_value <- as.numeric(result$starting_value)
-increment <- result$increment
-
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
   geom_bar(stat = "identity", fill = "#009E73") +
@@ -854,15 +302,22 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
     x = field, y = total_empty, label = pct_empty,
     angle = -70
   ), size = 4) +
-  geom_hline(
-    yintercept = seq(starting_value, max_count, by = increment),
-    linetype = "dotted", color = "gray40"
-  ) +
-#  ggtitle("Number and % of blank/missing fields per column",
   ggtitle(NULL,
     subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
   ) +
   labs(y = NULL, x = NULL)
+
+# Build the plot to extract y-axis breaks
+built_plot <- ggplot_build(blank_chart)
+
+# Extract Y-axis breaks (try different possible locations)
+y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
+# Filter out any NA values from y_breaks
+y_breaks <- y_breaks[!is.na(y_breaks)]
+
+# Add hlines using the Y-axis breaks
+blank_chart <- blank_chart +
+  geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
 
 # Print the bar chart
 print(blank_chart)
@@ -870,22 +325,11 @@ chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
 
 #########################################################################
-# consolidate Agencies (DCA, DOITT, NYC311-PRD)
-d311 <- consolidate_agencies((d311))
 
-sorted_by_agency <- rank_by_agency(d311)
-
-#chart_title <- "SR count by Agency & cumulative percentage"
-chart_title <- NULL
-chart_file_name <- "SRs_by_Agency.pdf"
-
-create_combo_chart(
-  d311,
-  chart_title,
-  chart_file_name
-)
+cat("\n\n**********COMPLAINT TYPES**********")
 
 #########################################################################
+
 # Calculate complaint frequency and responsible agency
 complaintData <- as.data.frame(table(d311$complaint_type))
 complaintData <- complaintData[order(-complaintData$Freq), ]
@@ -925,11 +369,11 @@ complaintData$agency[is.na(complaintData$agency)] <- "MULTIPLE"
 
 colnames(complaintData) <- c("complaint_type", "count", "percent", "cumulative_percent", "agency")
 
-cat("\nTop 10 'complaint_type's and responsible Agency:\n")
-print(head(complaintData, 10), row.names = FALSE, right = FALSE)
+cat("\nTop 20 'complaint_type's and responsible Agency:\n")
+print(head(complaintData, 20), row.names = FALSE, right = FALSE)
 
-cat("\nBottom 10 'complaint_type's and responsible Agency:\n")
-print(tail(complaintData[, c("complaint_type", "count", "agency")], 10),
+cat("\nBottom 20 'complaint_type's and responsible Agency:\n")
+print(tail(complaintData[, c("complaint_type", "count", "agency")], 20),
   row.names = FALSE, right = FALSE
 )
 
@@ -951,11 +395,10 @@ colnames(d311)[colnames(d311) == "agency"] <- "temp_agency"
 colnames(d311)[colnames(d311) == "complaint_type"] <- "agency"
 
 #chart_title <- "Top 20 Complaints and cumulative percentage"
-chart_file_name <- "SR_by_Complaint_Type.pdf"
-
 create_combo_chart(
   dataset = d311,
-  chart_file_name = chart_file_name
+  chart_title = NULL,
+  chart_file_name = "SR_by_Complaint_Type.pdf"
 )
 
 # Restore column names
@@ -1008,7 +451,7 @@ invalid_incident_zip_rows <- filter_non_numeric_zipcodes(d311, "incident_zip")
 
 num_row_invalid_incident_zip_rows <- nrow(invalid_incident_zip_rows)
 if (num_row_invalid_incident_zip_rows == 0) {
-  cat("\n\nAll 'incident_zip' entries are 5 numeric digits\n.")
+  cat("\n\nAll 'incident_zip' entries are 5 numeric digits.")
 } else {
   cat("\n\nThere are", num_row_invalid_incident_zip_rows, "non-numeric, non-5-digit 'incident_zip' entries.\n")
 
@@ -1041,7 +484,7 @@ cat("\n\nAre all values in 'longitude' numbers?", longitudeNum)
 
 #########################################################################
 
-cat("\n\n**********CHECKING FOR ALLOWABLE AND VALID VALUES**********\n")
+cat("\n\n\n**********CHECKING FOR ALLOWABLE AND VALID VALUES**********\n")
 
 #########################################################################
 # determine if the unique_key is in fact unique
@@ -1050,14 +493,14 @@ cat("\nAre all 'unique_keys' truly unique?", uniqueKeys, "\n")
 
 #########################################################################
 # Check to see if any of the latitudes or longitudes fall outside the extreme points of New York City.
-# Change the lat/long fields into type "numeric" to enable comparison.
+# Change the lat/long fields to "numeric" to enable comparison.
 
 # Extreme points of the boundaries of New York City as provide by chatGPT and confirmed elsewhere.
 # Note that Longitudes (west of prime meridian) are expressed as negative values
-southernMostLatitude <- 40.477399
-northernMostLatitude <- 40.917576
-easternMostLongitude <- -73.700181
-westernMostLongitude <- -74.259090
+southernMostLatitude <- 40.4961
+northernMostLatitude <- 40.9156
+easternMostLongitude <- -73.7004
+westernMostLongitude <- -74.2591
 
 # Convert lat/long to numeric conversions for comparisons
 d311$latitude <- as.numeric(d311$latitude)
@@ -1096,6 +539,65 @@ if (nrow(badLongitudes) > 0) {
   print(head(badLongitudes[, c("unique_key", "agency", "longitude")], 5), row.names = FALSE, right = FALSE)
 }
 
+# Check to see if any of the x or y state plane coordinates fall outside the extreme points of New York City.
+# Define the latitude and longitude points.
+points_df <- data.frame(
+  name = c("Northernmost", "Easternmost", "Southernmost", "Westernmost"),
+  lat = c(40.9156, 40.4961, 40.4961, 40.9156),
+  lon = c(-73.7004, -73.7004, -74.2591, -74.2591)
+)
+
+#Convert to an sf object and apply the State Plane projection.
+points_sf <- st_as_sf(points_df, coords = c("lon", "lat"), crs = 4326)  # WGS84 lat/long
+points_sp <- st_transform(points_sf, crs = 2263)  # Convert to State Plane
+
+# Change the x/y_coordinate_state_plane fields to "numeric" to enable comparison.
+d311$x_coordinate_state_plane<- as.numeric(d311$x_coordinate_state_plane)
+d311$y_coordinate_state_plane <- as.numeric(d311$y_coordinate_state_plane)
+
+# Extract the bounding box (xmin, ymin, xmax, ymax) from the sf object
+bbox <- st_bbox(points_sp)
+
+# Assign the individual values to variables
+xmin <- as.numeric( bbox["xmin"] )
+xmax <- as.numeric( bbox["xmax"] )
+ymin <- as.numeric( bbox["ymin"] )
+ymax <- as.numeric( bbox["ymax"] )
+
+# Filter NA values
+d311_clean <- d311[!is.na(d311$x_coordinate_state_plane) & !is.na(d311$y_coordinate_state_plane), ]
+
+# Check for x-coordinate outliers
+x_outliers <- d311_clean[
+  d311_clean$x_coordinate_state_plane < xmin | 
+    d311_clean$x_coordinate_state_plane > xmax, 
+]
+
+# Check for y-coordinate outliers
+y_outliers <- d311_clean[
+  d311_clean$y_coordinate_state_plane < ymin | 
+    d311_clean$y_coordinate_state_plane > ymax, 
+]
+
+#Print status for x-coordinate outliers
+if (nrow(x_outliers) == 0) {
+  cat("\nAll x_coordinate_state_plane values lie within the boundaries of NYC.\n")
+} else {
+  cat("\n\nThere are", nrow(x_outliers), "x_coordinate_state_plane values outside the boundaries of NYC.\n")
+  cat("\nHere are the first few rows of x-coordinate outliers:\n")
+  print(head(x_outliers[, c("unique_key", "agency", "x_coordinate_state_plane")]))
+}
+
+# Print status for y-coordinate outliers
+if (nrow(y_outliers) == 0) {
+  cat("All y_coordinate_state_plane values lie within the boundaries of NYC.\n")
+} else {
+  cat("\n\nThere are", nrow(y_outliers), "y_coordinate_state_plane values outside the boundaries of NYC.\n")
+  cat("\nHere are the first few rows of y-coordinate outliers:\n")
+  print(head(y_outliers[, c("unique_key", "agency", "y_coordinate_state_plane")]))
+}
+
+  
 #########################################################################
 address_type_results <- are_valid_values(d311$address_type, data.frame(
   values = c(
@@ -1204,25 +706,33 @@ cbValues <-
   )
 
 cb_results <- are_valid_values(d311$community_board, data.frame(cbValues), "community_board")
+
 if (!cb_results[[1]]) {
-  chart_title <- "Invalid community boards by Agnecy & cumulative percentage"
-  chart_file_name <- "invalid_community_boards.pdf"
-  cb_dataset <- cb_results[[3]]
-  create_combo_chart(cb_dataset, chart_title, chart_file_name)
+#  cb_dataset <- cb_results[[3]]
+  create_combo_chart(
+                    dataset = cb_results[[3]],
+                    chart_title = "Invalid community boards by Agnecy & cumulative percentage",
+                    chart_file_name = "invalid_community_boards.pdf")
 }
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
 
 incident_zip_results <- are_valid_values(d311$incident_zip, USPSzipcodesOnly, "incident_zip")
+
 if (!incident_zip_results[[1]]) {
-  chart_title <- "Invalid incident_zip by Agnecy & cumulative percentage"
-  chart_file_name <- "invalid_incident_zip.pdf"
-  incident_zip_dataset <- incident_zip_results[[3]]
-  create_combo_chart(incident_zip_dataset, chart_title, chart_file_name)
+   create_combo_chart(
+     dataset = incident_zip_results[[3]],
+     chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
+     chart_file_name = "invalid_incident_zip.pdf")
 }
 
 #########################################################################
+
+cat("\n\n**********CHECKING FOR ALLOWABLE AND VALID DATES**********\n")
+
+#########################################################################
+
 # Duration is the time between created_date and closed_date
 # Compute and store "duration" in a new additional column for the "d311" dataframe.
 d311$duration <-
@@ -1247,7 +757,7 @@ num_rows_closedBeforeOpened <- nrow(closedBeforeOpened)
 
 if (num_rows_closedBeforeOpened > 0) {
   cat(
-    "\n\nThere are", format(num_rows_closedBeforeOpened, big.mark = ","),
+    "\nThere are", format(num_rows_closedBeforeOpened, big.mark = ","),
     "SRs 'closed' before they were 'created' (negative duration) \nrepresenting",
     round(num_rows_closedBeforeOpened / (num_rows_d311 - numBlankClosedDate) * 100, 4),
     "% of non-blank data.\n"
@@ -1287,27 +797,20 @@ if (num_rows_closedBeforeOpened > 0) {
 
   summary_df <- rank_by_agency(closedBeforeOpened)
 
-  chart_title <- "negative duration SRs by Agency & cumulative percentage"
-  chart_file_name <- "negative_duration_SR_barchart.pdf"
-
   create_combo_chart(
-    closedBeforeOpened,
-    chart_title,
-    chart_file_name
+    dataset = closedBeforeOpened,
+    chart_title = "negative duration SRs by Agency & cumulative percentage",
+    chart_file_name = "negative_duration_SR_barchart.pdf"
   )
 
-  x_axis_label <- "Negative duration (days)"
-  x_axis_field <- "duration"
 #  chart_title <- "Closed before Created (negative duration days)"
-  chart_title <- NULL
-  chart_file_name <- "negative_duration_SR_violin.pdf"
-  
+
   negativeDurationViolin <- create_violin_chart(
-    large_neg_duration,
-    x_axis_label,
-    x_axis_field,
-    chart_title,
-    chart_file_name
+    dataset = large_neg_duration,
+    x_axis_title = "Negative duration (days)",
+    x_axis_field = "duration",
+    chart_title = NULL,
+    chart_file_name = "negative_duration_SR_violin.pdf"
   )
 
   # Create boxplot of the (negative) duration values
@@ -1343,13 +846,14 @@ zeroDurations <-
     "duration",
     "agency"
   )]
+
 numBlankClosedDate <-
   missingDataPerColumn[missingDataPerColumn$field == "closed_date", "total_empty"]
 
 num_rows_zeroDurations <- nrow(zeroDurations)
 if (num_rows_zeroDurations > 0) {
   cat(
-    "\n\nThere are",
+    "\nThere are",
     format(num_rows_zeroDurations, big.mark = ","),
     "SRs that are 'closed' and 'created' at the exact same time, \nto the second, representing",
     round(num_rows_zeroDurations / (num_rows_d311 - numBlankClosedDate) * 100, 4),
@@ -1360,15 +864,13 @@ if (num_rows_zeroDurations > 0) {
   random_sample <- zeroDurations %>% sample_n(min(num_rows_zeroDurations, 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
 
-  sorted_zero_durations <- rank_by_agency(zeroDurations)
+#  sorted_zero_durations <- rank_by_agency(zeroDurations)
 
-  chart_title <- "Zero duration SRs by Agency & cumulative percentage"
-  chart_file_name <- "zero_duration_SR.pdf"
-  if (!is.null(sorted_zero_durations)) {
+  if (!is.null(zeroDurations)) {
     create_combo_chart(
-      zeroDurations,
-      chart_title,
-      chart_file_name
+      dataset = zeroDurations,
+      chart_title = "Zero duration SRs by Agency & cumulative percentage",
+      chart_file_name = "zero_duration_SR.pdf"
     )
   }
 } else {
@@ -1392,9 +894,7 @@ closedinFuture <-
 
 # Compute the # of days into the future the SR is closed, based on the max_created_date + 1 day
 closedinFuture$future_days <- round(as.numeric(difftime(closedinFuture$closed_date,
-  max_closed_date,
-  units = "days"
-)), 4)
+  max_closed_date, units = "days")), 4)
 
 numBlankClosedDate <-
   missingDataPerColumn[missingDataPerColumn$field == "closed_date", "total_empty"]
@@ -1402,6 +902,7 @@ numBlankClosedDate <-
 num_rows_future <- nrow(closedinFuture)
 
 if (num_rows_future > 0) {
+  
   max_closed_date_readable <- format(max_closed_date, "%Y-%m-%d %H:%M:%S")
   cat("\n(The maximum 'closed_date' and time for this dataset is:", max_closed_date_readable, ")")
   cat(
@@ -1436,7 +937,6 @@ if (num_rows_future > 0) {
         plot.title = element_text(hjust = 0.5, size = 13),
         plot.subtitle = element_text(size = 9)
       ) +
-      #    scale_x_reverse() +
       labs(
         title = "SRs closed in the future",
         x = "Days closed in the future",
@@ -1448,7 +948,7 @@ if (num_rows_future > 0) {
     ggsave(chart_path, plot = closedinFutureChart, width = 10, height = 8)
   }
 } else {
-  cat("\n\nThere are no SRs with a 'closed_date' in the future.\n")
+  cat("\n\nThere are no SRs with a 'closed_date' in the future.")
 }
 
 #########################################################################
@@ -1466,7 +966,7 @@ numBlankDueDate <-
 num_row_bad_due_date <- nrow(bad_due_date)
 if (num_row_bad_due_date > 0) {
   cat(
-    "\n\nThere are",
+    "\nThere are",
     format(num_row_bad_due_date, big.mark = ","),
     "SRs with a 'due_date' before 'created_date', \nrepresenting",
     round(num_row_bad_due_date / (num_rows_d311 - numBlankDueDate) * 100, 2),
@@ -1495,7 +995,6 @@ d311 <- d311 %>%
       NA
     )
   )
-
 
 post_closed_positive <- d311[d311$postClosedUpdateDuration > 0 & !is.na(d311$postClosedUpdateDuration), ]
 
@@ -1526,7 +1025,7 @@ if (num_row_extreme_late > 0) {
     "\nThere are", num_row_extreme_late, "extremely late (>", too_large_threshold,
     "days) resoultion updates. \nThese are removed and excluded from the analysis."
   )
-  cat("\n\nHere is a sample:\n")
+  cat("\n\nSample:\n")
   print(head(exclude_extreme_late_update, 5), row.names = FALSE)
 } else {
   cat("\nThere are no SRs with extremely large (>", too_large_threshold, ") post-closed updates.", sep = "")
@@ -1537,51 +1036,45 @@ if (num_row_updatedLate > 0) {
     "\nThere are", num_row_updatedLate, "SRs with large (>", resoultion_action_threshold, "but <=", too_large_threshold,
     "days) 'resolution_action_updated_date(s)'\n"
   )
-  cat("\nHere is a sample:\n")
+  cat("\nSample:\n")
   random_sample_large <- updatedLate %>% sample_n(min(num_row_updatedLate, 5)) # random sample
   print(random_sample_large, row.names = FALSE, right = FALSE)
 }
 
 if (num_row_updatedLate > 0) {
-  cat("\nThe median of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(median(updatedLate$postClosedUpdateDuration), 4), "days")
-  cat("\nThe average of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(mean(updatedLate$postClosedUpdateDuration), 4), "days")
-  cat("\nThe std dev of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(sd(updatedLate$postClosedUpdateDuration), 4), "days\n")
-  cat("\n\nThe mean of all post-closed resolution updates is: ",
-    round(mean(post_closed_positive$postClosedUpdateDuration), 4), " days [", round(mean(post_closed_positive$postClosedUpdateDuration) * 24, 4), " hours]",
+  cat("\nMedian of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(median(updatedLate$postClosedUpdateDuration), 4), "days")
+  cat("\nAverage of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(mean(updatedLate$postClosedUpdateDuration), 4), "days")
+  cat("\nStandard deviation of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(sd(updatedLate$postClosedUpdateDuration), 4), "days\n")
+  cat("\n\nThe average of all post-closed resolution updates in total is: ",
+    round(mean(post_closed_positive$postClosedUpdateDuration), 4), " days [", round(mean(post_closed_positive$postClosedUpdateDuration) * 24, 4), " hours]\n",
     sep = ""
   )
   if (!is.null(updatedLate)) {
-    sorted_updateLate <- rank_by_agency(updatedLate)
+#    sorted_updateLate <- rank_by_agency(updatedLate)
 
-    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage")
-    chart_file_name <- "post_Closed_Bar_Chart.pdf"
     create_combo_chart(
-      updatedLate,
-      chart_title,
-      chart_file_name
-    )
+      dataset = updatedLate,  
+      chart_title = paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage"),
+      chart_file_name = "post_Closed_Bar_Chart.pdf" )
 
-    x_axis_name <- "Post_closed Resolution Update (days)"
-    x_axis_field <- "postClosedUpdateDuration"
 #    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
-    chart_title <- NULL
-    chart_file_name <- "post_closed_violin_chart.pdf"
-    
+
     post_closed_violin_chart <- create_violin_chart(
-      updatedLate,
-      x_axis_name,
-      x_axis_field,
-      chart_title,
-      chart_file_name
+      dataset = updatedLate,
+      x_axis_title = "Post_closed Resolution Update (days)",
+      x_axis_field = "postClosedUpdateDuration",
+      chart_title = NULL,
+      chart_file_name =  "post_closed_violin_chart.pdf"
     )
   }
+
 } else {
   cat("\n\nThere are no SRs with a 'resolution_action_updated_date' >", resoultion_action_threshold, "After 'closed_date'.\n")
 }
 
 #########################################################################
 
-cat("\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
+cat("\n\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
 
 #########################################################################
 # Check if "location" is a concatenation of "latitude" and "longitude"
@@ -1619,11 +1112,11 @@ nonMatching_park_borough <- detect_duplicates(
 )
 
 if (!is.null(nonMatching_park_borough)) {
-  sorted_park_borough <- rank_by_agency(nonMatching_park_borough)
+#  sorted_park_borough <- rank_by_agency(nonMatching_park_borough)
   create_combo_chart(
-    nonMatching_park_borough,
-    "non-matching between 'borough' and 'park_borough' by Agency & cumulative percentage",
-    "non_matching_park_borough_chart"
+    dataset = nonMatching_park_borough,
+    chart_title = "non-matching between 'borough' and 'park_borough' by Agency & cumulative percentage",
+    chart_file_name = "non_matching_park_borough_chart.pdf"
   )
 }
 
@@ -1639,18 +1132,19 @@ nonMatching_taxi_company_borough <- detect_duplicates(
 )
 
 if (!is.null(nonMatching_taxi_company_borough)) {
-  sorted_taxi_borough <- (nonMatching_taxi_company_borough)
-  chart_title <- "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage"
-  chart_file_name <- "non_matching_taxi_company_borough_chart.pdf"
+#  sorted_taxi_borough <- (nonMatching_taxi_company_borough)
   create_combo_chart(
-    nonMatching_taxi_company_borough,
-    chart_title,
-    chart_file_name
+    dataset = nonMatching_taxi_company_borough,
+    chart_title =  "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage",
+    chart_file_name = "non_matching_taxi_company_borough_chart.pdf"
   )
 }
 
 #########################################################################
-cat("\n\n\n***Case study analyzing Homeless Person Assistance response times.***\n")
+
+cat("\n\n\n**********CASE STUDY: ANALYZING RESPONSE TIMES FOR HOMELSS PERSON ASSISTANCE.**********\n")
+
+#########################################################################
 
 homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
   !is.na(d311$duration), ]
@@ -1658,20 +1152,18 @@ duration_mean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
 duration_sd <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
 duration_median <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
 
-cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless Person Assistance\n")
-cat("\nAverage response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
-# cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
+cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless Person Assistance.")
+cat("\n\nAvg response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
+cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
 cat("\nMedian response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   ",
-  duration_median, " days (", 24 * duration_median, " hrs)",
-  sep = ""
-)
+  duration_median, " days (", 24 * duration_median, " hrs)",sep = "" )
 
 negative_homeless_assistance_SRs <- homeless_assistance_SRs[homeless_assistance_SRs$duration < 0 &
   !is.na(homeless_assistance_SRs$duration), ]
 num_row_neg_duration <- nrow(negative_homeless_assistance_SRs)
 
 if (num_row_neg_duration > 0) {
-  cat("\n\n***Removing", num_row_neg_duration, "SRs with negative & zero durations.***\n")
+  cat("\n\n***Removing", num_row_neg_duration, "SRs with extreme negative durations.***\n")
 
   homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
     !is.na(d311$duration) & d311$duration > 0, ]
@@ -1684,22 +1176,15 @@ if (num_row_neg_duration > 0) {
   cat("\nAvg response time (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean_clean, "days")
   cat("\nStd deviation for (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd_clean, "days")
   cat("\nMedian response time (cleaned data)  'HOMELESS PERSON ASSISTANCE': ",
-    duration_median_clean, " days (", duration_median_clean * 24, " hrs)",
-    sep = ""
-  )
-  cat("\n\nMaximum response time:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
-  
-  chart_title <- "Response time for 'Homeless Person Assistance (cleaned data)' SRs"
-  chart_file_name <- "homeless_response_time_clean_violin.pdf"
-  x_axis_name <- "Response time (days)"
-  x_axis_field <- "duration"
+    duration_median_clean, " days (", duration_median_clean * 24, " hrs)", sep = "" )
+  cat("\n\nThe maximum response time for this study is:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
   
   homeless_violin_chart <- create_violin_chart(
-    homeless_assistance_SRs,
-    x_axis_name,
-    x_axis_field,
-    chart_title,
-    chart_file_name
+    dataset = homeless_assistance_SRs,
+    x_axis_title = "Response time (days)",
+    x_axis_field = "duration",
+    chart_title = "Response time for 'Homeless Person Assistance (cleaned data)' SRs",
+    chart_file_name = "homeless_response_time_clean_violin.pdf"
   )
 } else {
   cat("\n\nThere are no negative duration Homeless Person Assistance SRs to remove.")
@@ -1707,7 +1192,7 @@ if (num_row_neg_duration > 0) {
 
 #########################################################################
 
-##### CROSS STREET/INTERSECTION STREET ANALYSYS #####
+cat("\n\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********n")
 
 #########################################################################
 # Normalize street names
@@ -1752,7 +1237,7 @@ redundant_columns <- c(
   "translated_borough_boundaries"
 )
 
-cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant fields:\n")
+cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant and added fields:\n")
 
 # Print the redundant columns vertically
 index <- 1
@@ -1771,10 +1256,10 @@ reduced_size <- object.size(d311_reduced)
 size_reduction <- original_size - reduced_size
 
 # Print the results
-cat("Original size:", format(original_size, units = "auto"), "\n")
-cat("Size after removing redundant columns:", format(reduced_size, units = "auto"), "\n")
-cat("Potential size reduction:", format(size_reduction, units = "auto"), "or",
-    round(size_reduction/original_size * 100, 1),  "%")
+cat("\nOriginal size:", format(original_size, units = "auto"))
+cat("\nSize after removing redundant columns:", format(reduced_size, units = "auto"))
+cat("\nPotential size reduction:", format(size_reduction, units = "auto"), "or",
+    round(size_reduction/original_size * 100, 1),  "%\n")
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
@@ -1792,7 +1277,7 @@ if (duration > 3600) {
 
 program_end <- as.POSIXct(Sys.time())
 formatted_end_time <- format(program_end, "%Y-%m-%d %H:%M:%S")
-cat("\nExecution ends at:", formatted_end_time)
+cat("\n\nExecution ends at:", formatted_end_time)
 cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
 
 #########################################################################

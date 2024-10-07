@@ -41,7 +41,7 @@ detect_duplicates <- function(
     return(non_matching_fields)
   }
   else {
-    cat("\nAll values match between '", reference_field, "' and '", duplicate_field, "'\n")
+    cat("\nThere is a 100% match between '", reference_field, "' and '", duplicate_field)
   }
 }
 

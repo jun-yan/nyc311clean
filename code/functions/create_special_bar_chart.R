@@ -12,30 +12,29 @@ create_special_bar_chart <- function(
     y_axis_labels = scales::comma,
     chart_file_name = NULL,
     horizontal_adjustment_max = 0.5,
-    vertical_adjustment_max = -1)    
+    vertical_adjustment_max = -1,
+    console_print_out_title = "Data Summary")
 {
   
-  # Find the max y value
-  y_max_count <- max(dataset[[y_col]])
-  y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
+  # Call the new function to calculate and print statistics
+  stats <- calculate_and_print_statistics(dataset, x_col, y_col, console_print_out_title)
   
-  result <- calculate_values(y_max_count)
-  starting_value <- result$starting_value
-  increment <- result$increment
-  
-#  cat("\nStarting Value", starting_value, " Increment", increment, "\n")
-  
-  # Calculate mean, median, and standard deviation if requested
-  y_mean_value <- round(mean(dataset[[y_col]]), 0)
-  y_median_value <- round(median(dataset[[y_col]]), 0)
-  y_sd_value <- round(sd(dataset[[y_col]]), 0)
+  # Use the returned values in your charting logic
+  y_max_count <- stats$y_max_count
+  y_min_count <- stats$y_min_count
+  y_mean_value <- stats$y_mean_value
+  y_median_value <- stats$y_median_value
+  y_sd_value <- stats$y_sd_value
+  max_row <- stats$max_row
+  min_row <- stats$min_row
+  y_total_count <- stats$y_total_count
   
   x_position <- levels(dataset[[x_col]])[floor(length(levels(dataset[[x_col]])) / 2)]
   
   # Create the ggplot chart
   special_bar_chart <- ggplot(dataset, aes(x = !!sym(x_col), y = !!sym(y_col))) +
     
-    geom_bar(stat = "identity", fill = "#009E73") +
+    geom_bar(stat = "identity", fill = "#44AA99") +
     
     scale_x_discrete() +
     
@@ -66,11 +65,17 @@ create_special_bar_chart <- function(
              size = 4.5, color = "black", 
              vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max ) +
       
-    geom_hline(
-        yintercept = seq(starting_value, y_max_count, by=increment),
-        linetype = "dotted", color = "gray40", linewidth = 0.3) +
-    
     labs(x = NULL, y = NULL)
+  
+  # Build the plot to extract y-axis breaks
+  built_plot <- ggplot_build(special_bar_chart)
+  
+  # Extract Y-axis breaks (try different possible locations)
+  y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
+  
+  # Add hlines using the Y-axis breaks
+  special_bar_chart <- special_bar_chart +
+    geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
   
   # Save the plot with adjusted size and DPI
   # Define aspect ratio (golden ratio)

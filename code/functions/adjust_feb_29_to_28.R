@@ -6,7 +6,7 @@ adjust_feb_29_to_28 <- function(data, date_cols) {
     if (col %in% names(data)) {
       # Ensure the column is in POSIXct format; if not, attempt to convert it
       if (!inherits(data[[col]], "POSIXct")) {
-        data[[col]] <- as.POSIXct(data[[col]], format = "%Y-%m-%d %H:%M:%S", tz = "America/New_York")
+        data[[col]] <- as.POSIXct(data[[col]], format = "%Y-%m-%d %H:%M:%S", tz = "UTC")
       }
       
       # Handle invalid conversion results (NA)
@@ -17,7 +17,7 @@ adjust_feb_29_to_28 <- function(data, date_cols) {
       num_29Feb_rows <- length(feb_29_indices)
       
       if (num_29Feb_rows > 0) {
-        cat("\nAdjusted", num_29Feb_rows, "rows in", col, "dated 29 February to 28 February\n")
+        cat("\nAdjusted", num_29Feb_rows, "rows in the", col, "column from 29 February to 28 February\n")
         head(num_29Feb_rows, 50)
         # Replace February 29 dates with February 28 of the same year
         data[[col]][feb_29_indices] <- as.POSIXct(

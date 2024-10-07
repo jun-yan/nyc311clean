@@ -107,9 +107,10 @@ cross_street_analysis <- function(
   
   ####################
   # cross_street is blank, but intersection_street is not blank
+  ####################
   
   cat(
-    "\n\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
+    "\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
     "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
     round((num_rows_cross_street_blank / num_rows_d311 * 100), 2), "% of total rows."
   )
@@ -126,7 +127,7 @@ cross_street_analysis <- function(
   # intersection_street is blank, but cross_street is not blank
   
   cat(
-    "\n\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
+    "\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
     "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
     round(num_rows_intersection_street_blank / num_rows_d311 * 100, 2),
     "% of total rows."
