@@ -101,7 +101,8 @@ cross_street_analysis <- function(
     create_combo_chart(
       non_dup_streets,
       chart_title,
-      chart_file_name
+      chart_file_name,
+      console_print_out_title = paste0("Summary of non-Matching '", cross_street, "' and '", intersection_street, "'by Agency")
     )
   }
   

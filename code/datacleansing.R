@@ -9,7 +9,9 @@
 # install.packages("lubridate")
 # install.packages("data.table")
 # install.packages("sf")
+# install.packages("tidyverse")
 
+library(tidyr)
 library(ggplot2)
 library(campfin)
 library(stringr)
@@ -222,7 +224,8 @@ sorted_by_agency <- rank_by_agency(d311)
 create_combo_chart(
   dataset = d311,
   chart_title = NULL,
-  chart_file_name = "SRs_by_Agency.pdf"
+  chart_file_name = "SRs_by_Agency.pdf",
+  console_print_out_title = "Summary of SRs by Agency"
 )
 
 # Display the results
@@ -236,7 +239,6 @@ cat("\n\nData contains SRs created from", earliest_date_formatted, "through", la
 cat("\n\n**********BLANK and N/A ENTRIES BY COLUMN**********")
 
 #########################################################################
-# calculate the number of blank and N/A data entries.
 
 # Identify the date columns
 date_cols <- c("created_date", "closed_date", "due_date", "resolution_action_updated_date")
@@ -285,6 +287,10 @@ print(missingDataPerColumn, row.names = FALSE, right = FALSE)
 max_count <- max(missingDataPerColumn$blanks)
 total_count <- sum(missingDataPerColumn$count)
 
+# Sort 'field' by 'total_empty' descending
+missingDataPerColumn <- missingDataPerColumn %>%
+  mutate(field = reorder(field, -total_empty))
+
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
   geom_bar(stat = "identity", fill = "#009E73") +
@@ -296,7 +302,8 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
     panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
     axis.text.y = element_text(face = "bold"),
-    legend.position = "none" # Remove all legends
+    legend.position = "none", # Remove all legends
+    aspect.ratio = 0.618033   # Set aspect ratio
   ) +
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
@@ -321,8 +328,14 @@ blank_chart <- blank_chart +
 
 # Print the bar chart
 print(blank_chart)
+
+# Set desired width
+chart_width <- 10
+chart_height <- chart_width / 1.618  # Golden Ratio for height
+
+# Save the chart with the Golden Ratio aspect ratio
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
-ggsave(chart_path, plot = blank_chart, width = 10, height = 8)
+ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
 
 #########################################################################
 
@@ -372,7 +385,7 @@ colnames(complaintData) <- c("complaint_type", "count", "percent", "cumulative_p
 cat("\nTop 20 'complaint_type's and responsible Agency:\n")
 print(head(complaintData, 20), row.names = FALSE, right = FALSE)
 
-cat("\nBottom 20 'complaint_type's and responsible Agency:\n")
+cat("\nBottom 20 'complaint_type(s) and responsible Agency:\n")
 print(tail(complaintData[, c("complaint_type", "count", "agency")], 20),
   row.names = FALSE, right = FALSE
 )
@@ -398,7 +411,8 @@ colnames(d311)[colnames(d311) == "complaint_type"] <- "agency"
 create_combo_chart(
   dataset = d311,
   chart_title = NULL,
-  chart_file_name = "SR_by_Complaint_Type.pdf"
+  chart_file_name = "SR_by_Complaint_Type.pdf",
+  console_print_out_title = "Summary of Complaint Type"
 )
 
 # Restore column names
@@ -497,10 +511,10 @@ cat("\nAre all 'unique_keys' truly unique?", uniqueKeys, "\n")
 
 # Extreme points of the boundaries of New York City as provide by chatGPT and confirmed elsewhere.
 # Note that Longitudes (west of prime meridian) are expressed as negative values
-southernMostLatitude <- 40.4961
-northernMostLatitude <- 40.9156
-easternMostLongitude <- -73.7004
-westernMostLongitude <- -74.2591
+southernMostLatitude <- 40.477399
+northernMostLatitude <- 40.917576
+easternMostLongitude <- -73.700181
+westernMostLongitude <- -74.259090
 
 # Convert lat/long to numeric conversions for comparisons
 d311$latitude <- as.numeric(d311$latitude)
@@ -526,17 +540,17 @@ cat(
   nrow(badLatitudes),
   "\n"
 )
+
 if (nrow(badLatitudes) > 0) {
-  print(head(badLatitudes[, c("unique_key", "agency", "latitude")], 5), row.names = FALSE, right = FALSE)
+  print(head(badLatitudes[, c("unique_key", "agency", "latitude", "city")],20), row.names = FALSE, right = FALSE)
 }
 
 cat(
   "\nThe number of 'longitudes' outside the boundaries of NYC is:",
-  nrow(badLongitudes)
-)
+  nrow(badLongitudes), "\n")
 
 if (nrow(badLongitudes) > 0) {
-  print(head(badLongitudes[, c("unique_key", "agency", "longitude")], 5), row.names = FALSE, right = FALSE)
+  print(head(badLongitudes[, c("unique_key", "agency", "longitude", "city")], 20), row.names = FALSE, right = FALSE)
 }
 
 # Check to see if any of the x or y state plane coordinates fall outside the extreme points of New York City.
@@ -581,7 +595,7 @@ y_outliers <- d311_clean[
 
 #Print status for x-coordinate outliers
 if (nrow(x_outliers) == 0) {
-  cat("\nAll x_coordinate_state_plane values lie within the boundaries of NYC.\n")
+  cat("\nAll x_coordinate_state_plane values lie within the boundaries of NYC.")
 } else {
   cat("\n\nThere are", nrow(x_outliers), "x_coordinate_state_plane values outside the boundaries of NYC.\n")
   cat("\nHere are the first few rows of x-coordinate outliers:\n")
@@ -590,7 +604,7 @@ if (nrow(x_outliers) == 0) {
 
 # Print status for y-coordinate outliers
 if (nrow(y_outliers) == 0) {
-  cat("All y_coordinate_state_plane values lie within the boundaries of NYC.\n")
+  cat("\nAll y_coordinate_state_plane values lie within the boundaries of NYC.")
 } else {
   cat("\n\nThere are", nrow(y_outliers), "y_coordinate_state_plane values outside the boundaries of NYC.\n")
   cat("\nHere are the first few rows of y-coordinate outliers:\n")
@@ -711,8 +725,9 @@ if (!cb_results[[1]]) {
 #  cb_dataset <- cb_results[[3]]
   create_combo_chart(
                     dataset = cb_results[[3]],
-                    chart_title = "Invalid community boards by Agnecy & cumulative percentage",
-                    chart_file_name = "invalid_community_boards.pdf")
+                    chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
+                    chart_file_name = "invalid_community_boards.pdf",
+                    console_print_out_title = "Summary of Invalid Community Boards")
 }
 
 #########################################################################
@@ -724,7 +739,8 @@ if (!incident_zip_results[[1]]) {
    create_combo_chart(
      dataset = incident_zip_results[[3]],
      chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
-     chart_file_name = "invalid_incident_zip.pdf")
+     chart_file_name = "invalid_incident_zip.pdf",
+     console_print_out_title = "Summary of Invalid incident_zip(s) by Agency")
 }
 
 #########################################################################
@@ -800,7 +816,8 @@ if (num_rows_closedBeforeOpened > 0) {
   create_combo_chart(
     dataset = closedBeforeOpened,
     chart_title = "negative duration SRs by Agency & cumulative percentage",
-    chart_file_name = "negative_duration_SR_barchart.pdf"
+    chart_file_name = "negative_duration_SR_barchart.pdf",
+    console_print_out_title = "Summary of negative duration SRs"
   )
 
 #  chart_title <- "Closed before Created (negative duration days)"
@@ -870,7 +887,8 @@ if (num_rows_zeroDurations > 0) {
     create_combo_chart(
       dataset = zeroDurations,
       chart_title = "Zero duration SRs by Agency & cumulative percentage",
-      chart_file_name = "zero_duration_SR.pdf"
+      chart_file_name = "zero_duration_SR.pdf",
+      console_print_out_title = "Summary of zero duration SRs by Agency"
     )
   }
 } else {
@@ -1055,7 +1073,9 @@ if (num_row_updatedLate > 0) {
     create_combo_chart(
       dataset = updatedLate,  
       chart_title = paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage"),
-      chart_file_name = "post_Closed_Bar_Chart.pdf" )
+      chart_file_name = "post_Closed_Bar_Chart.pdf",
+      console_print_out_title = "Summary of post-close-resolution-updates by Agency"
+  )
 
 #    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
 
@@ -1116,7 +1136,8 @@ if (!is.null(nonMatching_park_borough)) {
   create_combo_chart(
     dataset = nonMatching_park_borough,
     chart_title = "non-matching between 'borough' and 'park_borough' by Agency & cumulative percentage",
-    chart_file_name = "non_matching_park_borough_chart.pdf"
+    chart_file_name = "non_matching_park_borough_chart.pdf",
+    console_print_out_title = "Summary of non-matching borough & park_borough by Agency"
   )
 }
 
@@ -1136,7 +1157,8 @@ if (!is.null(nonMatching_taxi_company_borough)) {
   create_combo_chart(
     dataset = nonMatching_taxi_company_borough,
     chart_title =  "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage",
-    chart_file_name = "non_matching_taxi_company_borough_chart.pdf"
+    chart_file_name = "non_matching_taxi_company_borough_chart.pdf",
+    console_print_out_title = "Summary of non-matching borough & taxi_company_borough by Agency"
   )
 }
 
@@ -1204,7 +1226,33 @@ address_fields <- c("intersection_street_1", "intersection_street_2",
 # Apply normal_address function to each column in address_fields
 d311[address_fields] <- lapply(d311[address_fields], normal_address, 
                                     abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
-#**********************
+
+# Define replacement dictionaries
+word_to_number <- list(
+  "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
+  "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
+  "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12"
+)
+
+street_abbreviations <- list("Avenue" = "AVE")
+
+# Apply normalization functions to each column in address_fields
+for (field in address_fields) {
+  if (field %in% names(d311)) {
+    cat("\nProcessing column:", field, "\n")
+    
+    # Apply normalize_street
+    d311[[field]] <- normalize_street(d311[[field]], word_to_number)
+    
+    # Apply normalize_avenue
+    d311[[field]] <- normalize_avenue(d311[[field]], street_abbreviations)
+  } else {
+    cat("\nWarning:", field, "not found in d311 dataset.\n")
+  }
+}
+
+# **********************
+
 cross_street <- "street_name"
 intersection_street <- "landmark"
 z1 <- cross_street_analysis(d311, cross_street, intersection_street)

@@ -4,6 +4,7 @@
 # install.packages('zoo')
 # install.packages("ggpmisc")
 # install.packages("lubridate")
+rm(list = ls(), envir = .GlobalEnv)
 
 library(ggplot2)
 library(scales)
@@ -133,8 +134,9 @@ chart_file_name <- "Complains_by_Agency.pdf"
 
 create_combo_chart(
   dataset = d311,
-  chart_title = NULL,
-  chart_file_name = chart_file_name
+  chart_title = chart_title,
+  chart_file_name = chart_file_name, 
+  console_print_out_title = "Summary of complaints by Agency"
 )
  
 # ########################################################################
@@ -245,7 +247,7 @@ cat("\nGrowth over", nrow(yearly_df), "years is", percentage_growth, "%")
 cat("\nYearly Summary:\n")
 print(yearly_df, row.names = FALSE, right = FALSE)
 
-if (nrow(yearly_df) > 2) {  #skip if only 1-2 years. Not enough data to be meaningful.
+if (nrow(yearly_df) > 1) {  #skip if only 1-2 years. Not enough data to be meaningful.
   yearly_df$Year <- as.numeric(yearly_df$Year)
   earliest_year <- min(yearly_df$Year)
 
@@ -255,17 +257,15 @@ if (nrow(yearly_df) > 2) {  #skip if only 1-2 years. Not enough data to be meani
   extra_line <- annotate("text",
     x = as.numeric(min_year$Year), y = max_year$count,
     label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-    size = 3.7, color = "#E69F00", vjust = -1, hjust = 0.1 )
+    size = 3.7, color = "#661100", vjust = -1, hjust = 0.1 )
 
-  SR_yearly <- create_bar_chart(
-    yearly_df,
+  SR_yearly <- create_bar_chart_numeric(
+    dataset = yearly_df,
     x_col = "Year",
     y_col = "count",
     chart_title = NULL,
     sub_title = chart_sub_title,
-    x_axis_title = NULL,
-    y_axis_title = NULL,
-    console_print_out_title = "Yearly",
+    console_print_out_title = "Yearly SR count",
     add_mean = TRUE,
     add_median = FALSE,
     add_sd = FALSE,
@@ -279,15 +279,6 @@ if (nrow(yearly_df) > 2) {  #skip if only 1-2 years. Not enough data to be meani
 }
 
 #########################################################################
-# Overall monthly summary
-monthly_df <- monthly_df[order(-monthly_df$count), ]
-cat("\nMonthly Summary (top 10):\n")
-print(head(monthly_df, 10), row.names = FALSE, right = FALSE)
-
-monthly_df <- monthly_df[order(monthly_df$count), ]
-cat("\nMonthly Summary (bottom 10):\n")
-print(head(monthly_df, 10), row.names = FALSE, right = FALSE)
-
 # Chart SRs by month
 max_count <- max(monthly_df$count)
 total_count <- sum(monthly_df$count)
@@ -314,53 +305,32 @@ extra_line <- annotate("text",
   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
   size = 5, color = "#661100", vjust = 1, hjust = 1 )
 
-SR_monthly <- create_bar_chart(
-  monthly_df,
+SR_monthly <- create_bar_chart_categorical(
+  dataset = monthly_df,
   x_col = "YearMonth",
   y_col = "count",
-  chart_title = NULL,
+  chart_title = "SRs by Month",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Monthly",
-  add_mean = TRUE,
+  console_print_out_title = "Monthly SR Count",
+  add_mean = FALSE,
   add_median = FALSE,
   add_sd = FALSE,
   add_trendline = FALSE,
   add_maximum = TRUE,
   add_minimum = FALSE,
   add_second_maximum = FALSE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf"),
-  horizontal_adjustment_max = 1.3,
-  vertical_adjustment_max = 1
+  extra_line = NULL,
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf")
 )
 
 #########################################################################
-# Overall daily summary
-daily_df$created_date <- as.character(daily_df$created_date)
-
-# Convert created_date to Date format
-daily_df$created_date <- as.Date(daily_df$created_date)
-
-# Sort the dataframe by count in descending order
-sorted_df <- daily_df[order(-daily_df$count), ]
-
-# Select the top ten rows
-top_ten <- sorted_df[1:10, ]
-
-# Sort the dataframe by count in ascending order
-sorted_df <- daily_df[order(daily_df$count), ]
-
-# Select the bottom ten rows
-bottom_ten <- head(sorted_df, 10)
+# Ensure created_date is in Date format, then sort by it
+daily_df$created_date <- as.Date(daily_df$created_date)  # Convert to Date format once
+daily_df <- daily_df[order(daily_df$created_date), ]  # Sort by created_date
 
 # Find corresponding dates
 max_date <- daily_df$created_date[which.max(daily_df$count)]
 min_date <- daily_df$created_date[which.min(daily_df$count)]
-
-daily_df <- daily_df[order(daily_df$created_date), ]
-daily_df$created_date <- as.Date(daily_df$created_date)
 
 earliest_day <- min(daily_df$created_date)
 max_count <- max(daily_df$count)
@@ -371,15 +341,13 @@ extra_line2 <- annotate("text",
   size = 3.7, color = "#E69F00", vjust = 0.6, hjust = -2
 )
 
-SR_daily <- create_bar_chart(
-  daily_df,
+SR_daily <- create_bar_chart_categorical(
+  dataset = daily_df,
   x_col = "created_date",
   y_col = "count",
   chart_title = "Daily SR count",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Daily",
+  console_print_out_title = "Daily SR Count",
   add_mean = FALSE,
   add_median = TRUE,
   add_sd = TRUE,
@@ -393,30 +361,8 @@ SR_daily <- create_bar_chart(
   vertical_adjustment_max = 0.8
 )
 
-# Print the top ten counts
-cat("\n\nTop ten counts by date:\n")
-for (i in 1:nrow(top_ten)) {
-  cat(format(top_ten$created_date[i], "%Y-%m-%d"), "  ", format(top_ten$count[i], big.mark = ","), "  ", i, "\n")
-}
-
-# Print the bottom ten counts
-cat("\nBottom ten counts by date:\n")
-for (i in seq(nrow(bottom_ten), 1, by = -1)) {
-  cat(format(bottom_ten$created_date[i], "%Y-%m-%d"), 
-      "   ", 
-      format(bottom_ten$count[i], big.mark = ","), 
-      "    ", 
-      (nrow(bottom_ten) - i + 1), 
-      "\n")
-}
-
 #########################################################################
 # Overall calendar month summary (Jan, Feb, Mar, etc.)
-
-# # Determine the stats
-# mean_count <- mean_value <- round(mean(calendar_month_df$count, na.rm = TRUE), 0)
-# median_count <- round(median(calendar_month_df$count, na.rm = TRUE), 0)
-# standard_deviation <- round(sd(calendar_month_df$count, na.rm = TRUE), 0)
 
 # Number of days in each month, with February as 28.2 days
 days_in_month <- c(
@@ -425,66 +371,29 @@ days_in_month <- c(
   "September" = 30, "October" = 31, "November" = 30, "December" = 31
 )
 
-max_calendar_month <- calendar_month_df[which.max(calendar_month_df$count), ]
-max_calendar_month_name <- as.character(calendar_month_df$Month[which.max(calendar_month_df$count)])
-# max_calendar_month$Month <- as.character(month.name[max_calendar_month$Month])
-# max_calendar_count <- max_calendar_month$count
-# 
-# 
-# # Get the number of days for the max_calendar_month
-# days_for_max_month <- days_in_month[max_calendar_month$Month]
-# cat(
-#   "\n\nCalendar month with maximum count:", max_calendar_month$Month,
-#   "with", format(max_calendar_count, big.mark = ","), "SRs"
-# )
-# cat("\nPer day count (maximum):", round(max_calendar_month$count / days_for_max_month, 0))
-# 
-# min_calendar_month <- calendar_month_df[which.min((calendar_month_df$count)), ]
-# min_calendar_month_name <- as.character(calendar_month_df$Month[which.min(calendar_month_df$count)])
-# min_calendar_month$Month <- as.character(month.name[min_calendar_month$Month])
-# min_calendar_count <- min_calendar_month$count
-# 
-# # Get the number of days for the min_calendar_month
-# days_for_min_month <- days_in_month[min_calendar_month$Month]
-# cat(
-#   "\n\nCalendar month with minimum count:", min_calendar_month$Month,
-#   "with", format(min_calendar_count, big.mark = ","), "SRs"
-# )
-# cat("\nPer day count (minimum):", round(min_calendar_month$count / days_for_min_month, 0))
-# 
 # Add the count_per_day column
 calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month[calendar_month_df$Month], 0)
 
 # Order the dataframe by Month
 calendar_month_df <- calendar_month_df[order(calendar_month_df$Month), ]
 
-# Calendar month chart
-SR_calendar_month <- create_special_bar_chart(
-  data = calendar_month_df,
+SR_calendar_month <- create_bar_chart_categorical(
+  dataset = calendar_month_df,
   x_col = "Month",
   y_col = "count",
   chart_title = "SRs by Calendar Month",
   sub_title = chart_sub_title,
-  earliest_x_value = "January",
-  max_x_value = max_calendar_month_name,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf"),
-  console_print_out_title = "Calendar Month" 
+  console_print_out_title = "SRs by Calendar Month",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = NULL,
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf")
 )
-
-cat("\n\nSRs by calendar month, ordered by calendar\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
-
-# Order the dataframe by total count
-calendar_month_df <- calendar_month_df %>%
-  arrange(desc(count))
-cat("\nSRs by calendar month, ordered by count\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
-
-# Order the dataframe by count_per_day
-calendar_month_df <- calendar_month_df %>%
-  arrange(desc(count_per_day))
-cat("\nSRs by calendar month, ordered by count/day\n")
-print(calendar_month_df, row.names = FALSE, right = FALSE)
 
 #########################################################################
 # Overall day-of-the-year summary (Jan 1st, Jan 2nd, Jan 3rd, etc.)
@@ -494,60 +403,21 @@ day_counts_df <- day_counts_df %>%
   arrange(as.Date(paste0("2020/", day_of_year), format = "%Y/%m/%d")) %>%
   mutate(day_number = row_number())
 
-# # Determine the stats
-# mean_count <- mean_value <- round(mean(day_counts_df$count, na.rm = TRUE), 0)
-# median_count <- round(median(day_counts_df$count, na.rm = TRUE), 0)
-# standard_deviation <- round(sd(day_counts_df$count, na.rm = TRUE), 0)
-
-# cat(
-#   "\nAverage day-of-the-year count:", format(mean_count, big.mark = ","),
-#   "  Standard deviation(\u03C3):", format(standard_deviation, big.mark = ",")
-# )
-# cat("\nMedian:", format(median_count, big.mark = ","))
-
-# max_day_of_the_year <- day_counts_df[which.max(day_counts_df$count), ]
-# max_day_of_the_year$day_of_year <- as.character(max_day_of_the_year$day_of_year)
-# 
-# # Sort the dataframe by count in ascending order
-# sorted_day_counts_df <- day_counts_df[order(day_counts_df$count), ]
-# 
-# # Get the 2nd minimum day of the year
-# second_min_day_of_the_year <- sorted_day_counts_df[2, ]
-# 
-# # Add the day of the year  as a character
-# second_min_day_of_the_year$DayOfWeek <- as.character(second_min_day_of_the_year$day_of_year)
-
-# # Print the result
-# cat(
-#   "\nDay of the year with the 2nd minimum count:", second_min_day_of_the_year$day_of_year,
-#   "with", format(second_min_day_of_the_year$count, big.mark = ","), "SRs\n"
-# )
-
-# cat("\nDay-of-the-Year Summary:")
-
 # Convert day_of_year to character
 day_counts_df$day_of_year <- as.character(day_counts_df$day_of_year)
-
-# # Format the columns for better alignment
-formatted_day_counts_df <- data.frame(
-   day_of_year = format(day_counts_df$day_of_year, width = max(nchar(day_counts_df$day_of_year))),
-   count = format(day_counts_df$count, width = max(nchar(day_counts_df$count)))
- )
 
 day_counts_df <- day_counts_df[order(-day_counts_df$count), ]
 
 days_to_chart <- day_counts_df %>%
   select(count, day_number)
 
-SR_day_of_the_year <- create_bar_chart(
+SR_day_of_the_year <- create_bar_chart_numeric(
   dataset = days_to_chart,
   x_col = "day_number",
   y_col = "count",
   chart_title = "SRs by Day-of-the-Year",
-  sub_title = chart_sub_title,                   
-  x_axis_title = NULL,              
-  y_axis_title = NULL,              
-  console_print_out_title = "Day_of_the_year", 
+  sub_title = chart_sub_title,
+  console_print_out_title = "SRs by Day_of_the_year",
   add_mean = TRUE,
   add_median = FALSE,
   add_sd = FALSE,
@@ -558,35 +428,14 @@ SR_day_of_the_year <- create_bar_chart(
   extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_year.pdf"),
   horizontal_adjustment_max = 1.2,
-  vertical_adjustment_max = 1.5)   
-
-# Print the Day-of-the-Calendar Year Summary with custom order
-cat("\nTop 10 days\n")
-print(head(day_counts_df, n = 10), right = TRUE)
-
-cat("\nBottom 10 days\n")
-print(tail(day_counts_df, n = 10), right = TRUE)
+  vertical_adjustment_max = 1.5
+)
 
 #########################################################################
 # Overall day-of-the-week summary
 
-# # Determine the stats
-# mean_count <- mean_value <- round(mean(day_of_week_df$count, na.rm = TRUE), 0)
-# median_count <- round(median(day_of_week_df$count, na.rm = TRUE), 0)
-# standard_deviation <- round(sd(day_of_week_df$count, na.rm = TRUE), 0)
-
 day_of_week_df$day_of_week <- as.character(day_of_week_df$day_of_week)
 max_day_of_the_week <- day_of_week_df[which.max(day_of_week_df$count), ]
-# cat(
-#   "\n\nDay-of-the-week maximum:", max_day_of_the_week$day_of_week,
-#   "with", format(max_day_of_the_week$count, big.mark = ","), "SRs"
-# )
-# 
-# min_day_of_the_week <- day_of_week_df[which.min((day_of_week_df$count)), ]
-# cat(
-#   "\n\nDay-of-the-week minimum:", min_day_of_the_week$day_of_week,
-#   "with", format(min_day_of_the_week$count, big.mark = ","), "SRs"
-# )
 
 # Add a new column 'week_day' with row counts
 day_of_week_df <- day_of_week_df %>%
@@ -595,24 +444,26 @@ day_of_week_df <- day_of_week_df %>%
 # Convert the 'day_of_week' column to a factor
 day_of_week_df$day_of_week <- factor(day_of_week_df$day_of_week)
 
-# Day of the week chart
-SR_day_of_the_week <- create_special_bar_chart(
+
+SR_day_of_the_week <- create_bar_chart_categorical(
   dataset = day_of_week_df,
   x_col = "day_of_week",
   y_col = "count",
   chart_title = "SRs by Day-of-the-Week",
   sub_title = chart_sub_title,
-  earliest_x_value = "1-Monday",
-  max_x_value = max_day_of_the_week$day_of_week,
-  x_angle = 60,
+  console_print_out_title = "SRs by Day-of-the-Week",
+  add_mean = FALSE,
+  add_median = FALSE,
+  add_sd = FALSE,
+  add_trendline = FALSE,
+  add_maximum = TRUE,
+  add_minimum = FALSE,
+  add_second_maximum = FALSE,
+  extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_week.pdf"),
   horizontal_adjustment_max = 0.5,
-  vertical_adjustment_max = 0.2,
-  console_print_out_title = "Day-of-the-Week"
-  )
-
-cat("\nDay-of-the-Week Summary:\n")
-print(day_of_week_df, row.names = FALSE, right = FALSE)
+  vertical_adjustment_max = 0.2
+)
 
 #########################################################################
 # Determine the # of SRs created exactly on the hour with 00 minutes and 00 seconds.
@@ -626,8 +477,7 @@ grouped_by_hour <- filtered_by_hour %>%
   group_by(hour = hour(created_date)) %>%
   summarise(count = n())
 
-total_count <- sum(grouped_by_hour$count)
-
+# total_count <- sum(grouped_by_hour$count)
 max_hour_of_the_day <- grouped_by_hour[which.max(grouped_by_hour$count), ]
 
 extra_line <- annotate("text",
@@ -636,15 +486,13 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.4, hjust = 0.1
 )
 
-SR_created_by_top_of_hour <- create_bar_chart(
-  grouped_by_hour,
+SR_created_by_top_of_hour <- create_bar_chart_numeric(
+  dataset = grouped_by_hour,
   x_col = "hour",
   y_col = "count",
-  chart_title = "SRs 'created' Exactly on the Hour (zero minutes/zero seconds)",
+  chart_title = "SRs created Exactly on the Hour (xx:00:00))",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Top-of-Hour",
+  console_print_out_title = "SRs created Exactly on the Hour (xx:00:00)",
   add_mean = FALSE,
   add_median = TRUE,
   add_sd = TRUE,
@@ -676,18 +524,6 @@ minute_counts <- date_filtered %>%
   group_by(hour = hour(created_date), minute = minute(created_date)) %>%
   summarise(count = n(), .groups = "drop")
 
-# total_count <- sum(minute_counts$count)
-# 
-# # Calculate max values for annotation
-# max_hour_of_the_day <- minute_counts[which.max(minute_counts$count), ]
-# max_hour_minute_of_the_date <- paste0(sprintf("%02d", max_hour_of_the_day$hour), ":",
-#    sprintf("%02d", max_hour_of_the_day$minute),
-#    sep = ""
-#  )
-# max_value <- max(minute_counts$count)
-# max_hour_and_minute <- paste0(max_hour_of_the_day$hour, ":",
-# max_hour_of_the_day$minute, "0", sep = "" )
-
 minute_counts <- minute_counts %>%
   mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
 
@@ -697,15 +533,13 @@ minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:
 
 extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = "2 hour")
 
-SR_created_by_minute_of_busiest_day <- create_bar_chart(
-  minute_counts,
+SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
+  dataset = minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-  chart_title = paste("SRs 'created' by Exact Minute-of-the-busiest-Day (00 secs) on", max_date),
+  chart_title = paste("SRs created by Exact Minute-of-the-busiest-Day (xx:xx:00) on", max_date),
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Minute (00 sec)",
+  console_print_out_title = "SRs created Exactly on the Minute (yy:xx:00) on busiest Day",
   add_mean = FALSE,
   add_median = FALSE,
   add_sd = TRUE,
@@ -718,7 +552,7 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart(
 )
 
 #########################################################################
-# Determine the # of SRs closed exactly on hour with minute and seconds == 00.
+# Determine the # of SRs closed exactly on hour with minute and seconds == 00:00.
 # Looking for an anomaly at midnight and noon.
 
 # Filter rows where the created_date has seconds = "00" and minutes = "00"
@@ -732,32 +566,6 @@ grouped_by_hour <- filtered_by_hour %>%
 #total_count <- sum(grouped_by_hour$count)
 
 max_hour_of_the_day <- grouped_by_hour[which.max(grouped_by_hour$count), ]
-#max_hour <- as.character(max_hour_of_the_day$hour)
-#max_count <- max_hour_of_the_day$count
-
-# # Order the data frame by the count column in descending order
-# ordered_by_count <- grouped_by_hour[order(-grouped_by_hour$count), ]
-# # Select the second row
-# second_max_hour_of_the_day <- ordered_by_count[2, ]
-# second_max_hour <- as.character(second_max_hour_of_the_day$hour)
-# second_max_count <- second_max_hour_of_the_day$count
-
-# cat(
-#   "\nTop of the hour with maximum 'closed' count is hour #:", max_hour,
-#   "with", format(max_count, big.mark = ","), "SRs"
-# )
-# 
-# cat(
-#   "\nTop of the hour with the 2nd most 'closed' count is hour #:", second_max_hour,
-#   "with", format(second_max_count, big.mark = ","), "SRs"
-# )
-
-# min_hour_of_the_day <- grouped_by_hour[which.min(grouped_by_hour$count), ]
-# min_hour_of_the_day$hour <- as.character(min_hour_of_the_day$hour)
-# cat(
-#   "\nTop of the Hour with the minimum 'created' count is hour #:", min_hour_of_the_day$hour,
-#   "with", format(min_hour_of_the_day$count, big.mark = ","), "SRs\n"
-# )
 
 extra_line <- annotate("text",
   x = max_hour_of_the_day$hour, y = max_hour_of_the_day$count,
@@ -765,23 +573,21 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.7, hjust = 0.1
 )
 
-SR_closed_by_top_of_hour <- create_bar_chart(
-  grouped_by_hour,
+SR_closed_by_top_of_hour <- create_bar_chart_numeric(
+  dataset = grouped_by_hour,
   x_col = "hour",
   y_col = "count",
-  chart_title = "SRs 'closed' Exactly on the Hour (zero minutes/zero seconds",
+  chart_title = "SRs closed Exactly on the Hour (xx:00:00)",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Minute (00 sec)",
+  console_print_out_title = "SRs closed exactly on the Hour (xx:00:00) on busiest Day",
   add_mean = FALSE,
   add_median = FALSE,
   add_sd = TRUE,
   add_trendline = FALSE,
   add_maximum = FALSE,
   add_minimum = FALSE,
-  extra_line = extra_line,
   add_second_maximum = TRUE,
+  extra_line = extra_line,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf")
 )
 
@@ -807,33 +613,23 @@ minute_counts <- date_filtered %>%
 
 total_count <- sum(minute_counts$count)
 
-# Calculate max values for annotation
-max_hour_of_the_day <- minute_counts[which.max(minute_counts$count), ]
-max_hour_minute_of_the_date <- paste0(sprintf("%02d", max_hour_of_the_day$hour), ":", sprintf("%02d", max_hour_of_the_day$minute))
-max_value <- max(minute_counts$count)
-
-max_hour_minute_of_the_day <- paste0(max_hour_of_the_day$hour, "0:", max_hour_of_the_day$minute, "0")
-
 # Assuming 'minute_counts' is your data frame with 'hour' and 'minute' columns
 minute_counts <- minute_counts %>%
   mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
 
 # Convert hour_minute to a time format
 minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
-earliest_hour_minute <- min(minute_counts$hour_minute)
+#earliest_hour_minute <- min(minute_counts$hour_minute)
 
 extra_line <- scale_x_datetime(expand = c(.03, .03), date_labels = "%H:%M", breaks = "2 hour")
 
-SR_closed_by_minute_of_busiest_day <- create_bar_chart(
-  minute_counts,
+SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
+  dataset = minute_counts,
   x_col = "hour_minute",
   y_col = "count",
-  chart_title = paste("SRs 'closed' by Exact Minute-of-the-busiest-Day (00:00) on", max_date),
-#  chart_title = NULL,
+  chart_title = paste("SRs closed by Exact Minute-of-the-busiest-Day (yy:xx:00) on", max_date),
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Minute of the Busiest Day",
+  console_print_out_title = "SRs closed by Exact Minute (yy:xx:00) of the Busiest Day",
   add_mean = FALSE,
   add_median = FALSE,
   add_sd = TRUE,
@@ -851,27 +647,6 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart(
 # Overall created time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 
 max_hour_of_the_day <- created_hour_of_day_df[which.max(created_hour_of_day_df$count), ]
-#max_hour_of_the_day$created_hour <- as.character(max_hour_of_the_day$created_hour)
-#  cat(
-#    "\nHour of the day with maximum 'created' count is hour #:", max_hour_of_the_day$created_hour,
-#    "with", format(max_hour_of_the_day$count, big.mark = ","), "SRs"
-#  )
-# 
-#  min_hour_of_the_day <- created_hour_of_day_df[which.min(created_hour_of_day_df$count), ]
-#  min_hour_of_the_day$created_hour <- as.character(min_hour_of_the_day$created_hour)
-#  cat(
-#    "\nHour of the day with the minimum 'created' count is hour #:", min_hour_of_the_day$created_hour,
-#    "with", format(min_hour_of_the_day$count, big.mark = ","), "SRs\n"
-#  )
-
-# Chart by 'created' time-of-the-day
-#max_count <- max(created_hour_of_day_df$count)
-
-# result <- calculate_values(max_count)
-# starting_value <- result$starting_value
-# increment <- result$increment
-# 
-#max_hour_of_the_day$created_hour <- as.numeric(max_hour_of_the_day$created_hour)
 
 extra_line <- annotate("text",
   x = max_hour_of_the_day$created_hour, y = max_hour_of_the_day$count,
@@ -879,15 +654,14 @@ extra_line <- annotate("text",
   size = 4, color = "black", vjust = -0.7, hjust = -0.1
 )
 
-SR_created_time_of_day <- create_bar_chart(
-  created_hour_of_day_df,
+
+SR_created_time_of_day <- create_bar_chart_numeric(
+  dataset = created_hour_of_day_df,
   x_col = "created_hour",
   y_col = "count",
-  chart_title = "SRs 'created' by hour-of-the-day",
+  chart_title = "SRs created by hour-of-the-day",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Hour-of-the-Day",
+  console_print_out_title = "SR created by hour-of-the-day",
   add_mean = TRUE,
   add_median = FALSE,
   add_sd = FALSE,
@@ -895,39 +669,14 @@ SR_created_time_of_day <- create_bar_chart(
   add_maximum = FALSE,
   add_minimum = FALSE,
   add_second_maximum = FALSE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf"),
+  horizontal_adjustment_max = -1,
+  vertical_adjustment_max = 1
 )
-
-cat("\nHour-of-the-day 'created' Summary:\n")
-
-# Print the created time-of-the-day Summary
-print(created_hour_of_day_df, row.names = FALSE, right = FALSE)
 
 #########################################################################
 # Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 max_hour_of_the_day <- closed_hour_of_day_df[which.max(closed_hour_of_day_df$count), ]
-#max_hour_of_the_day$closed_hour <- as.character(max_hour_of_the_day$closed_hour)
-#max_count <- formatted_day_counts_df- max_hour_of_the_day$count
-
-#max_count <- max(closed_hour_of_day_df$count)
-
-# cat(
-#   "\nHour of the day with maximum 'closed' count is hour:", 
-#   sprintf("%02d:00", as.integer(max_hour_of_the_day$closed_hour)),  # Convert character to integer and format as HH:00
-#   "with", format(as.numeric(max_hour_of_the_day$count), big.mark = ","), "SRs"
-# )
-# 
-# min_hour_of_the_day <- closed_hour_of_day_df[which.min(closed_hour_of_day_df$count), ]
-# min_hour_of_the_day$closed_hour <- as.character(min_hour_of_the_day$closed_hour)
-# cat(
-#   "\nHour of the day with the minimum 'closed' count is hour:", 
-#   sprintf("%02d:00", as.integer(min_hour_of_the_day$closed_hour)),  # Convert character to integer and format as HH:00
-#   "with", format(as.numeric(min_hour_of_the_day$count), big.mark = ","), "SRs\n"
-# )
-
-
-#max_hour_of_the_day$closed_hour <- as.numeric(max_hour_of_the_day$closed_hour)
 
 extra_line <- annotate("text",
   x = max_hour_of_the_day$closed_hour, y = max_hour_of_the_day$count,
@@ -935,27 +684,27 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.7, hjust = -.5
 )
 
-SR_closed_time_of_day <- create_bar_chart(
-  closed_hour_of_day_df,
+SR_closed_time_of_day <- create_bar_chart_numeric(
+  dataset = closed_hour_of_day_df,
   x_col = "closed_hour",
   y_col = "count",
-  chart_title = "SRs 'closed' by hour-of-the-day",
+  chart_title = "SRs closed by Hour of Day",
   sub_title = chart_sub_title,
-  x_axis_title = NULL,
-  y_axis_title = NULL,
-  console_print_out_title = "Hour-of-the-Day",
+  console_print_out_title = "SRs closed by Hour-of-the-Day",
   add_mean = TRUE,
   add_median = FALSE,
   add_sd = FALSE,
   add_trendline = FALSE,
-  add_maximum = FALSE,
+  add_maximum = TRUE,
   add_minimum = FALSE,
-  add_second_maximum = TRUE,
+  add_second_maximum = FALSE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf"),
+  horizontal_adjustment_max = -1,
+  vertical_adjustment_max = 1
 )
 
-cat("\nHour-of-the-day 'closed' Summary:\n")
+cat("\nSummary of closed by hour-of-the-day:\n")
 
 # Create a new column to format closed_hour as HH:00
 closed_hour_of_day_df$closed_hour_formatted <- sprintf("%02d:00", as.integer(closed_hour_of_day_df$closed_hour))
@@ -987,42 +736,44 @@ if (midnight_created_count > 0) {
   cat(
     "\n\nThere are",
     format(midnight_created_count, big.mark = ","),
-    "SRs that were 'created' at exactly midnight."
+    "SRs that were created at exactly midnight."
   )
   
   sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
   
-  chart_title <- "SRs created exactly at midnight by Agency & cumulative percentage"
+  chart_title <- "SRs created exactly at midnight (00:00:00) by Agency & cumulative percentage"
   chart_file_name <- "SRs_created_at_midnight_by_Agency.pdf"
   
   create_combo_chart(
     created_at_midnight,
     chart_title,
-    chart_file_name
+    chart_file_name,
+    console_print_out_title = "SRs created at midnight"
   )
 } else {
-  cat("\n\nThere are no SRs with a 'created_date' exactly at midnight.\n")
+  cat("\n\nThere are no SRs with a created_date exactly at midnight.\n")
 }
 
 if (noon_created_count > 0) {
   cat(
     "\n\nThere",
     format(noon_created_count, big.mark = ","),
-    "SRs that were 'created' exactly at noon."
+    "SRs that were created exactly at noon."
   )
   
   sorted_create_at_noon <- rank_by_agency(created_at_noon)
   
-  chart_title <- "SRs created exactly at noon by Agency & cumulative percentage"
+  chart_title <- "SRs created exactly at noon (12:00:00) by Agency & cumulative percentage"
   chart_file_name <- "SRs_created_at_noon_by_Agency.pdf"
   if (!is.null(sorted_create_at_noon)) {
     create_combo_chart(
       created_at_noon,
       chart_title,
-      chart_file_name
+      chart_file_name,
+      console_print_out_title = "SRs created at noon"
     )
   } else {
-    cat("\n\nThere are no SRs with a 'created_date' exactly at noon.\n")
+    cat("\n\nThere are no SRs with a created_date exactly at noon.\n")
   }
 }
 
@@ -1056,21 +807,22 @@ if (midnight_closed_count > 0) {
   cat(
     "\n\nThere are",
     format(midnight_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at midnight."
+    "SRs that were closed exactly at midnight."
   )
   
   sorted_closed_at_midnight <- rank_by_agency(closed_at_midnight)
   
-  chart_title <- "SRs closed exactly at midnight by Agency & cumulative percentage"
+  chart_title <- "SRs closed exactly at midnight (00:00:00) by Agency & cumulative percentage"
   chart_file_name <- "SRs_closed_at_midnight_by_Agency.pdf"
   if (!is.null(sorted_closed_at_midnight)) {
     create_combo_chart(
       closed_at_midnight,
       chart_title,
-      chart_file_name
+      chart_file_name,
+      console_print_out_title = "SRs closed at midnight"
     )
   } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at midnight.\n")
+    cat("\n\nThere are no SRs with a closed_date exactly at midnight (00:00:00).\n")
   }
 }
 
@@ -1078,21 +830,22 @@ if (noon_closed_count > 0) {
   cat(
     "\n\nThere are",
     format(noon_closed_count, big.mark = ","),
-    "SRs that were 'closed' exactly at noon."
+    "SRs that were closed exactly at noon."
   )
   
   sorted_closed_at_noon <- rank_by_agency(closed_at_noon)
   
-  chart_title <- "SRs closed exactly at noon by Agency & cumulative percentage"
+  chart_title <- "SRs closed exactly at noon (12:00:00) by Agency & cumulative percentage"
   chart_file_name <- "SRs_closed_at_noon_by_Agency.pdf"
   if (!is.null(sorted_closed_at_noon)) {
     create_combo_chart(
       closed_at_noon,
       chart_title,
-      chart_file_name
+      chart_file_name,
+      console_print_out_title = "SRs closed at noon"
     )
   } else {
-    cat("\n\nThere are no SRs with a 'closed_date' exactly at noon.\n")
+    cat("\n\nThere are no SRs with a closed_date exactly at noon (12:00:00).\n")
   }
 }
 
