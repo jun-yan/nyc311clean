@@ -54,7 +54,7 @@ functions_path <- "functions"
 files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 # Source each file
 lapply(files, source)
- 
+
 # Set scipen option to a large value
 options(scipen = 10)
 
@@ -79,7 +79,8 @@ data2File <- file.path("..", "..", "data", "USPS_zipcodes.csv")
 USPSzipcodes <-
   read.csv(data2File,
     header = TRUE,
-    colClasses = rep("character"))
+    colClasses = rep("character")
+  )
 
 USPSzipcodes <- as.data.frame(USPSzipcodes)
 
@@ -94,10 +95,11 @@ num_zipcode_rows <- nrow(USPSzipcodesOnly)
 data3File <- file.path("..", "..", "data", "USPSabb.csv")
 USPSabbreviations <-
   read.csv(data3File,
-           header = TRUE,
-           colClasses = rep("character"))
+    header = TRUE,
+    colClasses = rep("character")
+  )
 
-#USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
+# USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
 num_abbreviaton_row <- nrow(USPSabbreviations)
@@ -170,8 +172,9 @@ d311 <- d311[!is.na(d311$created_date), ]
 d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
 d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
 d311$due_date <- as.POSIXct(d311$due_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
-d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date, 
-                                        format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$resolution_action_updated_date <- as.POSIXct(d311$resolution_action_updated_date,
+  format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC"
+)
 
 # Specify the date columns to adjust
 date_columns <- c("created_date", "closed_date", "resolution_action_updated_date", "due_date")
@@ -220,7 +223,7 @@ d311 <- consolidate_agencies((d311))
 
 sorted_by_agency <- rank_by_agency(d311)
 
-#chart_title <- "SR count by Agency & cumulative percentage"
+# chart_title <- "SR count by Agency & cumulative percentage"
 create_combo_chart(
   dataset = d311,
   chart_title = NULL,
@@ -231,7 +234,7 @@ create_combo_chart(
 # Display the results
 cat("\nNumber of rows in the 311 SR data set:", format(num_rows_d311, big.mark = ","))
 cat("\nNumber of columns in the 311 SR data set:", format(num_columns_d311, big.mark = ","))
-cat("\nNumber of Agencies represented:", length(unique(d311$agency)) )
+cat("\nNumber of Agencies represented:", length(unique(d311$agency)))
 cat("\n\nData contains SRs created from", earliest_date_formatted, "through", latest_date_formatted)
 
 #########################################################################
@@ -303,7 +306,7 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
     axis.text.y = element_text(face = "bold"),
     legend.position = "none", # Remove all legends
-    aspect.ratio = 0.618033   # Set aspect ratio
+    aspect.ratio = 0.618033 # Set aspect ratio
   ) +
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
@@ -331,7 +334,7 @@ print(blank_chart)
 
 # Set desired width
 chart_width <- 10
-chart_height <- chart_width / 1.618  # Golden Ratio for height
+chart_height <- chart_width / 1.618 # Golden Ratio for height
 
 # Save the chart with the Golden Ratio aspect ratio
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
@@ -407,7 +410,7 @@ cat(
 colnames(d311)[colnames(d311) == "agency"] <- "temp_agency"
 colnames(d311)[colnames(d311) == "complaint_type"] <- "agency"
 
-#chart_title <- "Top 20 Complaints and cumulative percentage"
+# chart_title <- "Top 20 Complaints and cumulative percentage"
 create_combo_chart(
   dataset = d311,
   chart_title = NULL,
@@ -542,12 +545,13 @@ cat(
 )
 
 if (nrow(badLatitudes) > 0) {
-  print(head(badLatitudes[, c("unique_key", "agency", "latitude", "city")],20), row.names = FALSE, right = FALSE)
+  print(head(badLatitudes[, c("unique_key", "agency", "latitude", "city")], 20), row.names = FALSE, right = FALSE)
 }
 
 cat(
   "\nThe number of 'longitudes' outside the boundaries of NYC is:",
-  nrow(badLongitudes), "\n")
+  nrow(badLongitudes), "\n"
+)
 
 if (nrow(badLongitudes) > 0) {
   print(head(badLongitudes[, c("unique_key", "agency", "longitude", "city")], 20), row.names = FALSE, right = FALSE)
@@ -561,39 +565,39 @@ points_df <- data.frame(
   lon = c(-73.7004, -73.7004, -74.2591, -74.2591)
 )
 
-#Convert to an sf object and apply the State Plane projection.
-points_sf <- st_as_sf(points_df, coords = c("lon", "lat"), crs = 4326)  # WGS84 lat/long
-points_sp <- st_transform(points_sf, crs = 2263)  # Convert to State Plane
+# Convert to an sf object and apply the State Plane projection.
+points_sf <- st_as_sf(points_df, coords = c("lon", "lat"), crs = 4326) # WGS84 lat/long
+points_sp <- st_transform(points_sf, crs = 2263) # Convert to State Plane
 
 # Change the x/y_coordinate_state_plane fields to "numeric" to enable comparison.
-d311$x_coordinate_state_plane<- as.numeric(d311$x_coordinate_state_plane)
+d311$x_coordinate_state_plane <- as.numeric(d311$x_coordinate_state_plane)
 d311$y_coordinate_state_plane <- as.numeric(d311$y_coordinate_state_plane)
 
 # Extract the bounding box (xmin, ymin, xmax, ymax) from the sf object
 bbox <- st_bbox(points_sp)
 
 # Assign the individual values to variables
-xmin <- as.numeric( bbox["xmin"] )
-xmax <- as.numeric( bbox["xmax"] )
-ymin <- as.numeric( bbox["ymin"] )
-ymax <- as.numeric( bbox["ymax"] )
+xmin <- as.numeric(bbox["xmin"])
+xmax <- as.numeric(bbox["xmax"])
+ymin <- as.numeric(bbox["ymin"])
+ymax <- as.numeric(bbox["ymax"])
 
 # Filter NA values
 d311_clean <- d311[!is.na(d311$x_coordinate_state_plane) & !is.na(d311$y_coordinate_state_plane), ]
 
 # Check for x-coordinate outliers
 x_outliers <- d311_clean[
-  d311_clean$x_coordinate_state_plane < xmin | 
-    d311_clean$x_coordinate_state_plane > xmax, 
+  d311_clean$x_coordinate_state_plane < xmin |
+    d311_clean$x_coordinate_state_plane > xmax,
 ]
 
 # Check for y-coordinate outliers
 y_outliers <- d311_clean[
-  d311_clean$y_coordinate_state_plane < ymin | 
-    d311_clean$y_coordinate_state_plane > ymax, 
+  d311_clean$y_coordinate_state_plane < ymin |
+    d311_clean$y_coordinate_state_plane > ymax,
 ]
 
-#Print status for x-coordinate outliers
+# Print status for x-coordinate outliers
 if (nrow(x_outliers) == 0) {
   cat("\nAll x_coordinate_state_plane values lie within the boundaries of NYC.")
 } else {
@@ -611,7 +615,6 @@ if (nrow(y_outliers) == 0) {
   print(head(y_outliers[, c("unique_key", "agency", "y_coordinate_state_plane")]))
 }
 
-  
 #########################################################################
 address_type_results <- are_valid_values(d311$address_type, data.frame(
   values = c(
@@ -722,12 +725,13 @@ cbValues <-
 cb_results <- are_valid_values(d311$community_board, data.frame(cbValues), "community_board")
 
 if (!cb_results[[1]]) {
-#  cb_dataset <- cb_results[[3]]
+  #  cb_dataset <- cb_results[[3]]
   create_combo_chart(
-                    dataset = cb_results[[3]],
-                    chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
-                    chart_file_name = "invalid_community_boards.pdf",
-                    console_print_out_title = "Summary of Invalid Community Boards")
+    dataset = cb_results[[3]],
+    chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
+    chart_file_name = "invalid_community_boards.pdf",
+    console_print_out_title = "Summary of Invalid Community Boards"
+  )
 }
 
 #########################################################################
@@ -736,11 +740,12 @@ if (!cb_results[[1]]) {
 incident_zip_results <- are_valid_values(d311$incident_zip, USPSzipcodesOnly, "incident_zip")
 
 if (!incident_zip_results[[1]]) {
-   create_combo_chart(
-     dataset = incident_zip_results[[3]],
-     chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
-     chart_file_name = "invalid_incident_zip.pdf",
-     console_print_out_title = "Summary of Invalid incident_zip(s) by Agency")
+  create_combo_chart(
+    dataset = incident_zip_results[[3]],
+    chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
+    chart_file_name = "invalid_incident_zip.pdf",
+    console_print_out_title = "Summary of Invalid incident_zip(s) by Agency"
+  )
 }
 
 #########################################################################
@@ -820,7 +825,7 @@ if (num_rows_closedBeforeOpened > 0) {
     console_print_out_title = "Summary of negative duration SRs"
   )
 
-#  chart_title <- "Closed before Created (negative duration days)"
+  #  chart_title <- "Closed before Created (negative duration days)"
 
   negativeDurationViolin <- create_violin_chart(
     dataset = large_neg_duration,
@@ -832,7 +837,8 @@ if (num_rows_closedBeforeOpened > 0) {
 
   # Create boxplot of the (negative) duration values
   negativeDurationChart <- ggplot(
-    data = large_neg_duration, aes(x = duration, y = factor(1))) +
+    data = large_neg_duration, aes(x = duration, y = factor(1))
+  ) +
     geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
     geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
     theme(
@@ -881,7 +887,7 @@ if (num_rows_zeroDurations > 0) {
   random_sample <- zeroDurations %>% sample_n(min(num_rows_zeroDurations, 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
 
-#  sorted_zero_durations <- rank_by_agency(zeroDurations)
+  #  sorted_zero_durations <- rank_by_agency(zeroDurations)
 
   if (!is.null(zeroDurations)) {
     create_combo_chart(
@@ -912,7 +918,9 @@ closedinFuture <-
 
 # Compute the # of days into the future the SR is closed, based on the max_created_date + 1 day
 closedinFuture$future_days <- round(as.numeric(difftime(closedinFuture$closed_date,
-  max_closed_date, units = "days")), 4)
+  max_closed_date,
+  units = "days"
+)), 4)
 
 numBlankClosedDate <-
   missingDataPerColumn[missingDataPerColumn$field == "closed_date", "total_empty"]
@@ -920,7 +928,6 @@ numBlankClosedDate <-
 num_rows_future <- nrow(closedinFuture)
 
 if (num_rows_future > 0) {
-  
   max_closed_date_readable <- format(max_closed_date, "%Y-%m-%d %H:%M:%S")
   cat("\n(The maximum 'closed_date' and time for this dataset is:", max_closed_date_readable, ")")
   cat(
@@ -1068,26 +1075,21 @@ if (num_row_updatedLate > 0) {
     sep = ""
   )
   if (!is.null(updatedLate)) {
-#    sorted_updateLate <- rank_by_agency(updatedLate)
-
     create_combo_chart(
-      dataset = updatedLate,  
+      dataset = updatedLate,
       chart_title = paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage"),
       chart_file_name = "post_Closed_Bar_Chart.pdf",
       console_print_out_title = "Summary of post-close-resolution-updates by Agency"
-  )
-
-#    chart_title <- paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days")
+    )
 
     post_closed_violin_chart <- create_violin_chart(
       dataset = updatedLate,
       x_axis_title = "Post_closed Resolution Update (days)",
       x_axis_field = "postClosedUpdateDuration",
       chart_title = NULL,
-      chart_file_name =  "post_closed_violin_chart.pdf"
+      chart_file_name = "post_closed_violin_chart.pdf"
     )
   }
-
 } else {
   cat("\n\nThere are no SRs with a 'resolution_action_updated_date' >", resoultion_action_threshold, "After 'closed_date'.\n")
 }
@@ -1132,7 +1134,7 @@ nonMatching_park_borough <- detect_duplicates(
 )
 
 if (!is.null(nonMatching_park_borough)) {
-#  sorted_park_borough <- rank_by_agency(nonMatching_park_borough)
+  #  sorted_park_borough <- rank_by_agency(nonMatching_park_borough)
   create_combo_chart(
     dataset = nonMatching_park_borough,
     chart_title = "non-matching between 'borough' and 'park_borough' by Agency & cumulative percentage",
@@ -1153,10 +1155,10 @@ nonMatching_taxi_company_borough <- detect_duplicates(
 )
 
 if (!is.null(nonMatching_taxi_company_borough)) {
-#  sorted_taxi_borough <- (nonMatching_taxi_company_borough)
+  #  sorted_taxi_borough <- (nonMatching_taxi_company_borough)
   create_combo_chart(
     dataset = nonMatching_taxi_company_borough,
-    chart_title =  "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage",
+    chart_title = "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage",
     chart_file_name = "non_matching_taxi_company_borough_chart.pdf",
     console_print_out_title = "Summary of non-matching borough & taxi_company_borough by Agency"
   )
@@ -1178,7 +1180,9 @@ cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless
 cat("\n\nAvg response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
 cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
 cat("\nMedian response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   ",
-  duration_median, " days (", 24 * duration_median, " hrs)",sep = "" )
+  duration_median, " days (", 24 * duration_median, " hrs)",
+  sep = ""
+)
 
 negative_homeless_assistance_SRs <- homeless_assistance_SRs[homeless_assistance_SRs$duration < 0 &
   !is.na(homeless_assistance_SRs$duration), ]
@@ -1198,9 +1202,11 @@ if (num_row_neg_duration > 0) {
   cat("\nAvg response time (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean_clean, "days")
   cat("\nStd deviation for (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd_clean, "days")
   cat("\nMedian response time (cleaned data)  'HOMELESS PERSON ASSISTANCE': ",
-    duration_median_clean, " days (", duration_median_clean * 24, " hrs)", sep = "" )
+    duration_median_clean, " days (", duration_median_clean * 24, " hrs)",
+    sep = ""
+  )
   cat("\n\nThe maximum response time for this study is:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
-  
+
   homeless_violin_chart <- create_violin_chart(
     dataset = homeless_assistance_SRs,
     x_axis_title = "Response time (days)",
@@ -1218,15 +1224,18 @@ cat("\n\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********n")
 
 #########################################################################
 # Normalize street names
-address_fields <- c("intersection_street_1", "intersection_street_2",
-                    "cross_street_1", "cross_street_2",
-                    "street_name", "landmark", "taxi_pick_up_location")
+address_fields <- c(
+  "intersection_street_1", "intersection_street_2",
+  "cross_street_1", "cross_street_2",
+  "street_name", "landmark", "taxi_pick_up_location"
+)
 
 # **********************
 # Apply normal_address function to each column in address_fields
-d311[address_fields] <- lapply(d311[address_fields], normal_address, 
-                                    abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE)
 
+d311[address_fields] <- lapply(d311[address_fields], normal_address,
+  abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE
+)
 # Define replacement dictionaries
 word_to_number <- list(
   "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
@@ -1240,10 +1249,10 @@ street_abbreviations <- list("Avenue" = "AVE")
 for (field in address_fields) {
   if (field %in% names(d311)) {
     cat("\nProcessing column:", field, "\n")
-    
+
     # Apply normalize_street
     d311[[field]] <- normalize_street(d311[[field]], word_to_number)
-    
+
     # Apply normalize_avenue
     d311[[field]] <- normalize_avenue(d311[[field]], street_abbreviations)
   } else {
@@ -1295,7 +1304,7 @@ for (column in redundant_columns) {
 }
 
 # Delete the redundant columns
-d311_reduced <- d311[, !names(d311) %in% redundant_columns,]
+d311_reduced <- d311[, !names(d311) %in% redundant_columns, ]
 
 # Calculate the size of the new data table object
 reduced_size <- object.size(d311_reduced)
@@ -1306,8 +1315,10 @@ size_reduction <- original_size - reduced_size
 # Print the results
 cat("\nOriginal size:", format(original_size, units = "auto"))
 cat("\nSize after removing redundant columns:", format(reduced_size, units = "auto"))
-cat("\nPotential size reduction:", format(size_reduction, units = "auto"), "or",
-    round(size_reduction/original_size * 100, 1),  "%\n")
+cat(
+  "\nPotential size reduction:", format(size_reduction, units = "auto"), "or",
+  round(size_reduction / original_size * 100, 1), "%\n"
+)
 
 #########################################################################
 programStop <- as.POSIXct(Sys.time())
