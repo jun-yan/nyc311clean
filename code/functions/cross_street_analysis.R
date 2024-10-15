@@ -81,6 +81,25 @@ cross_street_analysis <- function(
   non_dup_streets_non_blank <- non_dup_streets[non_dup_streets[[cross_street]] != "" &
                                                  non_dup_streets[[intersection_street]] != "", ]
   
+  # Define the relative path to go up two directories and then into "data"
+  relative_path <- file.path("..", "..", "data")
+  
+  # Ensure the directory exists (optional)
+  if (!dir.exists(relative_path)) {
+    dir.create(relative_path, recursive = TRUE)
+  }
+  
+  # Select only the cross_street and intersection_street columns
+  subset_data <- non_dup_streets_non_blank[, c(cross_street, intersection_street)]
+  
+  # Construct the filename with dynamic column names and place it in the relative path
+  filename <- file.path(relative_path, paste0("non_dup_streets_non_blank_", cross_street, "_", intersection_street, ".csv"))
+  
+  # Save the subset dataframe to disk at the specified relative path
+  write.csv(subset_data, file = filename, row.names = FALSE)
+  
+  cat("Data saved to:", filename, "\n")  # Optional printout for confirmation
+  
   num_rows_non_dup_non_blank <- nrow(non_dup_streets_non_blank)
   
   cat("\nSample of matching",cross_street, "&", intersection_street, ":\n")

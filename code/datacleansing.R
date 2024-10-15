@@ -25,7 +25,9 @@ library(sf)
 
 #########################################################################
 
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
+#main_data_file <- "smaller_test_data.csv"
+#main_data_file <- "extra_small.csv"
 
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
@@ -342,7 +344,7 @@ ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_heigh
 
 #########################################################################
 
-cat("\n\n**********COMPLAINT TYPES**********")
+cat("\n\n**********COMPLAINT TYPES**********\n")
 
 #########################################################################
 
@@ -501,7 +503,7 @@ cat("\n\nAre all values in 'longitude' numbers?", longitudeNum)
 
 #########################################################################
 
-cat("\n\n\n**********CHECKING FOR ALLOWABLE AND VALID VALUES**********\n")
+cat("\n\n**********CHECKING FOR ALLOWABLE AND VALID VALUES**********\n")
 
 #########################################################################
 # determine if the unique_key is in fact unique
@@ -776,7 +778,7 @@ numBlankClosedDate <-
 
 num_rows_closedBeforeOpened <- nrow(closedBeforeOpened)
 
-if (num_rows_closedBeforeOpened > 0) {
+if (num_rows_closedBeforeOpened > 1) {
   cat(
     "\nThere are", format(num_rows_closedBeforeOpened, big.mark = ","),
     "SRs 'closed' before they were 'created' (negative duration) \nrepresenting",
@@ -1096,7 +1098,7 @@ if (num_row_updatedLate > 0) {
 
 #########################################################################
 
-cat("\n\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
+cat("\n\n**********CHECKING FOR DUPLICATE VALUES**********\n")
 
 #########################################################################
 # Check if "location" is a concatenation of "latitude" and "longitude"
@@ -1220,30 +1222,102 @@ if (num_row_neg_duration > 0) {
 
 #########################################################################
 
-cat("\n\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********n")
+cat("\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********\n")
 
 #########################################################################
 # Normalize street names
 address_fields <- c(
-  "intersection_street_1", "intersection_street_2",
-  "cross_street_1", "cross_street_2",
-  "street_name", "landmark", "taxi_pick_up_location"
+#  "intersection_street_1", "intersection_street_2",
+#  "cross_street_1", "cross_street_2",
+
+    "street_name", "landmark", "taxi_pick_up_location"
 )
 
 # **********************
 # Apply normal_address function to each column in address_fields
 
 d311[address_fields] <- lapply(d311[address_fields], normal_address,
-  abbs = USPSabbreviations, na = NULL, punct = "", abb_end = TRUE
-)
-# Define replacement dictionaries
-word_to_number <- list(
-  "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
-  "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
-  "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12"
+  abbs = USPSabbreviations, na = NULL, punct = " ", abb_end = FALSE
 )
 
-street_abbreviations <- list("Avenue" = "AVE")
+# Define replacement dictionaries
+replacement_list <- list(
+  "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
+  "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
+  "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12",
+  "AVE OF THE AMERICAS" = "6 AVE",
+  "FREDERICK DOUGLASS BLVD" = "8 AVE",
+  "ADAM CLAYTON POWELL JR BLVD" = "7 AVE",
+  "MALCOLM X BLVD" = "LENOX AVE",
+  "BEVERLEY RD" = "BEVERLY RD",
+  "EAST GUN HL RD" = "EAST GUNHILL RD",
+  "MAC DOUGAL ST" = "MACDONOUGH ST"
+)
+
+  # "SHR FRONT PKWY" = "SHOREFRONT PKWY",
+  # "OCEAN VW AVE" = "OCEANVIEW AVE",
+  # "DOUGLASS ST" = "DOUGLAS ST",
+  # "OLD FULTON ST" = "CADMAN PLZ WEST",
+  # "JFK" = "JOHN F KENNEDY AIRPORT",
+  # "CATHEDRAL PKWY" = "WEST 110 ST",
+  # "ANDREWS AVE SOUTH" = "ANDREWS AVE",
+  # "PARKHILL AVE" = "PARK HILL AVE",
+  # "MC KINLEY AVE" = "MCKINLEY AVE",
+  # "LORING PLACE SOUTH" = "LORING PLACE",
+  # "SAINT NICHOLAS AVE" = "ST NICHOLAS AVE",
+  # "MALCOM X BLVD" = "LENOX BLVD",
+  # "ADAM CLAYTON POWELL BLVD" = "7 AVE",
+  # "MSGR MCGOLRICK PARK" = "MONSIGNOR MCGOLRICK PARK",
+  # "DUKE ELLINGTON BLVD" = "WEST 106 ST",
+  # "LA GUARDIA AIRPORT" = "LAGUARDIA AIRPORT",
+  # "KENMORE PLACE" = "EAST 21 ST",
+  # "GRAND CENTRAL PKWY SR NORTH" = "GRAND CENTRAL PKWY",
+  # "SAINT MARKS AVE" = "ST MARKS AVE",
+  # "BLEEKER ST" = "BLEECKER ST",
+  # "MC KEEVER PLACE" = "MCKEEVER PLACE",
+  # "WHITEPLAINS RD" = "WHITE PLNS RD",
+  # "FREDERICK DOUGLAS BLVD" = "8 AVE",
+  # "THOMAS BOYLAND ST" = "THOMAS S BOYLAND ST",
+  # "GRAND CENTRAL PKWY SR WEST" = "GRAND CENTRAL PKWY",
+  # "CROSSBAY BLVD" = "CROSS BAY BLVD",
+  # "HUTCHINSON RIV PKWY EAST" = "HUTCHINSON RIV PKWY",
+  # "SAINT JOHNS PLACE" = "ST JOHNS PLACE",
+  # "VAN WYCK EXPY SR EAST" = "VAN WYCK EXPY",
+  # "FREDRICK DOUGLAS BLVD" = "8 AVE",
+  # "PENNSYLVANIA STA" = "PENN STA",
+  # "EDGECOMB AVE" = "EDGECOMBE AVE",
+  # "BAYRIDGE PKWY" = "BAY RIDGE PKWY",
+  # "BAYRIDGE AVE" = "BAY RIDGE PKWY",
+  # "GRANDCONCOURSE" = "GRAND CONCOURSE",
+  # "SPRUCE AVE" = "SPRUCE ST",
+  # "ST MARY S AVE" = "ST MARYS AVE",
+  # "SEDGEWICK AVE" = "SEDGWICK AVE",
+  # "COURTLAND AVE" = "COURTLANDT AVE",
+  # "THE BATTERY" = "BATTERY PARK",
+  # "LGA" = "LAGUARDIA AIRPORT",
+  # "DEREIMER AVE" = "DE REIMER AVE",
+  # "ST ANN S AVE" = "ST ANNS AVE",
+  # "FT GRN PLACE" = "FT GREENE PLACE",
+  # "SHEPHARD AVE" = "SHEPHERD AVE",
+  # "CASTLEHILL AVE" = "CASTLE HL AVE",
+  # "SAINT ANDREWS PLACE" = "ST ANDREWS PLACE",
+  # "JFK AIRPORT" = "JOHN F KENNEDY AIRPORT",
+  # "SAINT EDWARDS ST" = "ST EDWARDS ST",
+  # "HORACE HARDING EXPRE" = "HORACE HARDING EXPY",
+  # "DR MARTIN LUTHER KING JR BLVD" = "125 ST",
+  # "FRANKLIN D ROOSEVELT" = "FDR", 
+  # "DESOTA RD" = "DE SOTA RD",
+  # "LENOX BLVD" = "LENOX AVE",
+  # "MACDOUGAL ST" = "MACDONOUGH",
+  # "BAY RDG AVE" = "BAY RIDGE PKWY",
+  # "BAY RDG PKWY" = "BAY RIDGE PKWY",
+  # "MCDOUGAL ST" = "MACDONOUGH",
+  # "VAN WYCK EXPY SR WEST" = "VAN WYCK EXPY",
+  # "ASTORIA BLVD NORTH" = "ASTORIA BLVD"
+  # 
+  # 
+  # 
+#)
 
 # Apply normalization functions to each column in address_fields
 for (field in address_fields) {
@@ -1251,10 +1325,8 @@ for (field in address_fields) {
     cat("\nProcessing column:", field, "\n")
 
     # Apply normalize_street
-    d311[[field]] <- normalize_street(d311[[field]], word_to_number)
+    d311[[field]] <- normalize_street(d311[[field]], replacement_list )
 
-    # Apply normalize_avenue
-    d311[[field]] <- normalize_avenue(d311[[field]], street_abbreviations)
   } else {
     cat("\nWarning:", field, "not found in d311 dataset.\n")
   }
@@ -1276,7 +1348,7 @@ y2 <- cross_street_analysis(d311, cross_street, intersection_street)
 
 #########################################################################
 
-cat("\n\n**********REDUCE FILE SIZE. REMOVE DUPLICATE VALUES**********\n")
+cat("\n\n**********REDUCE FILE SIZE BY REMOVING DUPLICATE/REDUNDANT FIELDS**********\n")
 
 ##########################################################################
 cat("\nCurrent column names for d311 dataframe\n")
@@ -1290,8 +1362,7 @@ redundant_columns <- c(
   "intersection_street_2",
   "location",
   "duration",
-  "postClosedUpdateDuration",
-  "translated_borough_boundaries"
+  "postClosedUpdateDuration"
 )
 
 cat("\nShrinking file size by deleting these", length(redundant_columns), "redundant and added fields:\n")

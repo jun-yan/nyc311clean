@@ -8,7 +8,7 @@ create_bar_chart <- function(
     sub_title = "",                   # Default empty subtitle
     x_axis_title = NULL,              # Default empty x-axis title
     y_axis_title = NULL,              # Default empty y-axis title
-    console_print_out_title = "Data Summary", # Default title for console output
+    print_out_title = "Data Summary", # Default title for console output
     add_mean = FALSE,
     add_median = FALSE,
     add_sd = FALSE,
@@ -21,37 +21,50 @@ create_bar_chart <- function(
     horizontal_adjustment_max = 1,
     vertical_adjustment_max = -1)            # Default NULL means no file saving)
 {
+  # Find the row with the maximum count
+  max_row <- dataset[which.max(dataset[[y_col]]), ]
+  y_max_count <- max_row[[y_col]]
+  y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
   
-  # Call the new function to calculate and print statistics
-  stats <- calculate_and_print_statistics(dataset, x_col, y_col, console_print_out_title)
+  # Find the row with the minimum count
+  min_row <- dataset[which.min(dataset[[y_col]]), ]
+  y_min_count <- round(min_row[[y_col]], 0)
   
-  # Use the returned values in your charting logic
-  y_max_count <- stats$y_max_count
-  y_min_count <- stats$y_min_count
-  y_mean_value <- stats$y_mean_value
-  y_median_value <- stats$y_median_value
-  y_sd_value <- stats$y_sd_value
-  max_row <- stats$max_row
-  min_row <- stats$min_row
-  y_total_count <- stats$y_total_count
+  # result <- calculate_values(y_max_count)
+  # starting_value <- result$starting_value
+  # increment <- result$increment
   
-  # Print the summary of dataset for the first 20 rows
-  cat("\n", console_print_out_title, " (first 20 rows):\n", sep = "")
-  print(head(dataset[, c(x_col, y_col)], 20), row.names = FALSE)
+  # Calculate mean, median, and standard deviation if requested
+  y_mean_value <- round(mean(dataset[[y_col]]), 0)
+  y_median_value <- round(median(dataset[[y_col]]), 0)
+  y_sd_value <- round(sd(dataset[[y_col]]), 0)
   
-  # Check if x_col is of Date type or POSIXct type
-  if (inherits(dataset[[x_col]], "Date")) {
-    # Use date scale for Date columns
+  # # Print the date and count for maximum and minimum values
+  cat("\n\n***", print_out_title, "SRs***")
+  # print_out_title <- substr(print_out_title, 1, 1) %>%
+  #   paste(., substr(print_out_title, 2, nchar(print_out_title)), sep = "")
+  
+  cat(
+    "\n", paste("Maximum", print_out_title, ":"), as.character(max_row[[x_col]]), "  ",
+    paste("Maximum", print_out_title, "count:"), format(y_max_count, big.mark = ",")
+  )
+  
+  cat(
+    "\n", paste("Minimum", print_out_title, ":"), as.character(min_row[[x_col]]), "  ",
+    paste("Minimum", print_out_title, "count: "), format(y_min_count, big.mark = ","))
+  
+  cat("\n")
+  cat(
+    paste("\nAverage ", print_out_title, ":", sep = ""), format(y_mean_value, big.mark = ","), "  ",
+    paste("\nMedian ", print_out_title, ":", sep = ""), format(y_median_value, big.mark = ","),
+    paste("\nStd Dev (\u03C3) ", print_out_title, ":", sep = ""), format(y_sd_value, big.mark = ","), "\n"
+  )
+  
+  # Check if x_col is of Date type
+  if (inherits(dataset[[x_col]], "Date") || inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
     scale_x <- scale_x_date(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
-  } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXlt")) {
-    # Use datetime scale for POSIXct or POSIXlt columns (time-based data)
-    scale_x <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%H:%M"), breaks = scales::date_breaks("2 hours"))
-  } else if (is.numeric(dataset[[x_col]])) {
-    # Use continuous scale for numeric columns
-    scale_x <- scale_x_continuous(expand = c(0.01, 0))
   } else {
-    # Use discrete scale for categorical (non-numeric) columns
-    scale_x <- scale_x_discrete(expand = c(0.01, 0))
+    scale_x <- scale_x_continuous(expand = c(0.01, 0))
   }
   
   # Create the bar chart
@@ -69,6 +82,10 @@ create_bar_chart <- function(
       plot.subtitle = element_text(size = 6),
       aspect.ratio = 0.618033 ) +
     
+    # geom_hline(
+    #   yintercept = seq(starting_value, y_max_count, by = increment),
+    #   linetype = "dotted", color = "gray40", linewidth = 0.3) +
+    
     ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = "")) +
     labs(x = x_axis_title, y = y_axis_title)
   
@@ -77,10 +94,6 @@ create_bar_chart <- function(
   
   # Extract Y-axis breaks (try different possible locations)
   y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
-  # Filter out any NA values from y_breaks
-  y_breaks <- y_breaks[!is.na(y_breaks)]
-  
-#  print(y_breaks)
   
   # Add hlines using the Y-axis breaks
   bar_chart <- bar_chart +
@@ -159,23 +172,21 @@ create_bar_chart <- function(
   # Print the bar chart
     print(bar_chart)
   
-    # Save the chart to a file if chart_file_name is provided
-    if (!is.null(chart_file_name)) {
-      chart_path <- file.path(chart_directory_path, chart_file_name)
-      
-      # Define aspect ratio (golden ratio)
-      chart_width <- 10  # Adjust to match manuscript
-      chart_height <- chart_width / 1.618
-      
-      # Save the plot with adjusted size and DPI
-      ggsave(
-        filename = chart_file_name,
-        plot = bar_chart,
-        path = chart_directory_path,
-        width = chart_width,
-        height = chart_height,
-        dpi = 300 )  # High resolution for manuscripts
-    }
+  # Save the chart to a file if chart_file_name is provided
+    chart_path <- file.path(chart_directory_path, chart_file_name)
+    
+  # Define aspect ratio (golden ratio)
+    chart_width <- 10  # Adjust to match manuscript
+    chart_height <- chart_width / 1.618
+    
+  # Save the plot with adjusted size and DPI
+    ggsave(
+      filename = chart_file_name,
+      plot = bar_chart,
+      path = chart_directory_path,
+      width = chart_width,
+      height = chart_height,
+      dpi = 300 )  # High resolution for manuscripts
 }
 
 #########################################################################
