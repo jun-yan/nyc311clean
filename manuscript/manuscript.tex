@@ -32,6 +32,8 @@
 
 \usepackage{comment}
 \usepackage{booktabs, textgreek}
+\usepackage{subcaption}
+
 
 %% float control
 \renewcommand\floatpagefraction{0.75}
@@ -200,12 +202,11 @@ and requirements observed in the curation of such datasets.
 
 The paper is organized as follows. Section~\ref{sec:data} provides 
 an overview of the history of the NYC 311 SR system and presents 
-a summary of SR counts over the 10-year period from 2014 to 2023. 
+a summary of SR counts over a 2-year period from 2022 to 2023. 
 Section~\ref{sec:issues} delves into specific data cleansing 
 challenges affecting data quality and curation efficiency, 
 including structural problems, adherence to the data dictionary, 
 and the presence of missing, blank, or N/A entries. This section
-utilizes 311 SR data over a a 2-year period from 2022-2023.  It 
  investigates field compliance with reference or acceptable values, 
 highlights logical inconsistencies, and examines concerning patterns 
 in the data. We explore the balance between precision and accuracy 
@@ -229,8 +230,8 @@ millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile app channels in 2009, a
 record high of 348,463 monthly service requests in August 2020 due to
 the COVID-19 pandemic, the 2021 expansion to include the MTA's city
-subway system, and a record 3.23 million service requests in
-2023. 
+subway system (the biggest expansion in their history), and a 
+record 3.23 million service requests in 2023. 
 
 
 Today, the NYC 311 data system manages over 3 million service
@@ -249,7 +250,7 @@ correlating data over long periods, excluding personally
 identifiable information (PII), integration with stand-alone systems
 at selected NYC agencies, and managing API usage for numerous
 third-party users. These challenges are addressed by various agency
-open data managers and 
+open data managers and OTI.
 \end{comment}
 
 The impact of NYC 311 data extends beyond operational efficiency; it
@@ -263,82 +264,56 @@ routes based on analyses by the Taxi and Limousine Commission (TLC),
 and improving responsiveness across City Agencies
 
 
-\begin{figure}[tbp]
-	\centering
-  	\includegraphics[width = \textwidth]{10-year-trend_yearly.pdf}
- 	\caption{10-year (2014-2023) annual SR Counts.}
-  	\label{fig:10-yr}
-\end{figure}
-
-\jy{If the 10-year data was only used for Figure~\ref{fig:10-yr}, we
-  could remove this figure and just describe it in text. This would
-  avoid the confusion of which dataset was used in the analyses in the
-  sequel.}
-
-\jy{If we keep the 10-year data, we might as well make some dynamic
-  visualization over time. For example, Figure 2/3 could have multiple
-  panels such that we can see several 2-year decompositions over
-  time.}
+Our investigation utilizes an SR dataset covering  2-years (2022-2023).
+This dataset is approximately 3.7 GB in size and contains over 
+6.4 million rows with each row representing one SR. It contains 
+41 columns of data. It is used to conduct detailed analysis 
+in areas such as data consistency, data validity, redundant fields, 
+etc.. Instructions on downloading this file from the 
+NYC Open Data Portal are available in the supplemental material.
 
 
-Our investigation utilizes two 311 SR datasets covering 10-years and 2-years.
-The 10-year period (2014--2023), downloaded on 15 September 2024, 
-contains only three columns (created\_date, closed\_date, and 
-agency). This dataset is used to analyze long-term 
-trends and observe certain dating anomalies. The 10-year dataset is approximately 
-1.4 GB in size and contains over 27 million rows, each row representing one SR.
- Instructions on downloading this file from the NYC Open Data Portal 
- are available in the supplemental material.
-
-
-Additionally, this investigation uses a 2-year dataset covering the period
-2022--2023, also downloaded on 15 September 2024. This data set 
-contains the full 41 columns of 311 SR data available from the portal, 
-and is used to conduct detailed analysis in areas such as data consistency, 
-data validity, redundant fields, etc.. This 2-year dataset 
-is quite large at 3.7GB. It contains over 6 million rows of SRs. Instructions 
-on downloading this file from the NYC Open Data Portal are 
-available in the supplemental material.
-
-
-Figure~\ref{fig:10-yr} shows  annual counts of 311 SRs over the
-10-year period from 2014 to 2023, revealing a clear upward trend in
-public engagement. As indicated, the most significant increase
-in activity occurred in 2020, when the number of requests surged to 3.23 million
-during the COVID-19 pandemic, illustrating the essential role of the
-311 system in supporting residents during times of crisis. Overall, SR
-counts increased by 49.5\% between 2014 and 2023, reflecting
-growing public reliance on the system. (During this 10-year time 
-period, the population of NYC grew just 0.6\%.) The steady 
-rise in SRs can be attributed to the increased accessibility of 
-the 311 system via online and mobile platforms, as well as 
-heightened public awareness  and utilization of the service. 
+During the 10-year period from 2014 to 2023,  311 experienced
+a 50\% in Service Requests, , reflecting a growing public reliance 
+on the system. (As a note, during this 10-year timeframe, the 
+population of NYC grew just 0.6\%.). The most significant increase
+in activity occurred in 2020, when the number of requests 
+surged to 3.23 million during the COVID-19 pandemic, 
+illustrating the essential role of the 311 system in supporting 
+NYC residents during times of crisis. The steady 
+rise in SRs can be at least partially attributed to the increased 
+accessibility of the 311 system via online and mobile 
+platforms, as well as heightened public awareness of the service. 
 While the spike in 2020 was exceptional, the broader trend 
-indicates sustained growth in service request volume over 
-the decade, highlighting the system's evolving role in managing 
+indicates sustained growth in SR volume in future years,  
+highlighting the system's evolving role in managing 
 both routine city operations and extraordinary events.
 
 
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 agency, showing the cumulative percentage of SRs handled by each
-agency over a the 2-year time frame. Note that the
-distribution of SRs is concentrated among a few key agencies. The six
-largest agencies are New York Police Department (NYPD), 
-Housing Preservation and Development (HPD),
-New York City Department of Sanitation (DSNY), Department of
-Transportation (DOT), Department of Environmental Protection (DEP),
-and Department of Parks and Recreation (DPR).
-Collectively they handle over 90\% of the total SR volume. This is
-indicative of the critical roles these agencies play in managing
+agency over a the 2-year timeframe. Note that the
+distribution of SRs is heavily concentrated among a few key 
+agencies. The six largest agencies are:
+
+\begin{itemize}
+    \item New York Police Department (NYPD) - 43\%
+    \item Housing Preservation and Development (HPD) - 21\%
+    \item New York City Department of Sanitation (DSNY) - 10\%
+    \item Department of Transportation (DOT) - 7\%
+    \item Department of Environmental Protection (DEP) - 5\%
+    \item Department of Parks and Recreation (DPR) - 4\%
+\end{itemize}
+
+Collectively these six City agnecies handle over 90\% of the total SR 
+volume, indicative of the critical role these agencies play in managing
 public concerns, ranging from noise complaints and housing issues to
 sanitation and transportation problems. The NYPD alone accounts for a
-substantial portion of the total SRs, underscoring its central role in
-addressing complaints related to public safety. The
-remaining 10\% is distributed across a number of other
-agencies. This concentration of SRs points to a
-reliance on a few key departments to resolve most non-emergency
-issues (e.g. non 911 calls). Accordingly, this underscores 
-the necessity for optimal data handling and curation processes 
+substantial portion of the total SRs, underscoring its leading role in
+addressing complaints related to public safety. The remaining
+10\% of SRs is distributed across 10 other
+agencies. This concentration of SRs to the `big six'' agencies 
+underscores the necessity for optimal data handling and curation processes 
 within these high-volume agencies in order to ensure 
 efficiency and responsiveness.
 
@@ -357,28 +332,22 @@ efficiency and responsiveness.
   \label{fig:SR_complaints}
 \end{figure}
 
-\jy{Currently we have 9 figures and 3 tables, which are too many for
-  an article. Some journal (e.g., Biometrics) requires no more than 6
-  tables/figures combines. We need to more selective in presenting
-  figures/tables, perhaps no more than 8 combined?
-}
-
 Figure~\ref{fig:SR_complaints}
-illustrates the top 20 complaint types, accounting for 70\% 
-of all SRs and their cumulative percentage. Note that the 
-distribution of complaints is skewed, with a small number of issues 
-dominating total SR volume. Noise-related complaints, including 
-residential, commercial, and street noise, make up 22\% of all 
-complaints, making them the most frequent issue in the NYC 311 system. 
+illustrates how the top 20 complaint types, accounting for 70\% 
+of all SRs. Note that the distribution of complaints is skewed, 
+with a small number of issues dominating total SR volume. 
+Noise-related complaints, including residential, commercial, and 
+street noise, when combined make up 22\% of all 
+complaints; the most frequent issue in the NYC 311 system. 
 Other prominent categories include illegal parking, heat/hot water 
 complaints, and blocked driveways. The cumulative percentage curve 
-shows that after the top 20, the remaining complaint types are spread 
-thinly across the remaining 30\% of SRs. This concentration suggests 
-that improving responses to the most frequent complaints could have 
-a significant impact on overall service efficiency and resident 
-satisfaction. It also provides insights into the operational 
-pressures faced by the city agencies responsible for handling these 
-high-volume complaints.
+reveals that after the top 20 complaint types, the remaining 
+complaint types are spread thinly across the remaining 30\% of SRs,
+suggesting that improving responses to the most frequent 
+complaints could have an outsized impact on overall service 
+efficiency and resident satisfaction. This chart also provides 
+insights into the operational pressures faced by City agencies 
+responsible for handling these high-volume complaints.
 
 
 \section{NYC 311 SR Data Cleansing Issues} 
@@ -395,12 +364,13 @@ standardizing data formats \citep[e.g.,][]{cody2017cody,
 especially important as open datasets often come from diverse,
 uncoordinated sources, leading to variations in data quality,
 completeness, and consistency. Without thorough data cleansing, the utility
-of open data can be quite limited, affecting its reliability for
-research, policy-making, and innovation. The main purpose of cleansing
-open data is to ensure that it is accurate, consistent, and usable
-across multiple platforms and by various stakeholders. This improves
-the trustworthiness of the data and enables better decision-making,
-more accurate analysis, and the integration of data into machine
+of open data can be limited and perhaps untrustworhty, affecting 
+its reliability for research, policy-making, and innovation. The 
+main purpose of cleansing open data is to ensure that it is 
+accurate, consistent, and usable across multiple platforms and by 
+various stakeholders with a myriad of purpose. Data cleansing improves
+the trustworthiness of the data and enables more accurate analysis, 
+better decision-making,and the integration of data into machine
 learning models or other systems.
 
 
@@ -409,10 +379,10 @@ processing. One of the primary efforts is data validation, which spans
 several critical checks. For instance, mandatory fields must not be 
 left empty, ensuring that key information is always captured. 
 Additionally, certain fields must conform to specific data types, 
-such as numeric, character, or date formats, which are typically 
-outlined in a Data Dictionary. Another essential aspect of validation 
+such as numeric, character, or date formats; typically 
+outlined in a Data Dictionary. An essential aspect of validation 
 is domain compliance, where fields must adhere to a predefined set of 
-values, such as statuses, state names, zip codes, or gender. Structural 
+values, such as statuses, state names, or zip codes. Structural 
 errors also play a significant role in data quality, particularly when 
 naming conventions or data entries are inconsistent. Common issues 
 include fields that do not appear in the Data Dictionary or the 
@@ -426,10 +396,12 @@ must be carefully managed to ensure reliable and meaningful data.
 
 
 Here we identify the presence of issues in the NYC 311 SR open data;
-not attempting to solve them. A solution effort should
-be undertaken only after an investigation as to the why and how 
-such issues came about, and a discussion as to whether or not it 
-is an actual \textit{error} or holds some other status.
+not attempting to solve them but rather to highlight their scope and
+magnitued. A solution effort should be undertaken only after further 
+investigation as to the why and how such issues came about, 
+and a discussion as to whether or not it is an actual \textit{error} or 
+holds some other status. Coordination with the originating Agency
+is paramount.
 
 
 \subsection{Structural Issues}
@@ -444,16 +416,17 @@ characteristics of the 311 SR data set:
 	\item There are 41 columns of data for each row, exportable as a CSV file.
 	Each row represents one Service Request. 
 	
-	\item There are four date fields (created, closed, updated, due).
+	\item There are four date fields (created, closed, action\_updated, due).
 	
 	\item There are two borough fields; one of which appear to be a duplicate.
 		
 	\item Seven street fields; two pair of which appear to be duplicates
 	
 	\item In addition to the incident\_address, there are five additional location fields: 
-	lat/long, street\_name, landmark, NY State plane, and Block \#
+	latitude/longitude, street\_name, landmark, USGS State Plane 
+	Coordinate System, and Block \#.
 	
-	\item One free-form text field, resolution\_description, which 
+	\item A free-form text field, resolution\_description, which 
 	supports 934 characters of input, including commas and special characters
 \end{itemize}
 
@@ -463,15 +436,23 @@ identifies 41 data columns (fields) and provides related information
 for each. However, there are six additional fields that can be
 optionally downloaded. These fields are 
 visible in the portal's ``Column manager'' widget, labeled with the prefix 
-``@computed\_region.'' The additional fields include \texttt{zip\_codes}, 
-\texttt{community\_districts}, \texttt{borough\_boundaries}, 
-\texttt{city\_council\_districts}, \texttt{police\_precincts}, and 
-\texttt{police\_precinct}. While one can likely infer the meaning and 
+``@computed\_region.'' The additional fields include:
+
+\begin{itemize}
+    \item \texttt{zip\_codes}
+    \item \texttt{community\_districts}
+    \item \texttt{borough\_boundaries}
+    \item \texttt{city\_council\_districts}
+    \item \texttt{police\_precincts}
+    \item \texttt{police\_precinct}
+\end{itemize}
+
+While one can likely infer the meaning and 
 derivation of these computed fields, uncertainty remains as to
 their derivation and usage. These six fields are not included in
-the Data Dictionary. Our analysis has shown that these six 
-fields have numerous data validity issues. Liaison with the 
-NYC Open Data Teams leads us to treat these six fields 
+the Data Dictionary, which we have asked to be updated. Our 
+analysis shows that these six \texttt{computed} fields have 
+significant data validity issues, leading us to treat these six fields 
 as experimental and not for suitable for normal use. Accordingly, 
 we will not address these fields in our analysis.
 
@@ -482,21 +463,25 @@ Understanding the absence of data by field is important
 when undertaking analysis. For example, if you wanted to 
 determine if SRs were closed before or after their
 \texttt{due\_date}, you would be challenged as 99.6\% of the
-\texttt{due\_date} field is
-blank. When counting fields for blank or N/A values, they appear 
-to divide into three groups:
-\textbf{Mostly Empty}, \textbf{Partially Empty}, 
-and \textbf{Few/None Empty}. 
-The Mostly Empty category ranges from 93--99.9\% blank 
-and includes such fields as
+\texttt{due\_date} field is blank. When counting fields for 
+blank or N/A values, they appear to divide into three groups:
+
+\begin{itemize}
+    \item \textbf{Mostly Empty} -- 93-99.9\% blank 
+    \item \textbf{Partially Empty} -- 40-4\% blank
+    \item \textbf{Few/None Empty} -- 2-0\% blank
+\end{itemize}
+
+
+The Mostly Empty category includes such fields as
 \texttt{taxi\_company due\_date},
 \texttt{pickup\_location}, and \texttt{landmark}.
 The Partially Empty includes such fields as
 \texttt{location\_type}, \texttt{borough}, 
 and \texttt{cross\_street}. And the Few/None Empty includes
 \texttt{created\_date}, \texttt{complaint\_type},
-\texttt{agency}, and \texttt{status}. In some cases it may make
-sense to inquiry as to why some fields are frequently blank.
+\texttt{agency}, and \texttt{status}. In some analysis efforts, it may be
+prudent to inquire as to why some fields are mostly or almost always blank.
 Figure~\ref{fig:blank_fields} presents a graphic 
 depiction of total empty (blank \& N/As) for each fields illustrating
 the grouping into the Most, Partial, and Few categories.
@@ -513,46 +498,57 @@ the grouping into the Most, Partial, and Few categories.
 \subsection{Validating Data for Acceptable Values}
 \label{sec:domain}
 Any analytic effort must ensure that fields containing invalid values 
-are identified and removed from the analysis. Below are the results of 
-selected field validation. The latitude and longitude fields were 
+are identified and isolated from the analysis. Below are the results of 
+selected field validations. The latitude and longitude fields were 
 found to fall within the geographic boundaries of New York City, and 
 the \texttt{unique\_key} field was indeed unique, as required. 
 Unfortunately, the Data Dictionary specifies very few domains of 
-acceptable values. However, the following fields were tested and found 
+acceptable values. Nonetheless, the following fields were tested and found 
 to comply with their expected domains, as determined by public usage 
-and historical datasets: \texttt{address\_type}, \texttt{status}, 
-\texttt{borough}, \texttt{borough\_boundaries}, \texttt{park\_borough}, 
-\texttt{data\_channel}, \texttt{vehicle\_type}, and 
-\texttt{city\_council\_district}. Some fields proved to be problematic 
-as to their compliance with a domain of legal values. 
+and historical datasets:
+
+\begin{itemize}
+    \item \texttt{address\_type}
+    \item \texttt{status}
+    \item \texttt{borough}
+    \item \texttt{borough\_boundaries}
+    \item \texttt{park\_borough}
+    \item \texttt{data\_channel}
+    \item \texttt{vehicle\_type}
+    \item \texttt{city\_council\_district}
+\end{itemize}
+
+But some fields proved problematic as to their 
+compliance with a domain of allowable values. 
 
 
 \paragraph{Zip Codes}
 \label{sec:zipcodesissues}
 All zip codes ( \texttt{incident\_zip}) 
-should be valid as defined by the USPS database, which contains 
+should validate against the USPS database, which contains 
 44,173 valid zip codes. The \texttt{incident\_zip} field has 
-only 0.07\% invalid entries, this still results in 4,163 errors; 
-not insignificant. If you sort the invalid entries by Agency, 
-the distribution by percentage mirrors the \texttt{overall} 
+only 0.07\% invalid entries, this still results in 4,374 errors; 
+not insignificant. If you group the invalid entries by 
+percentage by Agency, it mirrors the \texttt{overall} 
 breakdown of SRs by Agency, potentially 
 indicating a systemic problem.
 
 
-\paragraph{Date and Closed Date}
+\paragraph{Created and Closed Date}
 \label{sec:negativeduration}
 For the \texttt{created\_date} and \texttt{closed\_date} fields, one 
 might expect that these fields are automatically populated by the SR 
 application software when setting an SR status to ``new'' or ``closed.'' 
 Unfortunately, this does not seem to be the case, as several anomalies 
-exist in the date fields:
+exist in the created and closed date fields. Here are some of the errors:
+
 \begin{itemize}
     \item SRs with a \texttt{closed\_date} that occurs before the 
-    \texttt{created\_date}.
+    \texttt{created\_date} indicating a negative duration.
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
-    the far distant past.
+    the far distant past, e.g. 1900.
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} that 
-    match to the second.
+    match to the second indicating a zero duration.
     \item A large number of SRs closed and/or created exactly at midnight 
     or noon, to the second.
 \end{itemize}
@@ -563,18 +559,21 @@ Citizens, NYC Government Officials, and Agencies use the created and
 closed dates to measure the ``duration'' of SRs, which reflects Agency 
 responsiveness. While duration is not directly present in the dataset, 
 it can be easily computed as the difference between
-\texttt{(closed\_date} and \texttt{created\_date}.
-There are 12,251 SRs where the \texttt{closed\_date} precedes the 
+\texttt{(closed\_date} and \texttt{created\_date}.  Duration is one of 
+most used fields that is constantly analyzed, such as determining if 
+one NYC borough receives faster response for ceratin 
+complaints. There are 12,450 SRs where the \texttt{closed\_date} precedes the 
 \texttt{created\_date}, generating nonsensical ``negative durations.'' 
 Though this represents only 0.2\% of the dataset, these errors can 
-significantly impact response time analyses.
-Eight SRs with extremely large negative durations ($-$730 days), all 
-originating from the Department of Homeless Services (DHS), contain 
-an entry of ``1900-01-01'' as the \texttt{closed\_date}. This results 
-in negative durations exceeding $-$44,601 days (or 122 years). Such 
+significantly impact response time analyses. Eight SRs with extremely 
+large negative durations ($-$730 days), all originating from the 
+Department of Homeless Services (DHS); all contain an entry 
+of ``1900-01-01'' as the \texttt{closed\_date}. This results 
+in negative durations exceeding $-$44,601 days (or 122 years). Many
+other SRs have negative durations in excess of 300+ days. Such 
 anomalies, though rare, can significantly skew statistical results if 
 not addressed during data cleansing. As a result, these SR rows are 
-removed from the analysis. 
+removed from the analysis. Here is a sample:
 
 \begin{table}[tbp]
   \centering
@@ -595,6 +594,11 @@ removed from the analysis.
   \label{tab:largest-errors}
 \end{table}
 
+Excluding the extreme negative values, 
+Figure~\ref{fig:negative-duration-violin} shows the broad spread of 
+negative-duration SRs. While there are few outliers, the magnitude 
+of the negative durations is troubling and can produce bizarre
+and unwanted analytical results.
 
 \begin{figure}[tbp]
 	 \centering
@@ -603,58 +607,30 @@ removed from the analysis.
  \label{fig:negative-duration-violin}
 \end{figure}
 
-
-Excluding the extreme negative values, 
-Figure~\ref{fig:negative-duration-violin} shows the broad spread of 
-negative-duration SRs. While there are few outliers, the magnitude 
-of the negative durations is troubling and can produce bizarre 
-analytical results. Table~\ref{tab:largest-errors} summarizes the 
+Table~\ref{tab:largest-errors} summarizes the 
 negative durations of the largest magnitude (in days). The data 
 suggests that the negative duration issue is predominantly a problem 
 within the Department of Transportation (DOT), where 95\% of these 
 errors occur.
 
-
-% For illustration, consider a case study of homeless person
-% assistance. Suppose that DHS wants to know ``How 
-% quickly have 311 SRs for ``Homeless Person Assistance'' been resolved 
-% over the past two years?'' This is a typical request made by 
-% both the public and City government; analogous to ``How quickly 
-% is my Agency responding to ``critical'' requests, and does 
-% that performance vary by Borough, Zip Code, etc. To conduct such an 
-% analysis, we can use the tools on the Open Data Portal. Here are the steps:
-		
-		
-% \begin{itemize}
-%     \item Select created\_date from 2022-2023 and filter by complaint\_type = 
-%     ``Homeless Person Assistance'' (this yields 55,000 SRs)
-    
-%     \item Compute the ``duration'' (closed\_date – created\_date)
-    
-%     \item Take an average of the ``duration'' field  which yields: \textbf{Answer:  -4.8 days}  
-% \end{itemize}
-
-		
-% Clearly that answer is nonsensical. How did such a simple task result 
-% in an absurd answer? The answer lies in the computation of the ``duration'' 
-% field. It turns out, there are eight DHS SRs that have a closed\_date 
-% of ``1900-01-01''. Each of those SRs creates a negative duration of -44,602 
-% days (-122 years). Those eight SRs are enough to drive the 
-% average duration of 55,000 Homeless Assistance SRs to a negative 
-% value; clearly incorrect. In this case, the median is a better measure 
-% of central tendency. The median is  0.2 days (approx 5 hrs) which will
-% surely please the DHS. 
-
-		
-%\begin{figure}[tbp]
-% 	 \centering
- %	 \includegraphics[width = \textwidth]{homeless_response_time_clean.pdf}
-%	 \caption{Homeless Assistance SR Durations}
-%	 \label{fig:homeless}
-%end{figure}
-
 \subparagraph{Resolution Action Update Date}
 	
+A similar issue occurs when resolution action update date is after the
+closing date.  When an SR is updated, the 311 software 
+automatically populates the \texttt{resolution\_action\_update\_date}. 
+While it is certainly possible to update an SR after it is closed, 
+some of these updates seem to be well beyond an expected 
+range, some over 2 years later. As shown in 
+Figure~\ref{fig:resolution-violin}, there are 10,265 SRs that 
+were updated more than 30 days after the 
+\texttt{closed\_date}, but less than 730 days, cutoff used to 
+exclude infeasible dates such as 1900-01-01. The chart 
+highlights the distribution of these post-closure updates, with 
+a notable concentration of updates within 
+the 30-to-90-day range. This pattern raises questions about whether 
+such delayed updates are standard operational practice or indicative 
+of a potential issue requiring further investigation. 
+
 \begin{figure}[tbp]
   \centering
   \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
@@ -662,96 +638,46 @@ errors occur.
   \label{fig:resolution-violin}
 \end{figure}
 
-
-A similar issue occurs when resolution action update date is after the
-closing date. \jy{It might be possible, I think, if they allow updates
-  after a SR is closed.}
-When an SR is updated, the 311 software automatically populates the 
-\texttt{resolution\_action\_update\_date}. Some of these updates 
-occur long after the SR is closed. As shown in Figure~\ref{fig:resolution-violin}, 
-there are 7,460 SRs that were updated more than 30 days after the 
-\texttt{closed\_date}, but less than 730 days, to exclude infeasible 
-dates like 1900-01-01. The chart highlights the distribution of these 
-post-closure updates, with a notable concentration of updates within 
-the 30-to-90-day range. This pattern raises questions about whether 
-such delayed updates are standard operational practice or indicative 
-of a potential issue requiring further investigation. While the reason 
-for these delayed updates is unclear, they may impact the accuracy of 
-response time analyses if not properly accounted for.
 	
-\subparagraph{Same Created Date \& Closed Date: Zero Durations}
+\subparagraph{Identical Created Date \& Closed Date: Zero Durations}
 A more prevalent issue occurs when the \texttt{closed\_date} and 
 \texttt{created\_date} are exactly the same, down to the second. This 
-creates a \textbf{zero duration}, which is also nonsensical. There 
-are 191,141 such SRs, representing 3.1\% of all non-blank data. 
+creates a \textbf{zero duration}, which is nonsensical. There 
+are 163,720 such SRs, representing 2.6\% of all non-blank data. 
 Ninety-nine percent of these zero-duration SRs occur in five agencies:
-DHMH, DOT, DOB, DSNY, and DEP.. 
-This distribution does not mirror the overall SR distribution by 
-agency, suggesting an agency-specific issue.
+DHMH, DOT, DOB, DSNY, and DEP. This distribution does not 
+mirror the overall SR distribution by Agency, suggesting 
+an agency-specific issue.
 	
 		
 \subparagraph{Created Date or Closed Date(s) at Midnight or Noon}
 Another issue found with the \texttt{created\_date} and 
 \texttt{closed\_date} fields is the unusually large number of SRs 
 created or closed at exactly midnight (00:00:00) or noon (12:00:00), 
-down to the second. Normally, SR creation and closure follow the 
+down to the second. Normally, SR creation and closure follows the 
 work-day schedule, with most SRs created during daylight hours and 
 fewer at night or in the early morning. However, there is a 
-significantly higher number of SRs closed exactly at midnight and noon, 
-as well as a large number created exactly at noon. Specific observations 
-include:
-\begin{itemize}
-    \item 99,779 SRs were created exactly at noon (12:00:00).
-    \item 235,347 SRs were closed exactly at midnight (00:00:00).
-    \item 105,505 SRs were closed exactly at noon.
-\end{itemize}
-
-
-A unique way to visualize this anomaly is to examine the busiest day 
-during this 2-year period (Friday, 2023-09-29). Then aggregate 
-the created\_date(s) by minute (with seconds equal to zero), providing
-a minute-by-minute look at SR creation on that one day. Note the spike 
-at exactly noon (12:00), well beyond the 3\textsigma line.
-
+significantly higher number of SRs closed exactly at midnight, 
+as well as a large number created exactly at midnight. 
 
 \begin{figure}[tbp]
     \centering
-    \begin{minipage}{0.5\textwidth}
+    \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
-        \caption{SRs Created Minute-by-Minute on Busiest Day}
+        \includegraphics[width=\textwidth]{2-year-trend_SRs_created_on_the_hour.pdf}
+        \caption{SRs Created by Hour of the Day}
         \label{fig:busiestcreated}
-    \end{minipage}%
-    \begin{minipage}{0.5\textwidth}
+    \end{subfigure}
+    \par\medskip
+    \begin{subfigure}{\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
-        \caption{SRs Closed Minute-by-Minute on Busiest Day}
+        \includegraphics[width=\textwidth]{2-year-trend_SRs_closed_on_the_hour.pdf}
+        \caption{SRs Closed by Hour of the Day}
         \label{fig:busiestclosed}
-    \end{minipage}
+    \end{subfigure}
+    \caption{Comparison of SRs Created and Closed by Hour of the Day}
+    \label{fig:stacked}
 \end{figure}
-
-
-
-\begin{figure}[tbp]
-  \centering
-  \includegraphics[width=0.7\textwidth]{2-year-trend_SR_created_by_minute_of_busiest_day.pdf}
-  \includegraphics[width=0.7\textwidth]{2-year-trend-SR_closed_by_minute_of_busiest_day.pdf}
-  \caption{SRs Created and closed minute-by-minute on busiest day
-    during two year period \jy{give years}.}
-  \label{fig:busiest}
-\end{figure}	
-
-Figure~\ref{fig:busiest} visualizes this anomaly by examining the 
-busiest day during this 2-year period (Friday, 2023-09-29). The 
-\texttt{created\_date} values are aggregated by minute (with seconds 
-equal to zero), providing a minute-by-minute look at SR creation on 
-that day. Notably, there is a spike exactly at noon (12:00), well 
-beyond the 3\textsigma{} line. \jy{May not want to mention 3 sigma as
-  here we have highly skewed count data.}
-The same analysis was repeated for 
-\texttt{closed\_date} values on the busiest day, aggregated by minute 
-(with seconds equal to zero). Spikes were observed at both 00:00:00 
-and 12:00:00.
 
 
 These unusual patterns of SR creation and closure exactly at midnight 
@@ -770,24 +696,17 @@ the ``closed-at-noon'' SRs.
 \subsection{Accuracy and precision}
 \label{sec:precision}
 
-\jy{This is caused by reading the number in as double
-  precision. Single precision would be good. The raw csv file only
-  have 7 digits after the decimal point, e.g.,
-  $(40.769737, -73.91244)$.
-  }
-
-
 An question of precision vs. accuracy arises with the Latitude 
 and Longitude fields. Both Latitude are expressed as 
 a 14-decimal number, e.g. 40.86769186022511. Given 
-that 1 degree of latitude at the equator is equal to 111.044736 
+that 1 degree of latitude at the equator is equal to 111.04 
 kilometers, the ``1'' at the end of that number represents 
 approximately 1.1 nanometers (1/1,000,000,000 of a meter). For 
-reference a DNA molecule is approximately 2nm in width. Clearly 
-the representation of the Latitude and Longitude fields is a 
+reference a DNA molecule is approximately 2nm in width. The 
+representation of the Latitude and Longitude fields appears to be a 
 classic case of 14-digit precision, but limited accuracy. 
 
-
+\dt{STOPPED EDITING HERE}
 
 \subsection{Redundant \& Duplicate fields}
 \label{sec:duplicates}

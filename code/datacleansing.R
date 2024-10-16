@@ -163,10 +163,6 @@ d311[, columns_to_upper] <- lapply(d311[, columns_to_upper], toupper)
 cat("\n\n**********DATA SUMMARY**********\n")
 
 #########################################################################
-# Consolidate Agency names
-d311 <- consolidate_agencies((d311))
-
-#########################################################################
 # Filter out rows with NA values in the created_date column
 d311 <- d311[!is.na(d311$created_date), ]
 
@@ -297,26 +293,33 @@ missingDataPerColumn <- missingDataPerColumn %>%
   mutate(field = reorder(field, -total_empty))
 
 # Create the bar chart with vertical X-axis labels
-blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
+blank_chart <- ggplot(
+  
+  missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
+  
   geom_bar(stat = "identity", fill = "#009E73") +
+  
   theme(
-    axis.title.x = element_text(vjust = 0, size = 11),
-    axis.title.y = element_text(vjust = 1, size = 11),
+    axis.title.x = element_text(vjust = 0, size = 8),
+    axis.title.y = element_text(vjust = 1, size = 8),
     plot.title = element_text(hjust = 0.5, size = 13),
-    plot.subtitle = element_text(size = 9),
+    plot.subtitle = element_text(size = 7),
     panel.background = element_rect(fill = "gray95", color = "gray95"),
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
     axis.text.y = element_text(face = "bold"),
     legend.position = "none", # Remove all legends
     aspect.ratio = 0.618033 # Set aspect ratio
   ) +
+  
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
     angle = -70
-  ), size = 4) +
+  ), size = 2.3, color = "black") +
+  
   ggtitle(NULL,
     subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
   ) +
+  
   labs(y = NULL, x = NULL)
 
 # Build the plot to extract y-axis breaks
@@ -831,7 +834,7 @@ if (num_rows_closedBeforeOpened > 1) {
 
   negativeDurationViolin <- create_violin_chart(
     dataset = large_neg_duration,
-    x_axis_title = "Negative duration (days)",
+    x_axis_title = NULL,
     x_axis_field = "duration",
     chart_title = NULL,
     chart_file_name = "negative_duration_SR_violin.pdf"
@@ -839,17 +842,25 @@ if (num_rows_closedBeforeOpened > 1) {
 
   # Create boxplot of the (negative) duration values
   negativeDurationChart <- ggplot(
-    data = large_neg_duration, aes(x = duration, y = factor(1))
+    
+    data = large_neg_duration, 
+    aes(x = duration, y = factor(1))
   ) +
+    
     geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
+    
     geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
+    
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
-      plot.subtitle = element_text(size = 9)
+      plot.subtitle = element_text(size = 7),
+      axis.text.x = element_text( face = "bold", size = 8),
+      axis.text.y = element_text(face = "bold", size = 8),
     ) +
+    
     labs(
       title = "SRs closed before they were created (negative duration) *excluding large negative values",
-      x = "Duration (negative)", y = "",
+      x = "", y = "",
       subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(large_neg_duration), sep = "")
     )
 
@@ -962,7 +973,7 @@ if (num_rows_future > 0) {
       theme(
         legend.position = "none",
         plot.title = element_text(hjust = 0.5, size = 13),
-        plot.subtitle = element_text(size = 9)
+        plot.subtitle = element_text(size = 8)
       ) +
       labs(
         title = "SRs closed in the future",
@@ -1086,7 +1097,7 @@ if (num_row_updatedLate > 0) {
 
     post_closed_violin_chart <- create_violin_chart(
       dataset = updatedLate,
-      x_axis_title = "Post_closed Resolution Update (days)",
+      x_axis_title = NULL,
       x_axis_field = "postClosedUpdateDuration",
       chart_title = NULL,
       chart_file_name = "post_closed_violin_chart.pdf"
@@ -1224,113 +1235,113 @@ if (num_row_neg_duration > 0) {
 
 cat("\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********\n")
 
-#########################################################################
-# Normalize street names
-address_fields <- c(
-#  "intersection_street_1", "intersection_street_2",
-#  "cross_street_1", "cross_street_2",
-
-    "street_name", "landmark", "taxi_pick_up_location"
-)
-
-# **********************
-# Apply normal_address function to each column in address_fields
-
-d311[address_fields] <- lapply(d311[address_fields], normal_address,
-  abbs = USPSabbreviations, na = NULL, punct = " ", abb_end = FALSE
-)
-
-# Define replacement dictionaries
-replacement_list <- list(
-  "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
-  "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
-  "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12",
-  "AVE OF THE AMERICAS" = "6 AVE",
-  "FREDERICK DOUGLASS BLVD" = "8 AVE",
-  "ADAM CLAYTON POWELL JR BLVD" = "7 AVE",
-  "MALCOLM X BLVD" = "LENOX AVE",
-  "BEVERLEY RD" = "BEVERLY RD",
-  "EAST GUN HL RD" = "EAST GUNHILL RD",
-  "MAC DOUGAL ST" = "MACDONOUGH ST"
-)
-
-  # "SHR FRONT PKWY" = "SHOREFRONT PKWY",
-  # "OCEAN VW AVE" = "OCEANVIEW AVE",
-  # "DOUGLASS ST" = "DOUGLAS ST",
-  # "OLD FULTON ST" = "CADMAN PLZ WEST",
-  # "JFK" = "JOHN F KENNEDY AIRPORT",
-  # "CATHEDRAL PKWY" = "WEST 110 ST",
-  # "ANDREWS AVE SOUTH" = "ANDREWS AVE",
-  # "PARKHILL AVE" = "PARK HILL AVE",
-  # "MC KINLEY AVE" = "MCKINLEY AVE",
-  # "LORING PLACE SOUTH" = "LORING PLACE",
-  # "SAINT NICHOLAS AVE" = "ST NICHOLAS AVE",
-  # "MALCOM X BLVD" = "LENOX BLVD",
-  # "ADAM CLAYTON POWELL BLVD" = "7 AVE",
-  # "MSGR MCGOLRICK PARK" = "MONSIGNOR MCGOLRICK PARK",
-  # "DUKE ELLINGTON BLVD" = "WEST 106 ST",
-  # "LA GUARDIA AIRPORT" = "LAGUARDIA AIRPORT",
-  # "KENMORE PLACE" = "EAST 21 ST",
-  # "GRAND CENTRAL PKWY SR NORTH" = "GRAND CENTRAL PKWY",
-  # "SAINT MARKS AVE" = "ST MARKS AVE",
-  # "BLEEKER ST" = "BLEECKER ST",
-  # "MC KEEVER PLACE" = "MCKEEVER PLACE",
-  # "WHITEPLAINS RD" = "WHITE PLNS RD",
-  # "FREDERICK DOUGLAS BLVD" = "8 AVE",
-  # "THOMAS BOYLAND ST" = "THOMAS S BOYLAND ST",
-  # "GRAND CENTRAL PKWY SR WEST" = "GRAND CENTRAL PKWY",
-  # "CROSSBAY BLVD" = "CROSS BAY BLVD",
-  # "HUTCHINSON RIV PKWY EAST" = "HUTCHINSON RIV PKWY",
-  # "SAINT JOHNS PLACE" = "ST JOHNS PLACE",
-  # "VAN WYCK EXPY SR EAST" = "VAN WYCK EXPY",
-  # "FREDRICK DOUGLAS BLVD" = "8 AVE",
-  # "PENNSYLVANIA STA" = "PENN STA",
-  # "EDGECOMB AVE" = "EDGECOMBE AVE",
-  # "BAYRIDGE PKWY" = "BAY RIDGE PKWY",
-  # "BAYRIDGE AVE" = "BAY RIDGE PKWY",
-  # "GRANDCONCOURSE" = "GRAND CONCOURSE",
-  # "SPRUCE AVE" = "SPRUCE ST",
-  # "ST MARY S AVE" = "ST MARYS AVE",
-  # "SEDGEWICK AVE" = "SEDGWICK AVE",
-  # "COURTLAND AVE" = "COURTLANDT AVE",
-  # "THE BATTERY" = "BATTERY PARK",
-  # "LGA" = "LAGUARDIA AIRPORT",
-  # "DEREIMER AVE" = "DE REIMER AVE",
-  # "ST ANN S AVE" = "ST ANNS AVE",
-  # "FT GRN PLACE" = "FT GREENE PLACE",
-  # "SHEPHARD AVE" = "SHEPHERD AVE",
-  # "CASTLEHILL AVE" = "CASTLE HL AVE",
-  # "SAINT ANDREWS PLACE" = "ST ANDREWS PLACE",
-  # "JFK AIRPORT" = "JOHN F KENNEDY AIRPORT",
-  # "SAINT EDWARDS ST" = "ST EDWARDS ST",
-  # "HORACE HARDING EXPRE" = "HORACE HARDING EXPY",
-  # "DR MARTIN LUTHER KING JR BLVD" = "125 ST",
-  # "FRANKLIN D ROOSEVELT" = "FDR", 
-  # "DESOTA RD" = "DE SOTA RD",
-  # "LENOX BLVD" = "LENOX AVE",
-  # "MACDOUGAL ST" = "MACDONOUGH",
-  # "BAY RDG AVE" = "BAY RIDGE PKWY",
-  # "BAY RDG PKWY" = "BAY RIDGE PKWY",
-  # "MCDOUGAL ST" = "MACDONOUGH",
-  # "VAN WYCK EXPY SR WEST" = "VAN WYCK EXPY",
-  # "ASTORIA BLVD NORTH" = "ASTORIA BLVD"
-  # 
-  # 
-  # 
-#)
-
-# Apply normalization functions to each column in address_fields
-for (field in address_fields) {
-  if (field %in% names(d311)) {
-    cat("\nProcessing column:", field, "\n")
-
-    # Apply normalize_street
-    d311[[field]] <- normalize_street(d311[[field]], replacement_list )
-
-  } else {
-    cat("\nWarning:", field, "not found in d311 dataset.\n")
-  }
-}
+# #########################################################################
+# # Normalize street names
+# address_fields <- c(
+# #  "intersection_street_1", "intersection_street_2",
+# #  "cross_street_1", "cross_street_2",
+# 
+#     "street_name", "landmark", "taxi_pick_up_location"
+# )
+# 
+# # **********************
+# # Apply normal_address function to each column in address_fields
+# 
+# d311[address_fields] <- lapply(d311[address_fields], normal_address,
+#   abbs = USPSabbreviations, na = NULL, punct = " ", abb_end = FALSE
+# )
+# 
+# # Define replacement dictionaries
+# replacement_list <- list(
+#   "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
+#   "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
+#   "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12",
+#   "AVE OF THE AMERICAS" = "6 AVE",
+#   "FREDERICK DOUGLASS BLVD" = "8 AVE",
+#   "ADAM CLAYTON POWELL JR BLVD" = "7 AVE",
+#   "MALCOLM X BLVD" = "LENOX AVE",
+#   "BEVERLEY RD" = "BEVERLY RD",
+#   "EAST GUN HL RD" = "EAST GUNHILL RD",
+#   "MAC DOUGAL ST" = "MACDONOUGH ST"
+# )
+# 
+#   # "SHR FRONT PKWY" = "SHOREFRONT PKWY",
+#   # "OCEAN VW AVE" = "OCEANVIEW AVE",
+#   # "DOUGLASS ST" = "DOUGLAS ST",
+#   # "OLD FULTON ST" = "CADMAN PLZ WEST",
+#   # "JFK" = "JOHN F KENNEDY AIRPORT",
+#   # "CATHEDRAL PKWY" = "WEST 110 ST",
+#   # "ANDREWS AVE SOUTH" = "ANDREWS AVE",
+#   # "PARKHILL AVE" = "PARK HILL AVE",
+#   # "MC KINLEY AVE" = "MCKINLEY AVE",
+#   # "LORING PLACE SOUTH" = "LORING PLACE",
+#   # "SAINT NICHOLAS AVE" = "ST NICHOLAS AVE",
+#   # "MALCOM X BLVD" = "LENOX BLVD",
+#   # "ADAM CLAYTON POWELL BLVD" = "7 AVE",
+#   # "MSGR MCGOLRICK PARK" = "MONSIGNOR MCGOLRICK PARK",
+#   # "DUKE ELLINGTON BLVD" = "WEST 106 ST",
+#   # "LA GUARDIA AIRPORT" = "LAGUARDIA AIRPORT",
+#   # "KENMORE PLACE" = "EAST 21 ST",
+#   # "GRAND CENTRAL PKWY SR NORTH" = "GRAND CENTRAL PKWY",
+#   # "SAINT MARKS AVE" = "ST MARKS AVE",
+#   # "BLEEKER ST" = "BLEECKER ST",
+#   # "MC KEEVER PLACE" = "MCKEEVER PLACE",
+#   # "WHITEPLAINS RD" = "WHITE PLNS RD",
+#   # "FREDERICK DOUGLAS BLVD" = "8 AVE",
+#   # "THOMAS BOYLAND ST" = "THOMAS S BOYLAND ST",
+#   # "GRAND CENTRAL PKWY SR WEST" = "GRAND CENTRAL PKWY",
+#   # "CROSSBAY BLVD" = "CROSS BAY BLVD",
+#   # "HUTCHINSON RIV PKWY EAST" = "HUTCHINSON RIV PKWY",
+#   # "SAINT JOHNS PLACE" = "ST JOHNS PLACE",
+#   # "VAN WYCK EXPY SR EAST" = "VAN WYCK EXPY",
+#   # "FREDRICK DOUGLAS BLVD" = "8 AVE",
+#   # "PENNSYLVANIA STA" = "PENN STA",
+#   # "EDGECOMB AVE" = "EDGECOMBE AVE",
+#   # "BAYRIDGE PKWY" = "BAY RIDGE PKWY",
+#   # "BAYRIDGE AVE" = "BAY RIDGE PKWY",
+#   # "GRANDCONCOURSE" = "GRAND CONCOURSE",
+#   # "SPRUCE AVE" = "SPRUCE ST",
+#   # "ST MARY S AVE" = "ST MARYS AVE",
+#   # "SEDGEWICK AVE" = "SEDGWICK AVE",
+#   # "COURTLAND AVE" = "COURTLANDT AVE",
+#   # "THE BATTERY" = "BATTERY PARK",
+#   # "LGA" = "LAGUARDIA AIRPORT",
+#   # "DEREIMER AVE" = "DE REIMER AVE",
+#   # "ST ANN S AVE" = "ST ANNS AVE",
+#   # "FT GRN PLACE" = "FT GREENE PLACE",
+#   # "SHEPHARD AVE" = "SHEPHERD AVE",
+#   # "CASTLEHILL AVE" = "CASTLE HL AVE",
+#   # "SAINT ANDREWS PLACE" = "ST ANDREWS PLACE",
+#   # "JFK AIRPORT" = "JOHN F KENNEDY AIRPORT",
+#   # "SAINT EDWARDS ST" = "ST EDWARDS ST",
+#   # "HORACE HARDING EXPRE" = "HORACE HARDING EXPY",
+#   # "DR MARTIN LUTHER KING JR BLVD" = "125 ST",
+#   # "FRANKLIN D ROOSEVELT" = "FDR", 
+#   # "DESOTA RD" = "DE SOTA RD",
+#   # "LENOX BLVD" = "LENOX AVE",
+#   # "MACDOUGAL ST" = "MACDONOUGH",
+#   # "BAY RDG AVE" = "BAY RIDGE PKWY",
+#   # "BAY RDG PKWY" = "BAY RIDGE PKWY",
+#   # "MCDOUGAL ST" = "MACDONOUGH",
+#   # "VAN WYCK EXPY SR WEST" = "VAN WYCK EXPY",
+#   # "ASTORIA BLVD NORTH" = "ASTORIA BLVD"
+#   # 
+#   # 
+#   # 
+# #)
+# 
+# # Apply normalization functions to each column in address_fields
+# for (field in address_fields) {
+#   if (field %in% names(d311)) {
+#     cat("\nProcessing column:", field, "\n")
+# 
+#     # Apply normalize_street
+#     d311[[field]] <- normalize_street(d311[[field]], replacement_list )
+# 
+#   } else {
+#     cat("\nWarning:", field, "not found in d311 dataset.\n")
+#   }
+# }
 
 # **********************
 
