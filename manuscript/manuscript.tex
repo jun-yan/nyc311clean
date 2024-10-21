@@ -305,7 +305,7 @@ agencies. The six largest agencies are:
     \item Department of Parks and Recreation (DPR) - 4\%
 \end{itemize}
 
-Collectively these six City agnecies handle over 90\% of the total SR 
+Collectively these six City agencies handle over 90\% of the total SR 
 volume, indicative of the critical role these agencies play in managing
 public concerns, ranging from noise complaints and housing issues to
 sanitation and transportation problems. The NYPD alone accounts for a
@@ -364,7 +364,7 @@ standardizing data formats \citep[e.g.,][]{cody2017cody,
 especially important as open datasets often come from diverse,
 uncoordinated sources, leading to variations in data quality,
 completeness, and consistency. Without thorough data cleansing, the utility
-of open data can be limited and perhaps untrustworhty, affecting 
+of open data can be limited and perhaps untrustworthy, affecting 
 its reliability for research, policy-making, and innovation. The 
 main purpose of cleansing open data is to ensure that it is 
 accurate, consistent, and usable across multiple platforms and by 
@@ -416,17 +416,18 @@ characteristics of the 311 SR data set:
 	\item There are 41 columns of data for each row, exportable as a CSV file.
 	Each row represents one Service Request. 
 	
-	\item There are four date fields (created, closed, action\_updated, due).
+	\item There are four date fields 
+	(\texttt{created\_date}, \texttt{closed\_date}, \texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}).
 	
 	\item There are two borough fields; one of which appear to be a duplicate.
 		
 	\item Seven street fields; two pair of which appear to be duplicates
 	
-	\item In addition to the incident\_address, there are five additional location fields: 
-	latitude/longitude, street\_name, landmark, USGS State Plane 
-	Coordinate System, and Block \#.
+	\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
+	\texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
+	Coordinate System, and \texttt{block} \#.
 	
-	\item A free-form text field, resolution\_description, which 
+	\item A free-form text field, \texttt{resolution\_description}, which 
 	supports 934 characters of input, including commas and special characters
 \end{itemize}
 
@@ -478,7 +479,7 @@ The Mostly Empty category includes such fields as
 \texttt{pickup\_location}, and \texttt{landmark}.
 The Partially Empty includes such fields as
 \texttt{location\_type}, \texttt{borough}, 
-and \texttt{cross\_street}. And the Few/None Empty includes
+and \texttt{cross\_street\_1 \& \_2}. And the Few/None Empty includes
 \texttt{created\_date}, \texttt{complaint\_type},
 \texttt{agency}, and \texttt{status}. In some analysis efforts, it may be
 prudent to inquire as to why some fields are mostly or almost always blank.
@@ -529,7 +530,7 @@ should validate against the USPS database, which contains
 44,173 valid zip codes. The \texttt{incident\_zip} field has 
 only 0.07\% invalid entries, this still results in 4,374 errors; 
 not insignificant. If you group the invalid entries by 
-percentage by Agency, it mirrors the \texttt{overall} 
+percentage by Agency, it mirrors the \textit{overall} 
 breakdown of SRs by Agency, potentially 
 indicating a systemic problem.
 
@@ -537,31 +538,32 @@ indicating a systemic problem.
 \paragraph{Created and Closed Date}
 \label{sec:negativeduration}
 For the \texttt{created\_date} and \texttt{closed\_date} fields, one 
-might expect that these fields are automatically populated by the SR 
+might expect that these fields to be automatically populated by the  
 application software when setting an SR status to ``new'' or ``closed.'' 
 Unfortunately, this does not seem to be the case, as several anomalies 
-exist in the created and closed date fields. Here are some of the errors:
+exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
+an automated process would normally exclude, including:
 
 \begin{itemize}
     \item SRs with a \texttt{closed\_date} that occurs before the 
-    \texttt{created\_date} indicating a negative duration.
+    \texttt{created\_date} creating a ``negative duration''.
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
-    the far distant past, e.g. 1900.
+    the far distant past, e.g. ``1900-01-01''.
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} that 
-    match to the second indicating a zero duration.
-    \item A large number of SRs closed and/or created exactly at midnight 
-    or noon, to the second.
+    match \textbf{to the second} indicating a nonsensical ``zero duration''.
+    \item An unusually large number of SRs closed and/or created exactly at midnight 
+    and noon, to the second.
 \end{itemize}
 
 
 \subparagraph{Closed before Created: Negative Duration}
 Citizens, NYC Government Officials, and Agencies use the created and 
-closed dates to measure the ``duration'' of SRs, which reflects Agency 
+closed dates to measure the \textit{duration} of SRs, which often reflects an Agency's 
 responsiveness. While duration is not directly present in the dataset, 
 it can be easily computed as the difference between
 \texttt{(closed\_date} and \texttt{created\_date}.  Duration is one of 
-most used fields that is constantly analyzed, such as determining if 
-one NYC borough receives faster response for ceratin 
+most frequently used 311metrics and is constantly analyzed, such as determining if 
+one NYC borough receives faster response than another for certain 
 complaints. There are 12,450 SRs where the \texttt{closed\_date} precedes the 
 \texttt{created\_date}, generating nonsensical ``negative durations.'' 
 Though this represents only 0.2\% of the dataset, these errors can 
@@ -577,7 +579,7 @@ removed from the analysis. Here is a sample:
 
 \begin{table}[tbp]
   \centering
-  \caption{Negative duraton of the largest magnitude (days) excluding
+  \caption{Negative duration of the largest magnitude ($-$730 days) excluding
     extreme negative values}
   \begin{tabular}{l l l r l}
     \toprule
@@ -613,39 +615,15 @@ suggests that the negative duration issue is predominantly a problem
 within the Department of Transportation (DOT), where 95\% of these 
 errors occur.
 
-\subparagraph{Resolution Action Update Date}
-	
-A similar issue occurs when resolution action update date is after the
-closing date.  When an SR is updated, the 311 software 
-automatically populates the \texttt{resolution\_action\_update\_date}. 
-While it is certainly possible to update an SR after it is closed, 
-some of these updates seem to be well beyond an expected 
-range, some over 2 years later. As shown in 
-Figure~\ref{fig:resolution-violin}, there are 10,265 SRs that 
-were updated more than 30 days after the 
-\texttt{closed\_date}, but less than 730 days, cutoff used to 
-exclude infeasible dates such as 1900-01-01. The chart 
-highlights the distribution of these post-closure updates, with 
-a notable concentration of updates within 
-the 30-to-90-day range. This pattern raises questions about whether 
-such delayed updates are standard operational practice or indicative 
-of a potential issue requiring further investigation. 
-
-\begin{figure}[tbp]
-  \centering
-  \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
-  \caption{Post-closed resolution action update date(s) over 30 days.}
-  \label{fig:resolution-violin}
-\end{figure}
 
 	
 \subparagraph{Identical Created Date \& Closed Date: Zero Durations}
 A more prevalent issue occurs when the \texttt{closed\_date} and 
 \texttt{created\_date} are exactly the same, down to the second. This 
-creates a \textbf{zero duration}, which is nonsensical. There 
+creates a \textbf{zero duration} for the SR, which is nonsensical. There 
 are 163,720 such SRs, representing 2.6\% of all non-blank data. 
-Ninety-nine percent of these zero-duration SRs occur in five agencies:
-DHMH, DOT, DOB, DSNY, and DEP. This distribution does not 
+99\% percent of these zero-duration SRs occur within five agencies:
+DHMH, DOT, DOB, DSNY, and DEP. This distribution \textbf{does not} 
 mirror the overall SR distribution by Agency, suggesting 
 an agency-specific issue.
 	
@@ -685,28 +663,48 @@ and noon suggest the presence of a bulk create/close software process
 that automatically assigns time stamps of midnight (00:00:00) or noon 
 (12:00:00) to large batches of SRs. This behavior distorts the 
 calculated duration of these SRs by providing inaccurate dates. The 
-distribution by agency shows that over 90\% of the ``created-at-noon'' 
-SRs come from just two agencies: DOB and DSNY. Further investigation 
-reveals that a single agency, DSNY, is responsible for over 99\% of 
-the ``closed-at-noon'' SRs.
+distribution by agency shows that over 92\% of the ``closed-exactly-at-midnight'' 
+SRs come from just two agencies: DOB (69\%) and DSNY  (23\%).
 
+\subparagraph{Resolution Action Update Date}
+A similar issue occurs when the \texttt{resolution\_action\_update\_date} occurs well after the
+\texttt{closed\_date}.  When an SR is updated, the 311 software 
+automatically populates the \texttt{resolution\_action\_update\_date}. 
+While it is certainly possible, and even routine, to update an SR after it is closed, 
+some of these updates seem to be well beyond an expected 
+date, with some ``updates'' occurring over 2 years later. As shown in 
+Figure~\ref{fig:resolution-violin}, there are 10,265 SRs that 
+were updated >30 days after the 
+\texttt{closed\_date} (but <730 days, an arbitrary cutoff used to 
+exclude infeasible dates such as ``1900-01-01''. The chart 
+highlights the distribution of these post-closure updates, with 
+a notable concentration of updates occurring within 
+the 30-to-90-day range. This pattern raises questions about whether 
+such delayed updates are standard operational practice or indicative 
+of a potential issue which might warrant further investigation. 
+
+\begin{figure}[tbp]
+  \centering
+  \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
+  \caption{Post-closed \texttt{resolution\_action\_update\_date}(s) >30 days.}
+  \label{fig:resolution-violin}
+\end{figure}
 
 
 	
 \subsection{Accuracy and precision}
 \label{sec:precision}
 
-An question of precision vs. accuracy arises with the Latitude 
-and Longitude fields. Both Latitude are expressed as 
+An question of precision vs. accuracy arises with the \texttt{latitude} 
+and \texttt{longitude} fields. Both Latitude are expressed as 
 a 14-decimal number, e.g. 40.86769186022511. Given 
 that 1 degree of latitude at the equator is equal to 111.04 
 kilometers, the ``1'' at the end of that number represents 
 approximately 1.1 nanometers (1/1,000,000,000 of a meter). For 
 reference a DNA molecule is approximately 2nm in width. The 
-representation of the Latitude and Longitude fields appears to be a 
-classic case of 14-digit precision, but limited accuracy. 
+representation of the \texttt{latitude} and \texttt{longitude} fields appears to be a 
+classic case of extreme precision, but limited accuracy. 
 
-\dt{STOPPED EDITING HERE}
 
 \subsection{Redundant \& Duplicate fields}
 \label{sec:duplicates}
@@ -714,26 +712,27 @@ classic case of 14-digit precision, but limited accuracy.
 During this analysis, several redundant fields were observed and should 
 be examined for possible consolidation.
 
-\textbf{Latitude/Longitude and Location:} The \texttt{location} field 
-is a pure concatenation of the latitude and longitude fields with a 
+\texttt{Latitude/Longitude} and \texttt{location}: The \texttt{location} field 
+is a pure concatenation of the \texttt{latitude} and \texttt{longitude} fields except with a 
 comma and parentheses added. This makes the \texttt{location} field 
 arguably harder to use than the individual fields. For example:  
 \texttt{latitude}: 40.768456429488, \texttt{longitude}: $-$73.9575661888774, 
-and \texttt{location}: (40.768456429488, $-$73.95756618887745).
+form the \texttt{location}: (40.768456429488, $-$73.95756618887745).
 
-\textbf{borough \& park\_borough:} These two fields are fully redundant, 
+\texttt{borough} \& \texttt{park\_borough}: These two fields are fully redundant, 
 as they are 100\% matches.
 
-\textbf{borough \& taxi\_company\_borough:} Despite their names, these 
+\texttt{borough} \& \texttt{taxi\_company\_borough}: Despite their names, these 
 fields are almost entirely different, with only a 0.05\% match. The 
 \texttt{taxi\_company\_borough} field is used exclusively by the TLC, 
 indicating a need for consultation with TLC to understand the differing 
-uses.
-\jy{The taxi\_company\_borough may mean the borough of the location of
-  the taxi company, which can be irrelevant to the borough where the
-  incident was reported.. Such information could be useful only when
-  studying TLC related SRs. It'd be better to use a second table to
-  store such TLC dependent information.}
+uses. It is likely that that the usage of \texttt{taxi\_company\_borough}
+is quite different than that of \texttt{borough}. Such information could be 
+useful only when studying TLC related SRs. It might make more
+sense to store TLC data in a separate dataset.
+
+
+\dt{STOPPED EDITING HERE}
 
 \textbf{agency \& agency\_name:} The \texttt{agency} field contains 
 abbreviations of City agencies (e.g., NYPD, DOT), while 
