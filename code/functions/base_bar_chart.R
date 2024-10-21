@@ -29,15 +29,34 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
   y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
   
   # Step 2: Set up x_scale based on x_col type
+  # if (inherits(dataset[[x_col]], "Date")) {
+  #   x_scale <- scale_x_date(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+  # } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
+  #   x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+  # } else if (is.numeric(dataset[[x_col]])) {
+  #   x_scale <- scale_x_continuous(expand = c(0.01, 0))
+  # } else {
+  #   x_scale <- scale_x_discrete(expand = c(0.01, 0))
+  # }
+  
+  
+  # Step 2: Set up x_scale based on x_col type
   if (inherits(dataset[[x_col]], "Date")) {
     x_scale <- scale_x_date(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
   } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
-    x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+    # Default to "6 months" break for POSIXct, unless finer granularity is detected
+    if (any(diff(as.numeric(dataset[[x_col]])) < 86400)) { # 86400 seconds = 1 day
+      x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%H:%M"), breaks = scales::date_breaks("2 hours"))
+    } else {
+      x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+    }
   } else if (is.numeric(dataset[[x_col]])) {
     x_scale <- scale_x_continuous(expand = c(0.01, 0))
   } else {
     x_scale <- scale_x_discrete(expand = c(0.01, 0))
   }
+  
+  
   
   # Step 3: Create the base ggplot object
   bar_chart <- ggplot(sorted_dataset, aes(x = .data[[x_col]], y = .data[[y_col]])) +

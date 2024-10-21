@@ -43,11 +43,11 @@ create_combo_chart <- function(
   earliest_title <- format(as.Date(earliest_date), format = "%Y-%m-%d")
   latest_title <- format(as.Date(latest_date), format = "%Y-%m-%d")
   
-  result <- calculate_values(max_count)
-  starting_value <- result$starting_value
-  increment <- result$increment
+  # result <- calculate_values(max_count)
+  # starting_value <- result$starting_value
+  # increment <- result$increment
 
-  # Step 1: Create the initial plot
+  # Step 1: Create the initial plot without specifying y-axis breaks
   combo_chart <- ggplot(summary_df) +
     
     geom_bar(aes(x = agency, y = count), stat = "identity", fill = "#E69F00", width = 0.55) +
@@ -59,8 +59,8 @@ create_combo_chart <- function(
               size = 3, colour = "black", hjust = 0.5, vjust = 1.7) +
     
     scale_y_continuous(
-      breaks = seq(starting_value, max_count, by = increment), 
-      sec.axis = sec_axis(~ . / max_count )
+      labels = scales::comma,  # Use comma format for y-axis labels
+      sec.axis = sec_axis(~ . / max_count)
     ) +
     
     ggtitle(chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
@@ -84,15 +84,18 @@ create_combo_chart <- function(
                 colour = "black", linewidth = 1, linetype = "dotted")
   }
   
-  # Step 2: Add horizontal lines based on y-axis breaks
+  # Step 2: Build the plot to extract y-axis breaks
   built_plot <- ggplot_build(combo_chart)
   y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
-  y_breaks <- y_breaks[!is.na(y_breaks)]
+  y_breaks <- y_breaks[!is.na(y_breaks)]  # Remove any NA values
   
+  # Step 3: Add horizontal lines using the y-axis breaks
   combo_chart <- combo_chart + 
     geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
   
+  # Print or save the chart as needed
   print(combo_chart)
+  
   
   # Save the plot
   chart_path <- file.path(chart_directory_path, chart_file_name)

@@ -28,6 +28,7 @@ library(sf)
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
+#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.CSV"
 
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
@@ -45,7 +46,7 @@ data1File <- file.path("..", "..", "data", main_data_file)
 # Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
 max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "Core charts")
+chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "core charts")
 
 writeFilePath <- file.path("..", "..", "data", "smaller.csv")
 
@@ -54,13 +55,17 @@ functions_path <- "functions"
 
 # Source all .R files in the directory
 files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+
 # Source each file
 lapply(files, source)
 
 # Set scipen option to a large value
 options(scipen = 10)
 
+
 sink("../../console_output/core_console_output.txt")
+#sink("../../console_output/2024_console_output.txt")
+
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
 

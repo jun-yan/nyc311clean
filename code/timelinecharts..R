@@ -20,8 +20,9 @@ cat("\nExecution begins at:", formattedStartTime)
 #########################################################################
 
 # Set path for the data file
-#main_data_file <- "10-year 2014-2023.csv"
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "10-year 2014-2023.csv"
+#main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.csv"
 
 #########################################################################
 
@@ -47,6 +48,7 @@ if (year_digits != "10") { year_digits <- "2"}
   # Set path for the chart directory
 
 chart_prefix <- paste0(year_digits, "-year")
+#chart_prefix <- "Jan-Sep_2024"
 chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", chart_prefix)
 
 file_name_prefix <- chart_prefix #to name individual chart files
@@ -54,7 +56,10 @@ file_name_prefix <- chart_prefix #to name individual chart files
 # Set scipen option to a large value to prevent scientific notation for numbers
 options(scipen = 10)
 
+
 sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
+#sink(paste0("../../console_output/", "2024_console_output.txt"))
+
 
 cat("\nExecution begins at:", formattedStartTime)
 
@@ -130,8 +135,8 @@ print_threshold <- nrow(sorted_by_agency)
 sorted_by_agency <- as.data.frame(sorted_by_agency)
 print(head(sorted_by_agency, print_threshold), row.names = FALSE, right = FALSE)
 
-chart_title <- "Complaints by Agency"
-chart_file_name <- "Complains_by_Agency.pdf"
+chart_title <- NULL
+chart_file_name <- "Complaints_by_Agency.pdf"
 
 create_combo_chart(
   dataset = d311,
@@ -532,7 +537,9 @@ minute_counts <- minute_counts %>%
 minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
 #earliest_hour_minute <- min(minute_counts$hour_minute)
 
-extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = "2 hour")
+#extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = "2 hour")
+extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = scales::date_breaks("2 hours"))
+
 
 SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
   dataset = minute_counts,
