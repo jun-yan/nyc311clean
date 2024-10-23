@@ -475,10 +475,10 @@ blank or N/A values, they appear to divide into three groups:
 
 
 The Mostly Empty category includes such fields as
-\texttt{taxi\_company due\_date},
-\texttt{pickup\_location}, and \texttt{landmark}.
+\texttt{taxi\_company\_borough}, \texttt{due\_date},
+\texttt{road\_ramp}, and \texttt{bridge\_highway\_name}.
 The Partially Empty includes such fields as
-\texttt{location\_type}, \texttt{borough}, 
+\texttt{location\_type}, \texttt{landmark}, 
 and \texttt{cross\_street\_1 \& \_2}. And the Few/None Empty includes
 \texttt{created\_date}, \texttt{complaint\_type},
 \texttt{agency}, and \texttt{status}. In some analysis efforts, it may be
@@ -579,8 +579,7 @@ removed from the analysis. Here is a sample:
 
 \begin{table}[tbp]
   \centering
-  \caption{Negative duration of the largest magnitude ($-$730 days) excluding
-    extreme negative values}
+  \caption{Sample  negative durations [excluding extreme  values ($-$730 days)]}
   \begin{tabular}{l l l r l}
     \toprule
     {created\_date} & {closed\_date} & {duration} 
@@ -750,49 +749,24 @@ CSV file.
   the years}
   
 
-\textbf{landmark \& street\_name:} While the \texttt{landmark} field is 
+\texttt{landmark} \& \texttt{street\_name:} While the \texttt{landmark} field is 
 intended for noteworthy locations (e.g., parks, airports), most entries 
 are actually street names, with a 62\% match to \texttt{street\_name}. 
 Even non-matches (excluding blanks) appear to be similar, differing 
 only in spelling or formatting (e.g., ``NINTH AVE'' vs. ``9 AVE''). This 
-indicates a possible misuse of the \texttt{landmark} field.
+indicates a possible misuse of the \texttt{landmark} field as well as
+a high level of redundancy.
 
-\textbf{cross\_street\_1 \& intersection\_street\_1 and cross\_street\_2 
-\& intersection\_street\_2:} These two sets of street pairs are used to 
-help identify the incident address. After applying address 
-standardization using the R \textit{campfin} package, we found 88\% of 
-these pairs to be duplicates, while 12\% do not match. This discrepancy 
-raises the question of which field should be trusted. It is possible 
-that the two pairs originated from different agencies that used 
+\texttt{cross\_street\_1} \& \texttt{intersection\_street\_1} and \texttt{cross\_street\_2} 
+\& \texttt{intersection\_street\_2}: These two sets of street pairs are used to 
+help identify the incident address. We found 88\% of 
+these pairs to be duplicates. This duplication  
+raises the question of which field-pair should be trusted. It is possible 
+that the two street pairs originated from different agencies that used 
 different variable names to represent the same information, but no 
-documentation exists to clarify this relationship.
+documentation exists to clarify this relationship. Without question
+these two street-pairs are highly redundant.
 
-\paragraph{Near Match}
-
-\jy{This investigation could be relegated to on online supplement
-  given the low percentage of near-match. It's taking too much spaces
-  here.
-}
-
-\begin{table}[tbp]
-    \centering
-     \caption{Examples of near-matches for cross\_street\_1 and intersection\_street\_1.}
-     \label{tab:x1nearmatches}
-		\begin{tabular}{l l l r}
-	        \toprule
-	        \textbf{cross\_street\_1} & \textbf{intersection\_street\_1} 
-	        & \textbf{agency} & \textbf{hamming\_distance} \\
-	        \midrule
-	        WEST 168 ST    & WEST 167 ST           & DOT    & 1 \\
-	        105 AVE        & 107 AVE               & DOT    & 1 \\
-	        145 ST         & 150 ST                & DOT    & 2 \\
-	        138 ST         & 139 ST                & DOT    & 1 \\
-	        19 AVE         & 20 AVE                & DOT    & 2 \\
-	        76 ST          & 79 ST                 & DOT    & 1 \\
-	        67 ST          & 68 ST                 & DOT    & 1 \\
-	        \bottomrule
-	    \end{tabular}
-\end{table}
 
 \begin{table}[tbp]
     \centering
@@ -812,39 +786,11 @@ documentation exists to clarify this relationship.
 	    \end{tabular}
 \end{table}
 
-In addition to the matching values, we encountered a number of 
-\textit{near-matches}, situations where the \texttt{cross\_street} 
-and \texttt{intersection\_street} are nearly, but not exactly, identical. 
-An example of such a near-match is when one field reads ``HARMON DR'' 
-and the other reads ``HARMON RD.'' To identify these near-matches, 
-we applied the \href{https://en.wikipedia.org/wiki/Hamming_distance}
-{\textit{Hamming Distance}}, which measures the number of character
-\jy{needs a quick definition and reference}
-changes required to make the two fields identical. For this analysis, 
-we set the threshold for a near-match to a Hamming Distance of two (2).
-
-
-Table~\ref{tab:x1near-matches} provides examples of near-matches for 
-\texttt{cross\_street\_1} and \texttt{intersection\_street\_1}. These 
-entries show slight variations in the street name or number, such as 
-``WEST 168 ST'' and ``WEST 167 ST,'' both processed by DOT, where only 
-one character differs. Although these discrepancies may seem small, 
-they can have implications for data accuracy, particularly when 
-geocoding or matching locations for analysis purposes.
-
 
 Table~\ref{tab:summary1} presents a summary of the match and 
 near-match results for \texttt{cross\_street\_1} and 
 \texttt{intersection\_street\_1}. As the table shows, 88.15\% of the 
 entries are exact matches, while 25.4\% are blank but matching. 
-However, 11.85\% of the entries are non-matching, and a small fraction 
-(0.002\%) fall into the near-match category. Although this percentage 
-seems negligible, even a small number of near-matches can lead to 
-confusion or errors when analyzing location-based data, especially 
-if critical decisions rely on accurate street data. Address 
-standardization or correction processes may be necessary to resolve 
-these inconsistencies and improve the reliability of the data.
-
 
 \subsection{Storage}
 \label{sec:filesize}
