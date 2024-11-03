@@ -20,8 +20,8 @@ cat("\nExecution begins at:", formattedStartTime)
 #########################################################################
 
 # Set path for the data file
-#main_data_file <- "10-year 2014-2023.csv"
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "10-year 2014-2023.csv"
+#main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 # main_data_file <- "extra_small.csv"
@@ -61,7 +61,7 @@ file_name_prefix <- chart_prefix # to name individual chart files
 options(scipen = 10)
 
 
- sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
+sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
 # sink(paste0("../../console_output/", "2024_console_output.txt"))
 
 
@@ -108,7 +108,6 @@ d311 <- adjust_feb_29_to_28(d311, date_columns)
 # Collect macro statistics from the dataset
 # Extract the year(s) from the created_date column
 years <- year(d311$created_date)
-
 num_years <- unique(years)
 
 cat("\nTotal rows:", format(num_rows, big.mark = ","), "covering", length(num_years), "years")
@@ -151,166 +150,73 @@ create_combo_chart(
   console_print_out_title = "Summary of complaints by Agency"
 )
 
-# # ########################################################################
-# # Aggregate at the yearly level
-# yearly_summary <- d311 %>%
-#   mutate(Year = year(created_date)) %>%
-#   group_by(Year) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
-# # Aggregate at the monthly level
-# monthly_summary <- d311 %>%
-#   mutate(YearMonth = floor_date(created_date, "month")) %>%
-#   group_by(YearMonth) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
-# # Aggregate at the daily level
-# daily_summary <- d311 %>%
-#   mutate(created_date = as.Date(created_date)) %>%
-#   group_by(created_date) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
-# ########################################################################
-# # Aggregate by calendar month
-# calendar_month_summary <- d311 %>%
-#   mutate(Month = format(created_date, "%B")) %>%
-#   group_by(Month) %>%
-#   summarise(count = n(), .groups = 'drop') %>%
-#   mutate(Month = factor(Month, levels = month.name))
-#
-# # Find the maximum count
-# max_rows_calendar_month <- max(calendar_month_summary$count, na.rm = TRUE)
-#
-# #########################################################################
-# # Extract day of the year and aggregate counts
-# day_counts <- d311 %>%
-#   mutate(day_of_year = format(created_date, "%m/%d")) %>%
-#   group_by(day_of_year) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
-# #########################################################################
-# day_of_week <- d311 %>%
-#   mutate(day_of_week = weekdays(created_date)) %>%
-#   group_by(day_of_week) %>%
-#   summarize(count = n(), .groups = 'drop') %>%
-#   mutate(day_of_week = factor(day_of_week, levels =
-#                                 c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
-#                               labels =
-#                                 c("1-Monday", "2-Tuesday", "3-Wednesday", "4-Thursday", "5-Friday", "6-Saturday", "7-Sunday"))) %>%
-# arrange(day_of_week)
-#
-# #########################################################################
-# # Extract created_hour and closed_hour in one step
-# d311 <- d311 %>%
-#   mutate(
-#     created_hour = hour(created_date),
-#     closed_hour = hour(closed_date)
-#   )
-#
-# # Aggregate the rows by created_hour, excluding NA values
-# created_counts <- d311 %>%
-#   filter(!is.na(created_hour)) %>%
-#   group_by(created_hour) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
-# # Aggregate the rows by closed_hour, excluding NA values
-# closed_counts <- d311 %>%
-#   filter(!is.na(closed_hour)) %>%
-#   group_by(closed_hour) %>%
-#   summarise(count = n(), .groups = 'drop')
-#
 #########################################################################
-#########################################################################
-
-# Aggregate by second (precise timestamps)
-second_level_summary <- d311 %>%
+# Aggregate created_date by second (precise timestamps)
+second_level_created_summary <- d311 %>%
   mutate(created_second = floor_date(created_date, "second")) %>%
   group_by(created_second) %>%
   summarise(count = n(), .groups = "drop")
 
-top_of_hour_summary <- second_level_summary %>%
+# Aggregate created_date by minute using the second-level aggregation
+minute_level_created_summary <- second_level_created_summary %>%
+  mutate(created_minute = floor_date(created_second, "minute")) %>%
+  group_by(created_minute) %>%
+  summarise(count = sum(count), .groups = "drop")
+
+# Aggregate created_date by hour using the minute-level aggregation
+hour_level_created_summary <- minute_level_created_summary %>%
+  mutate(created_hour = floor_date(created_minute, "hour")) %>%
+  group_by(created_hour) %>%
+  summarise(count = sum(count), .groups = "drop")
+
+# Aggregate by created_date by hour
+created_hour_of_day <- second_level_created_summary %>%
+  mutate(created_hour = hour(created_second)) %>%  # Extract the hour from created_second
+  group_by(created_hour) %>%
+  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
+
+# Aggregate by created_date at top of hour (xx:00:00)
+top_of_hour_created_summary <- second_level_created_summary %>%
   filter(minute(created_second) == 0 & second(created_second) == 0) %>%
   mutate(created_hour = hour(created_second)) %>%
   group_by(created_hour) %>%
   summarise(count = sum(count), .groups = "drop")
 
-# Use second_level_summary to aggregate SRs by the hour of the day (for created_date)
-created_hour_of_day <- second_level_summary %>%
-  mutate(created_hour = hour(created_second)) %>%  # Extract the hour from created_second
-  group_by(created_hour) %>%
-  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
-
-
-# Aggregate by second (precise timestamps) for closed_date
-second_level_closed_summary <- d311 %>%
-  filter(!is.na(closed_date)) %>%
-  mutate(closed_second = floor_date(closed_date, "second")) %>%
-  group_by(closed_second) %>%
-  summarise(count = n(), .groups = "drop")
-
-# Use second_level_closed_summary to aggregate SRs by the minute of the day
-minute_level_closed_summary <- second_level_closed_summary %>%
-  mutate(closed_minute = floor_date(closed_second, "minute")) %>%  # Round closed_second to minute
-  group_by(closed_minute) %>%
-  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each minute
-
-# Filter and summarize for top of the hour based on closed_date
-top_of_hour_closed_summary <- second_level_closed_summary %>%
-  filter(minute(closed_second) == 0 & second(closed_second) == 0) %>%  # Keep only rows where minutes and seconds are zero
-  mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour
-  group_by(closed_hour) %>%
-  summarise(count = sum(count), .groups = "drop")  # Summarize by hour
-
-# Use second_level_closed_summary to aggregate SRs by the hour of the day
-closed_hour_of_day <- second_level_closed_summary %>%
-  mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour from closed_second
-  group_by(closed_hour) %>%
-  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
-
-
-# Aggregate by minute using the second-level aggregation
-minute_level_summary <- second_level_summary %>%
-  mutate(created_minute = floor_date(created_second, "minute")) %>%
-  group_by(created_minute) %>%
-  summarise(count = sum(count), .groups = "drop")
-
-# Aggregate by hour using the minute-level aggregation
-hour_level_summary <- minute_level_summary %>%
-  mutate(created_hour = floor_date(created_minute, "hour")) %>%
-  group_by(created_hour) %>%
-  summarise(count = sum(count), .groups = "drop")
-
-# Aggregate by day using the hour-level aggregation
-day_level_summary <- hour_level_summary %>%
+# Aggregate created_date by day using the hour-level aggregation
+day_level_summary <- hour_level_created_summary %>%
   mutate(created_day = as.Date(created_hour)) %>%
   group_by(created_day) %>%
   summarise(count = sum(count), .groups = "drop")
 
-yearly_summary <- day_level_summary %>%
-  mutate(Year = year(created_day)) %>%
-  group_by(Year) %>%
-  summarise(count = sum(count), .groups = "drop")
-
+# Aggregate created_date by month using the day-level aggregation
 monthly_summary <- day_level_summary %>%
   mutate(YearMonth = floor_date(created_day, "month")) %>%
   group_by(YearMonth) %>%
   summarise(count = sum(count), .groups = "drop")
 
+# Aggregate created_date by year using the monthly-level aggregation
+yearly_summary <- monthly_summary %>%
+  mutate(Year = year(YearMonth)) %>%
+  group_by(Year) %>%
+  summarise(count = sum(count), .groups = "drop")
+
+# Aggregate created_date by calendar month using the day-level aggregation
 calendar_month_summary <- day_level_summary %>%
   mutate(Month = format(created_day, "%B")) %>%
   group_by(Month) %>%
   summarise(count = sum(count), .groups = "drop") %>%
   mutate(Month = factor(Month, levels = month.name))
 
+# Aggregate created_date by day of the week using the day-level aggregation
 day_of_week_summary <- day_level_summary %>%
   mutate(day_of_week = weekdays(created_day)) %>%
   group_by(day_of_week) %>%
   summarise(count = sum(count), .groups = "drop") %>%
   mutate(day_of_week = factor(day_of_week,
-    levels =
-      c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
-    labels =
-      c("1-Monday", "2-Tuesday", "3-Wednesday", "4-Thursday", "5-Friday", "6-Saturday", "7-Sunday")
+                              levels =
+                                c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"),
+                              labels =
+                                c("1-Monday", "2-Tuesday", "3-Wednesday", "4-Thursday", "5-Friday", "6-Saturday", "7-Sunday")
   )) %>%
   arrange(day_of_week)
 
@@ -326,10 +232,37 @@ day_of_year_summary <- day_level_summary %>%
 day_of_year_summary$day_of_year <- as.character(day_of_year_summary$day_of_year)
 day_of_year_summary <- day_of_year_summary[order(-day_of_year_summary$count), ]
 
+#########################################################################
+# Aggregate closed_date by second (precise timestamps) 
+second_level_closed_summary <- d311 %>%
+  filter(!is.na(closed_date)) %>%
+  mutate(closed_second = floor_date(closed_date, "second")) %>%
+  group_by(closed_second) %>%
+  summarise(count = n(), .groups = "drop")
+
+# Use second_level_closed_summary to aggregate SRs by the minute of the day
+minute_level_closed_summary <- second_level_closed_summary %>%
+  mutate(closed_minute = floor_date(closed_second, "minute")) %>%  # Round closed_second to minute
+  group_by(closed_minute) %>%
+  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each minute
+
+# Use second_level_closed_summary to aggregate SRs by the hour of the day
+closed_hour_of_day <- second_level_closed_summary %>%
+  mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour from closed_second
+  group_by(closed_hour) %>%
+  summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
+
+# Filter and summarize for top of the hour based on closed_date
+top_of_hour_closed_summary <- second_level_closed_summary %>%
+  filter(minute(closed_second) == 0 & second(closed_second) == 0) %>%  # Keep only rows where minutes and seconds are zero
+  mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour
+  group_by(closed_hour) %>%
+  summarise(count = sum(count), .groups = "drop")  # Summarize by hour
+
+#########################################################################
 # Prepare data for charting
 days_to_chart <- day_of_year_summary %>%
   select(count, day_number)
-
 
 # Step 1: Find the busiest day
 busiest_day <- day_level_summary %>%
@@ -363,15 +296,13 @@ minute_summary_closed_busiest_day <- entries_with_closed_date %>%
   group_by(closed_minute) %>%
   summarise(count = n(), .groups = "drop")
 
-# Step 4: Aggregate by second for closed_date on the busiest day
+# Step 5: Aggregate by second for closed_date on the busiest day
 second_summary_closed_busiest_day <- entries_with_closed_date %>%
   mutate(closed_second = floor_date(closed_date, "second")) %>%
   group_by(closed_second) %>%
   summarise(count = n(), .groups = "drop")
 
 #########################################################################
-#########################################################################
-
 # List of data frames to convert
 df_list <- list(
   second_level_closed_summary_df = second_level_closed_summary,
@@ -567,21 +498,6 @@ SR_calendar_month <- create_bar_chart_categorical(
 )
 
 #########################################################################
-# Overall day-of-the-year summary (Jan 1st, Jan 2nd, Jan 3rd, etc.)
-
-# # Assuming day_counts_df is already sorted by date
-# day_counts_df <- day_counts_df %>%
-#   arrange(as.Date(paste0("2020/", day_of_year), format = "%Y/%m/%d")) %>%
-#   mutate(day_number = row_number())
-#
-# # Convert day_of_year to character
-# day_counts_df$day_of_year <- as.character(day_counts_df$day_of_year)
-#
-# day_counts_df <- day_counts_df[order(-day_counts_df$count), ]
-#
-# days_to_chart <- day_counts_df %>%
-#   select(count, day_number)
-#
 SR_day_of_the_year <- create_bar_chart_numeric(
   dataset = days_to_chart,
   x_col = "day_number",
@@ -637,47 +553,9 @@ SR_day_of_the_week <- create_bar_chart_categorical(
 )
 
 #########################################################################
-# # Determine the # of SRs created exactly on the hour with 00 minutes and 00 seconds.
-# # Looking for an anomaly at midnight and noon.
-#
-# # Filter rows where the created_date has seconds = "00" and minutes = "00"
-# filtered_by_hour <- d311 %>%
-#   filter(minute(created_date) == 0 & second(created_date) == 0)
-#
-# grouped_by_hour <- filtered_by_hour %>%
-#   group_by(hour = hour(created_date)) %>%
-#   summarise(count = n())
-#
-# # total_count <- sum(grouped_by_hour$count)
-# max_hour_of_the_day <- grouped_by_hour[which.max(grouped_by_hour$count), ]
-#
-# extra_line <- annotate("text",
-#   x = max_hour_of_the_day$hour, y = max_hour_of_the_day$count,
-#   label = paste0("Max: ", format(max_hour_of_the_day$count, big.mark = ",")),
-#   size = 3.7, color = "black", vjust = -0.4, hjust = 0.1
-# )
-#
-# SR_created_by_top_of_hour <- create_bar_chart_numeric(
-#   dataset = grouped_by_hour,
-#   x_col = "hour",
-#   y_col = "count",
-#   chart_title = "SRs created Exactly on the Hour (xx:00:00))",
-#   sub_title = chart_sub_title,
-#   console_print_out_title = "SRs created Exactly on the Hour (xx:00:00)",
-#   add_mean = FALSE,
-#   add_median = TRUE,
-#   add_sd = TRUE,
-#   add_trendline = FALSE,
-#   add_maximum = FALSE,
-#   add_minimum = FALSE,
-#   add_second_maximum = TRUE,
-#   extra_line = extra_line,
-#   chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf")
-# )
-#
 
 # Use second-level aggregated data and filter for top of the hour entries
-filtered_by_hour <- second_level_summary %>%
+filtered_by_hour <- second_level_created_summary %>%
   filter(minute(created_second) == 0 & second(created_second) == 0)
 
 # Group the data by the hour
@@ -716,58 +594,9 @@ SR_created_by_top_of_hour <- create_bar_chart_numeric(
 )
 
 #########################################################################
-# # Show minute-by-minute creation of SRs on the busiest day of the year.
-# # Ensure created_date is in the correct time zone
-# d311 <- d311 %>%
-#   mutate(created_date = with_tz(created_date, tzone = "UTC"))
-#
-# # Filter the data for the desired date and seconds value "00"
-# date_to_filter <- max_date
-#
-# date_filtered <- d311 %>%
-#   filter(
-#     as_date(created_date, tz = "UTC") == ymd(date_to_filter, tz = "UTC"),
-#     second(created_date) == 0
-#   )
-#
-# # Group by hour and minute, count the rows
-# minute_counts <- date_filtered %>%
-#   group_by(hour = hour(created_date), minute = minute(created_date)) %>%
-#   summarise(count = n(), .groups = "drop")
-#
-# minute_counts <- minute_counts %>%
-#   mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
-#
-# # Convert hour_minute to a time format
-# minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
-# #earliest_hour_minute <- min(minute_counts$hour_minute)
-#
-# #extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = "2 hour")
-# extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = scales::date_breaks("2 hours"))
-#
-#
-# SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
-#   dataset = minute_counts,
-#   x_col = "hour_minute",
-#   y_col = "count",
-#   chart_title = paste("SRs created by Exact Minute-of-the-busiest-Day (xx:xx:00) on", max_date),
-#   sub_title = chart_sub_title,
-#   console_print_out_title = "SRs created Exactly on the Minute (yy:xx:00) on busiest Day",
-#   add_mean = FALSE,
-#   add_median = FALSE,
-#   add_sd = TRUE,
-#   add_trendline = FALSE,
-#   add_maximum = TRUE,
-#   add_minimum = FALSE,
-#   add_second_maximum = FALSE,
-#   extra_line = extra_line,
-#   chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf")
-# )
-#
-
 
 # Use pre-aggregated data for the minute-level summary
-minute_counts_busiest_day <- minute_level_summary %>%
+minute_counts_busiest_day <- minute_level_created_summary %>%
   filter(as.Date(created_minute) == as.Date(max_date)) # Filter for the busiest day
 
 # Group the data by hour and minute
@@ -807,44 +636,6 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
 
 #########################################################################
 # # Determine the # of SRs closed exactly on hour with minute and seconds == 00:00.
-# # Looking for an anomaly at midnight and noon.
-#
-# # Filter rows where the created_date has seconds = "00" and minutes = "00"
-# filtered_by_hour <- d311 %>%
-#   filter(!is.na(closed_date) & minute(closed_date) == 0 & second(closed_date) == 0)
-#
-# grouped_by_hour <- filtered_by_hour %>%
-#   group_by(hour = hour(closed_date)) %>%
-#   summarise(count = n())
-#
-# #total_count <- sum(grouped_by_hour$count)
-#
-# max_hour_of_the_day <- grouped_by_hour[which.max(grouped_by_hour$count), ]
-#
-# extra_line <- annotate("text",
-#   x = max_hour_of_the_day$hour, y = max_hour_of_the_day$count,
-#   label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-#   size = 3.7, color = "black", vjust = -0.7, hjust = 0.1
-# )
-#
-# SR_closed_by_top_of_hour <- create_bar_chart_numeric(
-#   dataset = grouped_by_hour,
-#   x_col = "hour",
-#   y_col = "count",
-#   chart_title = "SRs closed Exactly on the Hour (xx:00:00)",
-#   sub_title = chart_sub_title,
-#   console_print_out_title = "SRs closed exactly on the Hour (xx:00:00) on busiest Day",
-#   add_mean = FALSE,
-#   add_median = FALSE,
-#   add_sd = TRUE,
-#   add_trendline = FALSE,
-#   add_maximum = FALSE,
-#   add_minimum = FALSE,
-#   add_second_maximum = TRUE,
-#   extra_line = extra_line,
-#   chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf")
-# )
-
 
 # Use second-level closed summary and filter for entries where minute and second are exactly zero
 filtered_by_hour <- second_level_closed_summary %>%
@@ -885,36 +676,8 @@ SR_closed_by_top_of_hour <- create_bar_chart_numeric(
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf")
 )
 
-
-# #########################################################################
-# # Show minute-by-minute closure of SRs on the busiest day of the year.
-# # Ensure closed_date is in the correct time zone
-# d311 <- d311 %>%
-#   mutate(closed_date = with_tz(closed_date, tzone = "UTC"))
-# 
-# # Filter the data for the desired date and seconds value "00"
-# date_to_filter <- max_date
-# 
-# date_filtered <- d311 %>%
-#   filter(
-#     as_date(closed_date, tz = "UTC") == ymd(date_to_filter, tz = "UTC"),
-#     second(closed_date) == 0 & !is.na(closed_date)
-#   )
-# 
-# # Group by hour and minute, count the rows
-# minute_counts <- date_filtered %>%
-#   group_by(hour = hour(closed_date), minute = minute(closed_date)) %>%
-#   summarise(count = n(), .groups = "drop")
-# 
-# total_count <- sum(minute_counts$count)
-# 
-# # Assuming 'minute_counts' is your data frame with 'hour' and 'minute' columns
-# minute_counts <- minute_counts %>%
-#   mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
-# 
-# # Convert hour_minute to a time format
-# minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:%M")
-# # earliest_hour_minute <- min(minute_counts$hour_minute)
+#########################################################################
+# Show minute-by-minute closure of SRs on the busiest day of the year.
 
 # Use pre-aggregated minute-level closed summary and filter for the busiest day
 minute_counts_busiest_day <- minute_level_closed_summary %>%
@@ -956,19 +719,6 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
 )
 
 # Use pre-aggregated minute-level closed summary and filter for the busiest day
-# Aggregate by minute for closed_date
-# minute_level_closed_summary <- d311 %>%
-#   filter(!is.na(closed_date)) %>%
-#   mutate(closed_minute = floor_date(closed_date, "minute")) %>%
-#   group_by(closed_minute) %>%
-#   summarise(count = n(), .groups = "drop")
-
-# # Use second_level_closed_summary to aggregate SRs by the minute of the day
-# minute_level_closed_summary <- second_level_closed_summary %>%
-#   mutate(closed_minute = floor_date(closed_second, "minute")) %>%  # Round closed_second to minute
-#   group_by(closed_minute) %>%
-#   summarise(count = sum(count), .groups = "drop")  # Sum the counts for each minute
-
 # Filter for the busiest day
 minute_counts_busiest_day <- minute_level_closed_summary %>%
   filter(as.Date(closed_minute) == as.Date(max_date))  # Filter for the busiest day
@@ -1013,45 +763,8 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
   vertical_adjustment_max = 1
 )
 
-
 #########################################################################
-# # Overall created time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
-#
-# max_hour_of_the_day <- created_hour_of_day_df[which.max(created_hour_of_day_df$count), ]
-#
-# extra_line <- annotate("text",
-#   x = max_hour_of_the_day$created_hour, y = max_hour_of_the_day$count,
-#   label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-#   size = 4, color = "black", vjust = -0.7, hjust = -0.1
-# )
-#
-#
-# SR_created_time_of_day <- create_bar_chart_numeric(
-#   dataset = created_hour_of_day_df,
-#   x_col = "created_hour",
-#   y_col = "count",
-#   chart_title = "SRs created by hour-of-the-day",
-#   sub_title = chart_sub_title,
-#   console_print_out_title = "SR created by hour-of-the-day",
-#   add_mean = TRUE,
-#   add_median = FALSE,
-#   add_sd = FALSE,
-#   add_trendline = FALSE,
-#   add_maximum = FALSE,
-#   add_minimum = FALSE,
-#   add_second_maximum = FALSE,
-#   chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf"),
-#   horizontal_adjustment_max = -1,
-#   vertical_adjustment_max = 1
-# )
-
-# # Aggregate SRs by the hour of the day (for created_date)
-# created_hour_of_day_df <- d311 %>%
-#   mutate(created_hour = hour(created_date)) %>%  # Extract the hour from created_date
-#   group_by(created_hour) %>%
-#   summarise(count = n(), .groups = "drop")  # Count the number of SRs created at each hour
-
-
+# Overall created time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 # Find the hour with the maximum count
 max_hour_of_the_day <- created_hour_of_day_df[which.max(created_hour_of_day_df$count), ]
 
@@ -1089,52 +802,7 @@ cat("\nSummary of created by hour-of-the-day:\n")
 print(created_hour_of_day_df[, c("created_hour", "count")], row.names = FALSE, right = FALSE)
 
 #########################################################################
-# # Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
-# max_hour_of_the_day <- closed_hour_of_day_df[which.max(closed_hour_of_day_df$count), ]
-#
-# extra_line <- annotate("text",
-#   x = max_hour_of_the_day$closed_hour, y = max_hour_of_the_day$count,
-#   label = paste0("Max: ", format(max_count, big.mark = ","), sep = ""),
-#   size = 3.7, color = "black", vjust = -0.7, hjust = -.5
-# )
-#
-# SR_closed_time_of_day <- create_bar_chart_numeric(
-#   dataset = closed_hour_of_day_df,
-#   x_col = "closed_hour",
-#   y_col = "count",
-#   chart_title = "SRs closed by Hour of Day",
-#   sub_title = chart_sub_title,
-#   console_print_out_title = "SRs closed by Hour-of-the-Day",
-#   add_mean = TRUE,
-#   add_median = FALSE,
-#   add_sd = FALSE,
-#   add_trendline = FALSE,
-#   add_maximum = TRUE,
-#   add_minimum = FALSE,
-#   add_second_maximum = FALSE,
-#   extra_line = extra_line,
-#   chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf"),
-#   horizontal_adjustment_max = -1,
-#   vertical_adjustment_max = 1
-# )
-#
-# cat("\nSummary of closed by hour-of-the-day:\n")
-#
-# # Create a new column to format closed_hour as HH:00
-# closed_hour_of_day_df$closed_hour_formatted <- sprintf("%02d:00", as.integer(closed_hour_of_day_df$closed_hour))
-# # Print the dataframe with formatted closed_hour and counts
-# print(closed_hour_of_day_df[, c("closed_hour_formatted", "count")], row.names = FALSE, right = FALSE)
-
-# # Aggregate SRs by the hour of the day (for closed_date)
-# closed_hour_of_day_df <- d311 %>%
-#   filter(!is.na(closed_date)) %>%  # Ensure closed_date is not NA
-#   mutate(closed_hour = hour(closed_date)) %>%  # Extract the hour from closed_date
-#   group_by(closed_hour) %>%
-#   summarise(count = n(), .groups = "drop")  # Count the number of SRs closed at each hour
-
-
-
-
+# Overall closed time-of-day summary (0900, 1000, 1100, 1200, 1300, etc.)
 # Find the hour with the maximum count
 max_hour_of_the_day <- closed_hour_of_day_df[which.max(closed_hour_of_day_df$count), ]
 
@@ -1175,97 +843,20 @@ closed_hour_of_day_df$closed_hour_formatted <- sprintf("%02d:00", as.integer(clo
 # Print the dataframe with formatted closed_hour and counts
 print(closed_hour_of_day_df[, c("closed_hour_formatted", "count")], row.names = FALSE, right = FALSE)
 
-
-# ########################################################################
-# # Identify SRs created at midnight and noon
-#
-# hour <- as.numeric(format(d311$created_date, "%H"))
-# minute <- as.numeric(format(d311$created_date, "%M"))
-# second <- as.numeric(format(d311$created_date, "%S"))
-#
-# # Identify rows with time exactly at midnight (00:00:00)
-# midnight_created_rows <- hour == 0 & minute == 0 & second == 0
-# noon_created_rows <- hour == 12 & minute == 0 & second == 0
-#
-# # Count the number of rows with time exactly at midnight
-# midnight_created_count <- sum(midnight_created_rows)
-# noon_created_count <- sum(noon_created_rows)
-#
-# midnight_created_data <- d311[midnight_created_rows, ]
-# created_at_midnight <- midnight_created_data[, c("created_date", "agency")]
-#
-# noon_created_data <- d311[noon_created_rows, ]
-# created_at_noon <- noon_created_data[, c("created_date", "agency")]
-#
-# if (midnight_created_count > 0) {
-#   cat(
-#     "\n\nThere are",
-#     format(midnight_created_count, big.mark = ","),
-#     "SRs that were created at exactly midnight."
-#   )
-#
-#   sorted_create_at_midnight <- rank_by_agency(created_at_midnight)
-#
-#   chart_title <- "SRs created exactly at midnight (00:00:00) by Agency & cumulative percentage"
-#   chart_file_name <- "SRs_created_at_midnight_by_Agency.pdf"
-#
-#   create_combo_chart(
-#     created_at_midnight,
-#     chart_title,
-#     chart_file_name,
-#     console_print_out_title = "SRs created at midnight"
-#   )
-# } else {
-#   cat("\n\nThere are no SRs with a created_date exactly at midnight.\n")
-# }
-#
-# if (noon_created_count > 0) {
-#   cat(
-#     "\n\nThere",
-#     format(noon_created_count, big.mark = ","),
-#     "SRs that were created exactly at noon."
-#   )
-#
-#   sorted_create_at_noon <- rank_by_agency(created_at_noon)
-#
-#   chart_title <- "SRs created exactly at noon (12:00:00) by Agency & cumulative percentage"
-#   chart_file_name <- "SRs_created_at_noon_by_Agency.pdf"
-#   if (!is.null(sorted_create_at_noon)) {
-#     create_combo_chart(
-#       created_at_noon,
-#       chart_title,
-#       chart_file_name,
-#       console_print_out_title = "SRs created at noon"
-#     )
-#   } else {
-#     cat("\n\nThere are no SRs with a created_date exactly at noon.\n")
-#   }
-# }
-
-
 ########################################################################
 # Identify SRs created at midnight and noon using lubridate
-# hour <- hour(d311$created_date)
-# minute <- minute(d311$created_date)
-# second <- second(d311$created_date)
-# 
-# # Identify rows with time exactly at midnight (00:00:00) and noon (12:00:00)
-# midnight_created_rows <- hour == 0 & minute == 0 & second == 0
-# noon_created_rows <- hour == 12 & minute == 0 & second == 0
-
-
 # Extract hour, minute, and second components from second-level created summary
-hour <- hour(second_level_summary$created_second)
-minute <- minute(second_level_summary$created_second)
-second <- second(second_level_summary$created_second)
+hour <- hour(second_level_created_summary$created_second)
+minute <- minute(second_level_created_summary$created_second)
+second <- second(second_level_created_summary$created_second)
 
 # Identify rows with time exactly at midnight (00:00:00) and noon (12:00:00)
 midnight_created_rows <- hour == 0 & minute == 0 & second == 0
 noon_created_rows <- hour == 12 & minute == 0 & second == 0
 
 # Get the data for SRs created exactly at midnight or noon
-created_at_midnight <- second_level_summary[midnight_created_rows, ]
-created_at_noon <- second_level_summary[noon_created_rows, ]
+created_at_midnight <- second_level_created_summary[midnight_created_rows, ]
+created_at_noon <- second_level_created_summary[noon_created_rows, ]
 
 # Count the number of SRs created at midnight and noon
 midnight_created_count <- nrow(created_at_midnight)
@@ -1327,15 +918,6 @@ if (noon_created_count > 0) {
 # Remove N/A closed_date(s)
 valid_closed_date <- !is.na(d311$closed_date)
 valid_closed_data <- d311[valid_closed_date, ]
-
-# # Extract hour, minute, and second components of closed_date for valid rows
-# hour <- as.numeric(format(d311$closed_date[valid_closed_date], "%H"))
-# minute <- as.numeric(format(d311$closed_date[valid_closed_date], "%M"))
-# second <- as.numeric(format(d311$closed_date[valid_closed_date], "%S"))
-# 
-# # Identify rows with time exactly at midnight (00:00:00)
-# midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
-# noon_closed_rows <- hour == 12 & minute == 0 & second == 0
 
 # Extract hour, minute, and second from the second-level closed summary
 hour <- hour(second_level_closed_summary$closed_second)
@@ -1408,15 +990,6 @@ if (noon_closed_count > 0) {
 
 ########################################################################
 # Identify SRs closed at midnight and noon
-
-# # Remove N/A closed_date(s)
-# valid_closed_data <- d311[!is.na(d311$closed_date), ]
-# 
-# # Extract hour, minute, and second components of closed_date
-# hour <- hour(valid_closed_data$closed_date)
-# minute <- minute(valid_closed_data$closed_date)
-# second <- second(valid_closed_data$closed_date)
-
 # Extract hour, minute, and second components from second-level closed summary
 hour <- hour(second_level_closed_summary$closed_second)
 minute <- minute(second_level_closed_summary$closed_second)
