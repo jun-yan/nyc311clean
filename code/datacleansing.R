@@ -26,9 +26,9 @@ library(sf)
 #########################################################################
 
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
+#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.CSV
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
-#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.CSV"
 
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
@@ -95,7 +95,7 @@ USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
-num_zipcode_rows <- nrow(USPSzipcodesOnly)
+#num_zipcode_rows <- nrow(USPSzipcodesOnly)
 
 #########################################################################
 # Load the USPS zipcode file
@@ -109,7 +109,7 @@ USPSabbreviations <-
 # USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
-num_abbreviaton_row <- nrow(USPSabbreviations)
+#num_abbreviaton_row <- nrow(USPSabbreviations)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -224,7 +224,7 @@ chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", se
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
 d311 <- consolidate_agencies((d311))
 
-sorted_by_agency <- rank_by_agency(d311)
+#sorted_by_agency <- rank_by_agency(d311)
 
 # chart_title <- "SR count by Agency & cumulative percentage"
 create_combo_chart(
@@ -290,8 +290,8 @@ cat("\nNumber and % blanks and N/A (total empty) entries per column:\n")
 print(missingDataPerColumn, row.names = FALSE, right = FALSE)
 
 # Determine the parameters for the chart
-max_count <- max(missingDataPerColumn$blanks)
-total_count <- sum(missingDataPerColumn$count)
+#max_count <- max(missingDataPerColumn$blanks)
+#total_count <- sum(missingDataPerColumn$count)
 
 # Sort 'field' by 'total_empty' descending
 missingDataPerColumn <- missingDataPerColumn %>%
@@ -458,6 +458,13 @@ print(tail(complaintData[, c("complaint_type", "count", "agency")], 20),
   row.names = FALSE, right = FALSE
 )
 
+cat("\nComplaints with multiple responsible Agencies:\n")
+# Filter rows where agency is "MULTIPLE"
+multiple_agency_complaints <- complaintData[complaintData$agency == "MULTIPLE", ]
+
+# View the results
+head(multiple_agency_complaints, 50)
+
 # Identify the 'Noise' complaints
 noise_rows <- complaintData %>%
   filter(str_starts(complaint_type, "NOISE"))
@@ -487,6 +494,19 @@ create_combo_chart(
 # Rename columns to trick 'create_combo_chart' function to use 'complaint_type' as 'agency'
 colnames(d311)[colnames(d311) == "agency"] <- "complaint_type"
 colnames(d311)[colnames(d311) == "temp_agency"] <- "agency"
+
+
+# # Determine top responsible Agency for each complaint_type
+# top_agencies_per_complaint <- d311 %>%
+#   group_by(complaint_type, agency) %>%
+#   summarise(count = n(), .groups = "drop") %>%
+#   arrange(complaint_type, desc(count)) %>%
+#   group_by(complaint_type) %>%
+#   slice_head(n = 5)  # Select the top 5 agencies per complaint type
+# 
+# # View the results
+# print(top_agencies_per_complaint, n= 250)
+
 
 #########################################################################
 # Determine status of SRs
@@ -1123,8 +1143,8 @@ exclude_extreme_late_update <- exclude_extreme_late_update[, selected_columns, d
 updatedLate <- updatedLate[order(updatedLate$postClosedUpdateDuration, decreasing = TRUE), ]
 exclude_extreme_late_update <- exclude_extreme_late_update[order(exclude_extreme_late_update$postClosedUpdateDuration, decreasing = TRUE), ]
 
-numBlankResolutionDate <-
-  missingDataPerColumn[missingDataPerColumn$field == "resolution_action_updated_date", "total_empty"]
+#numBlankResolutionDate <-
+#  missingDataPerColumn[missingDataPerColumn$field == "resolution_action_updated_date", "total_empty"]
 
 num_row_updatedLate <- nrow(updatedLate)
 num_row_extreme_late <- nrow(exclude_extreme_late_update)

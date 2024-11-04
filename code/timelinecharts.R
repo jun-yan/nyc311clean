@@ -24,7 +24,7 @@ cat("\nExecution begins at:", formattedStartTime)
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
-# main_data_file <- "extra_small.csv"
+#main_data_file <- "extra_small.csv"
 
 #########################################################################
 
@@ -175,12 +175,12 @@ created_hour_of_day <- second_level_created_summary %>%
   group_by(created_hour) %>%
   summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
 
-# Aggregate by created_date at top of hour (xx:00:00)
-top_of_hour_created_summary <- second_level_created_summary %>%
-  filter(minute(created_second) == 0 & second(created_second) == 0) %>%
-  mutate(created_hour = hour(created_second)) %>%
-  group_by(created_hour) %>%
-  summarise(count = sum(count), .groups = "drop")
+# # Aggregate by created_date at top of hour (xx:00:00)
+# top_of_hour_created_summary <- second_level_created_summary %>%
+#   filter(minute(created_second) == 0 & second(created_second) == 0) %>%
+#   mutate(created_hour = hour(created_second)) %>%
+#   group_by(created_hour) %>%
+#   summarise(count = sum(count), .groups = "drop")
 
 # Aggregate created_date by day using the hour-level aggregation
 day_level_summary <- hour_level_created_summary %>%
@@ -252,12 +252,12 @@ closed_hour_of_day <- second_level_closed_summary %>%
   group_by(closed_hour) %>%
   summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
 
-# Filter and summarize for top of the hour based on closed_date
-top_of_hour_closed_summary <- second_level_closed_summary %>%
-  filter(minute(closed_second) == 0 & second(closed_second) == 0) %>%  # Keep only rows where minutes and seconds are zero
-  mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour
-  group_by(closed_hour) %>%
-  summarise(count = sum(count), .groups = "drop")  # Summarize by hour
+# # Filter and summarize for top of the hour based on closed_date
+# top_of_hour_closed_summary <- second_level_closed_summary %>%
+#   filter(minute(closed_second) == 0 & second(closed_second) == 0) %>%  # Keep only rows where minutes and seconds are zero
+#   mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour
+#   group_by(closed_hour) %>%
+#   summarise(count = sum(count), .groups = "drop")  # Summarize by hour
 
 #########################################################################
 # Prepare data for charting
@@ -390,13 +390,13 @@ monthly_df$YearMonth <- as.Date(paste(monthly_df$YearMonth, "01", sep = "-"), fo
 max_month <- monthly_df[which.max(monthly_df$count), ]
 min_month <- monthly_df[which.min(monthly_df$count), ]
 
-mxmonth <- max_month$YearMonth
-mimonth <- min_month$YearMonth
+#mxmonth <- max_month$YearMonth
+#mimonth <- min_month$YearMonth
 
-earliest_YearMonth <- min(monthly_df$YearMonth)
+#earliest_YearMonth <- min(monthly_df$YearMonth)
 
-start_date <- min(monthly_df$YearMonth)
-end_date <- max(monthly_df$YearMonth)
+#start_date <- min(monthly_df$YearMonth)
+#end_date <- max(monthly_df$YearMonth)
 
 # Ensure YearMonth is a Date object
 monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
@@ -432,16 +432,16 @@ daily_df <- daily_df[order(daily_df$created_day), ] # Sort by created_date
 
 # Find corresponding dates
 max_date <- daily_df$created_day[which.max(daily_df$count)]
-min_date <- daily_df$created_day[which.min(daily_df$count)]
+#min_date <- daily_df$created_day[which.min(daily_df$count)]
 
 earliest_day <- min(daily_df$created_day)
 max_count <- max(daily_df$count)
 
-extra_line2 <- annotate("text",
-  x = earliest_day, y = max_count,
-  label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-  size = 3.7, color = "#E69F00", vjust = 0.6, hjust = -2
-)
+# extra_line2 <- annotate("text",
+#   x = earliest_day, y = max_count,
+#   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
+#   size = 3.7, color = "#E69F00", vjust = 0.6, hjust = -2
+# )
 
 SR_daily <- create_bar_chart_categorical(
   dataset = daily_df,
@@ -522,7 +522,7 @@ SR_day_of_the_year <- create_bar_chart_numeric(
 # Overall day-of-the-week summary
 
 day_of_week_df$day_of_week <- as.character(day_of_week_df$day_of_week)
-max_day_of_the_week <- day_of_week_df[which.max(day_of_week_df$count), ]
+#max_day_of_the_week <- day_of_week_df[which.max(day_of_week_df$count), ]
 
 # Add a new column 'week_day' with row counts
 day_of_week_df <- day_of_week_df %>%
