@@ -63,7 +63,7 @@ lapply(files, source)
 options(scipen = 10)
 
 
-sink("../../console_output/core_console_output.txt")
+#sink("../../console_output/core_console_output.txt")
 #sink("../../console_output/2024_console_output.txt")
 
 cat("\nExecution begins at:", formattedStartTime)

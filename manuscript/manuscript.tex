@@ -312,7 +312,7 @@ sanitation and transportation problems. The NYPD alone accounts for a
 substantial portion of the total SRs, underscoring its leading role in
 addressing complaints related to public safety. The remaining
 10\% of SRs is distributed across 10 other
-agencies. This concentration of SRs to the `big six'' agencies 
+agencies. This concentration of SRs to the ``big six'' agencies 
 underscores the necessity for optimal data handling and curation processes 
 within these high-volume agencies in order to ensure 
 efficiency and responsiveness.
@@ -642,14 +642,14 @@ as well as a large number created exactly at midnight.
     \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{2-year-trend_SRs_created_on_the_hour.pdf}
-        \caption{SRs Created by Hour of the Day}
+        \caption{SRs Created Exactly on the Hour}
         \label{fig:busiestcreated}
     \end{subfigure}
     \par\medskip
     \begin{subfigure}{\textwidth}
         \centering
         \includegraphics[width=\textwidth]{2-year-trend_SRs_closed_on_the_hour.pdf}
-        \caption{SRs Closed by Hour of the Day}
+        \caption{SRs Closed Exactly on the Hour}
         \label{fig:busiestclosed}
     \end{subfigure}
     \caption{Comparison of SRs Created and Closed by Hour of the Day}
@@ -730,43 +730,31 @@ is quite different than that of \texttt{borough}. Such information could be
 useful only when studying TLC related SRs. It might make more
 sense to store TLC data in a separate dataset.
 
-
-\dt{STOPPED EDITING HERE}
-
-\textbf{agency \& agency\_name:} The \texttt{agency} field contains 
-abbreviations of City agencies (e.g., NYPD, DOT), while 
+\texttt{agency} \& \texttt{agency\_name}: The \texttt{agency} field contains 
+abbreviations of City agencies (e.g., NYPD, DOT, DSNY), while 
 \texttt{agency\_name} contains the full names. Including both seems 
 redundant, especially given the space taken up by full names in the 
-CSV file.
+CSV file. Additionally, the agency abbreviations are easily recognized.
 
-\jy{In my Chance article, we found an agency
-  `DEPARTMENT OF CONSUMER AND WORKER PROTECTION', which occurred 361
-  times in May 2023. It was the only one that does not look like an
-  acronym. Did this occur in the two-year data?
-  I wonder if this has been fixed lately.}
-
-\jy{A related question is whether the data quality has improved over
-  the years}
-  
-
-\texttt{landmark} \& \texttt{street\_name:} While the \texttt{landmark} field is 
-intended for noteworthy locations (e.g., parks, airports), most entries 
+\texttt{landmark} \& \texttt{street\_name}: Per the Data Dictionary, the
+\texttt{landmark} field ``can refer to any noteworthy location, 
+including but not limited to, parks, hospitals, airports, sports 
+facilities, performance spaces, etc.'  However, most entries 
 are actually street names, with a 62\% match to \texttt{street\_name}. 
-Even non-matches (excluding blanks) appear to be similar, differing 
-only in spelling or formatting (e.g., ``NINTH AVE'' vs. ``9 AVE''). This 
-indicates a possible misuse of the \texttt{landmark} field as well as
-a high level of redundancy.
+Even non-matches (excluding blanks) appear to technically be
+a match, differing only in spelling or formatting 
+(e.g., ``NINTH AVE'' vs. ``9 AVE''). This indicates a possible 
+misuse of the \texttt{landmark} field as well as a high level of redundancy.
 
-\texttt{cross\_street\_1} \& \texttt{intersection\_street\_1} and \texttt{cross\_street\_2} 
-\& \texttt{intersection\_street\_2}: These two sets of street pairs are used to 
-help identify the incident address. We found 88\% of 
-these pairs to be duplicates. This duplication  
-raises the question of which field-pair should be trusted. It is possible 
-that the two street pairs originated from different agencies that used 
-different variable names to represent the same information, but no 
-documentation exists to clarify this relationship. Without question
-these two street-pairs are highly redundant.
-
+\texttt{cross\_street\_1/2} \& \texttt{intersection\_street\_1/2}: These 
+two sets of street pairs are used to help identify the 
+\texttt{incident address}. We found 88\% of these pairs to be 
+duplicates. This duplication raises the question of which field-pair 
+should be trusted; and if they are different, how should they be treated?
+It is possible that these two street pairs originated from different 
+agencies that used different variable names to represent the same 
+information, but no documentation exists to clarify this 
+relationship. These two street-pairs are highly redundant.
 
 \begin{table}[tbp]
     \centering
@@ -786,11 +774,9 @@ these two street-pairs are highly redundant.
 	    \end{tabular}
 \end{table}
 
-
-Table~\ref{tab:summary1} presents a summary of the match and 
-near-match results for \texttt{cross\_street\_1} and 
-\texttt{intersection\_street\_1}. As the table shows, 88.15\% of the 
-entries are exact matches, while 25.4\% are blank but matching. 
+Table~\ref{tab:summary1} presents a summary of the matching results 
+for \texttt{cross\_street\_1} and \texttt{intersection\_street\_1}. As 
+the table shows, 88.15\% of the non-blank entries are exact matches.
 
 \subsection{Storage}
 \label{sec:filesize}
@@ -799,88 +785,99 @@ By removing duplicate and ``near-duplicate'' fields, it is possible to
 shrink the file size by 39.5\%, which for this large dataset equates to 
 a reduction of 1.4 Gb, which is significant. A smaller file size means faster downloads, 
 less storage impact, and simpler data analysis efforts.
+
+
 Below is a list of duplicate and near-duplicate fields. 
 
 \begin{itemize}
-    \item \textbf{agency\_name}: Each row contains the \texttt{agency} field, 
-    which uses abbreviations that are clear and well understood.
+    \item \textbf{\texttt{agency\_name}}: Since each row contains the \texttt{agency} 
+    field, which uses abbreviations that are clear and well understood, we believe the
+    \texttt{agency\_name} can be removed with minimal data loss.
     
-    \item \textbf{park\_borough}: A 100\% match with the \texttt{borough} field, 
-    leading to no data loss.
+    \item \textbf{\texttt{park\_borough}}: This field is a 100\% match with 
+    the \texttt{borough} field and can be deleted without data loss.
     
-    \item \textbf{location}: A straight concatenation of latitude and longitude 
-    fields, offering no additional value beyond duplication.
+    \item \textbf{\texttt{location}}: This field is a straight concatenation of 
+    the latitude and longitude fields. It can be deleted without data loss.
      
-    \item \textbf{cross\_street\_1 \& 2 and intersection\_street\_1 \& 2}: 
-    An 88\% match between these pairs. We recommend deleting the 
-    \texttt{intersection\_street\_1 \& 2} fields while acknowledging the
-    concomitant data loss.
+    \item \textbf{\texttt{cross\_street\_1/2}} and \textbf{\texttt{intersection\_street\_1/2}}: 
+    These two stree pairs both exhibit an 88\% match. We recommend deleting the 
+    \texttt{intersection\_street\_1/2} fields while acknowledging 
+    the concomitant data loss.
     
 \end{itemize}
 
-Additionally, certain fields may not be useful due to their sparse population. 
-For example, the \texttt{taxi\_company\_borough} field is 99.94\% blank, 
-\texttt{road\_ramp} is 99.8\% blank, \texttt{vehicle\_type} is 99.7\% blank, 
-and \texttt{due\_date} is 99.6\% blank. Several other fields, such as 
-\texttt{bridge\_highway\_direction}, \texttt{bridge\_highway\_name}, 
-\texttt{bridge\_highway\_segment}, and \texttt{taxi\_pick\_up\_location}, 
-are over 99\% blank, with most used exclusively by the TLC.
+Additionally, certain fields may not be useful for broad analysis
+due to their sparse data population. This especially applies to the fields below which
+are predominantly used by the TLC and are 99\% (or greater) blank. 
+\begin{quote}
+\textbf{Note:} \textit{Even a field that is 99\% blank still contains 64,000 
+non-blank rows in this large (6.4 million-row) dataset.}
+\end{quote}
 
+\begin{itemize}
+    \item \texttt{taxi\_company\_borough}
+    \item \texttt{road\_ramp}
+    \item \texttt{vehicle\_type}
+    \item \texttt{due\_date}
+    \item \texttt{bridge\_highway\_direction}
+    \item \texttt{bridge\_highway\_name}
+    \item \texttt{bridge\_highway\_segment}
+    \item \texttt{taxi\_pick\_up\_location}
+\end{itemize}
 
-Further reduction is possible by coding categorical 
-variables, such as \texttt{complaint\_type}, through methods like dropdown 
-menus or encoded categories. By using a dropdown menu for 
-\texttt{complaint\_type}, data entry can be standardized, reducing 
-inconsistencies caused by manual input errors. Additionally, categorical 
-variables with a limited set of possible values can be stored more 
-efficiently by assigning unique codes or numerical representations for 
-each category. For instance, instead of repeatedly storing the full text 
-for every complaint type (e.g., ``Noise - Residential,'' ``Noise - 
-Commercial''), a single code could represent each type. This not only 
-reduces file size but also improves data processing speed and efficiency 
-during analysis. Moreover, standardizing categorical inputs prevents 
-the inclusion of misspellings or unrecognized entries, ensuring cleaner 
+Further reduction is possible by encoding certain categorical 
+variables Using \texttt{complaint\_type} as an example,
+instead of repeatedly storing the full tex of each complaint
+type, it would use a numeric representation. 
+(e.g., ``NOISE - STREET/SIDEWALK'')could be represented by
+, a numeric code (e.g. 126). In this datase the example complaint type
+occurs over 300,000 times. Such encoding not only reduces file 
+size, but also improves processing efficiency. Moreover, 
+standardizing categorical inputs prevents the inclusion of 
+misspellings or unrecognized/invalid entries, ensuring cleaner 
 and more reliable data. This approach is particularly useful in large 
-datasets, where frequently repeated categorical variables can 
-significantly increase storage requirements. Encoding such fields 
-as dropdown options or coded variables can lead to faster query times 
-and more consistent data handling.
-
-
+datasets, where frequently repeated text-based categorical variables can 
+significantly increase storage requirements. 
 
 \subsection{Data Dictionary} 
 \label{sec:datadictionary}
 
-The Data Dictionary could benefit from an update. We found several 
+The Data Dictionary would benefit from an update. We found several 
 discrepancies between the Data Dictionary and the actual data, which 
-could potentially mislead analytic efforts.
+could potentially mislead analytic efforts. Here are some examples:
 
 \begin{itemize}
     \item While the Open Data portal lists the data types of various 
     fields, the Data Dictionary does not. Nor does it provide details 
-    on specific fields, such as constraints or the domain of legal 
-    values. For example, the \texttt{incident\_zip} field is specified 
-    as ``text.'' This may not be the most suitable definition; 
-    ``categorical,'' with a note that the data contains only numeric 
-    characters and is not subjected to arithmetic operations, might 
-    be a better description.
+    on specific fields such as constraints or the domain of legal 
+    values. For example, in the Data Dictionary, the \texttt{incident\_zip} 
+    field is specified as ``text.'' This may not be the most suitable 
+    definition. Perhaps ``categorical,'' with a note indicating that 
+    the data must contain only numeric values and is not subjected to 
+    arithmetic operations would be a better dictionary description.
+    
     
     \item Many of the domains of legal values are incomplete or 
     inaccurate. For example, the Data Dictionary indicates that the 
     \texttt{status} field has values of \textit{assigned, canceled, 
-    closed}, or \textit{pending}, but we also found values such as 
-    \textit{in progress, started}, and \textit{unspecified}. 
+    closed}, or \textit{pending}. However, we found additional
+    values such as \textit{in progress, started}, and \textit{unspecified}. 
     Additionally, no SRs were found with a status of 
-    \textit{canceled}. The \texttt{address\_type} field similarly 
+    \textit{canceled}. 
+    
+    
+    \item The \texttt{address\_type} field similarly 
     lists values of \textit{address, blockface, intersection, latlong}, 
-    and \textit{placename}, but we found additional values such as 
-    \textit{bbl} and \textit{unrecognized}, and no \textit{latlong} 
-    values were observed. Other fields, like \texttt{facility\_type}, 
+    and \textit{placename}. However, we found additional values such as 
+    \textit{bbl} and \textit{unrecognized}. Additionally, no \textit{latlong} 
+    values were observed. Other fields, such as \texttt{facility\_type}, 
     \texttt{vehicle\_type}, \texttt{taxi\_pick\_up\_location}, 
     \texttt{road\_ramp}, and \texttt{city}, exhibit similar inaccuracies 
     in their specified domain values.
     
-  \item As mentioned earlier, six \texttt{@computed} fields that are
+    
+	\item As mentioned earlier, six \texttt{@computed} fields that are
     present in the data but not included in the Data Dictionary need
     to be documented and perhaps labelled as ``experimental'' or
     ``not for official use''.
@@ -917,12 +914,15 @@ invalid zip codes and
 nonsensical date entries (e.g., negative durations) highlight the need 
 for rigorous validation processes. Governments should establish 
 clear protocols for data entry, ensuring that fields are populated with 
-valid, legally acceptable values. For example, fields like 
+valid, legally acceptable values. For example, fields such as 
 \texttt{created\_date} and \texttt{closed\_date} should be subject to 
 automated checks that prevent logical errors, such as closing an 
 SR before it was opened. Ensuring the integrity of critical fields 
 like geographic locations and agency names enhances the quality 
-and reliability of the data.
+and reliability of the data. Additionally, a number of fields have 
+very defined domains, such as \texttt{incident\_zip}. Such fields
+should be subject to data entry validation, in this example
+validating against the USPS database at the data entry point.
 
 \paragraph{Principle 3: Optimizing Storage and Representation Efficiency}
 Efficient storage and data representation are crucial for handling 
@@ -941,14 +941,15 @@ but also enhances the performance of queries and analysis processes.
 
 \paragraph{Principle 4: Updating Data Dictionaries and Documentation}
 Clear and accurate documentation is essential for the effective use 
-of government-released datasets. The NYC 311 data revealed several 
+of government-released datasets. Our study found several 
 issues where the Data Dictionary did not accurately reflect the 
-actual data, such as missing field descriptions for computed fields. 
+actual data, such as missing field descriptions for computed fields, and 
+inaccurate domain values for categorial fields such as \texttt{status}. 
 As mentioned, updating the Data Dictionary to include descriptions of all fields, 
 including the computed fields, e.g. \texttt{@computed\_region\_xxxx}, 
 would improve transparency and usability. Regular updates should 
-be made to ensure that any changes in data structure or content are 
-reflected. This practice enhances the ability of external users, 
+occur whenever there are changes in data structure, data usage, or 
+content. This practice enhances the ability of external users, 
 including researchers and developers, to understand and work 
 effectively with the data.
 
@@ -956,12 +957,13 @@ effectively with the data.
 Automating data validation and quality assurance processes can 
 significantly improve the reliability of government datasets. In the 
 NYC 311 case, issues such as large spikes in SR creation and closure 
-at exactly midnight or noon likely stem from automated processes that 
-distort the accurate capture of SR durations. By implementing 
-real-time validation tools, governments can prevent such anomalies 
-from entering the dataset. Automated systems can be designed to 
-flag inconsistencies, incorrect values, or illogical sequences, or 
-illogical date entries. 
+at exactly midnight (or noon) likely stem from a cron-job type 
+processes that distort the accurate capture of SR 
+durations. By implementing real-time validation tools, governments 
+can prevent such anomalies from entering the dataset in the first 
+place. Automated 
+systems can be designed to flag inconsistencies, incorrect values, 
+or illogical sequences, or illogical date entries. 
 Automation can also facilitate faster detection and correction of 
 errors, reducing the need for manual intervention and ensuring 
 the data remains clean and reliable as it is continuously updated.
@@ -973,10 +975,11 @@ understandable. This involves providing clear metadata and making
 datasets available in user-friendly formats. Additionally, 
 governments should communicate transparently about 
 data quality issues, such as notifying the public when errors in SR 
-fields (e.g., erroneous closed dates) are discovered and explaining 
-how such issues will be resolved. By ensuring transparency and 
-keeping the public informed, governments foster trust and promote 
-wider use of datasets for research, civic engagement, and innovation.
+fields (e.g., erroneous \texttt{closed\_ date(s)} are discovered, including
+an explanation about how such issues will be resolved. By 
+ensuring transparency and keeping the public informed, 
+governments foster trust and promote wider use of datasets 
+for research, civic engagement, and innovation.
 
 
 \subsection{Actionable Steps}
@@ -1023,71 +1026,6 @@ and civic organizations, governments can ensure that their open datasets
 remain accurate, transparent, and useful for a wide range of applications.
 
 
-% \begin{itemize}
-% \item  Undertake a dedicated effort 
-%     to investigate these data anomalies, confirm the veracity of the 
-%     issues, and collaborate with the appropriate Agency Open Data 
-%     Representatives to find resolutions. This effort may be complex 
-%     and require software changes. Coordination and mutual approval 
-%     of changes will be key, requiring strong support from senior 
-%     leadership.
-
-%     \item Standards and protocols should be established, agreed upon, 
-%     and enforced. This includes defining the domain of legal values, 
-%     ensuring data accuracy, implementing address normalization, 
-%     clarifying data usage, and providing detailed data definitions.
-
-%     \item Resolve many potential data integrity issues
-%     through enforcement by software. For instance, software should 
-%     prevent invalid entries like erroneous zip codes. Similarly, fields 
-%     like \texttt{created\_date} and \texttt{closed\_date}, which 
-%     measure responsiveness, should have logic checks to prevent 
-%     illogical sequences, such as an SR being ``closed'' before 
-%     being ``opened.''
-
-%     \item The large spikes in SR creation and closure at midnight and 
-%     noon likely point to automated processes from external Agency 
-%     integrations. These distortions should be eliminated in favor of 
-%     capturing accurate SR durations with precise timestamps.
-
-%     \item As discussed, there are six ``computed'' fields that are not 
-%     listed in the Data Dictionary. Some of these fields contain 
-%     significant inaccuracies. We recommend updating the Data 
-%     Dictionary and, if necessary, masking these fields from public use 
-%     until their accuracy is improved.
-
-%     \item Duplicate fields should be reviewed for removal. In some 
-%     cases, such as \texttt{borough} and \texttt{park\_borough}, the 
-%     duplication is 100\%. In others, the match is 80-90\%. 
-%     These near-duplicates should be assessed to determine their 
-%     relevance in the 311 SR dataset. Initial analysis suggests that 
-%     removing these fields could reduce file size by up to 12\%, with 
-%     further reductions possible upon deeper review.
-
-%     \item Fields with very low data presence, such as 
-%     \texttt{taxi\_company\_borough}, populated only 0.06\% of the time, 
-%     should be evaluated to determine if they are necessary.
-
-%     \item The Data Dictionary, last updated in March 2023, should be 
-%     revised based on the issues discussed in Section~\ref{sec:datadictionary}.
-
-%     \item The precision of latitude, longitude, and location fields 
-%     should be reduced. We recommend limiting precision to four 
-%     decimal places (0.000X), which represents approximately 36.4 feet. 
-%     More decimal points strain credibility.
-
-%     \item The 11 address-related fields (\texttt{incident\_address}, 
-%     \texttt{street\_name}, \texttt{city}, \texttt{intersection\_street\_1 \& 2}, 
-%     \texttt{cross\_street\_1 \& 2}, \texttt{landmark}, \texttt{road\_ramp}, 
-%     \texttt{bridge\_highway\_segment}, and \texttt{taxi\_pick\_up\_location}) 
-%     should be standardized to USPS format. Software can easily 
-%     perform this standardization.
-
-%     \item There are multiple ways missing data is represented, such as 
-%     ``UNKNOWN'', ``N/A'', ``NA'', ``na'', and blanks (`` ''). Protocols 
-%     should be established to standardize the representation of missing data.
-% \end{itemize}
-
 \section{Discussion} \label{sec:discussion}
 
 Our study highlights the critical role of robust data curation in
@@ -1105,7 +1043,7 @@ urban planning and policy \citep{rahm2000data, geiger2020garbage}.
 
 This research further emphasizes the necessity of harmonizing data
 across city agencies, particularly in resolving discrepancies in field
-names, formats, and definitions. Consistency in data is essential for
+names, formats, field usage, and definitions. Consistency in data is essential for
 trustworthy machine learning, where inconsistencies across sources can
 lead to distorted outcomes. This challenge is even more pronounced in
 datasets that span long time periods, as changes in agency structures
