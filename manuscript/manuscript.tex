@@ -748,35 +748,13 @@ misuse of the \texttt{landmark} field as well as a high level of redundancy.
 
 \texttt{cross\_street\_1/2} \& \texttt{intersection\_street\_1/2}: These 
 two sets of street pairs are used to help identify the 
-\texttt{incident address}. We found 88\% of these pairs to be 
+\texttt{incident address}. We found 88\% of these two street pairs to be 
 duplicates. This duplication raises the question of which field-pair 
 should be trusted; and if they are different, how should they be treated?
 It is possible that these two street pairs originated from different 
 agencies that used different variable names to represent the same 
 information, but no documentation exists to clarify this 
 relationship. These two street-pairs are highly redundant.
-
-\begin{table}[tbp]
-    \centering
-    \caption{Summary of cross\_street\_1 and intersection\_street\_1}
-    \label{tab:summary1}
-	    \begin{tabular}{l r r}
-	        \toprule
-	        \textbf{category} & \textbf{count} & \textbf{percentage} \\
-	        \midrule
-	        Matching                    & 5,637,182 & 88.15     \\
-	        Both blank -- Matching      & 1,624,499 & 25.4      \\
-	        Non-matching                &   757,726 & 11.85     \\
-	        cross\_street\_1\_blank     &   222,232 & N/A       \\
-	        intersection\_street\_1\_blank &   519,348 & N/A       \\
-	        Near-match                  &       128 & 0.002002  \\
-	        \bottomrule
-	    \end{tabular}
-\end{table}
-
-Table~\ref{tab:summary1} presents a summary of the matching results 
-for \texttt{cross\_street\_1} and \texttt{intersection\_street\_1}. As 
-the table shows, 88.15\% of the non-blank entries are exact matches.
 
 \subsection{Storage}
 \label{sec:filesize}

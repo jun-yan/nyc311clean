@@ -63,7 +63,7 @@ lapply(files, source)
 options(scipen = 10)
 
 
-#sink("../../console_output/core_console_output.txt")
+sink("../../console_output/core_console_output.txt")
 #sink("../../console_output/2024_console_output.txt")
 
 cat("\nExecution begins at:", formattedStartTime)
@@ -296,36 +296,89 @@ total_count <- sum(missingDataPerColumn$count)
 # Sort 'field' by 'total_empty' descending
 missingDataPerColumn <- missingDataPerColumn %>%
   mutate(field = reorder(field, -total_empty))
+# 
+# # Create the bar chart with vertical X-axis labels
+# blank_chart <- ggplot(
+#   
+#   missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
+#   
+#   geom_bar(stat = "identity", fill = "#009E73") +
+#   
+#   theme(
+#     axis.title.x = element_text(vjust = 0, size = 8),
+#     axis.title.y = element_text(vjust = 1, size = 8),
+#     plot.title = element_text(hjust = 0.5, size = 13),
+#     plot.subtitle = element_text(size = 7),
+#     panel.background = element_rect(fill = "gray95", color = "gray95"),
+#     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
+#     axis.text.y = element_text(face = "bold"),
+#     legend.position = "none", # Remove all legends
+#     aspect.ratio = 0.618033 # Set aspect ratio
+#   ) +
+#   
+#   geom_text(aes(
+#     x = field, y = total_empty, label = pct_empty,
+#     angle = -70
+#   ), size = 2.3, color = "black") +
+#   
+#   ggtitle(NULL,
+#     subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
+#   ) +
+#   
+#   labs(y = NULL, x = NULL)
+# 
+# # Build the plot to extract y-axis breaks
+# built_plot <- ggplot_build(blank_chart)
+# 
+# # Extract Y-axis breaks (try different possible locations)
+# y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
+# # Filter out any NA values from y_breaks
+# y_breaks <- y_breaks[!is.na(y_breaks)]
+# 
+# # Add hlines using the Y-axis breaks
+# blank_chart <- blank_chart +
+#   geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
+# 
+# # Print the bar chart
+# print(blank_chart)
+# 
+# # Set desired width
+# chart_width <- 10
+# chart_height <- chart_width / 1.618 # Golden Ratio for height
+# 
+# # Save the chart with the Golden Ratio aspect ratio
+# chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
+# ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
 
 # Create the bar chart with vertical X-axis labels
-blank_chart <- ggplot(
+blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
   
-  missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
+  # Match the fill color to base_bar_chart
+  geom_bar(stat = "identity", fill = "#44AA99", na.rm = TRUE) +
   
-  geom_bar(stat = "identity", fill = "#009E73") +
-  
+  # Standardize theme settings to match base_bar_chart
   theme(
-    axis.title.x = element_text(vjust = 0, size = 8),
-    axis.title.y = element_text(vjust = 1, size = 8),
-    plot.title = element_text(hjust = 0.5, size = 13),
+    axis.title = element_blank(), # Remove x and y axis titles for consistency
+    plot.title = element_text(hjust = 0.5, size = 12),
     plot.subtitle = element_text(size = 7),
     panel.background = element_rect(fill = "gray95", color = "gray95"),
-    axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
-    axis.text.y = element_text(face = "bold"),
+    axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold", size = 7),
+    axis.text.y = element_text(face = "bold", size = 8),
     legend.position = "none", # Remove all legends
-    aspect.ratio = 0.618033 # Set aspect ratio
+    aspect.ratio = 0.618033 # Set aspect ratio (golden ratio)
   ) +
   
+  # Standardize subtitle format
+  ggtitle(NULL, subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = " ")) +
+  
+  # Add percentage labels with standardized font size
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
     angle = -70
-  ), size = 2.3, color = "black") +
+  ), size = 2.5, color = "black") +
   
-  ggtitle(NULL,
-    subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
-  ) +
-  
-  labs(y = NULL, x = NULL)
+  # Remove x and y axis labels for consistency with base_bar_chart
+  labs(x = NULL, y = NULL)
 
 # Build the plot to extract y-axis breaks
 built_plot <- ggplot_build(blank_chart)
@@ -335,20 +388,22 @@ y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
 # Filter out any NA values from y_breaks
 y_breaks <- y_breaks[!is.na(y_breaks)]
 
-# Add hlines using the Y-axis breaks
+# Add hlines using the Y-axis breaks with matching line style and color
 blank_chart <- blank_chart +
   geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
 
 # Print the bar chart
 print(blank_chart)
 
-# Set desired width
+# Set desired width and height to match base_bar_chart
 chart_width <- 10
-chart_height <- chart_width / 1.618 # Golden Ratio for height
+#chart_height <- chart_width / 1.618 # Golden Ratio for height
+chart_height <- chart_width / 1.3 # Golden Ratio for height
 
 # Save the chart with the Golden Ratio aspect ratio
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
+
 
 #########################################################################
 
@@ -769,9 +824,20 @@ cat("\n\n**********CHECKING FOR ALLOWABLE AND VALID DATES**********\n")
 d311$duration <-
   as.numeric(difftime(d311$closed_date, d311$created_date, units = "days"))
 
+# positiveDurations <- d311[d311$duration > 0 & !is.na(d311$duration), ]
+# zeroDurations <- d311[d311$duration == 0 & !is.na(d311$duration), ]
+# negativeDurations <- d311[d311$duration < 0 & !is.na(d311$duration), ]
+
+# Step 1: Extract positive durations
 positiveDurations <- d311[d311$duration > 0 & !is.na(d311$duration), ]
-zeroDurations <- d311[d311$duration == 0 & !is.na(d311$duration), ]
-negativeDurations <- d311[d311$duration < 0 & !is.na(d311$duration), ]
+
+# Step 2: Extract zero durations from rows not in positiveDurations
+remaining_after_positive <- d311[!(rownames(d311) %in% rownames(positiveDurations)), ]
+zeroDurations <- remaining_after_positive[remaining_after_positive$duration == 0 & !is.na(remaining_after_positive$duration), ]
+
+# Step 3: Extract negative durations from remaining rows after filtering out positive and zero
+remaining_after_zero <- remaining_after_positive[!(rownames(remaining_after_positive) %in% rownames(zeroDurations)), ]
+negativeDurations <- remaining_after_zero[remaining_after_zero$duration < 0 & !is.na(remaining_after_zero$duration), ]
 
 #########################################################################
 # Identify SRs with negative duration (closed before they were created)
@@ -1184,57 +1250,57 @@ if (!is.null(nonMatching_taxi_company_borough)) {
 
 #########################################################################
 
-cat("\n\n\n**********CASE STUDY: ANALYZING RESPONSE TIMES FOR HOMELSS PERSON ASSISTANCE.**********\n")
-
-#########################################################################
-
-homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
-  !is.na(d311$duration), ]
-duration_mean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-duration_sd <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-duration_median <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-
-cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless Person Assistance.")
-cat("\n\nAvg response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
-cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
-cat("\nMedian response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   ",
-  duration_median, " days (", 24 * duration_median, " hrs)",
-  sep = ""
-)
-
-negative_homeless_assistance_SRs <- homeless_assistance_SRs[homeless_assistance_SRs$duration < 0 &
-  !is.na(homeless_assistance_SRs$duration), ]
-num_row_neg_duration <- nrow(negative_homeless_assistance_SRs)
-
-if (num_row_neg_duration > 0) {
-  cat("\n\n***Removing", num_row_neg_duration, "SRs with extreme negative durations.***\n")
-
-  homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
-    !is.na(d311$duration) & d311$duration > 0, ]
-  num_rows_cleaned <- nrow(homeless_assistance_SRs)
-
-  duration_mean_clean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-  duration_sd_clean <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-  duration_median_clean <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-
-  cat("\nAvg response time (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean_clean, "days")
-  cat("\nStd deviation for (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd_clean, "days")
-  cat("\nMedian response time (cleaned data)  'HOMELESS PERSON ASSISTANCE': ",
-    duration_median_clean, " days (", duration_median_clean * 24, " hrs)",
-    sep = ""
-  )
-  cat("\n\nThe maximum response time for this study is:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
-
-  homeless_violin_chart <- create_violin_chart(
-    dataset = homeless_assistance_SRs,
-    x_axis_title = "Response time (days)",
-    x_axis_field = "duration",
-    chart_title = "Response time for 'Homeless Person Assistance (cleaned data)' SRs",
-    chart_file_name = "homeless_response_time_clean_violin.pdf"
-  )
-} else {
-  cat("\n\nThere are no negative duration Homeless Person Assistance SRs to remove.")
-}
+# cat("\n\n\n**********CASE STUDY: ANALYZING RESPONSE TIMES FOR HOMELSS PERSON ASSISTANCE.**********\n")
+# 
+# #########################################################################
+# 
+# homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
+#   !is.na(d311$duration), ]
+# duration_mean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+# duration_sd <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+# duration_median <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+# 
+# cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless Person Assistance.")
+# cat("\n\nAvg response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
+# cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
+# cat("\nMedian response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   ",
+#   duration_median, " days (", 24 * duration_median, " hrs)",
+#   sep = ""
+# )
+# 
+# negative_homeless_assistance_SRs <- homeless_assistance_SRs[homeless_assistance_SRs$duration < 0 &
+#   !is.na(homeless_assistance_SRs$duration), ]
+# num_row_neg_duration <- nrow(negative_homeless_assistance_SRs)
+# 
+# if (num_row_neg_duration > 0) {
+#   cat("\n\n***Removing", num_row_neg_duration, "SRs with extreme negative durations.***\n")
+# 
+#   homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
+#     !is.na(d311$duration) & d311$duration > 0, ]
+#   num_rows_cleaned <- nrow(homeless_assistance_SRs)
+# 
+#   duration_mean_clean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+#   duration_sd_clean <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+#   duration_median_clean <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
+# 
+#   cat("\nAvg response time (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean_clean, "days")
+#   cat("\nStd deviation for (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd_clean, "days")
+#   cat("\nMedian response time (cleaned data)  'HOMELESS PERSON ASSISTANCE': ",
+#     duration_median_clean, " days (", duration_median_clean * 24, " hrs)",
+#     sep = ""
+#   )
+#   cat("\n\nThe maximum response time for this study is:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
+# 
+#   homeless_violin_chart <- create_violin_chart(
+#     dataset = homeless_assistance_SRs,
+#     x_axis_title = "Response time (days)",
+#     x_axis_field = "duration",
+#     chart_title = "Response time for 'Homeless Person Assistance (cleaned data)' SRs",
+#     chart_file_name = "homeless_response_time_clean_violin.pdf"
+#   )
+# } else {
+#   cat("\n\nThere are no negative duration Homeless Person Assistance SRs to remove.")
+# }
 
 #########################################################################
 

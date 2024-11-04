@@ -68,7 +68,7 @@ create_combo_chart <- function(
     labs(x = NULL, y = NULL) +
     
     theme(
-      axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 8),
+      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = 7),
       axis.text.y = element_text(face = "bold", size = 8),
       axis.text.y.right = element_text(color = "black", face = "bold", size = 8),
       plot.title = element_text(hjust = 0.5, size = 12),
@@ -100,8 +100,9 @@ create_combo_chart <- function(
   # Save the plot
   chart_path <- file.path(chart_directory_path, chart_file_name)
   chart_width <- 10
-  chart_height <- chart_width / 1.618
-  ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
+#  chart_height <- chart_width / 1.618
+  chart_height <- chart_width / 1.3
+    ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
 
 #########################################################################
