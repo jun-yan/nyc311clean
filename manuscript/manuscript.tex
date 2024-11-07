@@ -33,7 +33,7 @@
 \usepackage{comment}
 \usepackage{booktabs, textgreek}
 \usepackage{subcaption}
-
+\usepackage{enumitem}
 
 %% float control
 \renewcommand\floatpagefraction{0.75}
@@ -266,6 +266,26 @@ dataset is used to conduct detailed analysis
 in areas such as data consistency, data validity, redundant fields, 
 etc.. Instructions on downloading this file from the 
 NYC Open Data Portal are available in the supplemental material.
+Here are some characteristics of the 311 SR data set:
+
+\begin{itemize}[left=1.5em]
+	\item There are 41 columns of data for each row, exportable as a CSV file.
+	Each row represents a single Service Request (SR). 
+	
+	\item There are four date fields 
+	(\texttt{created\_date}, \texttt{closed\_date}, \texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}).
+	
+	\item There are two borough fields; one of which appear to be a duplicate.
+		
+	\item There are seven street fields; two pair of which appear to be duplicates
+	
+	\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
+	\texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
+	Coordinate System, and \texttt{block} \#.
+	
+	\item A free\mbox{-}form text field, \texttt{resolution\_description}, which 
+	supports 934 characters of input, including commas and special characters.
+\end{itemize}
 
 
 During the 10\mbox{-}year period from 2014 to 2023,  311 experienced
@@ -285,7 +305,6 @@ indicates sustained growth in SR volume in future years,
 highlighting the system's expanding role in managing 
 both routine City operations and extraordinary events.
 
-
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 the responsible Agency, showing the cumulative 
 percentage of SRs handled by each
@@ -293,13 +312,13 @@ Agency over a the 2\mbox{-}year time-frame. Note that the
 distribution of SRs is heavily concentrated among a few key 
 agencies. The six largest agencies are:
 
-\begin{itemize}
-    \item New York Police Department (NYPD) - 43\% of all SRs
-    \item Housing Preservation and Development (HPD) - 21\%
-    \item New York City Department of Sanitation (DSNY) - 10\%
-    \item Department of Transportation (DOT) - 7\%
-    \item Department of Environmental Protection (DEP) - 5\%
-    \item Department of Parks and Recreation (DPR) - 4\%
+\begin{itemize}[left=1.5em]
+    \item New York Police Department (NYPD): 43\% of all SRs
+    \item Housing Preservation and Development (HPD): 21\%
+    \item New York City Department of Sanitation (DSNY): 10\%
+    \item Department of Transportation (DOT): 7\%
+    \item Department of Environmental Protection (DEP): 5\%
+    \item Department of Parks and Recreation (DPR): 4\%
 \end{itemize}
 
 Collectively these six City Agencies handle over 90\% of the total SR 
@@ -345,7 +364,7 @@ responsible for handling these high-volume complaints.
 \end{figure}
 
 
-\section{NYC 311 SR Data Cleansing Issues} 
+\section{Data Cleansing Issues} 
 \label{sec:issues}
 Data cleansing refers to the process of identifying and rectifying
 errors, inconsistencies, and inaccuracies within datasets to ensure
@@ -376,59 +395,39 @@ left empty, ensuring that key information is always captured.
 Additionally, certain fields must conform to specific data types, 
 such as numeric, character, or date formats; typically 
 outlined in a \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}. An 
-essential aspect of validation 
-is domain compliance, where fields must adhere to a predefined set of 
+essential aspect of validation is domain compliance, where 
+fields must adhere to a predefined set of 
 values such as statuses, state names, or zip codes. Structural 
 errors can also play a significant role in data quality, particularly when 
 naming conventions or data entries are inconsistent. Common issues 
-include fields that do not appear in the Data Dictionary 
-and the inconsistent use of blanks, spaces, NA, N/A, 
-or ``<NA>'' to indicate missing data. Furthermore, redundant 
-or irrelevant fields can clutter datasets, reducing efficiency and 
-creating confusion or errors. Logical inconsistencies are another 
-consideration, such as related fields that violate expected 
+include fields that do not appear in the Data Dictionary,  
+inconsistent use of data fields. Furthermore, redundant 
+or irrelevant fields can clutter datasets, reducing efficiency, 
+creating confusion, and introducing errors. Logical inconsistencies 
+are another consideration, such as related fields that violate expected 
 relationships, e.g. a ``due date'' that precedes the ``created date.'' 
 Lastly, the balance between accuracy and precision is crucial, as both 
 must be carefully managed to ensure meaningful data.
 
 
-Here we identify the presence of issues in the NYC 311 SR open dataset;
-not attempting to solve them, but rather to highlight their scope and
-magnitude. We would recommend that a solution effort 
-should be undertaken only after further investigation as to 
-the why and how such issues came about, including a
-discussion as to whether or not it is an actual \textit{error} or 
-holds some other status. Coordination with the originating Agency
-is, of course, paramount.
+We identify the presence of issues in the NYC 311 SR open dataset;
+not attempting to solve them, but rather to highlight their scope, 
+magnitude, and potential impact. We would recommend 
+that a corrective solution should be undertaken only 
+after further investigation as to the why and how such 
+issues might come about, including  detailed discussions 
+with the originating Agency as to whether or not it is an 
+actual error, correct,  or holds some other status.
 
 
 \subsection{Structural Issues}
 \label{sec:structural}
 Structural issues refers to how data is organized, formatted, 
-or presented within a dataset. Structural issues can make 
-it difficult to analyze the data effectively. Here are some overall 
-characteristics of the 311 SR data set:
-
-\begin{itemize}
-	\item There are 41 columns of data for each row, exportable as a CSV file.
-	Each row represents a single Service Request (SR). 
-	
-	\item There are four date fields 
-	(\texttt{created\_date}, \texttt{closed\_date}, \texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}).
-	
-	\item There are two borough fields; one of which appear to be a duplicate.
-		
-	\item There are seven street fields; two pair of which appear to be duplicates
-	
-	\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
-	\texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
-	Coordinate System, and \texttt{block} \#.
-	
-	\item A free\mbox{-}form text field, \texttt{resolution\_description}, which 
-	supports 934 characters of input, including commas and special characters.
-\end{itemize}
-
-The 311 SR 
+or presented within a dataset. They can make 
+it difficult to analyze the data effectively and often require extensive 
+data cleaning efforts. Here are three structural issues we encountered.
+ 
+\paragraph{Undocumented Fields:} The 311 SR 
 \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} 
 identifies 41 data columns (fields) and provides related information 
 for each. However, there are six additional fields that can be
@@ -436,7 +435,7 @@ optionally downloaded. These fields are
 visible in the portal's ``Column manager'' widget, labeled with the prefix 
 ``@computed\_region.'' and include:
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item \texttt{zip\_codes}
     \item \texttt{community\_districts}
     \item \texttt{borough\_boundaries}
@@ -448,40 +447,67 @@ visible in the portal's ``Column manager'' widget, labeled with the prefix
 While one can likely infer the meaning of these ``computed'' 
 fields, uncertainty remains as to their derivation and 
 usage. These six fields are not included in
-the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}. Our 
-analysis shows that these six ``computed'' fields have 
+the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}. Additionally, 
+our analysis shows that these six ``computed'' fields have 
 significant data validity issues, leading us to treat these six fields 
-as experimental and not for suitable for normal use. Accordingly, 
+as experimental and \textit{not for suitable for public use}. An update 
+to the Data Dictionary would seem appropriate. Accordingly, 
 we will not address these fields in our analysis. 
 
+\paragraph{Representation of Missing data:} We found that the 
+311 SR dataset exhibited inconsistent approaches when 
+presenting missing data. We discovered many different 
+representations of missing data: nulls, spaces, ``NA'', ``N/A'', 
+and ``<NA>''. This variety of representations complicates programming
+efforts, and increases the likelihood of introducing errors 
+in data analysis (typically by search for or excluding missing fields 
+and not aware of the various representations). A more consistent 
+approach to treating missing data should be employed to address this issue.
 
-\subsection{Missing Data}
+\paragraph{Challenges with daylight saving time (DST):} The 311 SR 
+dataset captures local NYC times. Accordingly, twice each 
+year there are changes to the local time as a result of observing 
+DST, and this can introduce some unexpected results. For example, 
+on March 13, 2022 and March 12, 2023 there are no times 
+between 1:59AM and 2:59AM: the 2:00AM hour on those dates 
+is simply missing owing to the clocks moving forward; at 2:00AM 
+it instantly becomes 3:00AM. This creates a gap in the hourly 
+distribution of SRs on those days, and it exaggerates the 
+lifespan of SRs, albeit by a single hour. Similarly on 
+November 6, 2022 and November 5, 2023, the 
+hour of 1:00AM - 2:00AM is repeated twice. This can result 
+in a bizarre scenario where, for example, an SR can 
+be created at 1:59AM and then closed say 30 minutes later 
+at 1:29AM; seemingly nonsensical. Utilizing UTC time 
+for date\mbox{-}time stamps might help address this issue.
+
+
+\subsection{Missing Data by Field}
 \label{sec:blanks}
 Understanding the absence of data by field is important 
 when undertaking analysis. For example, if you wanted to 
 determine if SRs were closed before or after their
 \texttt{due\_date}, you would be challenged as 99.6\% of the
-\texttt{due\_date} fields are blank. When sorting fields by
-blank or N/A values, they appear to divide into three groups:
+\texttt{due\_date} field are blank. When sorting fields by
+blank (or N/A values) they appear to divide into three groups:
 
-\begin{itemize}
-    \item \textbf{Mostly Empty} -- 93-99.9\% blank 
-    \item \textbf{Partially Empty} -- 40-4\% blank
-    \item \textbf{Few/None Empty} -- 2-0\% blank
+\begin{itemize}[left=1.5em]
+    \item \textbf{Mostly Empty}: 93-99.9\% blank 
+    \item \textbf{Partially Empty}: 40-4\% blank
+    \item \textbf{Few/None Empty}: 2-0\% blank
 \end{itemize}
 
-
-The Mostly Empty category includes such fields as
+The \textit{Mostly Empty} category includes fields such as
 \texttt{taxi\_company\_borough}, \texttt{due\_date},
 \texttt{road\_ramp}, and \texttt{bridge\_highway\_name}.
-The Partially Empty category includes such fields as
+The \textit{Partially Empty} category includes fields such as
 \texttt{location\_type}, \texttt{landmark}, 
-and \texttt{cross\_street\_1 \& \_2}. And the Few/None Empty category
- includes \texttt{created\_date}, \texttt{complaint\_type},
+and \texttt{cross\_street\_1 \& \_2}. And the \textit{Few/None Empty} 
+category includes \texttt{created\_date}, \texttt{complaint\_type},
 \texttt{agency}, and \texttt{status}. For some analysis efforts, it may be
-prudent to inquire as to why some fields are mostly or almost always blank.
-Figure~\ref{fig:blank_fields} presents a graphic 
-depiction of total empty (blank \& N/As) for each fields illustrating
+prudent to inquire further as to why some fields are 
+mostly or almost always blank. Figure~\ref{fig:blank_fields} is 
+a graphic depiction of total empty (blank \& N/As) for each field illustrating
 the grouping into the Most, Partial, and Few categories.
 
 \begin{figure}[tbp]
@@ -503,7 +529,7 @@ Unfortunately, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files
 acceptable values for other fields. Nonetheless, the following fields were tested and found to comply with their expected domains, as determined by public 
 usage and as evidenced in other historical datasets:
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item \texttt{address\_type}
     \item \texttt{status}
     \item \texttt{borough}
@@ -539,7 +565,7 @@ Unfortunately, this does not seem to be the case, as several anomalies
 exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
 an automated process would normally exclude, including:
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item SRs with a \texttt{closed\_date} that occurs before the 
     \texttt{created\_date} resulting a nonsensical ``negative duration''.
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
@@ -549,6 +575,7 @@ an automated process would normally exclude, including:
     \item An unusually large number of SRs closed and/or created exactly at midnight 
     and noon, to the second.
 \end{itemize}
+
 
 \paragraph{Closed before Created: Negative Duration}
 Citizens, NYC Government Officials, and Agencies use the \texttt{created\_date}(s) and 
@@ -705,7 +732,7 @@ appears to be a classic case of extreme precision, but limited accuracy.
 During this analysis, several redundant fields were identified and should 
 be examined for possible consolidation.
 
-\paragraph{\texttt{Latitude/Longitude} and \texttt{location}}: 
+\paragraph{\texttt{latitude/longitude} \& \texttt{location}:} 
 The \texttt{location} field is a pure concatenation of 
 the \texttt{latitude} and \texttt{longitude} fields albeit with a 
 comma and parentheses added. This makes the \texttt{location} field 
@@ -713,10 +740,10 @@ arguably harder to use than the individual fields. For example:
 \texttt{latitude}: 40.768456429488, \texttt{longitude}: $-$73.9575661888774, 
 form the \texttt{location}: (40.768456429488, $-$73.95756618887745).
 
-\paragraph{\texttt{borough} \& \texttt{park\_borough}}: These two fields are fully redundant, 
+\paragraph{\texttt{borough} \& \texttt{park\_borough}:} These two fields are fully redundant, 
 as they are 100\% matches.
 
-\paragraph{\texttt{borough} \& \texttt{taxi\_company\_borough}}: Despite 
+\paragraph{\texttt{borough} \& \texttt{taxi\_company\_borough}:} Despite 
 their names, these fields are almost entirely different, with only 
 a 0.05\% match. The \texttt{taxi\_company\_borough} field is 
 used exclusively by the TLC, indicating a need for consultation 
@@ -724,25 +751,26 @@ with that Agency to understand the differing uses. It is
 likely that that the usage of \texttt{taxi\_company\_borough} is 
 quite different than that of \texttt{borough}. 
 
-\paragraph{\texttt{agency} \& \texttt{agency\_name}}: The \texttt{agency} 
+\paragraph{\texttt{agency} \& \texttt{agency\_name}:} The \texttt{agency} 
 field contains the abbreviations of City agencies (e.g., NYPD, DOT, DSNY), 
 while \texttt{agency\_name} contains the full names. Including both seems 
 redundant, especially given the space taken up by full names in the 
 CSV file. Additionally, the Agency abbreviations are easily recognized.
 
-\paragraph{\texttt{landmark} \& \texttt{street\_name}}: Per the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, the \texttt{landmark} field ``can refer to any 
-noteworthy location, including but not limited to, parks, 
-hospitals, airports, sports facilities, performance spaces, etc.'  
-However, most entries are actually street names, with a 62\% 
-match to \texttt{street\_name} field. Even the non\mbox{-}matches (excluding 
-blanks) appear to be a logical match, differing only in spelling or formatting 
+\paragraph{\texttt{landmark} \& \texttt{street\_name}:} Per the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, 
+the \texttt{landmark} field ``can refer to any noteworthy location, 
+including but not limited to, parks, hospitals, airports, sports facilities, 
+performance spaces, etc.'. However, most entries are actually 
+street names, with a 62\% match to \texttt{street\_name} field. 
+Even the non\mbox{-}matches (excluding blanks) appear to be 
+a logical match, differing only in spelling or formatting 
 (e.g., ``NINTH AVE'' vs. ``9 AVE''). This indicates a possible 
 misuse of the \texttt{landmark} field as well as a high level of redundancy.
 
-\paragraph{\texttt{cross\_street\_1/2} \& \texttt{intersection\_street\_1/2}}: These 
+\paragraph{\texttt{cross\_street\_1/2} \& \texttt{intersection\_street\_1/2}:} These 
 two sets of street pairs are used to help identify the 
 \texttt{incident address}. We found 88\% of both of these two 
-street pairs to be duplicates. Such a high leve of duplication 
+street pairs to be duplicates. Such a high level of duplication 
 raises the question of which field\mbox{-}pair should be trusted; 
 and if these street pairs are used differently, how should they be treated?
 It is possible that these two street pairs originated from different 
@@ -751,7 +779,7 @@ information, but no documentation exists to clarify this
 relationship. These two street\mbox{-}pairs are highly redundant.
 
 
-\subsection{Storage}
+\subsection{Reducing File Size}
 \label{sec:filesize}
 By removing duplicate and ``near\mbox{-}duplicate'' fields, it is possible to 
 shrink the file size by 39.5\%, which for this large dataset equates to 
@@ -761,7 +789,7 @@ simpler data analysis efforts. Below is a list of duplicate
 and near\mbox{-}duplicate fields which we believe could be
 removed from the dataset with minimal data loss. 
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item \textbf{\texttt{agency\_name}}: Since each row contains the \texttt{agency} 
     field, which uses clear and well understood abbreviations, we believe the
     \texttt{agency\_name} can be removed with minimal data loss.
@@ -784,12 +812,12 @@ due to their sparse data population. This especially applies to the fields below
 which are predominantly used by the TLC and are 99\% (or greater) blank.
 
 \begin{quote}
-\textbf{Note:} \textit{Even a field that is 99\% blank still contains 64,000 
+\textbf{Note:} \textit{Even a field that is 99\% blank will contain 64,000 
 non\mbox{-}blank rows in this large (6.4 million row) 
 dataset.} Non\mbox{-}trivial.
 \end{quote}
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item \texttt{taxi\_company\_borough}
     \item \texttt{road\_ramp}
     \item \texttt{vehicle\_type}
@@ -823,7 +851,7 @@ The \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-
 discrepancies between the Data Dictionary and the actual data, which 
 could potentially mislead analytic efforts. Here are some examples:
 
-\begin{itemize}
+\begin{itemize}[left=1.5em]
     \item While the NYC Open Data portal lists the data types of various 
     fields, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} does not. Nor does it provide details for specific fields such as constraints or the domain of legal 
     values. For example, in the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, the \texttt{incident\_zip} 
