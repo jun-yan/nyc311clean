@@ -20,8 +20,8 @@ cat("\nExecution begins at:", formattedStartTime)
 #########################################################################
 
 # Set path for the data file
-#main_data_file <- "10-year 2014-2023.csv"
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "10-year 2014-2023.csv"
+#main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"

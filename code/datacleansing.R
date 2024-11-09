@@ -30,6 +30,9 @@ main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
+# Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
+max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
@@ -42,9 +45,6 @@ setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
 # Set path for the data file
 data1File <- file.path("..", "..", "data", main_data_file)
-
-# Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
 
 chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "core charts")
 
@@ -62,7 +62,6 @@ lapply(files, source)
 # Set scipen option to a large value
 options(scipen = 10)
 
-
 sink("../../console_output/core_console_output.txt")
 #sink("../../console_output/2024_console_output.txt")
 
@@ -71,7 +70,6 @@ cat("\n***** Program initialization *****")
 
 options(digits = 14) # Set the number of decimal places to 14
 
-#########################################################################
 #########################################################################
 # File contains column names in the "header" line.
 # The R "read.csv" function uses a "." to replace the spaces in column names.
@@ -95,7 +93,6 @@ USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
-#num_zipcode_rows <- nrow(USPSzipcodesOnly)
 
 #########################################################################
 # Load the USPS zipcode file
@@ -109,7 +106,6 @@ USPSabbreviations <-
 # USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
-#num_abbreviaton_row <- nrow(USPSabbreviations)
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -289,66 +285,9 @@ missingDataPerColumn <- missingDataPerColumn[order(missingDataPerColumn$total_em
 cat("\nNumber and % blanks and N/A (total empty) entries per column:\n")
 print(missingDataPerColumn, row.names = FALSE, right = FALSE)
 
-# Determine the parameters for the chart
-#max_count <- max(missingDataPerColumn$blanks)
-#total_count <- sum(missingDataPerColumn$count)
-
 # Sort 'field' by 'total_empty' descending
 missingDataPerColumn <- missingDataPerColumn %>%
   mutate(field = reorder(field, -total_empty))
-# 
-# # Create the bar chart with vertical X-axis labels
-# blank_chart <- ggplot(
-#   
-#   missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
-#   
-#   geom_bar(stat = "identity", fill = "#009E73") +
-#   
-#   theme(
-#     axis.title.x = element_text(vjust = 0, size = 8),
-#     axis.title.y = element_text(vjust = 1, size = 8),
-#     plot.title = element_text(hjust = 0.5, size = 13),
-#     plot.subtitle = element_text(size = 7),
-#     panel.background = element_rect(fill = "gray95", color = "gray95"),
-#     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold"),
-#     axis.text.y = element_text(face = "bold"),
-#     legend.position = "none", # Remove all legends
-#     aspect.ratio = 0.618033 # Set aspect ratio
-#   ) +
-#   
-#   geom_text(aes(
-#     x = field, y = total_empty, label = pct_empty,
-#     angle = -70
-#   ), size = 2.3, color = "black") +
-#   
-#   ggtitle(NULL,
-#     subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = "")
-#   ) +
-#   
-#   labs(y = NULL, x = NULL)
-# 
-# # Build the plot to extract y-axis breaks
-# built_plot <- ggplot_build(blank_chart)
-# 
-# # Extract Y-axis breaks (try different possible locations)
-# y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
-# # Filter out any NA values from y_breaks
-# y_breaks <- y_breaks[!is.na(y_breaks)]
-# 
-# # Add hlines using the Y-axis breaks
-# blank_chart <- blank_chart +
-#   geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
-# 
-# # Print the bar chart
-# print(blank_chart)
-# 
-# # Set desired width
-# chart_width <- 10
-# chart_height <- chart_width / 1.618 # Golden Ratio for height
-# 
-# # Save the chart with the Golden Ratio aspect ratio
-# chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
-# ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
 
 # Create the bar chart with vertical X-axis labels
 blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty), y = total_empty)) +
@@ -404,13 +343,11 @@ chart_height <- chart_width / 1.3 # Golden Ratio for height
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
 
-
 #########################################################################
 
 cat("\n\n**********COMPLAINT TYPES**********\n")
 
 #########################################################################
-
 # Calculate complaint frequency and responsible agency
 complaintData <- as.data.frame(table(d311$complaint_type))
 complaintData <- complaintData[order(-complaintData$Freq), ]
@@ -495,19 +432,6 @@ create_combo_chart(
 colnames(d311)[colnames(d311) == "agency"] <- "complaint_type"
 colnames(d311)[colnames(d311) == "temp_agency"] <- "agency"
 
-
-# # Determine top responsible Agency for each complaint_type
-# top_agencies_per_complaint <- d311 %>%
-#   group_by(complaint_type, agency) %>%
-#   summarise(count = n(), .groups = "drop") %>%
-#   arrange(complaint_type, desc(count)) %>%
-#   group_by(complaint_type) %>%
-#   slice_head(n = 5)  # Select the top 5 agencies per complaint type
-# 
-# # View the results
-# print(top_agencies_per_complaint, n= 250)
-
-
 #########################################################################
 # Determine status of SRs
 sortedStatus <- as.data.frame(table(d311$status))
@@ -565,7 +489,6 @@ if (num_row_invalid_incident_zip_rows == 0) {
 
 #########################################################################
 # determine if various fields are numeric values
-
 x_coordinateNum <- areAllNumbers(d311$x_coordinate_state_plane)
 cat(
   "\n\nAre all values in 'x_coordinate_state_plane' numbers?",
@@ -1270,172 +1193,9 @@ if (!is.null(nonMatching_taxi_company_borough)) {
 
 #########################################################################
 
-# cat("\n\n\n**********CASE STUDY: ANALYZING RESPONSE TIMES FOR HOMELSS PERSON ASSISTANCE.**********\n")
-# 
-# #########################################################################
-# 
-# homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
-#   !is.na(d311$duration), ]
-# duration_mean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-# duration_sd <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-# duration_median <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-# 
-# cat("\nThere are", nrow(homeless_assistance_SRs), "SRs characterized as Homeless Person Assistance.")
-# cat("\n\nAvg response time (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean, "days")
-# cat("\nStd deviation for (raw data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd, "days")
-# cat("\nMedian response time (raw data) for 'HOMELESS PERSON ASSISTANCE':   ",
-#   duration_median, " days (", 24 * duration_median, " hrs)",
-#   sep = ""
-# )
-# 
-# negative_homeless_assistance_SRs <- homeless_assistance_SRs[homeless_assistance_SRs$duration < 0 &
-#   !is.na(homeless_assistance_SRs$duration), ]
-# num_row_neg_duration <- nrow(negative_homeless_assistance_SRs)
-# 
-# if (num_row_neg_duration > 0) {
-#   cat("\n\n***Removing", num_row_neg_duration, "SRs with extreme negative durations.***\n")
-# 
-#   homeless_assistance_SRs <- d311[d311$complaint_type == "HOMELESS PERSON ASSISTANCE" &
-#     !is.na(d311$duration) & d311$duration > 0, ]
-#   num_rows_cleaned <- nrow(homeless_assistance_SRs)
-# 
-#   duration_mean_clean <- round(mean(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-#   duration_sd_clean <- round(sd(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-#   duration_median_clean <- round(median(homeless_assistance_SRs$duration, na.rm = TRUE), 2)
-# 
-#   cat("\nAvg response time (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_mean_clean, "days")
-#   cat("\nStd deviation for (cleaned data) for 'HOMELESS PERSON ASSISTANCE':", duration_sd_clean, "days")
-#   cat("\nMedian response time (cleaned data)  'HOMELESS PERSON ASSISTANCE': ",
-#     duration_median_clean, " days (", duration_median_clean * 24, " hrs)",
-#     sep = ""
-#   )
-#   cat("\n\nThe maximum response time for this study is:", round(max(homeless_assistance_SRs$duration, na.rm = TRUE), 0), "days")
-# 
-#   homeless_violin_chart <- create_violin_chart(
-#     dataset = homeless_assistance_SRs,
-#     x_axis_title = "Response time (days)",
-#     x_axis_field = "duration",
-#     chart_title = "Response time for 'Homeless Person Assistance (cleaned data)' SRs",
-#     chart_file_name = "homeless_response_time_clean_violin.pdf"
-#   )
-# } else {
-#   cat("\n\nThere are no negative duration Homeless Person Assistance SRs to remove.")
-# }
-
-#########################################################################
-
 cat("\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********\n")
 
-# #########################################################################
-# # Normalize street names
-# address_fields <- c(
-# #  "intersection_street_1", "intersection_street_2",
-# #  "cross_street_1", "cross_street_2",
-# 
-#     "street_name", "landmark", "taxi_pick_up_location"
-# )
-# 
-# # **********************
-# # Apply normal_address function to each column in address_fields
-# 
-# d311[address_fields] <- lapply(d311[address_fields], normal_address,
-#   abbs = USPSabbreviations, na = NULL, punct = " ", abb_end = FALSE
-# )
-# 
-# # Define replacement dictionaries
-# replacement_list <- list(
-#   "First" = "1", "Second" = "2", "Third" = "3", "Fourth" = "4",
-#   "Fifth" = "5", "Sixth" = "6", "Seventh" = "7", "Eighth" = "8",
-#   "Ninth" = "9", "Tenth" = "10", "Eleventh" = "11", "Twelfth" = "12",
-#   "AVE OF THE AMERICAS" = "6 AVE",
-#   "FREDERICK DOUGLASS BLVD" = "8 AVE",
-#   "ADAM CLAYTON POWELL JR BLVD" = "7 AVE",
-#   "MALCOLM X BLVD" = "LENOX AVE",
-#   "BEVERLEY RD" = "BEVERLY RD",
-#   "EAST GUN HL RD" = "EAST GUNHILL RD",
-#   "MAC DOUGAL ST" = "MACDONOUGH ST"
-# )
-# 
-#   # "SHR FRONT PKWY" = "SHOREFRONT PKWY",
-#   # "OCEAN VW AVE" = "OCEANVIEW AVE",
-#   # "DOUGLASS ST" = "DOUGLAS ST",
-#   # "OLD FULTON ST" = "CADMAN PLZ WEST",
-#   # "JFK" = "JOHN F KENNEDY AIRPORT",
-#   # "CATHEDRAL PKWY" = "WEST 110 ST",
-#   # "ANDREWS AVE SOUTH" = "ANDREWS AVE",
-#   # "PARKHILL AVE" = "PARK HILL AVE",
-#   # "MC KINLEY AVE" = "MCKINLEY AVE",
-#   # "LORING PLACE SOUTH" = "LORING PLACE",
-#   # "SAINT NICHOLAS AVE" = "ST NICHOLAS AVE",
-#   # "MALCOM X BLVD" = "LENOX BLVD",
-#   # "ADAM CLAYTON POWELL BLVD" = "7 AVE",
-#   # "MSGR MCGOLRICK PARK" = "MONSIGNOR MCGOLRICK PARK",
-#   # "DUKE ELLINGTON BLVD" = "WEST 106 ST",
-#   # "LA GUARDIA AIRPORT" = "LAGUARDIA AIRPORT",
-#   # "KENMORE PLACE" = "EAST 21 ST",
-#   # "GRAND CENTRAL PKWY SR NORTH" = "GRAND CENTRAL PKWY",
-#   # "SAINT MARKS AVE" = "ST MARKS AVE",
-#   # "BLEEKER ST" = "BLEECKER ST",
-#   # "MC KEEVER PLACE" = "MCKEEVER PLACE",
-#   # "WHITEPLAINS RD" = "WHITE PLNS RD",
-#   # "FREDERICK DOUGLAS BLVD" = "8 AVE",
-#   # "THOMAS BOYLAND ST" = "THOMAS S BOYLAND ST",
-#   # "GRAND CENTRAL PKWY SR WEST" = "GRAND CENTRAL PKWY",
-#   # "CROSSBAY BLVD" = "CROSS BAY BLVD",
-#   # "HUTCHINSON RIV PKWY EAST" = "HUTCHINSON RIV PKWY",
-#   # "SAINT JOHNS PLACE" = "ST JOHNS PLACE",
-#   # "VAN WYCK EXPY SR EAST" = "VAN WYCK EXPY",
-#   # "FREDRICK DOUGLAS BLVD" = "8 AVE",
-#   # "PENNSYLVANIA STA" = "PENN STA",
-#   # "EDGECOMB AVE" = "EDGECOMBE AVE",
-#   # "BAYRIDGE PKWY" = "BAY RIDGE PKWY",
-#   # "BAYRIDGE AVE" = "BAY RIDGE PKWY",
-#   # "GRANDCONCOURSE" = "GRAND CONCOURSE",
-#   # "SPRUCE AVE" = "SPRUCE ST",
-#   # "ST MARY S AVE" = "ST MARYS AVE",
-#   # "SEDGEWICK AVE" = "SEDGWICK AVE",
-#   # "COURTLAND AVE" = "COURTLANDT AVE",
-#   # "THE BATTERY" = "BATTERY PARK",
-#   # "LGA" = "LAGUARDIA AIRPORT",
-#   # "DEREIMER AVE" = "DE REIMER AVE",
-#   # "ST ANN S AVE" = "ST ANNS AVE",
-#   # "FT GRN PLACE" = "FT GREENE PLACE",
-#   # "SHEPHARD AVE" = "SHEPHERD AVE",
-#   # "CASTLEHILL AVE" = "CASTLE HL AVE",
-#   # "SAINT ANDREWS PLACE" = "ST ANDREWS PLACE",
-#   # "JFK AIRPORT" = "JOHN F KENNEDY AIRPORT",
-#   # "SAINT EDWARDS ST" = "ST EDWARDS ST",
-#   # "HORACE HARDING EXPRE" = "HORACE HARDING EXPY",
-#   # "DR MARTIN LUTHER KING JR BLVD" = "125 ST",
-#   # "FRANKLIN D ROOSEVELT" = "FDR", 
-#   # "DESOTA RD" = "DE SOTA RD",
-#   # "LENOX BLVD" = "LENOX AVE",
-#   # "MACDOUGAL ST" = "MACDONOUGH",
-#   # "BAY RDG AVE" = "BAY RIDGE PKWY",
-#   # "BAY RDG PKWY" = "BAY RIDGE PKWY",
-#   # "MCDOUGAL ST" = "MACDONOUGH",
-#   # "VAN WYCK EXPY SR WEST" = "VAN WYCK EXPY",
-#   # "ASTORIA BLVD NORTH" = "ASTORIA BLVD"
-#   # 
-#   # 
-#   # 
-# #)
-# 
-# # Apply normalization functions to each column in address_fields
-# for (field in address_fields) {
-#   if (field %in% names(d311)) {
-#     cat("\nProcessing column:", field, "\n")
-# 
-#     # Apply normalize_street
-#     d311[[field]] <- normalize_street(d311[[field]], replacement_list )
-# 
-#   } else {
-#     cat("\nWarning:", field, "not found in d311 dataset.\n")
-#   }
-# }
-
-# **********************
-
+#########################################################################
 cross_street <- "street_name"
 intersection_street <- "landmark"
 z1 <- cross_street_analysis(d311, cross_street, intersection_street)
@@ -1518,4 +1278,7 @@ cat("\nExecution ends at:", formatted_end_time)
 cat("\n\nProgram run-time: ", round(duration, 4), units, "\n")
 
 #########################################################################
+
 cat("\n *****END OF PROGRAM*****")
+
+#########################################################################
