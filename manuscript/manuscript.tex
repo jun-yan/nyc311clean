@@ -103,6 +103,12 @@ the ongoing utility of open data.
 \section{Introduction} 
 \label{sec:intro}
 
+\jy{Need to avoid url links in the text. Could cite some as references
+  if needed.}
+
+\jy{No need for \mbox{-} in text.  one - is a hyphen; two -- is
+  en-dash;   three --- is an em-dash.}
+
 In the early 21st century, the open data movement began 
 to take shape, driven by the fundamental belief that 
 freely accessible data can transform both societies and 
@@ -632,6 +638,10 @@ of these negative durations (some <$-$300 days) is troubling
 and can produce bizarre analytical results such as greatly 
 distorting the mean response time for a specific complaint category.
 
+\jy{Figures 4-6 seems taking more spaces than necessary. Fig 4 and 6
+  could be on one with ggplot facet. Figure 5 too. Both using two
+  panels on one row.}
+
 \begin{figure}[tbp]
 	 \centering
  	 \includegraphics[width=\textwidth]{negative_duration_SR_violin.pdf}
@@ -651,7 +661,7 @@ errors occur.
    \label{tab:largest-errors}
  	\begin{tabular}{l l l r l}
     \toprule
-    \texttt{created\_date} & \texttt{closed\_date} & Duration (days)}  & {Agency} \\
+    \texttt{created\_date} & \texttt{closed\_date} & {Duration (days)}  & {Agency} \\
     \midrule
     2023-01-27 14:40:00 & 2022-01-14 14:40:00 & $-$378 & DOT \\
     2023-01-18 10:06:00 & 2022-01-12 10:06:00 & $-$371 & DOT \\
@@ -752,7 +762,7 @@ An question of precision vs. accuracy arises with the \texttt{latitude}
 and \texttt{longitude} fields. as well as with the duplicative 
 \texttt{location} field. These fields are expressed as
 \jy{This is a artifact of R reading them in as doubles. Single
-  precision should be sufficient as illustrated in my Chance manuscript.}
+  precision should be sufficient as illustrated in \citet{bates2024csv}.}
 a 14\mbox{-}decimal number, e.g. \texttt{latitude} 40.86769186022511. 
 Given that 1 degree of latitude at the equator is equal to 111.04 
 kilometers, the ``1'' at the end of the decimal number represents 
@@ -882,10 +892,15 @@ categorical inputs prevents the inclusion of misspellings
 or unrecognized/invalid entries, ensuring cleaner, more reliable 
 data. This approach is particularly useful in large datasets, where 
 frequently repeated text\mbox{-}based categorical variables can 
-significantly increase storage requirements. 
+significantly increase storage requirements.
+
+\jy{Could refer to cross-plotform data format such as Arrow
+  \citep{bates2024csv}.}
+
 
 \subsection{Data Dictionary} 
 \label{sec:datadictionary}
+
 The \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} would greatly benefit from an update. We found several discrepancies between the 
 Data Dictionary and the actual data, which could potentially 
 mislead analytic efforts. Here are some examples:
@@ -1127,7 +1142,7 @@ in machine learning models remains accurate, clean, and reliable
 
 \section*{Supplementary Material}
 The NYC 311 SR data and code used to produce the results reported in
-this paper are available [FixMe].
+this paper are available at \url{https://github.com/jun-yan/nyc311clean}.
 
 
 \bibliographystyle{jds}
