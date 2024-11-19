@@ -252,6 +252,8 @@ The impact of NYC 311 data extends beyond operational efficiency; it
 has become instrumental in shaping City governance and community
 engagement. Open data not only ensures governmental transparency
 but also empowers researchers, civic developers, and the general
+\jy{back up with some references:
+  \citep{minkoff2016nyc, o2017uncharted, kontokosta2021bias}}
 public. The data has been pivotal in providing advice on shelters
 during emergencies, handling inquiries during the COVID\mbox{-}19 pandemic,
 enforcing standards between landlords and tenants, reallocating taxi
@@ -260,10 +262,11 @@ and improving responsiveness across City Agencies.
 \jy{need to expand the importance of 311 SR data to the research
   community: such as
   resource allocation/response \citep{zha2014profiling, raj2021swift},
-  social equity \citep{kontokosta2021bias},
+  social equity \citep{white2018promises, kontokosta2021bias},
+  noise \citep{dove2022sounds},
   street flood \citep{agonafir2022understanding}, etc.}
   
-  
+
 
 Our investigation utilizes a 311 SR dataset covering  2\mbox{-}years (2022-2023).
 This sample was collected on 15 September 2024, and is used 
@@ -272,33 +275,34 @@ consistency, data validity, redundant fields, etc.. Instructions
 on downloading this file from the NYC Open Data Portal 
 are available in the supplemental material. Here are some 
 characteristics of the 311 SR dataset used in this analysis:
-
+\jy{need to clarify that we've made the column names to lower cases
+  and replaced spaces with underscores.}
 \begin{itemize}[left=1.5em]
-	\item The dataset is approximately 3.7 GB in size and contains 
-	over 6.4 million rows. It was exported as a CSV file.
+\item The dataset is approximately 3.7 GB in size and contains 
+  over 6.4 million rows. It was exported as a CSV file.
 
-	\item There are 41 columns of data for each row, with each
-	row representing a single Service Request (SR). 
+\item There are 41 columns of data for each row, with each
+  row representing a single Service Request (SR). 
 	
-	\item There are four date fields: \texttt{created\_date}, \texttt{closed\_date}, 
-	\texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}.
+\item There are four date fields: \texttt{created\_date}, \texttt{closed\_date}, 
+  \texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}.
 	
-	\item There are two borough fields; one of which appears to be a duplicate.
-		
-	\item There are seven street fields; two pair of which appear to be duplicates
+\item There are two borough fields; one of which appears to be a duplicate.
+  
+\item There are seven street fields; two pair of which appear to be duplicates
+          
+\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
+  \texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
+  Coordinate System, and \texttt{block} \textbf{\#}.
+  \jy{use raw names from the data for consistency.}
 	
-	\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
-
-	\texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
-	Coordinate System, and \texttt{block} \textbf{\#}.
-	
-	\item A free\mbox{-}form text field, \texttt{resolution\_description}, which 
-	supports 930 characters of input, including commas and 
-	special characters  which can be problematic for automated processing.
+\item A free\mbox{-}form text field, \texttt{resolution\_description}, which 
+  supports 930 characters of input, including commas and 
+  special characters  which can be problematic for automated processing.
 \end{itemize}
 
 
-During the 10\mbox{-}year period from 2014 to 2023,  NYC's 311 system
+During the 10-year period from 2014 to 2023,  NYC's 311 system
 experienced a 50\% increase in the number of SRs, 
 reflecting a growing public reliance on and usage of 
 the 311 system. (During this 10\mbox{-}year time-frame, the 
@@ -315,13 +319,16 @@ indicates sustained growth in SR volume in future years,
 highlighting the system's expanding role in managing 
 both routine City operations and extraordinary events.
 
+
+\jy{Remove the text above each figure. They should be included in the
+  caption.}
+
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 the responsible Agency, showing the cumulative 
 percentage of SRs handled by each
 agency over the 2\mbox{-}year time-frame. Note that the
 distribution of SRs is heavily concentrated among a few key 
 agencies. The six largest agencies are:
-
 \begin{enumerate}[left=1.5em]
     \item New York Police Department (NYPD): 43\% of all SRs
     \item Housing Preservation and Development (HPD): 21\%
@@ -330,6 +337,7 @@ agencies. The six largest agencies are:
     \item Department of Environmental Protection (DEP): 5\%
     \item Department of Parks and Recreation (DPR): 4\%
 \end{enumerate}
+
 
 Collectively these six City Agencies handle over 90\% of the total SR 
 volume, indicative of the critical role these Agencies play in managing
@@ -511,6 +519,8 @@ blank (or N/A values) they appear to divide into three groups:
 
 The \textit{Mostly Empty} category includes fields such as
 \texttt{taxi\_company\_borough}, \texttt{due\_date},
+\jy{These variables seem only relevant to certain agencies, which
+  could be made available in a separate table.}
 \texttt{road\_ramp}, and \texttt{bridge\_highway\_name}.
 The \textit{Partially Empty} category includes fields such as
 \texttt{location\_type}, \texttt{landmark}, 
@@ -581,6 +591,7 @@ an automated process would normally exclude, including:
 \begin{itemize}[left=1.5em]
     \item SRs with a \texttt{closed\_date} that occurs before the 
     \texttt{created\_date} resulting a nonsensical ``negative duration''. (12,450)
+\jy{what's the number in the parentheses?}
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
     the far distant past, e.g. ``1900-01-01''. (8)
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} that 
@@ -640,7 +651,7 @@ errors occur.
    \label{tab:largest-errors}
  	\begin{tabular}{l l l r l}
     \toprule
-    {created\_date} & {closed\_date} & {duration (days)}  & {agency} \\
+    \texttt{created\_date} & \texttt{closed\_date} & Duration (days)}  & {Agency} \\
     \midrule
     2023-01-27 14:40:00 & 2022-01-14 14:40:00 & $-$378 & DOT \\
     2023-01-18 10:06:00 & 2022-01-12 10:06:00 & $-$371 & DOT \\
@@ -654,7 +665,7 @@ errors occur.
 \paragraph{Identical Created \& Closed Dates (Zero Durations):}
 A more prevalent issue occurs when the \texttt{closed\_date} and 
 \texttt{created\_date} have exactly the same date\mbox{-}time stamp, 
-to the second. This creates a \textbf{zero duration} for the 
+to the second. This creates a \emph{zero duration} for the 
 SR, which is nonsensical. There are 163,720 such zero duration 
 SRs, representing 2.6\% of all non\mbox{-}blank data. 
 Additionally, 99\% percent of these zero duration SRs 
