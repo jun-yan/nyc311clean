@@ -66,7 +66,7 @@ York City 311 Service Request Data}
  \listoffigures % List of Figures
  \listoftables % List of Tables
 
-\hyphenpenalty=900
+\hyphenpenalty=950
 
 \begin{abstract}
 In the early 21st century, the open data movement began to transform 
@@ -74,10 +74,10 @@ societies and governments by promoting transparency,
 innovation, and public engagement. The City of New York (NYC) has been at
 the forefront of this movement since the enactment of the Open 
 Data Law in 2012, leading to the creation of the NYC Open Data
-portal. This portal now hosts 2,700 datasets from 80 city agencies,
+portal. This portal currently hosts 2,700 datasets,
 serving as a crucial resource for research across various domains, 
 including health, urban development, and transportation. The 
-success of these initiatives highlights the importance of data 
+success of this initiative highlights the importance of data 
 curation in ensuring the utility and reliability of open datasets.
 
 
@@ -115,7 +115,7 @@ governments. This movement champions the principles
 of transparency, innovation, and public engagement. 
 A landmark in this journey was the launch of the United States'
 \href{https://www.data.gov}{Data.gov} portal in 2009, a pioneering
-platform in making government data widely accessible. Shortly after,
+platform in making government data widely accessible. Shortly afterwards,
 the European Union followed suit, unveiling its
 \href{https://data.europa.eu/euodp}{Open Data Portal} in 2012, further
 cementing the movement's global reach. Furthermore, the World Bank's Open
@@ -123,7 +123,7 @@ Data initiative, initiated in 2010, stands out as a comprehensive
 repository for global development data, available at
 \href{https://data.worldbank.org}{World Bank Open Data}. 
 These initiatives represent significant strides in democratizing data, 
-breaking down barriers that once kept valuable information 
+removing barriers that once kept valuable information 
 regarding government performance in silos. Their collective impact 
 extends beyond mere data sharing to fostering a culture of openness 
 that benefits individuals, communities, governments, and economies worldwide 
@@ -135,17 +135,17 @@ marked by the enactment of the Open Data Law in 2012
 \citep{zuiderwijk2014open}. This landmark legislation led to the
 creation of the \href{https://opendata.cityofnewyork.us}{NYC Open Data
   portal}, which today hosts an impressive array of 2,700 datasets
-from 80 different city agencies. This resource has become invaluable
+across 80 different city agencies. This resource has become invaluable
 for researchers across various fields and has significantly enhanced
 local government transparency. Popular datasets include information on
 restaurant health inspection violations, car crashes, high school and
 college enrollment statistics, jail inmate charges, and the location
-of city\mbox{-}wide free Internet access points. These datasets have been
+of City\mbox{-}wide free Internet access points. These datasets have been
 applied in civil life in various ways, such as mapping car crashes
 involving pedestrians and visualizing high school and college
 enrollment trends. Furthermore, they have enabled significant research
-across multiple domains, including health \citep{cantor2018facets,
-  shankar2021data}, urban development \citep{neves2020impacts}, and
+across multiple domains, including health \citep{cantor2018facets, 
+shankar2021data}, urban development \citep{neves2020impacts}, and
 transportation \citep{gerte2019understanding}, aiding in the
 understanding and addressing of complex urban challenges.
 
@@ -160,7 +160,7 @@ require high\mbox{-}quality data to produce reliable insights
 data curation is data cleaning, which involves identifying and rectifying 
 inconsistencies, errors, and inaccuracies in datasets. While open data 
 initiatives have made vast amounts of data available, ensuring the 
-reliability of such data hinges on rigorous data cleaning processes. 
+reliability and utility of such data hinges on rigorous data cleaning processes. 
 Efficient usage of software tools can significantly streamline this 
 aspect of curation \citep[e.g.,][]{cody2017cody, van2018statistical}. Poor 
 curation may result in issues such as missing data, formatting errors, 
@@ -207,7 +207,7 @@ Section~\ref{sec:issues} delves into specific data cleansing
 challenges affecting data quality and curation efficiency, 
 including structural problems, adherence to the data dictionary, 
 and the presence of missing, blank, or N/A entries. This section
- also investigates field compliance with reference or acceptable values, 
+ also investigates data field compliance with reference or acceptable values, 
 highlights logical inconsistencies, and examines some concerning patterns 
 in the data. We explore the balance between precision and accuracy 
 and identify duplicate or redundant fields, along with observations 
@@ -219,7 +219,7 @@ while Section~\ref{sec:discussion} encapsulates key insights and
 discusses the broader implications of our findings.
 
 
-\section{NYC 311 SR Data} 
+\section{NYC 311 Service Request (SR) Data} 
 \label{sec:data}
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
@@ -230,67 +230,72 @@ maintenance requests. Initially a phone\mbox{-}based call center, the system
 evolved into a comprehensive data management platform handling
 millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile app channels in 2009, a
-record high of 348,463 monthly service requests in August 2020 due to
-the COVID\mbox{-}19 pandemic, the 2021 expansion to include the MTA's city
-subway system (the biggest expansion in their history), and a 
-record 3.23 million service requests in 2023. 
+record high of 348,463 monthly service requests in August 2020 associated 
+with the the COVID\mbox{-}19 pandemic, the 2021 expansion 
+to include the MTA's city subway system (the biggest 
+expansion in 311  history), and a record 3.23 million 
+service requests in 2023. 
 
 Today, the NYC 311 data system manages over 3 million service
 requests (SRs) per year. This data is publicly accessible through the NYC Open Data
 Portal, which provides tools for querying, grouping, aggregating,
 geo\mbox{-}mapping, visualizing, and exporting results. The
-\href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology
-  and Innovation (OTI)}, provides technological support for the
-open data system and data portal. Input data for the 311 system 
-is sourced from 17 different NYC Agencies. Some of these Agencies
+\href{https://www.nyc.gov/content/oti/pages/}{NYC Office of Technology 
+and Innovation (OTI)}, provides technical support for 
+the 311 application, the open data infrastructure, mobile \& web applications, 
+and the public\mbox{-}facing data portal. Input data for the 311 system 
+is sourced from 16 different NYC Agencies. Some of these Agencies
 utilize the core 311 software, while others transfer data to the
-311 Open Data Warehouse from in\mbox{-}house systems.
+311 Open Data Warehouse from their in\mbox{-}house systems.
 
 
 The impact of NYC 311 data extends beyond operational efficiency; it
-has become instrumental in shaping ity governance and community
-engagement. This open data not only ensures governmental transparency
+has become instrumental in shaping City governance and community
+engagement. Open data not only ensures governmental transparency
 but also empowers researchers, civic developers, and the general
 public. The data has been pivotal in providing advice on shelters
 during emergencies, handling inquiries during the COVID\mbox{-}19 pandemic,
 enforcing standards between landlords and tenants, reallocating taxi
 routes based on analyses by the Taxi and Limousine Commission (TLC),
-and improving responsiveness across City Agencies
+and improving responsiveness across City Agencies.
 
 
-Our investigation utilizes an SR dataset covering  2\mbox{-}years (2022-2023).
-This dataset is approximately 3.7 GB in size and contains over 
-6.4 million rows with each row representing one SR. It contains 
-41 columns of data and was collected on 15 September 2023. The 
-dataset is used to conduct detailed analysis 
-in areas such as data consistency, data validity, redundant fields, 
-etc.. Instructions on downloading this file from the 
-NYC Open Data Portal are available in the supplemental material.
-Here are some characteristics of the 311 SR data set:
+Our investigation utilizes a 311 SR dataset covering  2\mbox{-}years (2022-2023).
+ This sample was collected on 15 September 2024, and is used 
+ to conduct detailed analysis in areas such as data 
+ consistency, data validity, redundant fields, etc.. Instructions 
+ on downloading this file from the NYC Open Data Portal 
+ are available in the supplemental material. Here are some 
+ characteristics of the 311 SR dataset used in this analysis:
 
 \begin{itemize}[left=1.5em]
-	\item There are 41 columns of data for each row, exportable as a CSV file.
-	Each row represents a single Service Request (SR). 
+	\item The dataset is approximately 3.7 GB in size and contains 
+	over 6.4 million rows. It was exported as a CSV file.
+
+	\item There are 41 columns of data for each row, with each
+	row representing a single Service Request (SR). 
 	
-	\item There are four date fields 
-	(\texttt{created\_date}, \texttt{closed\_date}, \texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}).
+	\item There are four date fields: \texttt{created\_date}, \texttt{closed\_date}, 
+	\texttt{resolution\_action\_updated\_date}, \& \texttt{due\_date}.
 	
-	\item There are two borough fields; one of which appear to be a duplicate.
+	\item There are two borough fields; one of which appears to be a duplicate.
 		
 	\item There are seven street fields; two pair of which appear to be duplicates
 	
 	\item In addition to  \texttt{incident\_address}, there are five additional location fields: 
+
 	\texttt{latitude \& longitude}, \texttt{street\_name}, \texttt{landmark}, USGS State Plane 
-	Coordinate System, and \texttt{block} \#.
+	Coordinate System, and \texttt{block} \textbf{\#}.
 	
 	\item A free\mbox{-}form text field, \texttt{resolution\_description}, which 
-	supports 934 characters of input, including commas and special characters.
+	supports 930 characters of input, including commas and 
+	special characters  which can be problematic for automated processing.
 \end{itemize}
 
 
-During the 10\mbox{-}year period from 2014 to 2023,  311 experienced
-a 50\% increase in the number of Service Requests (SRs), 
-reflecting a growing public reliance and usage of 
+During the 10\mbox{-}year period from 2014 to 2023,  NYC's 311 system
+experienced a 50\% increase in the number of SRs, 
+reflecting a growing public reliance on and usage of 
 the 311 system. (During this 10\mbox{-}year time-frame, the 
 population of NYC grew just 0.6\%.). The most significant increase
 in activity occurred in 2020, when the volume of requests 
@@ -306,20 +311,20 @@ highlighting the system's expanding role in managing
 both routine City operations and extraordinary events.
 
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
-the responsible agency, showing the cumulative 
+the responsible Agency, showing the cumulative 
 percentage of SRs handled by each
-agency over a the 2\mbox{-}year time-frame. Note that the
+agency over the 2\mbox{-}year time-frame. Note that the
 distribution of SRs is heavily concentrated among a few key 
 agencies. The six largest agencies are:
 
-\begin{itemize}[left=1.5em]
+\begin{enumerate}[left=1.5em]
     \item New York Police Department (NYPD): 43\% of all SRs
     \item Housing Preservation and Development (HPD): 21\%
     \item New York City Department of Sanitation (DSNY): 10\%
     \item Department of Transportation (DOT): 7\%
     \item Department of Environmental Protection (DEP): 5\%
     \item Department of Parks and Recreation (DPR): 4\%
-\end{itemize}
+\end{enumerate}
 
 Collectively these six City Agencies handle over 90\% of the total SR 
 volume, indicative of the critical role these Agencies play in managing
@@ -328,32 +333,34 @@ sanitation and transportation problems. The remaining
 10\% of SRs is distributed across 10 additional Agencies. 
 This concentration of SRs to the ``big six'' Agencies 
 underscores the necessity for optimal data handling and 
-curation processes within these six high volume Agencies.
+curation processes within these  high volume Agencies.
 
 \begin{figure}[tbp]
 	\centering
 	\includegraphics[width = \textwidth]{SRs_by_Agency.pdf}
-  	\caption{SR counts by agency with Cumulative Percentage}
+  	\caption{SR Counts by Agency with Cumulative Percentage}
 	\label{fig:SRcountbyAgency}
 \end{figure}
 
-Figure~\ref{fig:SR_complaints}
-illustrates how the top 20 complaint types account for 70\% 
-of all SRs. Note that the distribution of complaints is skewed, 
+The dataset contains 210 different \texttt{complaint\_types}. 
+Figure~\ref{fig:SR_complaints} illustrates how the Top 20 
+\texttt{complaint\_type(s)} account for 70\% 
+of all SRs. The distribution of complaints is skewed, 
 with a small number of issues dominating total SR volume. 
-Of special interest are noise\mbox{-}related complaints, of which there are eight different
-types including residential, commercial, and 
-street noise. When combined noise\mbox{-}related SRs make up 22\% of all 
+Of special interest are noise\mbox{-}related complaints, of 
+which there are eight different types including vehicle, 
+residential, commercial, and street noise. When 
+combined, noise\mbox{-}related SRs make up 22\% of all 
 complaints; the most frequent issue in the NYC 311 system. 
 Other prominent categories include illegal parking, heat/hot water 
 complaints, and blocked driveways. The cumulative percentage curve 
-reveals that the top 20 complaint types comprise 70\% of SRs,
-while the remaining 190 complaint types are spread thinly 
+reveals that the Top 20 \texttt{complaint\_type(s)} comprise 70\% of SRs,
+while the remaining 190 other \texttt{complaint\_type(s)}  are spread thinly 
 across the remaining 30\%. This suggests that improving 
 responses to the most frequent complaints could have an 
 outsized impact on overall service efficiency and resident 
 satisfaction. This chart also provides insights into the 
-operational pressures faced by City Agencies 
+operational pressures faced by those City Agencies 
 responsible for handling these high-volume complaints.
 
 \begin{figure}[tbp]
@@ -389,7 +396,7 @@ data into machine learning models or other systems.
 
 
 Many quality criteria are employed to ensure high\mbox{-}quality data 
-processing. One of the primary efforts is data validation, which spans 
+processing. One of the primary efforts is data validation, which includes 
 several critical checks. For instance, mandatory fields must not be 
 left empty, ensuring that key information is always captured. 
 Additionally, certain fields must conform to specific data types, 
@@ -400,14 +407,14 @@ fields must adhere to a predefined set of
 values such as statuses, state names, or zip codes. Structural 
 errors can also play a significant role in data quality, particularly when 
 naming conventions or data entries are inconsistent. Common issues 
-include fields that do not appear in the Data Dictionary,  
-inconsistent use of data fields. Furthermore, redundant 
-or irrelevant fields can clutter datasets, reducing efficiency, 
+include fields that do not appear in the Data Dictionary and  
+inconsistent usage of data fields. Furthermore, redundant 
+(or irrelevant) fields can clutter datasets, reducing efficiency, 
 creating confusion, and introducing errors. Logical inconsistencies 
 are another consideration, such as related fields that violate expected 
 relationships, e.g. a ``due date'' that precedes the ``created date.'' 
 Lastly, the balance between accuracy and precision is crucial, as both 
-must be carefully managed to ensure meaningful data.
+must be managed to ensure meaningful data.
 
 
 We identify the presence of issues in the NYC 311 SR open dataset;
@@ -416,7 +423,7 @@ magnitude, and potential impact. We would recommend
 that a corrective solution should be undertaken only 
 after further investigation as to the why and how such 
 issues might come about, including  detailed discussions 
-with the originating agency as to whether or not it is an 
+with the originating agency as to whether or not the issue is an 
 actual error, correct,  or holds some other status.
 
 
@@ -431,7 +438,7 @@ data cleaning efforts. Here are three structural issues we encountered.
 \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} 
 identifies 41 data columns (fields) and provides related information 
 for each. However, there are six additional fields that can be
-optionally downloaded. These fields are 
+optionally downloaded if manually selected. These fields are 
 visible in the portal's ``Column manager'' widget, labeled with the prefix 
 ``@computed\_region.'' and include:
 
@@ -449,8 +456,8 @@ fields, uncertainty remains as to their derivation and
 usage. These six fields are not included in
 the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}. Additionally, 
 our analysis shows that these six ``computed'' fields have 
-significant data validity issues, leading us to treat these six fields 
-as experimental and \textit{not for suitable for public use}. An update 
+significant data validity issues, leading us to categorize these six fields 
+as experimental and \textit{not for public use}. An update 
 to the Data Dictionary would seem appropriate. Accordingly, 
 we will not address these fields in our analysis. 
 
@@ -461,25 +468,25 @@ representations of missing data: nulls, spaces, ``NA'', ``N/A'',
 and ``<NA>''. This variety of representations complicates programming
 efforts, and increases the likelihood of introducing errors 
 in data analysis (typically by search for or excluding missing fields 
-and not aware of the various representations). A more consistent 
+and not aware of the various representations of such). A more consistent 
 approach to treating missing data should be employed to address this issue.
 
 \paragraph{Challenges with daylight saving time (DST):} The 311 SR 
 dataset captures local NYC times. Accordingly, twice each 
 year there are changes to the local time as a result of observing 
-DST, and this can introduce some unexpected results. For example, 
-on March 13, 2022 and March 12, 2023 there are no times 
-between 1:59AM and 2:59AM: the 2:00AM hour on those dates 
+DST. This can introduce some unexpected results. For example, 
+on both March 13, 2022 and March 12, 2023 there are no times 
+between 1:59AM and 2:59AM. The 2:00AM hour on those dates 
 is simply missing owing to the clocks moving forward; at 2:00AM 
 it instantly becomes 3:00AM. This creates a gap in the hourly 
-distribution of SRs on those days, and it exaggerates the 
-lifespan of SRs, albeit by a single hour. Similarly on 
+distribution of SRs on those days, and exaggerates the 
+lifespan of SRs, albeit by a single hour. Similarly on both
 November 6, 2022 and November 5, 2023, the 
 hour of 1:00AM - 2:00AM is repeated twice. This can result 
 in a bizarre scenario where, for example, an SR can 
-be created at 1:59AM and then closed say 30 minutes later 
+be \textit{created} at 1:59AM and then be \textit{closed} 30 minutes later 
 at 1:29AM; seemingly nonsensical. Utilizing UTC time 
-for date\mbox{-}time stamps might help address this issue.
+for date\mbox{-}time stamps would help address this issue.
 
 
 \subsection{Missing Data by Field}
@@ -488,7 +495,7 @@ Understanding the absence of data by field is important
 when undertaking analysis. For example, if you wanted to 
 determine if SRs were closed before or after their
 \texttt{due\_date}, you would be challenged as 99.6\% of the
-\texttt{due\_date} field are blank. When sorting fields by
+\texttt{due\_date} fields are blank. When sorting fields by
 blank (or N/A values) they appear to divide into three groups:
 
 \begin{itemize}[left=1.5em]
@@ -507,8 +514,9 @@ category includes \texttt{created\_date}, \texttt{complaint\_type},
 \texttt{agency}, and \texttt{status}. For some analysis efforts, it may be
 prudent to inquire further as to why some fields are 
 mostly or almost always blank. Figure~\ref{fig:blank_fields} is 
-a graphic depiction of total empty (blank \& N/As) for each field illustrating
-the grouping into the Most, Partial, and Few categories.
+a graphic depiction of total empty (blank \& N/As) for each 
+field illustrating the grouping into 
+the \textbf{Most}, \textbf{Partial}, and \textbf{Few/None} categories.
 
 \begin{figure}[tbp]
 	\centering
@@ -521,9 +529,9 @@ the grouping into the Most, Partial, and Few categories.
 \subsection{Validating Data for Acceptable Values}
 \label{sec:domain}
 Any analytic effort must ensure that fields containing invalid values 
-are identified and isolated from the analysis. The \texttt{latitude} 
-and \texttt{longitude} fields were found to fall within the 
-geographic boundaries of New York City, and 
+are identified and isolated from the analysis. For example, the \texttt{latitude} 
+and \texttt{longitude} fields were found to all fall within the 
+geographic boundaries of New York City. Likewise, 
 the \texttt{unique\_key} field was indeed unique, as required. 
 Unfortunately, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} specifies very few domains of 
 acceptable values for other fields. Nonetheless, the following fields were tested and found to comply with their expected domains, as determined by public 
@@ -547,63 +555,66 @@ compliance with a domain of allowable values. These include:
 \label{sec:zipcodesissues}
 All \texttt{incident\_zip} zip codes should 
 validate against the USPS database, which contains 
-44,173 valid zip codes. And while the \texttt{incident\_zip} field has 
-only 0.07\% invalid entries, this still results in 4,374 errors; 
-not insignificant. If you group the invalid entries by 
-percentage by agency, it mirrors the \textit{overall} 
-breakdown of SRs by agency, potentially 
+44,173 valid zip codes. We discovered that the \texttt{incident\_zip} 
+field has 0.07\% invalid entries, resulting in 4,374 errors. This includes
+zip codes such as ``12345'', ``10000'', and ``99999'. If you group 
+the invalid zip code entries by percentage by agency, it 
+mirrors the \textit{overall} breakdown of SRs by Agency, potentially 
 indicating a systemic problem.
 
 
-\paragraph{Created and Closed Dates}
+\paragraph{Created and Closed Dates:}
 \label{sec:negativeduration}
 With the \texttt{created\_date} and \texttt{closed\_date} fields, one 
 might expect that these fields would be automatically populated by the  
-application software. Thus when updating an SR status to ``new'' or ``closed''
-the appropriate software should automatically populate those fields. 
+application software. Thus when creating  or closing an SR 
+the the software would automatically populate these fields. 
 Unfortunately, this does not seem to be the case, as several anomalies 
 exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
 an automated process would normally exclude, including:
 
 \begin{itemize}[left=1.5em]
     \item SRs with a \texttt{closed\_date} that occurs before the 
-    \texttt{created\_date} resulting a nonsensical ``negative duration''.
+    \texttt{created\_date} resulting a nonsensical ``negative duration''. (12,450)
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} in 
-    the far distant past, e.g. ``1900-01-01''.
+    the far distant past, e.g. ``1900-01-01''. (8)
     \item \texttt{created\_date(s)} and \texttt{closed\_date(s)} that 
-    match \textbf{to the second} creating an impossible ``zero duration''.
-    \item An unusually large number of SRs closed and/or created exactly at midnight 
-    and noon, to the second.
+    match \textbf{to the second} creating an impossible ``zero duration''. (163,720)
+    \item An unusually large number of SRs closed and/or created 
+    exactly at midnight, to the second. (247,000)
 \end{itemize}
 
 
-\paragraph{Closed before Created: Negative Duration}
+\paragraph{Closed before Created (Negative Duration):}
 Citizens, NYC Government Officials, and Agencies use the \texttt{created\_date}(s) and 
 \texttt{closed\_date}(s) to measure the \textit{duration} of SRs, 
 a useful surrogate to measure an agency's responsiveness. 
 While duration is not directly present in the dataset, 
-it can be easily computed as the difference between
-\texttt{(closed\_date} and \texttt{created\_date}.  Duration is one of 
-most frequently used 311metrics and is frequently analyzed, such as determining if 
-one NYC borough receives faster response than another for certain 
-complaints. There are 12,450 SRs where the \texttt{closed\_date} precedes the 
+it is easily computed as the difference between
+\texttt{closed\_date} and \texttt{created\_date}.  Duration is one of 
+most frequently used 311 performance metrics 
+and is frequently analyzed, such as determining if 
+one NYC borough receives faster Agency responses than 
+another borough for certain complaints. There are 
+12,450 SRs where the \texttt{closed\_date} precedes the 
 \texttt{created\_date}, generating nonsensical ``negative durations.'' 
 Although this represents only 0.2\% of the dataset, these errors can 
 significantly impact response time analyses. Eight SRs with extremely 
-large negative durations ($-$730 days), all originating from the 
+large negative durations, all originating from the 
 Department of Homeless Services (DHS); all contain an entry 
-of ``1900-01-01'' as the \texttt{closed\_date}. This results 
-in negative durations exceeding $-$44,601 days (or 122 years). Many
-other SRs have negative durations in excess of 300+ days. Such 
-anomalies, though rare, can significantly skew statistical results if 
-not addressed during data cleansing. As a result, these SR rows are 
-removed from the analysis. 
+of \textit{1900-01-01} as the \texttt{closed\_date}. This results 
+in very large negative durations exceeding $-$44,601 
+days (or 122 years). Many other SRs have negative durations 
+in excess of $-$300+ days. Such anomalies, though rare, can 
+significantly skew statistical results if not addressed during 
+data cleansing. Accordingly, these SR rows are removed from our analysis. 
 
-Excluding the extreme negative values ($-$730 days), 
+Excluding the extreme negative values (any that are <$-$730 days), 
 Figure~\ref{fig:negative-duration-violin} shows the broad spread of 
 negative duration SRs. While there are few outliers, the magnitude 
-of these negative durations (300 days) is troubling and can produce 
-bizarre and unwanted analytical results.
+of these negative durations (some <$-$300 days) is troubling 
+and can produce bizarre analytical results such as greatly 
+distorting the mean response time for a specific complaint category.
 
 \begin{figure}[tbp]
 	 \centering
@@ -620,7 +631,7 @@ errors occur.
 
 \begin{table}[tbp]
   \centering
-  \caption{Sample  negative durations [excluding extreme  values that are$-$730 days]}
+  \caption{Sample  Negative Durations [excluding extreme values that are <$-$730 days]}
    \label{tab:largest-errors}
  	\begin{tabular}{l l l r l}
     \toprule
@@ -635,27 +646,31 @@ errors occur.
     \end{tabular}
  \end{table}
 
-\paragraph{Identical Created Date \& Closed Date: Zero Durations}
+\paragraph{Identical Created \& Closed Dates (Zero Durations):}
 A more prevalent issue occurs when the \texttt{closed\_date} and 
-\texttt{created\_date} are exactly the same, to the second. This 
-creates a \textbf{zero duration} for the SR, which is nonsensical. There 
-are 163,720 zero duration SRs, representing 2.6\% of all non\mbox{-}blank data. 
-99\% percent of these zero duration SRs occur within five agencies:
-DHMH, DOT, DOB, DSNY, and DEP. This distribution \textbf{does not} 
+\texttt{created\_date} have exactly the same date\mbox{-}time stamp, 
+to the second. This creates a \textbf{zero duration} for the 
+SR, which is nonsensical. There are 163,720 such zero duration 
+SRs, representing 2.6\% of all non\mbox{-}blank data. 
+Additionally, 99\% percent of these zero duration SRs 
+occur within five agencies: Department of Health \& Mental 
+Hygiene (DHMH), DOT, Department of Buildings (DOB), DSNY, and 
+DEP. This distribution \textbf{does not} 
 mirror the overall SR distribution by agency, suggesting 
-an agency\mbox{-}specific issue.
+an Agency\mbox{-}specific issue.
 	
-\paragraph{Created Date or Closed Date(s) at Midnight or Noon}
+\paragraph{Created or Closed at Midnight:}
 Another issue involves the unusually large number of 
 SRs where the \texttt{created\_date} and \texttt{closed\_date} 
-indicate ``created'' or ``closed'' exactly at midnight (00:00:00) or 
-exactly at noon (12:00:00), down to the second. Normally, 
-SR creation and closure follows the work\mbox{-}day schedule, 
-with most SRs created during working hours and 
-fewer at night or in the early morning. However, there is a 
-significantly higher number of SRs closed exactly at midnight, 
-as well as a large number created exactly at midnight. The magnitude
-of this anomaly is well outside the 3$\sigma$ level. 
+indicate ``created'' or ``closed'' exactly at midnight (00:00:00), 
+to the second. Normally, SR creation and closure follows 
+the work\mbox{-}day schedule, with most SRs created 
+during working hours and fewer at night or in the 
+early morning. However, there is a significantly higher 
+number of SRs closed exactly at midnight, as well 
+as a large number created exactly at midnight. The magnitude 
+of this anomaly is well outside the 3$\sigma$ level as shown 
+in Figure~\ref{fig:stacked}
 
 \begin{figure}[tbp]
     \centering
@@ -678,30 +693,32 @@ of this anomaly is well outside the 3$\sigma$ level.
 
 These unusual patterns of SR creation and closure exactly at midnight 
 suggest the presence of a bulk create/close software process, perhaps one
-that automatically assigns time stamps of midnight (00:00:00) or noon 
-(12:00:00) to large batches of SRs prior to sending the data to the 311 
-system. This behavior distorts the calculated duration of these 
-SRs by providing inaccurate dates. The distribution by agency 
-shows that over 92\% of the ``closed-exactly-at-midnight'' 
-SRs come from just two Agencies: DOB (69\%) and DSNY  (23\%).
+that automatically assigns time stamps of midnight (00:00:00) to 
+large batches of SRs prior to sending the data to the 311 
+data warehouse. This behavior distorts the calculated duration of these 
+SRs as well as overall system usage by providing inaccurate 
+dates. Further analysis of the distribution by Agency shows that over 92\% of 
+the ``closed-exactly-at-midnight'' SRs come from just two 
+Agencies: DOB (69\%) and DSNY  (23\%).
 
 \paragraph{Resolution Action Update Date}
-A similar issue occurs when the \texttt{resolution\_action\_update\_date} 
-occurs well after the \texttt{closed\_date}.  When an SR is 
+A similar issue occurs when an SR is modified (and the \texttt{resolution\_action\_update\_date} is altered) well 
+after the \texttt{closed\_date}.  When an SR is 
 updated, the 311 software automatically populates the \texttt{resolution\_action\_update\_date}. While it is certainly 
 possible, and even routine, to update an SR after it is closed, 
-some of these updates seem to be well beyond any normal or expected 
-timeframe, with some ``updates'' occurring over 2 years 
-later. As shown in Figure~\ref{fig:resolution-violin}, there 
-are 10,265 SRs that were updated >30 days after the 
-\texttt{closed\_date} (Note: The chart excludes values >730 days, 
-an arbitrary cutoff to exclude infeasible dates such as ``1900-01-01''.)
- The chart highlights the distribution of these post-closure 
+some of these updates seem to be well beyond any 
+normal or expected timeframe, with some ``updates'' 
+occurring over 2 years later. As shown in Figure~\ref{fig:resolution-violin}, 
+there are 10,265 SRs that were updated >30 days after the 
+\texttt{closed\_date} (Not that Figure~\ref(fig:resolution-violin) excludes 
+values >730 days, an arbitrary cutoff to exclude 
+infeasible dates such as \textit{1900-01-01}. The chart 
+highlights the distribution of these post-closure 
  updates, with a notable concentration of updates occurring within 
-the 30\mbox{-}to\mbox{-}90 day range. This pattern raises 
+the 30\mbox{-}to\mbox{-}200 day range. This pattern raises 
 questions about whether such delayed updates are standard 
 operational practice or indicative of a potential issue 
-which might warrant further investigation. It should be noted
+which warrants further investigation. It should be noted
 that 84\% of these late updates are associated with the TLC agency
 and 12\% with DSNY.
 
@@ -713,18 +730,20 @@ and 12\% with DSNY.
 \end{figure}
 
 
-\subsection{Accuracy and precision}
+\subsection{Accuracy and Precision:}
 \label{sec:precision}
 An question of precision vs. accuracy arises with the \texttt{latitude} 
-and \texttt{longitude} fields. as well as the duplicative 
-field \texttt{location}. These fields are expressed as 
-a 14\mbox{-}decimal number, e.g. 40.86769186022511. Given 
-that 1 degree of latitude at the equator is equal to 111.04 
-kilometers, the ``1'' at the end of that number represents 
+and \texttt{longitude} fields. as well as with the duplicative 
+\texttt{location} field. These fields are expressed as 
+a 14\mbox{-}decimal number, e.g. \texttt{latitude} 40.86769186022511. 
+Given that 1 degree of latitude at the equator is equal to 111.04 
+kilometers, the ``1'' at the end of the decimal number represents 
 approximately 1.1 nanometers (1/1,000,000,000 of a meter). (For 
-reference a DNA molecule is approximately 2nm in width.) The 
+reference a DNA molecule is approximately 2 nanometers in width.) The 
 representation of the \texttt{latitude} and \texttt{longitude} fields
-appears to be a classic case of extreme precision, but limited accuracy. 
+appears to be a classic case of extreme precision, but limited 
+accuracy. All the \texttt{latitude}, \texttt{longitude}, and \texttt{location}
+fields display this characteristic. 
 
 
 \subsection{Redundant \& Duplicate fields}
@@ -735,10 +754,10 @@ be examined for possible consolidation.
 \paragraph{\texttt{latitude/longitude} \& \texttt{location}:} 
 The \texttt{location} field is a pure concatenation of 
 the \texttt{latitude} and \texttt{longitude} fields albeit with a 
-comma and parentheses added. This makes the \texttt{location} field 
-arguably harder to use than the individual fields. For example:  
-\texttt{latitude}: 40.768456429488, \texttt{longitude}: $-$73.9575661888774, 
-form the \texttt{location}: (40.768456429488, $-$73.95756618887745).
+comma and parentheses added. Arguably, this makes the \texttt{location} field 
+more difficult to use than the individual fields. For example:  
+\texttt{latitude}: ``40.768456429488'', \texttt{longitude}: ``$-$73.9575661888774'', 
+form the \texttt{location}: ``(40.768456429488, $-$73.9575661888774)''.
 
 \paragraph{\texttt{borough} \& \texttt{park\_borough}:} These two fields are fully redundant, 
 as they are 100\% matches.
@@ -755,28 +774,29 @@ quite different than that of \texttt{borough}.
 field contains the abbreviations of City agencies (e.g., NYPD, DOT, DSNY), 
 while \texttt{agency\_name} contains the full names. Including both seems 
 redundant, especially given the space taken up by full names in the 
-CSV file. Additionally, the agency abbreviations are easily recognized.
+CSV file and the fact that the agency abbreviations are 
+easily recognized and well understood.
 
 \paragraph{\texttt{landmark} \& \texttt{street\_name}:} Per the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, 
-the \texttt{landmark} field ``can refer to any noteworthy location, 
+the \texttt{landmark} field \textit{can refer to any noteworthy location, 
 including but not limited to, parks, hospitals, airports, sports facilities, 
-performance spaces, etc.'. However, most entries are actually 
+performance spaces, etc..} However, most entries are actually 
 street names, with a 62\% match to \texttt{street\_name} field. 
-Even the non\mbox{-}matches (excluding blanks) appear to be 
+Even many of the non\mbox{-}matches (excluding blanks) appear to be 
 a logical match, differing only in spelling or formatting 
 (e.g., ``NINTH AVE'' vs. ``9 AVE''). This indicates a possible 
 misuse of the \texttt{landmark} field as well as a high level of redundancy.
 
-\paragraph{\texttt{cross\_street\_1/2} \& \texttt{intersection\_street\_1/2}:} These 
-two sets of street pairs are used to help identify the 
+\paragraph{\texttt{cross\_street\_1 \& 2} \& \texttt{intersection\_street\_1 \& 2}:} These 
+two street pairs are used to help identify the 
 \texttt{incident address}. We found 88\% of both of these two 
-street pairs to be duplicates. Such a high level of duplication 
+street pairs ( 1 \& 2) to be duplicates. Such a high level of duplication 
 raises the question of which field\mbox{-}pair should be trusted; 
 and if these street pairs are used differently, how should they be treated?
 It is possible that these two street pairs originated from different 
 agencies that use different variable names to represent the same 
 information, but no documentation exists to clarify this 
-relationship. These two street\mbox{-}pairs are highly redundant.
+relationship. Nonetheless, these two street\mbox{-}pairs are highly redundant.
 
 
 \subsection{Reducing File Size}
@@ -802,7 +822,8 @@ removed from the dataset with minimal data loss.
     deleted without data loss.
      
     \item \textbf{\texttt{cross\_street\_1/2}} and \textbf{\texttt{intersection\_street\_1/2}}: 
-    These two street pairs both exhibit an 88\% match. We recommend deleting the 
+    These two street pairs both exhibit an 88\% match. While we cannot 
+    confirm the accuracy of either of these street pairs, we recommend deleting the 
     \texttt{intersection\_street\_1/2} fields while acknowledging 
     the concomitant data loss.
 \end{itemize}
@@ -812,9 +833,9 @@ due to their sparse data population. This especially applies to the fields below
 which are predominantly used by the TLC and are 99\% (or greater) blank.
 
 \begin{quote}
-\textbf{Note:} \textit{Even a field that is 99\% blank will contain 64,000 
-non\mbox{-}blank rows in this large (6.4 million row) 
-dataset.} Non\mbox{-}trivial.
+\textit{[We should note that even a field that is 99\% 
+blank will still contain 64,000 non\mbox{-}blank rows in this 
+large (6.4 million row) dataset.}; non\mbox{-}trivial.]
 \end{quote}
 
 \begin{itemize}[left=1.5em]
@@ -847,40 +868,40 @@ significantly increase storage requirements.
 
 \subsection{Data Dictionary} 
 \label{sec:datadictionary}
-The \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} would greatly benefit from an update. We found several 
-discrepancies between the Data Dictionary and the actual data, which 
-could potentially mislead analytic efforts. Here are some examples:
+The \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} would greatly benefit from an update. We found several discrepancies between the 
+Data Dictionary and the actual data, which could potentially 
+mislead analytic efforts. Here are some examples:
 
-\begin{itemize}[left=1.5em]
-    \item While the NYC Open Data portal lists the data types of various 
-    fields, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} does not. Nor does it provide details for specific fields such as constraints or the domain of legal 
-    values. For example, in the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, the \texttt{incident\_zip} 
-    field is specified as ``text.'' This may not be the most suitable 
-    definition. Perhaps ``categorical,'' with a note indicating that 
-    the data must contain only numeric values and is not subjected to 
-    arithmetic operations would be a better dictionary description.
-    
-    \item Many of the domains of legal values are incomplete or 
-    inaccurate. For example, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} indicates that the 
-    \texttt{status} field has values of \textit{assigned, canceled, 
-    closed}, or \textit{pending}. However, we found additional
-    values such as \textit{in progress, started}, and \textit{unspecified}. 
-    Additionally, no SRs were found with a status of \textit{canceled}. 
-    
-    \item The \texttt{address\_type} field similarly 
-    lists values of \textit{address, blockface, intersection, latlong}, 
-    and \textit{placename}. However, we found additional values such as 
-    \textit{bbl} and \textit{unrecognized}. Additionally, no \textit{latlong} 
-    values were observed. Other fields, such as \texttt{facility\_type}, 
-    \texttt{vehicle\_type}, \texttt{taxi\_pick\_up\_location}, 
-    \texttt{road\_ramp}, and \texttt{city}, exhibit similar inaccuracies 
-    in their specified domain values.
-    
-	\item As mentioned earlier, six \texttt{@computed} fields that are
-    present in the data but not included in the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} need
-    to be documented and perhaps labeled as ``experimental'' or
-    ``not for official use''.
-\end{itemize}
+\paragraph{Data typing:} While the NYC Open Data portal displays the data types of 
+various fields (aka ``columns''), the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} does 
+not. For example, in the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}, 
+the \texttt{incident\_zip} field is specified as ``text.'' This may 
+not be the most suitable data definition. Perhaps a better 
+dictionary description would be  ``categorical'' with a note 
+indicating that the data must contain only numeric values 
+and is not subjected to arithmetic operations.
+
+\paragraph{Domain of Legal Values:} Many of the data fields have
+domains of legal values that are missing, incomplete, or inaccurate. For 
+example, the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} indicates 
+that the \texttt{status} field takes on values of \textit{assigned, canceled, 
+closed}, or \textit{pending}. However, we observed additional values 
+such as \textit{in progress, started}, and \textit{unspecified}. Additionally, 
+no SRs were found with a status of \textit{canceled}. Similarly, 
+the Data Dictionary for the \texttt{address\_type} field lists as acceptable
+values \textit{address, blockface, intersection, latlong}, and 
+\textit{placename}. However, we found additional values such 
+as \textit{bbl} and \textit{unrecognized}. Additionally, no 
+\textit{latlong} values were observed. Other fields, such 
+as \texttt{facility\_type}, \texttt{vehicle\_type}, \texttt{taxi\_pick\_up\_location},
+texttt{road\_ramp}, and \texttt{city}, exhibit similar inaccuracies 
+in their specified domain values.
+
+\paragraph{Missing data fields:} As mentioned earlier, six \texttt{@computed} 
+fields that are present in the data but not included in 
+the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary} need
+to be documented and perhaps labeled as ``experimental'' 
+or ``not for official use''.
 
 
 \section{Government Open Data Curation Recommendations}
@@ -898,15 +919,15 @@ public services, research, and other applications.
 A key challenge in government released datasets is the 
 harmonization of data fields across various Agencies and 
 maintaining this consistency over time. To address this, agencies should adopt 
-standardized naming conventions and formats across all datasets. 
-Regular audits and data harmonization processes should be 
-implemented to ensure consistency across long\mbox{-}term datasets, 
-particularly as agency structures or reporting standards evolve. 
-For instance, ensuring that historical datasets reflect the same 
-field naming conventions over a span of years can prevent 
-inconsistent analyses. These standards should be promulgated 
-by the Open Data governing authority, following agreements 
-by the relevant parties.
+standardized naming conventions, value domains, usages, and 
+formats across all datasets. Regular audits and data harmonization 
+processes should be implemented to ensure consistency 
+across long\mbox{-}term datasets, particularly as agency structures 
+or reporting standards evolve. For instance, ensuring that 
+historical datasets reflect the same field naming conventions 
+over a span of years can prevent inconsistent analyses. 
+These standards should be promulgated by the Open Data 
+governing authority, following agreements by the relevant parties.
 
 \paragraph{Principle 2: Guaranteeing Accuracy and Validity during Data Entry}
 Data accuracy and validity are fundamental to the utility of 
@@ -920,11 +941,11 @@ ensuring data entries are accurate and valid. Some examples include:
 
 \begin{itemize}[left=1.5em]
     \item Certain date fields should be promulgated by the software
-    system versus manual entry. Certain dates should be populate 
+    system versus manual entry. Critical dates should be populated
     based upon an action in the system, such as a change in status. 
        
     \item Select fields should be subjected to automated checks 
-    that prevent logical errors, such as closing opening. 
+    that prevent logical errors, such as closing and opening. 
     
     \item A number of fields have clearly defined domains of legal
     values. These fields should be validated against a reference 
@@ -962,7 +983,7 @@ significantly improve the reliability of government datasets. Certain
 unusual trends can be identified, and irregularities highlighted. 
 In the NYC 311 case, issues such as large spikes in SR 
 creation and closure at exactly midnight (or noon) likely 
-stem from a cron job type processes that distort the 
+stem from a cron script process that distorts the 
 accurate capture of SR durations. By implementing 
 real\mbox{-}time and event\mbox{-}driven validation tools, governments 
 can both prevent such errors from entering the dataset in the first 
@@ -1004,6 +1025,14 @@ with various stakeholders, governments can ensure data remains relevant
 and actionable for public use.
 
 
+Automated Quality Assurance techniques should be employed to 
+monitor the quality of the data, as measured by agreed upon
+standards, such as the \% of invalid zip codes. Such tools could
+capture and display the quality of the data sets as presented
+on appropriate dashboards. Deviations in quality would be
+automatically highlighted, alerting appropriate corrective actions.
+
+
 Engagement with data scientists and statisticians is key to improving 
 data curation strategies. These experts can help design and refine 
 curation processes, such as creating algorithms for automatic data 
@@ -1013,12 +1042,12 @@ critical in developing protocols for validating incoming data, correcting
 errors in real\mbox{-}time, and ensuring consistency across multiple data sources. 
 Feedback from statisticians and data scientists, such as the issues reported 
 in this paper, benefit from a clear and accessible channel to the 311 SR data 
-team and other relevant city agencies. Establishing such feedback loops 
+team and other relevant City Agencies. Establishing such feedback loops 
 and other opportunities for public engagement, ensures that 
 recommendations for improving data curation and validation 
 are not only heard and discussed, but implemented. This feedback 
 mechanism would also allow ongoing dialogue between 
-data users and city officials, leading to more dynamic 
+data users and City officials, leading to more dynamic 
 and responsive data management practices.
 
 
@@ -1054,11 +1083,11 @@ names, formats, usage, and definitions. Consistency in data is essential for
 trustworthy machine learning, where inconsistencies across sources can
 lead to distorted outcomes. This challenge is even more pronounced in
 datasets that span long time periods, as changes in agency structures
-or reporting standards which can introduce subtle biases. Long\mbox{-}term data
-consistency is crucial for longitudinal studies and predictive
-modeling, as even minor data shifts can lead to significant deviations
-in model outcomes, as noted by \citet{rahm2000data} and
-\citet{borgman2012conundrum}.
+or reporting standards which can introduce subtle biases and data 
+distortions. Long\mbox{-}term data consistency is crucial for 
+longitudinal studies and predictive modeling, as even minor 
+data shifts can lead to significant deviations in model outcomes, 
+as noted by \citet{rahm2000data} and\citet{borgman2012conundrum}.
 
 
 Finally, the intersection of data curation and machine learning for
