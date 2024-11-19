@@ -45,8 +45,14 @@
 \setcounter{bottomnumber}{50}
 
 
-\doublespacing
 \begin{document}
+
+% \doublespacing 
+
+% \tableofcontents % Optional: Table of Contents
+% \listoffigures % List of Figures
+% \listoftables % List of Tables
+
 
 \begin{frontmatter}
   
@@ -61,11 +67,6 @@ York City 311 Service Request Data}
   \institution{University of Connecticut}, \cny{USA}}
 
 
-
- \tableofcontents % Optional: Table of Contents
- \listoffigures % List of Figures
- \listoftables % List of Tables
-
 \hyphenpenalty=950
 
 \begin{abstract}
@@ -76,29 +77,23 @@ the forefront of this movement since the enactment of the Open
 Data Law in 2012, leading to the creation of the NYC Open Data
 portal. This portal currently hosts 2,700 datasets,
 serving as a crucial resource for research across various domains, 
-including health, urban development, and transportation. The 
-success of this initiative highlights the importance of data 
-curation in ensuring the utility and reliability of open datasets.
-
-
-This paper examines the challenges of open data curation through a
-case study of the NYC 311 Service Request (SR) dataset, addressing issues 
+including health, urban development, and transportation. While the
+open data movement has made vase amounts of data accessible, the
+challenge of ensuring data quality and usability through effective
+curation remain insufficiently addressed in the literature..
+This paper examines these challenges through a
+case study of the NYC 311 Service Request dataset, focusing on issues 
 of data validity, consistency, and curation efficiency. Based on 
 insights from this case study, we propose a set of data curation 
-principles tailored for government\mbox{-}released open data. These principles 
-aim to enhance data management practices and ensure 
-the ongoing utility of open data. The paper concludes with 
-actionable recommendations for enhancing data curation and outlines
-general principles for the effective release of open data.
-
+principles tailored for government-released open data aiming
+to enhance data management practices and ensure 
+the ongoing utility of open data.
 \end{abstract}
 
-\begin{keywords}
+\begin{keywords} % no repeating those in title
   \kwd{Data cleansing}
-  \kwd{Data Curation}
   \kwd{Data science}
   \kwd{NYC Open Data}
-  \kwd{Open data}
   \kwd{Smart Cities}
   \kwd{Transparency}
 \end{keywords}
@@ -184,7 +179,9 @@ open data is vividly illustrated in public health and global challenges,
 where \citet{cantor2018facets} demonstrated the utility of curated 
 data in evaluating community health determinants, and 
 \citet{shankar2021data} observed its critical role during the 
-COVID\mbox{-}19 pandemic in managing collective responses.
+COVID-19 pandemic in managing collective responses.
+\jy{The gap in the literature needs to be further highlighted to set 
+  the stage for our contributions.}
 
 
 The contributions of this paper are twofold. First, we delve into
@@ -195,7 +192,7 @@ validity, consistency, and curation efficiency. We illustrate these
 points with live examples drawn from our 
 processing of the 311 SR data. Secondly, building upon insights 
 gained from this case study, we propose a set of data curation 
-principles tailored for government\mbox{-}released open data. These 
+principles tailored for government-released open data. These 
 principles are designed to address the unique challenges 
 and requirements observed in the curation of such datasets.
 
@@ -212,7 +209,6 @@ highlights logical inconsistencies, and examines some concerning patterns
 in the data. We explore the balance between precision and accuracy 
 and identify duplicate or redundant fields, along with observations 
 on the \href{https://data.cityofnewyork.us/api/views/erm2-nwe9/files/b372b884-f86a-453b-ba16-1fe06ce9d212?download=true&filename=311_ServiceRequest_2010-Present_DataDictionary_Updated_2023.xlsx}{Data Dictionary}.
-
 Section~\ref{sec:recommendations} offers 
 practical recommendations for mitigating or resolving these issues, 
 while Section~\ref{sec:discussion} encapsulates key insights and 
@@ -221,6 +217,7 @@ discusses the broader implications of our findings.
 
 \section{NYC 311 Service Request (SR) Data} 
 \label{sec:data}
+
 The NYC 311 service, a critical component of New York City's public
 engagement and service response framework, serves as a centralized hub
 for non\mbox{-}emergency inquiries and requests. Introduced in 2003, the NYC
@@ -232,9 +229,11 @@ millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile app channels in 2009, a
 record high of 348,463 monthly service requests in August 2020 associated 
 with the the COVID\mbox{-}19 pandemic, the 2021 expansion 
+\jy{use full name of MTA because it is used only once.}
 to include the MTA's city subway system (the biggest 
 expansion in 311  history), and a record 3.23 million 
-service requests in 2023. 
+service requests in 2023.
+
 
 Today, the NYC 311 data system manages over 3 million service
 requests (SRs) per year. This data is publicly accessible through the NYC Open Data
@@ -258,15 +257,21 @@ during emergencies, handling inquiries during the COVID\mbox{-}19 pandemic,
 enforcing standards between landlords and tenants, reallocating taxi
 routes based on analyses by the Taxi and Limousine Commission (TLC),
 and improving responsiveness across City Agencies.
-
+\jy{need to expand the importance of 311 SR data to the research
+  community: such as
+  resource allocation/response \citep{zha2014profiling, raj2021swift},
+  social equity \citep{kontokosta2021bias},
+  street flood \citep{agonafir2022understanding}, etc.}
+  
+  
 
 Our investigation utilizes a 311 SR dataset covering  2\mbox{-}years (2022-2023).
- This sample was collected on 15 September 2024, and is used 
- to conduct detailed analysis in areas such as data 
- consistency, data validity, redundant fields, etc.. Instructions 
- on downloading this file from the NYC Open Data Portal 
- are available in the supplemental material. Here are some 
- characteristics of the 311 SR dataset used in this analysis:
+This sample was collected on 15 September 2024, and is used 
+to conduct detailed analysis in areas such as data 
+consistency, data validity, redundant fields, etc.. Instructions 
+on downloading this file from the NYC Open Data Portal 
+are available in the supplemental material. Here are some 
+characteristics of the 311 SR dataset used in this analysis:
 
 \begin{itemize}[left=1.5em]
 	\item The dataset is approximately 3.7 GB in size and contains 
@@ -710,12 +715,12 @@ some of these updates seem to be well beyond any
 normal or expected timeframe, with some ``updates'' 
 occurring over 2 years later. As shown in Figure~\ref{fig:resolution-violin}, 
 there are 10,265 SRs that were updated >30 days after the 
-\texttt{closed\_date} (Not that Figure~\ref(fig:resolution-violin) excludes 
+\texttt{closed\_date} (Not that Figure~\ref{fig:resolution-violin} excludes 
 values >730 days, an arbitrary cutoff to exclude 
 infeasible dates such as \textit{1900-01-01}. The chart 
 highlights the distribution of these post-closure 
  updates, with a notable concentration of updates occurring within 
-the 30\mbox{-}to\mbox{-}200 day range. This pattern raises 
+the 30--200 day range. This pattern raises 
 questions about whether such delayed updates are standard 
 operational practice or indicative of a potential issue 
 which warrants further investigation. It should be noted
@@ -734,7 +739,9 @@ and 12\% with DSNY.
 \label{sec:precision}
 An question of precision vs. accuracy arises with the \texttt{latitude} 
 and \texttt{longitude} fields. as well as with the duplicative 
-\texttt{location} field. These fields are expressed as 
+\texttt{location} field. These fields are expressed as
+\jy{This is a artifact of R reading them in as doubles. Single
+  precision should be sufficient as illustrated in my Chance manuscript.}
 a 14\mbox{-}decimal number, e.g. \texttt{latitude} 40.86769186022511. 
 Given that 1 degree of latitude at the equator is equal to 111.04 
 kilometers, the ``1'' at the end of the decimal number represents 
