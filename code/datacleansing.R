@@ -68,7 +68,7 @@ sink("../../console_output/core_console_output.txt")
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
 
-options(digits = 14) # Set the number of decimal places to 14
+options(digits = 15) # Set the number of decimal places to 14
 
 #########################################################################
 # File contains column names in the "header" line.
