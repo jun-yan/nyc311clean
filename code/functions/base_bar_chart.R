@@ -52,14 +52,14 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
     theme(
       axis.title = element_blank(),  # Remove x and y axis titles
       plot.title = element_text(hjust = 0.5, size = 12),
-      plot.subtitle = element_text(size = 7),
+#      plot.subtitle = element_text(size = 7),
       axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 8),
       axis.text.y = element_text(face = "bold", size = 8),
       aspect.ratio = 0.618033
     ) +
     
     # Set the subtitle with total count included
-    ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = " ")) +
+#    ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = " ")) +
     
     # Remove x and y axis labels
     labs(x = NULL, y = NULL)  

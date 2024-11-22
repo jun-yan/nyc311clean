@@ -22,8 +22,8 @@ create_violin_chart <- function(
       title = chart_title,
       x = x_axis_title,
       y = "",
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
-                       format(nrow(dataset), big.mark = ","), sep = "")
+      # subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", 
+      #                  format(nrow(dataset), big.mark = ","), sep = "")
     ) +
     
     theme(

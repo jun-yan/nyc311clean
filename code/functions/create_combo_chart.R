@@ -63,8 +63,8 @@ create_combo_chart <- function(
       sec.axis = sec_axis(~ . / max_count)
     ) +
     
-    ggtitle(chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
-                                          " n=", format(total_count, big.mark = ","), sep = "")) +
+#    ggtitle(chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
+#                                          " n=", format(total_count, big.mark = ","), sep = "")) +
     labs(x = NULL, y = NULL) +
     
     theme(
