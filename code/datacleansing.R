@@ -92,7 +92,7 @@ if (!dir.exists(output_dir)) {
 }
 
 # Start directing console output to the file
-#sink(output_file)
+sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
@@ -101,7 +101,7 @@ cat("\n***** Program initialization *****")
 function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 lapply(function_files, source)  # Source each function file.
 
-options(scipen = 10) # Set scipen option to a large value.
+options(scipen = 999) # Set scipen option to a large value.
 
 options(digits = 15) # Set the number of decimal places to 15, the max observed.
 
@@ -274,7 +274,7 @@ cat("\nNumber of columns in the 311 SR data set:", format(num_columns_d311, big.
 cat("\nNumber of Agencies represented:", length(unique(d311$agency)))
 cat("\n\nData contains SRs created from", earliest_date_formatted, "through", latest_date_formatted)
 
-#########################################################################
+########################################################################
 
 cat("\n\n**********BLANK and N/A ENTRIES BY COLUMN**********")
 
@@ -381,6 +381,40 @@ chart_height <- chart_width / 1.2 # Golden Ratio for height
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
 ggsave(chart_path, plot = blank_chart, width = chart_width, 
        height = chart_height, dpi = 300)
+
+#########################################################################
+# Determine field usage by Agency
+# Initialize the list of fields (excluding "agency")
+options(scipen = 999)
+fields <- setdiff(names(d311), "agency")
+
+# Initialize a list to store the results
+results <- list()
+
+# Loop through each field and count usage by agency
+for (field in fields) {
+  result <- d311 %>%
+    filter(!is.na(.data[[field]]), nzchar(.data[[field]])) %>% # Exclude blanks and NAs
+    count(agency) %>%
+    rename(count = n) %>%
+    mutate(field = field)
+  
+  results[[field]] <- result
+}
+
+# Combine all results into a single dataframe
+final_results <- bind_rows(results)
+
+# Reshape the data to present as a table
+summary_table <- final_results %>%
+  pivot_wider(
+    names_from = agency,
+    values_from = count,
+    values_fill = 0
+  )
+
+# View the table
+print(summary_table, n=100)
 
 #########################################################################
 
@@ -902,7 +936,8 @@ if (num_rows_closedBeforeOpened > 1) {
     x_axis_title = NULL,
     x_axis_field = "duration",
     chart_title = NULL,
-    chart_file_name = "negative_duration_SR_violin.pdf"
+    chart_file_name = "negative_duration_SR_violin.pdf",
+    chart_directory = chart_directory_path
   )
 
   # Create boxplot of the (negative) duration values
@@ -1176,7 +1211,8 @@ if (num_row_updatedLate > 0) {
       x_axis_title = NULL,
       x_axis_field = "postClosedUpdateDuration",
       chart_title = NULL,
-      chart_file_name = "post_closed_violin_chart.pdf"
+      chart_file_name = "post_closed_violin_chart.pdf",
+      chart_directory = chart_directory_path
     )
   }
 } else {

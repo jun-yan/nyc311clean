@@ -4,6 +4,7 @@
 # install.packages('zoo')
 # install.packages("ggpmisc")
 # install.packages("lubridate")
+install.packages("data.table")
 #rm(list = ls(), envir = .GlobalEnv)
 
 library(ggplot2)
@@ -12,6 +13,7 @@ library(dplyr)
 library(zoo)
 library(ggpmisc)
 library(lubridate)
+library(data.table)
 
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
@@ -20,7 +22,6 @@ cat("\nExecution begins at:", formattedStartTime)
 #########################################################################
 
 # Set path for the data file
-#main_data_file <- "10-year 2014-2023.csv"
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
@@ -35,25 +36,14 @@ working_dir <- getwd()
 
 data_directory <- file.path(working_dir, "data")
 
-# Extract the first two digits for file naming purposes
-year_digits <- substr(main_data_file, 1, 2)
-
-if (year_digits != "10") {
-  year_digits <- "2"
-}
+# Define the path for the charts
+chart_directory_path <- file.path(working_dir, "charts")
 
 # Set path for the chart directory
 # Create the directory if it doesn't already exist
 if (!dir.exists(chart_directory_path)) {
   dir.create(chart_directory_path)
 }
-
-chart_prefix <- paste0(year_digits, "-year")
-
-# Define the path for the charts
-chart_directory_path <- file.path(working_dir, "charts")
-
-file_name_prefix <- chart_prefix # to name individual chart files
 
 # Define the console output directory and file name.
 output_dir <- file.path(working_dir, "console_output")
@@ -64,11 +54,22 @@ if (!dir.exists(output_dir)) {
   dir.create(output_dir)
 }
 
+# Extract the first two digits for file naming purposes
+year_digits <- substr(main_data_file, 1, 2)
+
+if (year_digits != "10") {
+  year_digits <- "2"
+}
+
+chart_prefix <- paste0(year_digits, "-year")
+
+file_name_prefix <- chart_prefix # to name individual chart files
+
 # Start directing console output to the file
 sink(output_file)
 
 # Set scipen option to a large value to prevent scientific notation for numbers
-options(scipen = 10)
+options(scipen = 999)
 
 # Define the path to the directory containing your function scripts
 functions_path <-  file.path(working_dir, "functions")

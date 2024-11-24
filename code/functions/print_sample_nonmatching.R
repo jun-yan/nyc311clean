@@ -1,11 +1,13 @@
+
 #########################################################################
 # Take a reference field and an identified duplicate field, and print a sample
 # The call the "rank_by_agency" function
 print_sample_nonmatching <- function(
     dataset,
     reference_field = NULL,
-    duplicate_field = NULL) {
-  dataset <- selected_columns
+    duplicate_field = NULL)
+  {
+#  dataset <- selected_columns
   # Remove the NAs for better display purposes
   dataset <- dataset[dataset[[duplicate_field]] != "" | !is.na(dataset[[duplicate_field]]), ]
   

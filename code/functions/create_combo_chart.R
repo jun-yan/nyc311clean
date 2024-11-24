@@ -10,7 +10,7 @@ create_combo_chart <- function(
   
   # Step 1: Create summary_df sorted by count and calculate cumulative percentage
   summary_df <- dataset %>%
-    count(agency) %>%
+    count(.data[["agency"]]) %>%
     rename(count = n) %>%
     arrange(desc(count)) %>%
     mutate(
@@ -18,6 +18,7 @@ create_combo_chart <- function(
       cumulative_percentage = cumsum(percentage)
     ) %>%
     slice_head(n = 20)
+  
   
   # Step 2: Reorder the agency factor based on the descending count
   summary_df <- summary_df %>%

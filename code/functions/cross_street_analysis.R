@@ -190,7 +190,7 @@ cross_street_analysis <- function(
     almost_match[[intersection_street]]
   )
   
-  # Identify rows where the Hamming distance is less than the threshold
+  # Identify rows where the Hamming distance is less than the hamming_distance
   matches_meeting_threshold <- subset(almost_match, hamming_distance <= threshold)
   num_rows_matches_meeting_threshold <- nrow(matches_meeting_threshold)
   

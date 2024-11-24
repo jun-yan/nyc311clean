@@ -4,7 +4,8 @@ create_violin_chart <- function(
     x_axis_title,
     x_axis_field,
     chart_title,
-    chart_file_name) {
+    chart_file_name,
+    chart_directory) {
   
   violin_chart <- ggplot(
     
@@ -34,7 +35,7 @@ create_violin_chart <- function(
       )
   
   suppressMessages(print(violin_chart))
-  chart_path <- file.path(chart_directory_path, chart_file_name)
+  chart_path <- file.path(chart_directory, chart_file_name)
   chart_width <- 10
   chart_height <- chart_width / 1.2
   ggsave(chart_path, plot = violin_chart, dpi = 300,
