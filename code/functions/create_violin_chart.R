@@ -12,7 +12,7 @@ create_violin_chart <- function(
     
     aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
     
-    geom_jitter(width = 0.2, alpha = 0.85, color = "#0072B2", size = 2, shape = 17) +
+    geom_jitter(width = 0.2, height = 0.4, alpha = 0.85, color = "#0072B2", size = 2, shape = 17) +
     
     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
     
@@ -35,7 +35,10 @@ create_violin_chart <- function(
   
   suppressMessages(print(violin_chart))
   chart_path <- file.path(chart_directory_path, chart_file_name)
-  suppressMessages(ggsave(chart_path, plot = violin_chart, width = 10, height = 8))
+  chart_width <- 10
+  chart_height <- chart_width / 1.2
+  ggsave(chart_path, plot = violin_chart, dpi = 300,
+                          width = chart_width, height = chart_height)
 }
 
 #########################################################################

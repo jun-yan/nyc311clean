@@ -49,17 +49,17 @@ make_column_names_user_friendly <- function(dataset) {
   # Return the dataset with modified column names
   return(dataset)
 }
-
-# Apply the function
-d311 <- make_column_names_user_friendly(d311)
-
-# Step 2: Reattach parentheses to the "location" field
-if ("location" %in% names(d311)) {
-  d311$location <- paste0("(", d311$location, ")")
-}
-
-# Print the resulting column names
-colnames(d311)
+# 
+# # Apply the function
+# d311 <- make_column_names_user_friendly(dataset)
+# 
+# # Step 2: Reattach parentheses to the "location" field
+# if ("location" %in% names(dataset)) {
+#   dataset$location <- paste0("(", d311$location, ")")
+# }
+# 
+# # Print the resulting column names
+# colnames(d311)
 
 
 

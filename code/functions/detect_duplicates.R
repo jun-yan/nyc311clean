@@ -9,17 +9,19 @@ detect_duplicates <- function(
   
   rows_condition_1 <- dataset[[reference_field]] != dataset[[duplicate_field]]
   
+  num_rows_dataset <- nrow(dataset)
+  
   all_non_matching_rows <- rows_condition_1
   non_matching_fields <- dataset[all_non_matching_rows, ]
   num_non_matching_fields <- nrow(non_matching_fields)
-  non_matching_percentage <- round((num_non_matching_fields / num_rows_d311) * 100, 2)
+  non_matching_percentage <- round((num_non_matching_fields / num_rows_dataset) * 100, 2)
   non_matching_fields <- non_matching_fields %>%
     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
   
   all_matching_rows <- rows_condition_0
   matching_fields <- dataset[all_matching_rows, ]
   num_matching_fields <- nrow(matching_fields)
-  matching_percentage <- round((num_matching_fields / num_rows_d311) * 100, 2)
+  matching_percentage <- round((num_matching_fields / num_rows_dataset) * 100, 2)
   matching_fields <- matching_fields %>%
     select("unique_key", all_of(reference_field), all_of(duplicate_field), "agency")
   

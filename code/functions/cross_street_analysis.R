@@ -1,8 +1,13 @@
-# #########################################################################
+
+##########################################################################
 cross_street_analysis <- function(
     dataset,
     cross_street,
-    intersection_street) {
+    intersection_street,
+    chart_directory) {
+  
+  num_rows_dataset <- nrow(dataset)
+  
   # Remove extra blanks
   dataset <- dataset %>%
     mutate(
@@ -121,6 +126,7 @@ cross_street_analysis <- function(
       non_dup_streets,
       chart_title,
       chart_file_name,
+      chart_directory,
       console_print_out_title = paste0("Summary of non-Matching '", cross_street, "' and '", intersection_street, "'by Agency")
     )
   }
@@ -132,7 +138,7 @@ cross_street_analysis <- function(
   cat(
     "\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
     "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
-    round((num_rows_cross_street_blank / num_rows_d311 * 100), 2), "% of total rows."
+    round((num_rows_cross_street_blank / num_rows_dataset * 100), 2), "% of total rows."
   )
   
   cat(
@@ -149,7 +155,7 @@ cross_street_analysis <- function(
   cat(
     "\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
     "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
-    round(num_rows_intersection_street_blank / num_rows_d311 * 100, 2),
+    round(num_rows_intersection_street_blank / num_rows_dataset * 100, 2),
     "% of total rows."
   )
   
@@ -221,12 +227,12 @@ cross_street_analysis <- function(
       )
     )
   
-  summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_d311) * 100, 2)
-  summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_d311) * 100, 2)
-  summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_d311) * 100, 2)
+  summary_street$percentage[1] <- round(((num_rows_equal - num_rows_both_blank)/num_rows_dataset) * 100, 2)
+  summary_street$percentage[2] <- round((num_rows_both_blank / num_rows_dataset) * 100, 2)
+  summary_street$percentage[3] <- round((num_rows_non_dup / num_rows_dataset) * 100, 2)
   summary_street$percentage[4] <- "N/A"
   summary_street$percentage[5] <- "N/A"
-  summary_street$percentage[6] <- round((num_rows_matches_meeting_threshold / num_rows_d311) * 100, 6)
+  summary_street$percentage[6] <- round((num_rows_matches_meeting_threshold / num_rows_dataset) * 100, 6)
   
   if (num_rows_matches_meeting_threshold == 0) {
     summary_street$percentage[6] <- "N/A"

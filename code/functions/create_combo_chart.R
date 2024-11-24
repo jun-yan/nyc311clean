@@ -4,7 +4,8 @@ create_combo_chart <- function(
     dataset,
     chart_title = NULL,
     chart_file_name = NULL,
-    console_print_out_title = "Data Summary"
+    console_print_out_title = "Data Summary",
+    chart_directory
 ) {
   
   # Step 1: Create summary_df sorted by count and calculate cumulative percentage
@@ -38,10 +39,10 @@ create_combo_chart <- function(
   max_count <- max(summary_df$count)
   total_count <- sum(summary_df$count)
   
-  earliest_date <- min(d311$created_date, na.rm = TRUE)
-  latest_date <- max(d311$created_date, na.rm = TRUE)
-  earliest_title <- format(as.Date(earliest_date), format = "%Y-%m-%d")
-  latest_title <- format(as.Date(latest_date), format = "%Y-%m-%d")
+  # earliest_date <- min(dataset$created_date, na.rm = TRUE)
+  # latest_date <- max(dataset$created_date, na.rm = TRUE)
+  # earliest_title <- format(as.Date(earliest_date), format = "%Y-%m-%d")
+  # latest_title <- format(as.Date(latest_date), format = "%Y-%m-%d")
   
   # result <- calculate_values(max_count)
   # starting_value <- result$starting_value
@@ -99,10 +100,10 @@ create_combo_chart <- function(
   
   
   # Save the plot
-  chart_path <- file.path(chart_directory_path, chart_file_name)
+  chart_path <- file.path(chart_directory, chart_file_name)
   chart_width <- 10
 #  chart_height <- chart_width / 1.618
-  chart_height <- chart_width / 1.3
+  chart_height <- chart_width / 1.2
     ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
 

@@ -4,7 +4,7 @@
 # install.packages('zoo')
 # install.packages("ggpmisc")
 # install.packages("lubridate")
-rm(list = ls(), envir = .GlobalEnv)
+#rm(list = ls(), envir = .GlobalEnv)
 
 library(ggplot2)
 library(scales)
@@ -20,9 +20,8 @@ cat("\nExecution begins at:", formattedStartTime)
 #########################################################################
 
 # Set path for the data file
-main_data_file <- "10-year 2014-2023.csv"
-#main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
-#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.csv"
+#main_data_file <- "10-year 2014-2023.csv"
+main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
@@ -32,16 +31,9 @@ cat("\n***** Program initialization *****")
 
 setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
-# Define the path to the directory containing your function scripts
-functions_path <- "functions"
+working_dir <- getwd()
 
-# Source all .R files in the directory
-files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
-
-# Source each file
-lapply(files, source)
-
-data1File <- file.path("..", "..", "data", main_data_file)
+data_directory <- file.path(working_dir, "data")
 
 # Extract the first two digits for file naming purposes
 year_digits <- substr(main_data_file, 1, 2)
@@ -49,21 +41,43 @@ year_digits <- substr(main_data_file, 1, 2)
 if (year_digits != "10") {
   year_digits <- "2"
 }
+
 # Set path for the chart directory
+# Create the directory if it doesn't already exist
+if (!dir.exists(chart_directory_path)) {
+  dir.create(chart_directory_path)
+}
 
 chart_prefix <- paste0(year_digits, "-year")
-# chart_prefix <- "Jan-Sep_2024"
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", chart_prefix)
+
+# Define the path for the charts
+chart_directory_path <- file.path(working_dir, "charts")
 
 file_name_prefix <- chart_prefix # to name individual chart files
+
+# Define the console output directory and file name.
+output_dir <- file.path(working_dir, "console_output")
+output_file <- file.path(output_dir, "timeline_console_output.txt")
+
+# Create the directory if it does not exist
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+}
+
+# Start directing console output to the file
+sink(output_file)
 
 # Set scipen option to a large value to prevent scientific notation for numbers
 options(scipen = 10)
 
+# Define the path to the directory containing your function scripts
+functions_path <-  file.path(working_dir, "functions")
 
-sink(paste0("../../console_output/", year_digits, "-yr timeline_console_output.txt"))
-# sink(paste0("../../console_output/", "2024_console_output.txt"))
+# Source all .R files in the directory
+files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 
+# Source each file
+lapply(files, source)
 
 cat("\nExecution begins at:", formattedStartTime)
 
@@ -71,11 +85,11 @@ cat("\nExecution begins at:", formattedStartTime)
 cat("\n\n**********DATA INPUT AND PREPARATION**********\n")
 
 # Load the main 311 SR data file. Set the read & write paths.
-d311 <-
-  read.csv(data1File,
-    header = TRUE,
-    colClasses = rep("character", ncol(read.csv(data1File)))
-  )
+main_data_file <- file.path(data_directory, main_data_file)
+d311 <- as.data.frame(fread(
+  main_data_file,
+  colClasses = "character"
+))
 
 num_rows <- nrow(d311)
 
@@ -129,26 +143,27 @@ cat(
 earliest_title <- format(earliest_date, "%Y-%m-%d")
 latest_title <- format(latest_date, "%Y-%m-%d")
 
-chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
+#chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
 
 #########################################################################
-# Sort by Agency and rank
-sorted_by_agency <- rank_by_agency(d311)
-
-cat("\n\nRanking by Agency\n")
-print_threshold <- nrow(sorted_by_agency)
-sorted_by_agency <- as.data.frame(sorted_by_agency)
-print(head(sorted_by_agency, print_threshold), row.names = FALSE, right = FALSE)
-
-chart_title <- NULL
-chart_file_name <- "Complaints_by_Agency.pdf"
-
-create_combo_chart(
-  dataset = d311,
-  chart_title = chart_title,
-  chart_file_name = chart_file_name,
-  console_print_out_title = "Summary of complaints by Agency"
-)
+# # Sort by Agency and rank
+# sorted_by_agency <- rank_by_agency(d311)
+# 
+# cat("\n\nRanking by Agency\n")
+# print_threshold <- nrow(sorted_by_agency)
+# sorted_by_agency <- as.data.frame(sorted_by_agency)
+# print(head(sorted_by_agency, print_threshold), row.names = FALSE, right = FALSE)
+# 
+# chart_title <- NULL
+# chart_file_name <- "Complaints_by_Agency.pdf"
+# 
+# create_combo_chart(
+#   dataset = d311,
+#   chart_title = chart_title,
+#   chart_file_name = chart_file_name,
+#   console_print_out_title = "Summary of complaints by Agency",
+#   chart_directory_path
+# )
 
 #########################################################################
 # Aggregate created_date by second (precise timestamps)
@@ -174,13 +189,6 @@ created_hour_of_day <- second_level_created_summary %>%
   mutate(created_hour = hour(created_second)) %>%  # Extract the hour from created_second
   group_by(created_hour) %>%
   summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
-
-# # Aggregate by created_date at top of hour (xx:00:00)
-# top_of_hour_created_summary <- second_level_created_summary %>%
-#   filter(minute(created_second) == 0 & second(created_second) == 0) %>%
-#   mutate(created_hour = hour(created_second)) %>%
-#   group_by(created_hour) %>%
-#   summarise(count = sum(count), .groups = "drop")
 
 # Aggregate created_date by day using the hour-level aggregation
 day_level_summary <- hour_level_created_summary %>%
@@ -251,13 +259,6 @@ closed_hour_of_day <- second_level_closed_summary %>%
   mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour from closed_second
   group_by(closed_hour) %>%
   summarise(count = sum(count), .groups = "drop")  # Sum the counts for each hour
-
-# # Filter and summarize for top of the hour based on closed_date
-# top_of_hour_closed_summary <- second_level_closed_summary %>%
-#   filter(minute(closed_second) == 0 & second(closed_second) == 0) %>%  # Keep only rows where minutes and seconds are zero
-#   mutate(closed_hour = hour(closed_second)) %>%  # Extract the hour
-#   group_by(closed_hour) %>%
-#   summarise(count = sum(count), .groups = "drop")  # Summarize by hour
 
 #########################################################################
 # Prepare data for charting
@@ -375,7 +376,8 @@ if (nrow(yearly_df) > 2) { # skip if <2 years. Not enough data to be meaningful.
     add_minimum = FALSE,
     add_second_maximum = FALSE,
     extra_line = extra_line,
-    chart_file_name = paste0(file_name_prefix, "-trend_SRs_yearly.pdf")
+    chart_file_name = paste0(file_name_prefix, "-trend_SRs_yearly.pdf"),
+    chart_directory = chart_directory_path
   )
 }
 
@@ -389,14 +391,6 @@ total_count <- comma(total_count)
 monthly_df$YearMonth <- as.Date(paste(monthly_df$YearMonth, "01", sep = "-"), format = "%Y-%m-%d")
 max_month <- monthly_df[which.max(monthly_df$count), ]
 min_month <- monthly_df[which.min(monthly_df$count), ]
-
-#mxmonth <- max_month$YearMonth
-#mimonth <- min_month$YearMonth
-
-#earliest_YearMonth <- min(monthly_df$YearMonth)
-
-#start_date <- min(monthly_df$YearMonth)
-#end_date <- max(monthly_df$YearMonth)
 
 # Ensure YearMonth is a Date object
 monthly_df$YearMonth <- as.Date(monthly_df$YearMonth)
@@ -422,7 +416,8 @@ SR_monthly <- create_bar_chart_categorical(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf"),
+  chart_directory = chart_directory_path
 )
 
 #########################################################################
@@ -459,6 +454,7 @@ SR_daily <- create_bar_chart_categorical(
   add_second_maximum = FALSE,
   extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_daily.pdf"),
+  chart_directory = chart_directory_path,
   horizontal_adjustment_max = 1.2,
   vertical_adjustment_max = 0.8
 )
@@ -494,7 +490,8 @@ SR_calendar_month <- create_bar_chart_categorical(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf"),
+  chart_directory = chart_directory_path
 )
 
 #########################################################################
@@ -514,6 +511,7 @@ SR_day_of_the_year <- create_bar_chart_numeric(
   add_second_maximum = TRUE,
   extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_year.pdf"),
+  chart_directory = chart_directory_path,
   horizontal_adjustment_max = 1.2,
   vertical_adjustment_max = 1.5
 )
@@ -548,6 +546,7 @@ SR_day_of_the_week <- create_bar_chart_categorical(
   add_second_maximum = FALSE,
   extra_line = NULL,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_week.pdf"),
+  chart_directory = chart_directory_path,
   horizontal_adjustment_max = 0.5,
   vertical_adjustment_max = 0.2
 )
@@ -590,7 +589,8 @@ SR_created_by_top_of_hour <- create_bar_chart_numeric(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf"),
+  chart_directory = chart_directory_path
 )
 
 #########################################################################
@@ -631,7 +631,8 @@ SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf")
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf"),
+  chart_directory= chart_directory_path
 )
 
 #########################################################################
@@ -673,8 +674,9 @@ SR_closed_by_top_of_hour <- create_bar_chart_numeric(
   add_minimum = FALSE,
   add_second_maximum = TRUE,
   extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf")
-)
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf"),
+  chart_directory= chart_directory_path
+  )
 
 #########################################################################
 # Show minute-by-minute closure of SRs on the busiest day of the year.
@@ -714,6 +716,7 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
   add_second_maximum = TRUE,
   extra_line = extra_line,
   chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),
+  chart_directory = chart_directory_path,
   horizontal_adjustment_max = -1,
   vertical_adjustment_max = 1
 )
@@ -759,6 +762,7 @@ SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
   add_second_maximum = TRUE,
   extra_line = extra_line,
   chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),
+  chart_directory= chart_directory_path,
   horizontal_adjustment_max = -1,
   vertical_adjustment_max = 1
 )
@@ -791,6 +795,7 @@ SR_created_time_of_day <- create_bar_chart_numeric(
   add_minimum = FALSE,
   add_second_maximum = FALSE,
   chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf"),
+  chart_directory= chart_directory_path,
   horizontal_adjustment_max = -1,
   vertical_adjustment_max = 1
 )
@@ -830,6 +835,7 @@ SR_closed_time_of_day <- create_bar_chart_numeric(
   add_second_maximum = FALSE,
   extra_line = extra_line,
   chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf"),
+  chart_directory= chart_directory_path,
   horizontal_adjustment_max = -1,
   vertical_adjustment_max = 1
 )
@@ -883,7 +889,8 @@ if (midnight_created_count > 0) {
     created_at_midnight,
     chart_title,
     chart_file_name,
-    console_print_out_title = "SRs created at midnight"
+    console_print_out_title = "SRs created at midnight",
+    chart_directory = chart_directory_path
   )
 } else {
   cat("\n\nThere are no SRs with a created_date exactly at midnight.\n")
@@ -906,6 +913,7 @@ if (noon_created_count > 0) {
     created_at_noon,
     chart_title,
     chart_file_name,
+    chart_directory= chart_directory_path,
     console_print_out_title = "SRs created at noon"
   )
 } else {
@@ -958,6 +966,7 @@ if (midnight_closed_count > 0) {
       closed_at_midnight,
       chart_title,
       chart_file_name,
+      chart_directory= chart_directory_path,
       console_print_out_title = "SRs closed at midnight"
     )
   } else {
@@ -981,6 +990,7 @@ if (noon_closed_count > 0) {
       closed_at_noon,
       chart_title,
       chart_file_name,
+      chart_directory= chart_directory_path,
       console_print_out_title = "SRs closed at noon"
     )
   } else {
@@ -1035,8 +1045,9 @@ if (midnight_closed_count > 0) {
 
   create_combo_chart(
     closed_at_midnight,
-    chart_title,
-    chart_file_name,
+    chart_title = chart_title,
+    chart_file_name = chart_file_name,
+    chart_directory = chart_directory_path,
     console_print_out_title = "SRs Closed at Midnight"
   )       
 } else {
@@ -1058,8 +1069,9 @@ if (noon_closed_count > 0) {
 
   create_combo_chart(
     closed_at_noon,
-    chart_title,
-    chart_file_name,
+    chart_title = chart_title,
+    chart_file_name = chart_file_name,
+    chart_directory= chart_directory_path,
     console_print_out_title = "SRs Closed at Noon"
   )
 } else {

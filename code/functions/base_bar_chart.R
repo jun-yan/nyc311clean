@@ -9,7 +9,8 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
                            horizontal_adjustment_max = 0.5,
                            vertical_adjustment_max = -1,
                            console_print_out_title = "Data Summary",
-                           chart_file_name = NULL) {
+                           chart_file_name = NULL,
+                           chart_directory) {
   
   # Step 1: Print Data Summary
   cat("\n\n", console_print_out_title, " (first 20 rows):\n", sep = "")
@@ -130,9 +131,11 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
   print(bar_chart)
   if (!is.null(chart_file_name)) {
     chart_width <- 10
-    chart_width <- chart_width / 1.618  # Golden ratio
-    chart_path <- file.path(chart_directory_path, chart_file_name)
-    ggsave(chart_path, plot = bar_chart, width = chart_width, height = chart_width, dpi = 300)
+#    chart_height <- chart_width / 1.618  # Golden ratio
+    chart_height <- chart_width / 1.2  # Golden ratio
+    chart_path <- file.path(chart_directory, chart_file_name)
+    ggsave(chart_path, plot = bar_chart, width = chart_width, 
+           height = chart_height, dpi = 300)
   }
 }
 

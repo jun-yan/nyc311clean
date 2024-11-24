@@ -18,7 +18,8 @@ create_bar_chart_categorical <- function(
     horizontal_adjustment_max = 0.5,
     vertical_adjustment_max = -1,
     console_print_out_title = "Data Summary",
-    chart_file_name = NULL) 
+    chart_file_name = NULL,
+    chart_directory) 
 {
   
   # Call base_bar_chart without x_scale
@@ -40,7 +41,8 @@ create_bar_chart_categorical <- function(
     horizontal_adjustment_max, 
     vertical_adjustment_max,
     console_print_out_title, 
-    chart_file_name
+    chart_file_name,
+    chart_directory
   )
 }
 

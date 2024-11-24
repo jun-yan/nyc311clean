@@ -1,27 +1,20 @@
+
 # #########################################################################
 # Validate that number fields are all numeric
 areAllNumbers <- function(numberField) {
   
-  # Identify the non-blank values using nzchar()
-  non_blank_indices <- which(nzchar(numberField))
+  # Remove blank and NA values
+  non_blank <- numberField[!is.na(numberField) & nzchar(numberField)]
   
-  # Subset the vector to keep only the non-blank values
-  numberField <- numberField[non_blank_indices]
-  
-  # remove blank and NAs
-  allNumbers <-
-    suppressWarnings(!is.na(as.numeric(numberField[numberField != ""])))
+  # Check if all remaining values are numeric
+  allNumbers <- suppressWarnings(!is.na(as.numeric(non_blank)))
   
   if (!all(allNumbers)) {
-    # find indices of values that are not numeric
-    non_numeric_values <-
-      numberField[grepl("[^[:digit:]]", numberField)]
+    # Extract the non-numeric values
+    non_numeric_values <- non_blank[!allNumbers]
     
-    cat(
-      "Non-numeric values in the vector: ",
-      non_numeric_values,
-      "\n"
-    )
+    cat("Non-numeric values in the vector:\n")
+    print(unique(non_numeric_values)) # Use unique to avoid redundant entries
   }
   return(all(allNumbers))
 }

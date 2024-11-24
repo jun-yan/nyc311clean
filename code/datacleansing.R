@@ -92,8 +92,7 @@ if (!dir.exists(output_dir)) {
 }
 
 # Start directing console output to the file
-sink(output_file)
-#sink("../../console_output/2024_console_output.txt")
+#sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
@@ -123,16 +122,7 @@ USPSzipcodes <- as.data.frame(fread(
   colClasses = "character"
 ))
 
-
-# USPSzipcodes <-
-#   read.csv(USPS_zipcode_reference_file,
-#     header = TRUE,
-#     colClasses = "character"
-#   )
-
-
 USPSzipcodes <- as.data.frame(USPSzipcodes)
-
 USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
@@ -141,12 +131,6 @@ USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
 #########################################################################
 # Load the USPS zipcode file
 USPS_abbreviations_reference_file <- file.path( data_file, "USPSabb.csv")
-# USPSabbreviations <-
-#   read.csv(USPS_abbreviations_reference_file,
-#     header = TRUE,
-#     colClasses = rep("character")
-#   )
-# 
 
 USPSabbreviations <- as.data.frame(fread(
   USPS_abbreviations_reference_file,
@@ -159,10 +143,10 @@ names(USPSabbreviations) <- c("full", "abb")
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-main_code_file_path <- file.path( working_dir, "data", main_data_file)
+main_data_file_path <- file.path( working_dir, "data", main_data_file)
 
 d311 <- as.data.frame(fread(
-  main_code_file_path,
+  main_data_file_path,
   colClasses = "character"
 ))
 
@@ -267,7 +251,7 @@ latest_date_formatted <- format(latest_date, format = "%Y-%m-%d %H:%M:%S")
 earliest_title <- format(as.Date(earliest_date_formatted), format = "%Y-%m-%d")
 latest_title <- format(as.Date(latest_date_formatted), format = "%Y-%m-%d")
 
-chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
+#chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
 
 #########################################################################
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
@@ -280,7 +264,8 @@ create_combo_chart(
   dataset = d311,
   chart_title = NULL,
   chart_file_name = "SRs_by_Agency.pdf",
-  console_print_out_title = "Summary of SRs by Agency"
+  console_print_out_title = "Summary of SRs by Agency",
+  chart_directory = chart_directory_path
 )
 
 # Display the results
@@ -390,11 +375,12 @@ print(blank_chart)
 # Set desired width and height to match base_bar_chart
 chart_width <- 10
 #chart_height <- chart_width / 1.618 # Golden Ratio for height
-chart_height <- chart_width / 1.3 # Golden Ratio for height
+chart_height <- chart_width / 1.2 # Golden Ratio for height
 
 # Save the chart with the Golden Ratio aspect ratio
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
-ggsave(chart_path, plot = blank_chart, width = chart_width, height = chart_height, dpi = 300)
+ggsave(chart_path, plot = blank_chart, width = chart_width, 
+       height = chart_height, dpi = 300)
 
 #########################################################################
 
@@ -477,6 +463,7 @@ create_combo_chart(
   dataset = d311,
   chart_title = NULL,
   chart_file_name = "SR_by_Complaint_Type.pdf",
+  chart_directory = chart_directory_path,
   console_print_out_title = "Summary of Complaint Type"
 )
 
@@ -677,20 +664,22 @@ if (nrow(y_outliers) == 0) {
 }
 
 #########################################################################
-address_type_results <- are_valid_values(d311$address_type, data.frame(
-  values = c(
-    "ADDRESS",
-    "BBL",
-    "BLOCKFACE",
-    "INTERSECTION",
-    "PLACENAME",
-    "UNRECOGNIZED"
-  )
-), "address_type")
+# Check to see if all address types are valid.
+valid_address_types = c(
+  "ADDRESS",
+  "BBL",
+  "BLOCKFACE",
+  "INTERSECTION",
+  "PLACENAME",
+  "UNRECOGNIZED"
+)
+address_type_results <- are_valid_values(
+    d311$address_type, 
+    valid_address_types, 
+    "address_type")
 
-statusResults <-
-  are_valid_values(d311$status, data.frame(
-    values = c(
+# Check to see if all SR statuses are valid.
+valid_statuses <- c(
       "ASSIGNED",
       "CANCEL",
       "CLOSED",
@@ -700,12 +689,14 @@ statusResults <-
       "STARTED",
       "UNSPECIFIED"
     )
-  ), "status")
+statusResults <-
+  are_valid_values(
+    d311$status,
+    valid_statuses,
+    "status")
 
 # check if borough, taxi_company_borough, and park_borough contain only allowable values
-boroughResults <-
-  are_valid_values(d311$borough, data.frame(
-    values = c(
+valid_boroughs <- c(
       "BRONX",
       "BROOKLYN",
       "MANHATTAN",
@@ -713,37 +704,41 @@ boroughResults <-
       "STATEN ISLAND",
       "UNSPECIFIED"
     )
-  ), "borough")
+boroughResults <-
+  are_valid_values(
+    d311$borough, 
+    valid_boroughs,
+    "borough")
 
 park_boroughResults <-
-  are_valid_values(d311$park_borough, data.frame(
-    values = c(
-      "BRONX",
-      "BROOKLYN",
-      "MANHATTAN",
-      "QUEENS",
-      "STATEN ISLAND",
-      "UNSPECIFIED"
-    )
-  ), "park_borough")
+  are_valid_values(
+    d311$park_borough,
+    valid_boroughs,
+    "park_borough")
 
 taxi_company_boroughResults <-
-  are_valid_values(d311$taxi_company_borough, data.frame(
-    values = c("BRONX", "BROOKLYN", "MANHATTAN", "QUEENS", "STATEN ISLAND")
-  ), "taxi_company_borough")
+  are_valid_values(
+    d311$taxi_company_borough,
+    valid_boroughs,
+    "taxi_company_borough")
+
+# check if SR channels contain only allowable values
 
 open_data_channelResults <-
-  are_valid_values(d311$open_data_channel_type, data.frame(values = c(
+  are_valid_values(
+    d311$open_data_channel_type,
+    c(
     "MOBILE",
     "ONLINE",
     "OTHER",
     "PHONE",
-    "UNKNOWN"
-  )), "open_data_channel")
+    "UNKNOWN"),
+    "open_data_channel")
 
 vehicle_typeResults <-
-  are_valid_values(d311$vehicle_type, data.frame(
-    values = c(
+  are_valid_values(
+    d311$vehicle_type,
+    c(
       "AMBULETTE / PARATRANSIT",
       "CAR",
       "CAR SERVICE",
@@ -753,8 +748,8 @@ vehicle_typeResults <-
       "SUV",
       "TRUCK",
       "VAN"
-    )
-  ), "vehicle_type")
+    ),
+   "vehicle_type")
 
 #########################################################################
 # check for allowable values in the 'community_board' field
@@ -783,30 +778,37 @@ cbValues <-
     "0 UNSPECIFIED"
   )
 
-cb_results <- are_valid_values(d311$community_board, data.frame(cbValues), "community_board")
+cb_results <- are_valid_values(
+  d311$community_board, 
+  cbValues, 
+  "community_board")
 
-if (!cb_results[[1]]) {
-  #  cb_dataset <- cb_results[[3]]
-  create_combo_chart(
-    dataset = cb_results[[3]],
-    chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
-    chart_file_name = "invalid_community_boards.pdf",
-    console_print_out_title = "Summary of Invalid Community Boards"
-  )
-}
+# if (!cb_results[[1]]) {
+#   create_combo_chart(
+#     dataset = cb_results[[2]],
+#     chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
+#     chart_file_name = "invalid_community_boards.pdf",
+#     console_print_out_title = "Summary of Invalid Community Boards"
+#   )
+# }
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
-incident_zip_results <- are_valid_values(d311$incident_zip, USPSzipcodesOnly, "incident_zip")
+USPSzipcodesList <- as.list(USPSzipcodesOnly$delivery_zipcode)
 
-if (!incident_zip_results[[1]]) {
-  create_combo_chart(
-    dataset = incident_zip_results[[3]],
-    chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
-    chart_file_name = "invalid_incident_zip.pdf",
-    console_print_out_title = "Summary of Invalid incident_zip(s) by Agency"
-  )
-}
+incident_zip_results <- are_valid_values(
+  d311$incident_zip, 
+  USPSzipcodesList, 
+  "incident_zip")
+
+# if (!incident_zip_results[[1]]) {
+#   create_combo_chart(
+#     dataset = incident_zip_results[[3]],
+#     chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
+#     chart_file_name = "invalid_incident_zip.pdf",
+#     console_print_out_title = "Summary of Invalid incident_zip(s) by Agency"
+#   )
+# }
 
 #########################################################################
 
@@ -889,6 +891,7 @@ if (num_rows_closedBeforeOpened > 1) {
     dataset = closedBeforeOpened,
     chart_title = "negative duration SRs by Agency & cumulative percentage",
     chart_file_name = "negative_duration_SR_barchart.pdf",
+    chart_directory = chart_directory_path,
     console_print_out_title = "Summary of negative duration SRs"
   )
 
@@ -909,11 +912,10 @@ if (num_rows_closedBeforeOpened > 1) {
     aes(x = duration, y = factor(1))
   ) +
     
-    geom_jitter(color = "#0072B2", alpha = 0.85, size = 1.9, shape = 17) +
+    geom_jitter(color = "#0072B2", alpha = 0.85, size = 1.9, shape = 17, width = 0.2, height = 0.2) +
     
     geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.65, outlier.colour = "black", 
                  outlier.size = 1) +
-    
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
 #      plot.subtitle = element_text(size = 7),
@@ -930,7 +932,10 @@ if (num_rows_closedBeforeOpened > 1) {
 
   print(negativeDurationChart)
   chart_path <- file.path(chart_directory_path, "negative_duration_SR_boxplot.pdf")
-  ggsave(chart_path, plot = negativeDurationChart, width = 10, height = 8)
+  chart_width = 10
+  chart_height = chart_width/1.2
+  ggsave(chart_path, plot = negativeDurationChart, width = chart_width, 
+         height = chart_height, dpi = 300)
 } else {
   cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
 }
@@ -971,6 +976,7 @@ if (num_rows_zeroDurations > 0) {
       dataset = zeroDurations,
       chart_title = "Zero duration SRs by Agency & cumulative percentage",
       chart_file_name = "zero_duration_SR.pdf",
+      chart_directory = chart_directory_path,
       console_print_out_title = "Summary of zero duration SRs by Agency"
     )
   }
@@ -1049,7 +1055,10 @@ if (num_rows_future > 0) {
 
     print(closedinFutureChart)
     chart_path <- file.path(chart_directory_path, "future_closed.pdf")
-    ggsave(chart_path, plot = closedinFutureChart, width = 10, height = 8)
+    chart_width = 10
+    chart_height = chart_width/1.2
+    ggsave(chart_path, plot = closedinFutureChart, 
+           width = chart_width, height = chart_height, dpi = 300)
   }
 } else {
   cat("\n\nThere are no SRs with a 'closed_date' in the future.")
@@ -1158,6 +1167,7 @@ if (num_row_updatedLate > 0) {
       dataset = updatedLate,
       chart_title = paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage"),
       chart_file_name = "post_Closed_Bar_Chart.pdf",
+      chart_directory = chart_directory_path,
       console_print_out_title = "Summary of post-close-resolution-updates by Agency"
     )
 
@@ -1218,6 +1228,7 @@ if (!is.null(nonMatching_park_borough)) {
     dataset = nonMatching_park_borough,
     chart_title = "non-matching between 'borough' and 'park_borough' by Agency & cumulative percentage",
     chart_file_name = "non_matching_park_borough_chart.pdf",
+    chart_directory = chart_directory_path,
     console_print_out_title = "Summary of non-matching borough & park_borough by Agency"
   )
 }
@@ -1239,6 +1250,7 @@ if (!is.null(nonMatching_taxi_company_borough)) {
     dataset = nonMatching_taxi_company_borough,
     chart_title = "non-matching between 'borough' and 'taxi_company_borough' by Agency & cumulative percentage",
     chart_file_name = "non_matching_taxi_company_borough_chart.pdf",
+    chart_directory = chart_directory_path,
     console_print_out_title = "Summary of non-matching borough & taxi_company_borough by Agency"
   )
 }
@@ -1250,15 +1262,18 @@ cat("\n\n**********CROSS STREET/INTERSECTION STREET ANALYSYS**********\n")
 #########################################################################
 cross_street <- "street_name"
 intersection_street <- "landmark"
-z1 <- cross_street_analysis(d311, cross_street, intersection_street)
+z1 <- cross_street_analysis(d311, cross_street, intersection_street, 
+                            chart_directory = chart_directory_path)
 
 cross_street <- "cross_street_1"
 intersection_street <- "intersection_street_1"
-y1 <- cross_street_analysis(d311, cross_street, intersection_street)
+y1 <- cross_street_analysis(d311, cross_street, intersection_street,
+                            chart_directory = chart_directory_path)
 
 cross_street <- "cross_street_2"
 intersection_street <- "intersection_street_2"
-y2 <- cross_street_analysis(d311, cross_street, intersection_street)
+y2 <- cross_street_analysis(d311, cross_street, intersection_street,
+                            chart_directory = chart_directory_path)
 
 #########################################################################
 
@@ -1305,11 +1320,11 @@ reduced_size <- object.size(d311_reduced)
 size_reduction <- original_size - reduced_size
 
 # Print the results
-cat("\nOriginal size:", format(original_size, units = "auto", digits = 4))
+cat("\nOriginal size:", format(original_size, units = "auto", digits = 2))
 cat("\nSize after removing redundant columns:", format(reduced_size, units = "auto", digits = 4))
 cat(
-  "\nPotential size reduction:", format(size_reduction, units = "auto", digits = 4), "or",
-  round(size_reduction / original_size * 100, 4), "%\n"
+  "\nPotential size reduction:", format(size_reduction, units = "auto", digits = 2), "or",
+  round(size_reduction / original_size * 100, 2), "%\n"
 )
 
 #########################################################################
