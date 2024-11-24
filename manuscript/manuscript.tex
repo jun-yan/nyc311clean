@@ -567,7 +567,7 @@ the Most, Partial, and Few/None categories.
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=\textwidth]{BlankFields-cro.pdf}
+  	\includegraphics[width=\textwidth]{BlankFields-crop.pdf}
 	\caption{Number and percentage of empty/blank entries for the
           311 SR data during 2022--2023.}
 	\label{fig:blank_fields}
@@ -740,6 +740,11 @@ as a large number created exactly at midnight. The magnitude
 of this anomaly is well outside the 3$\sigma$ level as shown 
 in Figure~\ref{fig:exacthours}
 
+\jy{The font sizes of annotations in Figure 4 and 5 need to be
+  increased. In addition, the size of the pdf figure could be made
+  arguments to the R function that generated them (instead of being
+  fixed in within the function).}
+
 \begin{figure}[tbp]
     \centering
     % First subfigure
@@ -780,9 +785,9 @@ possible, and even routine, to update an SR after it is closed,
 some of these updates seem to be well beyond any 
 normal or expected timeframe, with some ``updates'' 
 occurring over 2 years later. As shown in Figure~\ref{fig:resolution-violin}, 
-there are 10,265 SRs that were updated >30 days after the 
+there are 10,265 SRs that were updated $>30$ days after the 
 \texttt{closed\_date} (Not that Figure~\ref{fig:resolution-violin} excludes 
-values >730 days, an arbitrary cutoff to exclude 
+values $>730$ days, an arbitrary cutoff to exclude 
 infeasible dates such as \textit{1900-01-01}. The chart 
 highlights the distribution of these post-closure 
  updates, with a notable concentration of updates occurring within 
