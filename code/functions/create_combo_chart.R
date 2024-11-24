@@ -50,7 +50,7 @@ create_combo_chart <- function(
   # Step 1: Create the initial plot without specifying y-axis breaks
   combo_chart <- ggplot(summary_df) +
     
-    geom_bar(aes(x = agency, y = count), stat = "identity", fill = "#E69F00", width = 0.55) +
+    geom_bar(aes(x = agency, y = count), stat = "identity", fill = "#44AA99", width = 0.55) +
     
     geom_text(aes(label = count, x = agency, y = count), 
               colour = "black", hjust = 0.5, vjust = -0.5, size = 2.5) +
@@ -68,12 +68,13 @@ create_combo_chart <- function(
     labs(x = NULL, y = NULL) +
     
     theme(
-      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = 7),
+      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = 8.5),
       axis.text.y = element_text(face = "bold", size = 8),
       axis.text.y.right = element_text(color = "black", face = "bold", size = 8),
       plot.title = element_text(hjust = 0.5, size = 12),
       plot.subtitle = element_text(size = 7),
-      aspect.ratio = 0.618033
+      panel.background = element_rect(fill = "gray98", color = "gray98"),
+            aspect.ratio = 0.618033
     )
   
   # Only add the geom_line if there's more than one agency

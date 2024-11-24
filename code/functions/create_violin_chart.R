@@ -8,15 +8,15 @@ create_violin_chart <- function(
   
   violin_chart <- ggplot(
     
-    data = dataset, 
+    data = dataset,
     
     aes(x = !!rlang::sym(x_axis_field), y = factor(1))) +
     
-    geom_jitter(width = 0.25, alpha = 0.4, color = "#0072B2", size = 1.9, shape = 17) +
+    geom_jitter(width = 0.2, alpha = 0.85, color = "#0072B2", size = 2, shape = 17) +
     
     geom_violin(linewidth = 0.7, fill = "transparent", color = "black") +
     
-    geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.6, 
+    geom_boxplot(width = 0.25, fill = "#E69F00", color = "black", alpha = 0.65, 
                  outlier.colour = "black", outlier.size = 0.75) +
     labs(
       title = chart_title,
@@ -29,8 +29,9 @@ create_violin_chart <- function(
     theme(
       plot.title = element_text(size = 13, hjust = 0.5),
       plot.subtitle = element_text(size = 7),
-      axis.text.x = element_text(face = "bold", size = 8),
-    )
+      axis.text.x = element_text(face = "bold", size = 9),
+      panel.background = element_rect(fill = "gray98", color = "gray98")
+      )
   
   suppressMessages(print(violin_chart))
   chart_path <- file.path(chart_directory_path, chart_file_name)

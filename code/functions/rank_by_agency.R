@@ -2,6 +2,7 @@
 
 # Take a dataset and sort it by agency. Then add percentage and cumulative percentage columns.
 # Dataset should contain agency as a fields
+
 rank_by_agency <- function(dataset) {
   sorted_dataset <- dataset %>%
     group_by(agency) %>%

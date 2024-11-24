@@ -26,7 +26,6 @@ library(sf)
 #########################################################################
 
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
-#main_data_file <- "JAN-SEP_2024_AS_OF_10-16-2024.CSV
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
@@ -39,36 +38,73 @@ formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
 
-# Set the working directory to the "nyc311clean/code" directory to enable relative codes.
-# Alter this line of code to match your particular machine
-setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
+# Prior to running program, ensure the R code is located in the working directory, 
+# and that the R functions are located in a sub-directory named "functions".
+# Data files should be placed in a sub-directory named "data".
 
-# Set path for the data file
-data1File <- file.path("..", "..", "data", main_data_file)
+# Create the sub-directories used during program execution.
+# Get the current working directory
+working_dir <- getwd()
 
-chart_directory_path <- file.path("..", "..", "charts", "2022-2023 study", "core charts")
+# Define the path for the main data file (CSV file)
+data_file <- file.path(working_dir, "data")
 
-writeFilePath <- file.path("..", "..", "data", "smaller.csv")
+# Create the main data directory if it doesn't already exist, then halt program execution.
+if (!dir.exists(data_file)) {
+  dir.create(data_file)
+  cat("\nCreating the data directory below the working directory. \nPlace program data there.")
+  stop("\n\nProgram terminated because data directory does not exist.")
+}
 
 # Define the path to the directory containing your function scripts
-functions_path <- "functions"
+functions_path <- file.path(working_dir, "functions")
 
-# Source all .R files in the directory
-files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+# Create the directory if it doesn't already exist, and then halt program execution.
+if (!dir.exists(functions_path)) {
+  cat("\nCreate the 'functions' directory below the working directory. 
+      \nPlace R function code there.")
+  stop("Program terminated because 'functions' directory does not exist.")
+}
 
-# Source each file
-lapply(files, source)
+# Define the path for the charts
+chart_directory_path <- file.path(working_dir, "charts")
 
-# Set scipen option to a large value
-options(scipen = 10)
+# Create the directory if it doesn't already exist
+if (!dir.exists(chart_directory_path)) {
+  dir.create(chart_directory_path)
+}
 
-sink("../../console_output/core_console_output.txt")
+# Create the directory for the reduced size file following shrinkage code.
+writeFilePath <- file.path(working_dir, "data")
+
+# Create the directory if it doesn't already exist
+if (!dir.exists(writeFilePath)) {
+  dir.create(writeFilePath)
+}
+
+# Define the console output directory and file name.
+output_dir <- file.path(working_dir, "console_output")
+output_file <- file.path(output_dir, "core_console_output.txt")
+
+# Create the directory if it does not exist
+if (!dir.exists(output_dir)) {
+  dir.create(output_dir)
+}
+
+# Start directing console output to the file
+sink(output_file)
 #sink("../../console_output/2024_console_output.txt")
 
 cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
 
-options(digits = 15) # Set the number of decimal places to 14
+# Source all .R files in the "functions" sub-directory
+function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+lapply(function_files, source)  # Source each function file.
+
+options(scipen = 10) # Set scipen option to a large value.
+
+options(digits = 15) # Set the number of decimal places to 15, the max observed.
 
 #########################################################################
 # File contains column names in the "header" line.
@@ -80,12 +116,20 @@ options(digits = 15) # Set the number of decimal places to 14
 
 #########################################################################
 # Load the USPS zipcode file
-data2File <- file.path("..", "..", "data", "USPS_zipcodes.csv")
-USPSzipcodes <-
-  read.csv(data2File,
-    header = TRUE,
-    colClasses = rep("character")
-  )
+USPS_zipcode_reference_file <- file.path(data_file, "USPS_zipcodes.csv")
+
+USPSzipcodes <- as.data.frame(fread(
+  USPS_zipcode_reference_file,
+  colClasses = "character"
+))
+
+
+# USPSzipcodes <-
+#   read.csv(USPS_zipcode_reference_file,
+#     header = TRUE,
+#     colClasses = "character"
+#   )
+
 
 USPSzipcodes <- as.data.frame(USPSzipcodes)
 
@@ -96,24 +140,33 @@ USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
 
 #########################################################################
 # Load the USPS zipcode file
-data3File <- file.path("..", "..", "data", "USPSabb.csv")
-USPSabbreviations <-
-  read.csv(data3File,
-    header = TRUE,
-    colClasses = rep("character")
-  )
+USPS_abbreviations_reference_file <- file.path( data_file, "USPSabb.csv")
+# USPSabbreviations <-
+#   read.csv(USPS_abbreviations_reference_file,
+#     header = TRUE,
+#     colClasses = rep("character")
+#   )
+# 
 
-# USPSabbreviations <- data.frame(full = full_name, abb = abb_name)
+USPSabbreviations <- as.data.frame(fread(
+  USPS_abbreviations_reference_file,
+  colClasses = "character"
+))
+
+
 USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
 names(USPSabbreviations) <- c("full", "abb")
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-d311 <-
-  read.csv(data1File,
-    header = TRUE,
-    colClasses = rep("character", ncol(read.csv(data1File)))
-  )
+main_code_file_path <- file.path( working_dir, "data", main_data_file)
+
+d311 <- as.data.frame(fread(
+  main_code_file_path,
+  colClasses = "character"
+))
+
+# Capture original file size for later use during file reduction routine.
 original_size <- object.size(d311)
 
 # make columns names user friendly
@@ -220,7 +273,7 @@ chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", se
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
 d311 <- consolidate_agencies((d311))
 
-#sorted_by_agency <- rank_by_agency(d311)
+sorted_by_agency <- rank_by_agency(d311)
 
 # chart_title <- "SR count by Agency & cumulative percentage"
 create_combo_chart(
@@ -299,16 +352,16 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
   theme(
     axis.title = element_blank(), # Remove x and y axis titles for consistency
     plot.title = element_text(hjust = 0.5, size = 12),
-    plot.subtitle = element_text(size = 7),
-    panel.background = element_rect(fill = "gray95", color = "gray95"),
+#    plot.subtitle = element_text(size = 7),
+    panel.background = element_rect(fill = "gray98", color = "gray98"),
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold", size = 7),
-    axis.text.y = element_text(face = "bold", size = 8),
+    axis.text.y = element_text(face = "bold", size = 9),
     legend.position = "none", # Remove all legends
     aspect.ratio = 0.618033 # Set aspect ratio (golden ratio)
   ) +
   
   # Standardize subtitle format
-  ggtitle(NULL, subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = " ")) +
+#  ggtitle(NULL, subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = " ")) +
   
   # Add percentage labels with standardized font size
   geom_text(aes(
@@ -744,7 +797,6 @@ if (!cb_results[[1]]) {
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
-
 incident_zip_results <- are_valid_values(d311$incident_zip, USPSzipcodesOnly, "incident_zip")
 
 if (!incident_zip_results[[1]]) {
@@ -766,10 +818,6 @@ cat("\n\n**********CHECKING FOR ALLOWABLE AND VALID DATES**********\n")
 # Compute and store "duration" in a new additional column for the "d311" dataframe.
 d311$duration <-
   as.numeric(difftime(d311$closed_date, d311$created_date, units = "days"))
-
-# positiveDurations <- d311[d311$duration > 0 & !is.na(d311$duration), ]
-# zeroDurations <- d311[d311$duration == 0 & !is.na(d311$duration), ]
-# negativeDurations <- d311[d311$duration < 0 & !is.na(d311$duration), ]
 
 # Step 1: Extract positive durations
 positiveDurations <- d311[d311$duration > 0 & !is.na(d311$duration), ]
@@ -861,21 +909,23 @@ if (num_rows_closedBeforeOpened > 1) {
     aes(x = duration, y = factor(1))
   ) +
     
-    geom_jitter(color = "#0072B2", alpha = 0.4, size = 1.9, shape = 17) +
+    geom_jitter(color = "#0072B2", alpha = 0.85, size = 1.9, shape = 17) +
     
-    geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.75, outlier.colour = "black", outlier.size = 1) +
+    geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.65, outlier.colour = "black", 
+                 outlier.size = 1) +
     
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
-      plot.subtitle = element_text(size = 7),
-      axis.text.x = element_text( face = "bold", size = 8),
-      axis.text.y = element_text(face = "bold", size = 8),
+#      plot.subtitle = element_text(size = 7),
+      axis.text.x = element_text( face = "bold", size = 9),
+      axis.text.y = element_text(face = "bold", size = 9),
+      panel.background = element_rect(fill = "gray98", color = "gray98")
     ) +
     
     labs(
       title = "SRs closed before they were created (negative duration) *excluding large negative values",
-      x = "", y = "",
-      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(large_neg_duration), sep = "")
+      x = "", y = ""
+#      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(large_neg_duration), sep = "")
     )
 
   print(negativeDurationChart)
@@ -979,20 +1029,22 @@ if (num_rows_future > 0) {
       data = closedinFuture,
       aes(x = future_days, y = factor(1))
     ) +
-      geom_jitter(color = "#0072B2", size = 2, shape = 17) +
+      geom_jitter(color = "#0072B2", size = 2, shape = 17, alpha = 0.85) +
       geom_boxplot(
         outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
-        fill = "#E69F00", size = 1, color = "black"
+        fill = "#E69F00", size = 1, color = "black", alpha = 0.65
       ) +
       theme(
         legend.position = "none",
         plot.title = element_text(hjust = 0.5, size = 13),
-        plot.subtitle = element_text(size = 8)
+        panel.background = element_rect(fill = "gray98", color = "gray98")
+#        plot.subtitle = element_text(size = 8)
       ) +
       labs(
         title = "SRs closed in the future",
         x = "Days closed in the future",
-        subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", num_rows_future, sep = "")
+        y = NULL
+#        subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", num_rows_future, sep = "")
       )
 
     print(closedinFutureChart)
@@ -1239,6 +1291,13 @@ for (column in redundant_columns) {
 # Delete the redundant columns
 d311_reduced <- d311[, !names(d311) %in% redundant_columns, ]
 
+# # Correct for excessive precision. Round to 5 decimal places for Lat/Long (4.37")
+# d311$latitude <- ifelse(!is.na(d311$latitude), round(as.numeric(d311$latitude), digits = 5), NA)
+# d311$longitude <- ifelse(!is.na(d311$longitude), round(as.numeric(d311$longitude), digits = 5), NA)
+# 
+# # Update and replace the "location" field
+# d311$location <- paste0( "(", d311$latitude, ", ", d311$longitude, ")")
+
 # Calculate the size of the new data table object
 reduced_size <- object.size(d311_reduced)
 
@@ -1246,11 +1305,11 @@ reduced_size <- object.size(d311_reduced)
 size_reduction <- original_size - reduced_size
 
 # Print the results
-cat("\nOriginal size:", format(original_size, units = "auto"))
-cat("\nSize after removing redundant columns:", format(reduced_size, units = "auto"))
+cat("\nOriginal size:", format(original_size, units = "auto", digits = 4))
+cat("\nSize after removing redundant columns:", format(reduced_size, units = "auto", digits = 4))
 cat(
-  "\nPotential size reduction:", format(size_reduction, units = "auto"), "or",
-  round(size_reduction / original_size * 100, 1), "%\n"
+  "\nPotential size reduction:", format(size_reduction, units = "auto", digits = 4), "or",
+  round(size_reduction / original_size * 100, 4), "%\n"
 )
 
 #########################################################################
