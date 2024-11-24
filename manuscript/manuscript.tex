@@ -236,7 +236,7 @@ maintenance requests. Initially a phone-based call center, the system
 evolved into a comprehensive data management platform handling
 millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile channels in 2009, a
-record monhtly high of 348,463 Service Requests in 
+record monhtly high of 348,463 SRs in 
 August 2020 (associated with the the COVID-19 
 pandemic), the 2021 expansion to include the 
 Metropolitan Transit Authority (MTA) NYC subway 
@@ -291,7 +291,7 @@ characteristics of the 311 SR dataset used in this analysis:
   over 6.4 million rows. It was exported as a CSV file.
 
 \item There are 41 columns (fields) of data for each row, with each
-  row representing a single Service Request (SR). To facilitate 
+  row representing a single SR. To facilitate 
   processing, column names were made lower case and 
   spaces were replaced with underscores, e.g. \texttt{complaint\_type}. 
   This naming convention is used throught this paper. 
@@ -382,8 +382,8 @@ curation processes within these  high volume Agencies.
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width = \textwidth]{SRs_by_Agency.pdf}
-  	\caption{SR Counts by Agency for the time period 2022-2023}
+	\includegraphics[width = \textwidth]{SRs_by_Agency-crop.pdf}
+  	\caption{311 SR counts by agency for the time period 2022--2023.}
 	\label{fig:SRcountbyAgency}
 \end{figure}
 
@@ -410,8 +410,8 @@ responsible for handling these high-volume complaints.
 
 \begin{figure}[tbp]
  \centering
-  \includegraphics[width = \textwidth]{SR_by_Complaint_Type.pdf} 
-  \caption{Top 20 Complaint Types for the time period 2022-2023} 
+  \includegraphics[width = \textwidth]{SR_by_Complaint_Type-crop.pdf} 
+  \caption{Top 20 complaint types for the 311 SR during 2022--2023.} 
   \label{fig:SR_complaints}
 \end{figure}
 
@@ -480,7 +480,7 @@ it difficult to analyze the data effectively and often require extensive
 data cleaning efforts. Here are three structural issues we encountered.
  
 \paragraph{Undocumented Fields:} The 311 SR 
-The 311 Service Request Data Dictionary identifies 
+The 311 SR Data Dictionary identifies 
 41 data columns (fields) and provides related information 
 for each. However, there are six additional fields that can be
 optionally downloaded if manually selected. These fields are 
@@ -499,7 +499,7 @@ visible in the portal's ``Column manager'' widget, labeled with the prefix
 While one can likely infer the meaning of these ``computed'' 
 fields, uncertainty remains as to their derivation and 
 usage. These six fields are not included in
-the 311 Service Request Data Dictionary. Additionally, our analysis 
+the 311 SR Data Dictionary. Additionally, our analysis 
 revealed that these six ``computed'' fields have 
 significant data validity issues, leading us to categorize these six fields 
 as experimental and \textit{not for public use}. An update 
@@ -567,8 +567,9 @@ the Most, Partial, and Few/None categories.
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=\textwidth]{BlankFields.pdf}
-	\caption{Number and Percentage of Empty/Blank Entries for the time period 2022-2023}
+  	\includegraphics[width=\textwidth]{BlankFields-cro.pdf}
+	\caption{Number and percentage of empty/blank entries for the
+          311 SR data during 2022--2023.}
 	\label{fig:blank_fields}
 \end{figure}
 
@@ -580,8 +581,10 @@ are identified and isolated from the analysis. For example, the \texttt{latitude
 and \texttt{longitude} fields were found to all fall within the 
 geographic boundaries of New York City. Likewise, 
 the \texttt{unique\_key} field was indeed unique, as required. 
-Unfortunately, the 311 Service Request Data Dictionary specifies very few domains of 
-acceptable values for other fields. Nonetheless, the following fields were tested and found to comply with their expected domains, as determined by public 
+Unfortunately, the 311 SR Data Dictionary specifies very few domains
+of acceptable values for other fields. Nonetheless, the following
+fields were tested and found to comply with their expected
+domains, as determined by public
 usage and as evidenced in other historical datasets:
 
 \begin{itemize}[left=1.5em]
@@ -669,20 +672,21 @@ distorting the mean response time for a specific complaint category.
   % First figure
   \begin{subfigure}[t]{0.495\textwidth} % Adjust width as needed
     \centering
-    \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
-    \caption{Post-closed \texttt{resolution\_action\_update\_date}(s) >30 days}
-    \label{fig:resolution-violin}
+    \includegraphics[width=\textwidth]{negative_duration_SR_violin.pdf}
+    \caption{Distribution of negative response times.}
+    \label{fig:negative-duration-violin}
   \end{subfigure}
   \hfill % Horizontal space between subfigures
   % Second figure
   \begin{subfigure}[t]{0.495\textwidth} % Adjust width as needed
     \centering
-    \includegraphics[width=\textwidth]{negative_duration_SR_violin.pdf}
-    \caption{Distribution of Negative Durations.}
-    \label{fig:negative-duration-violin}
+    \includegraphics[width=\textwidth]{post_closed_violin_chart.pdf}
+    \caption{Post-closed \texttt{resolution\_action\_update\_date}(s) >30 days}
+    \label{fig:resolution-violin}
   \end{subfigure}
   % Main figure caption
-  \caption{Comparison of Violin Plots: (a) Post-Closed Resolution and (b) Negative Durations for the time period 2022-2023}
+  \caption{Violin plots for negative response times and post-closed
+    resolution during 2022--2023.}
   \label{fig:violin-plots}
 \end{figure}
 
@@ -696,7 +700,7 @@ errors occur.
 
 \begin{table}[tbp]
   \centering
-  \caption{Sample  Negative Durations [excluding extreme values that are <$-$730 days]}
+  \caption{Sample  negative durations [excluding extreme values that are <$-$730 days]}
    \label{tab:largest-errors}
  	\begin{tabular}{l l l r l}
     \toprule
@@ -734,7 +738,7 @@ early morning. However, there is a significantly higher
 number of SRs closed exactly at midnight, as well 
 as a large number created exactly at midnight. The magnitude 
 of this anomaly is well outside the 3$\sigma$ level as shown 
-in Figure~\ref{fig:stacked}
+in Figure~\ref{fig:exacthours}
 
 \begin{figure}[tbp]
     \centering
@@ -742,7 +746,7 @@ in Figure~\ref{fig:stacked}
     \begin{subfigure}[t]{0.495\textwidth} % Adjust width to fit side by side
         \centering
         \includegraphics[width=\textwidth]{2-year-trend_SRs_created_on_the_hour.pdf}
-        \caption{SRs Created Exactly on the Hour}
+        \caption{SRs created exactly on the hour}
         \label{fig:busiestcreated}
     \end{subfigure}
     \hfill % Add horizontal space between subfigures
@@ -750,12 +754,12 @@ in Figure~\ref{fig:stacked}
     \begin{subfigure}[t]{0.495\textwidth} % Adjust width to fit side by side
         \centering
         \includegraphics[width=\textwidth]{2-year-trend_SRs_closed_on_the_hour.pdf}
-        \caption{SRs Closed Exactly on the Hour}
+        \caption{SRs closed exactly on the hour}
         \label{fig:busiestclosed}
     \end{subfigure}
     % Main caption
-    \caption{Comparison of SRs Created \& Closed by Hour-of-the-Day for the time period 2022-2023}
-    \label{fig:comparison}
+    \caption{Comparison of 311 SRs created \& closed by hour-of-the-day during 2022--2023.}
+    \label{fig:exacthours}
 \end{figure}
 
 These unusual patterns of SR creation and closure exactly at midnight 
@@ -855,7 +859,7 @@ CSV file and the fact that the agency abbreviations are
 easily recognized and well understood.
 
 \paragraph{\texttt{landmark} \& \texttt{street\_name}:} Per the 
-311 Service Request Data Dictionary, the \texttt{landmark} 
+311 SR Data Dictionary, the \texttt{landmark} 
 field \textit{can refer to any noteworthy location, 
 including but not limited to, parks, hospitals, airports, sports facilities, 
 performance spaces, etc..} However, most entries are actually 
@@ -951,7 +955,11 @@ significantly increase storage requirements.
 \subsection{Data Dictionary} 
 \label{sec:datadictionary}
 
-The 311 Service Request Data Dictionary would greatly benefit from an update. We found several discrepancies between the Data Dictionary and the actual data, which could potentially mislead analytic efforts. Here are some examples:
+The 311 SR Data Dictionary would greatly benefit from an update. We
+found several discrepancies between the Data Dictionary and the actual
+data, which could potentially mislead analytic efforts. Here are some
+examples:
+
 
 \paragraph{Data typing:} While the NYC Open Data portal displays the data types of 
 various fields (aka ``columns''), the Data Dictionary does 
