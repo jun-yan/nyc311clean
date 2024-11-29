@@ -42,12 +42,9 @@ cat("\n***** Program initialization *****")
 # and that the R functions are located in a sub-directory named "functions".
 # Data files should be placed in a sub-directory named "data".
 
-setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean\\code")
+setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
 
 # Create the sub-directories used during program execution.
-# Get the current working directory
-working_dir <- getwd()
-
 # Get the current working directory
 working_dir <- getwd()
 
@@ -63,9 +60,6 @@ if (!dir.exists(base_dir)) {
   dir.create(base_dir)
   cat("Base directory '", base_dir, "' created.\n", sep = "")
 } 
-#else {
-#  cat("Base directory '", base_dir, "' already exists.\n", sep = "")
-#}
 
 # Loop through the subdirectories and create them if they don't exist
 for (sub_dir in sub_dirs) {
@@ -74,28 +68,25 @@ for (sub_dir in sub_dirs) {
     dir.create(dir_path)
     cat("Subdirectory '", dir_path, "' created.\n", sep = "")
   } 
-  # else {
-  #   cat("Subdirectory '", dir_path, "' already exists.\n", sep = "")
-  # }
-
-cat("Directory structure setup complete.\n")
 }
 
+cat("Directory structure setup complete.\n") }
+
 # Define the console output directory and file name.
-output_dir <- file.path(working_dir, "console_output")
+output_dir <- file.path(base_dir, "console_output")
 output_file <- file.path(output_dir, "core_console_output.txt")
 
 # Define the path to the directory containing your function scripts
-functions_path <- file.path(working_dir, "functions")
+functions_path <- file.path(base_dir, "functions")
 
 # Define the path for the main data file (CSV file)
-data_file <- file.path(working_dir, "data")
+data_file <- file.path(base_dir, "data")
 
 # Define the path for the charts
-chart_directory_path <- file.path(working_dir, "charts")
+chart_directory_path <- file.path(base_dir, "charts")
 
 # Create the directory for the reduced size file following shrinkage code.
-writeFilePath <- file.path(working_dir, "data")
+writeFilePath <- file.path(base_dir, "data")
 
 # Start directing console output to the file
 sink(output_file)
