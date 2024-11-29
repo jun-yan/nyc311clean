@@ -42,60 +42,65 @@ cat("\n***** Program initialization *****")
 # and that the R functions are located in a sub-directory named "functions".
 # Data files should be placed in a sub-directory named "data".
 
+setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean\\code")
+
 # Create the sub-directories used during program execution.
 # Get the current working directory
 working_dir <- getwd()
 
-# Define the path for the main data file (CSV file)
-data_file <- file.path(working_dir, "data")
+# Get the current working directory
+working_dir <- getwd()
 
-# Create the main data directory if it doesn't already exist, then halt program execution.
-if (!dir.exists(data_file)) {
-  dir.create(data_file)
-  cat("\nCreating the data directory below the working directory. \nPlace program data there.")
-  stop("\n\nProgram terminated because data directory does not exist.")
-}
+cat("\n***** Program initialization *****")
+# Set the base directory under the working directory
+base_dir <- file.path(working_dir, "code")
 
-# Define the path to the directory containing your function scripts
-functions_path <- file.path(working_dir, "functions")
+# Define the subdirectories
+sub_dirs <- c("charts", "functions", "data", "console_output")
 
-# Create the directory if it doesn't already exist, and then halt program execution.
-if (!dir.exists(functions_path)) {
-  cat("\nCreate the 'functions' directory below the working directory. 
-      \nPlace R function code there.")
-  stop("Program terminated because 'functions' directory does not exist.")
-}
+# Check if the base directory exists, and create it if it doesn't
+if (!dir.exists(base_dir)) {
+  dir.create(base_dir)
+  cat("Base directory '", base_dir, "' created.\n", sep = "")
+} 
+#else {
+#  cat("Base directory '", base_dir, "' already exists.\n", sep = "")
+#}
 
-# Define the path for the charts
-chart_directory_path <- file.path(working_dir, "charts")
+# Loop through the subdirectories and create them if they don't exist
+for (sub_dir in sub_dirs) {
+  dir_path <- file.path(base_dir, sub_dir)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path)
+    cat("Subdirectory '", dir_path, "' created.\n", sep = "")
+  } 
+  # else {
+  #   cat("Subdirectory '", dir_path, "' already exists.\n", sep = "")
+  # }
 
-# Create the directory if it doesn't already exist
-if (!dir.exists(chart_directory_path)) {
-  dir.create(chart_directory_path)
-}
-
-# Create the directory for the reduced size file following shrinkage code.
-writeFilePath <- file.path(working_dir, "data")
-
-# Create the directory if it doesn't already exist
-if (!dir.exists(writeFilePath)) {
-  dir.create(writeFilePath)
+cat("Directory structure setup complete.\n")
 }
 
 # Define the console output directory and file name.
 output_dir <- file.path(working_dir, "console_output")
 output_file <- file.path(output_dir, "core_console_output.txt")
 
-# Create the directory if it does not exist
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir)
-}
+# Define the path to the directory containing your function scripts
+functions_path <- file.path(working_dir, "functions")
+
+# Define the path for the main data file (CSV file)
+data_file <- file.path(working_dir, "data")
+
+# Define the path for the charts
+chart_directory_path <- file.path(working_dir, "charts")
+
+# Create the directory for the reduced size file following shrinkage code.
+writeFilePath <- file.path(working_dir, "data")
 
 # Start directing console output to the file
 sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
-cat("\n***** Program initialization *****")
 
 # Source all .R files in the "functions" sub-directory
 function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
@@ -143,7 +148,7 @@ names(USPSabbreviations) <- c("full", "abb")
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
-main_data_file_path <- file.path( working_dir, "data", main_data_file)
+main_data_file_path <- file.path( data_file, main_data_file)
 
 d311 <- as.data.frame(fread(
   main_data_file_path,

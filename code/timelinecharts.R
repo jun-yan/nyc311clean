@@ -4,7 +4,7 @@
 # install.packages('zoo')
 # install.packages("ggpmisc")
 # install.packages("lubridate")
-install.packages("data.table")
+# install.packages("data.table")
 #rm(list = ls(), envir = .GlobalEnv)
 
 library(ggplot2)
@@ -30,55 +30,66 @@ main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 
 cat("\n***** Program initialization *****")
 
-setwd("C:/Users/david/OneDrive/Documents/datacleaningproject/nyc311clean/code")
+# Prior to running program, ensure the R code is located in the working directory, 
+# and that the R functions are located in a sub-directory named "functions".
+# Data files should be placed in a sub-directory named "data".
 
+setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
+
+# Create the sub-directories used during program execution.
+
+# Get the current working directory
 working_dir <- getwd()
 
-data_directory <- file.path(working_dir, "data")
+# Set the base directory under the working directory
+base_dir <- file.path(working_dir, "code")
 
-# Define the path for the charts
-chart_directory_path <- file.path(working_dir, "charts")
+# Define the subdirectories
+sub_dirs <- c("charts", "functions", "data", "console_output")
 
-# Set path for the chart directory
-# Create the directory if it doesn't already exist
-if (!dir.exists(chart_directory_path)) {
-  dir.create(chart_directory_path)
+# Check if the base directory exists, and create it if it doesn't
+if (!dir.exists(base_dir)) {
+  dir.create(base_dir)
+  cat("Base directory '", base_dir, "' created.\n", sep = "")
 }
 
-# Define the console output directory and file name.
-output_dir <- file.path(working_dir, "console_output")
-output_file <- file.path(output_dir, "timeline_console_output.txt")
-
-# Create the directory if it does not exist
-if (!dir.exists(output_dir)) {
-  dir.create(output_dir)
+# Loop through the subdirectories and create them if they don't exist
+for (sub_dir in sub_dirs) {
+  dir_path <- file.path(base_dir, sub_dir)
+  if (!dir.exists(dir_path)) {
+    dir.create(dir_path)
+    cat("Subdirectory '", dir_path, "' created.\n", sep = "")
 }
-
-# Extract the first two digits for file naming purposes
-year_digits <- substr(main_data_file, 1, 2)
-
-if (year_digits != "10") {
-  year_digits <- "2"
 }
-
-chart_prefix <- paste0(year_digits, "-year")
-
-file_name_prefix <- chart_prefix # to name individual chart files
-
-# Start directing console output to the file
-sink(output_file)
-
-# Set scipen option to a large value to prevent scientific notation for numbers
-options(scipen = 999)
 
 # Define the path to the directory containing your function scripts
-functions_path <-  file.path(working_dir, "functions")
+functions_path <- file.path(base_dir, "functions")
 
-# Source all .R files in the directory
-files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+# Define the path for the main data file (CSV file)
+data_file <- file.path(base_dir, "data")
 
-# Source each file
-lapply(files, source)
+# Define the path for the charts
+chart_directory_path <- file.path(base_dir, "charts")
+
+# Create the directory for the reduced size file following shrinkage code.
+writeFilePath <- file.path(base_dir, "data")
+
+# Start directing console output to the file
+# Define the console output directory and file name.
+output_dir <- file.path(base_dir, "console_output")
+output_file <- file.path(output_dir, "timeline_console_output.txt")
+
+sink(output_file)
+
+cat("\nExecution begins at:", formattedStartTime)
+
+# Source all .R files in the "functions" sub-directory
+function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+lapply(function_files, source)  # Source each function file.
+
+options(scipen = 999) # Set scipen option to a large value.
+
+options(digits = 15) # Set the number of decimal places to 15, the max observed.
 
 cat("\nExecution begins at:", formattedStartTime)
 
@@ -86,7 +97,7 @@ cat("\nExecution begins at:", formattedStartTime)
 cat("\n\n**********DATA INPUT AND PREPARATION**********\n")
 
 # Load the main 311 SR data file. Set the read & write paths.
-main_data_file <- file.path(data_directory, main_data_file)
+main_data_file <- file.path(data_file, main_data_file)
 d311 <- as.data.frame(fread(
   main_data_file,
   colClasses = "character"
@@ -127,6 +138,8 @@ num_years <- unique(years)
 
 cat("\nTotal rows:", format(num_rows, big.mark = ","), "covering", length(num_years), "years")
 
+year_digits <- "2"
+file_name_prefix <- "2"
 #########################################################################
 # Calculate the earliest and latest dates directly
 earliest_date <- min(d311$created_date, na.rm = TRUE)
