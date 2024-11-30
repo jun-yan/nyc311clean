@@ -48,7 +48,6 @@ setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
 # Get the current working directory
 working_dir <- getwd()
 
-cat("\n***** Program initialization *****")
 # Set the base directory under the working directory
 base_dir <- file.path(working_dir, "code")
 
@@ -69,8 +68,6 @@ for (sub_dir in sub_dirs) {
     cat("Subdirectory '", dir_path, "' created.\n", sep = "")
   } 
 }
-
-cat("Directory structure setup complete.\n") }
 
 # Define the console output directory and file name.
 output_dir <- file.path(base_dir, "console_output")
