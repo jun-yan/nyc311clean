@@ -1,3 +1,36 @@
+options (repos = c (
+  ropenscilabs = "https://ropenscilabs.r-universe.dev",
+  CRAN = "https://cloud.r-project.org"
+))
+
+# install.packages("remotes")
+remotes::install_github ("mpadge/deposits")
+
+# Load the deposits package
+library(deposits)
+
+deposits_auth(service = "figshare")
+
+# Specify the Figshare article ID
+article_id <- "27895980" # Replace with your actual article ID
+deposits_download(service = "figshare", article_id = article_id, dir = "downloads")
+
+
+cli <- depositsClient$new (service = "figshare")
+
+# Authenticate with Figshare
+deposits_auth(service = "figshare")
+
+
+
+# List files in the article
+files <- deposits_files(service = "figshare", article_id = article_id)
+print(files)
+
+# Download all files in the article to the "downloads" directory
+deposits_download(service = "figshare", article_id = article_id, dir = "downloads")
+
+cat("Download complete. Files saved in 'downloads' directory.\n")
 
 setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
 
@@ -42,4 +75,9 @@ chart_directory_path <- file.path(base_dir, "charts")
 # Create the directory for the reduced size file following shrinkage code.
 writeFilePath <- file.path(base_dir, "data")
 
-cat{"\nDirectory structure and data files downloaded."}
+cat("\nDirectory structure and data files downloaded.")
+
+#############################################################################################
+#############################################################################################  
+
+

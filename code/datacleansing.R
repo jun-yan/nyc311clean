@@ -51,24 +51,6 @@ working_dir <- getwd()
 # Set the base directory under the working directory
 base_dir <- file.path(working_dir, "code")
 
-# Define the subdirectories
-sub_dirs <- c("charts", "functions", "data", "console_output")
-
-# Check if the base directory exists, and create it if it doesn't
-if (!dir.exists(base_dir)) {
-  dir.create(base_dir)
-  cat("Base directory '", base_dir, "' created.\n", sep = "")
-} 
-
-# Loop through the subdirectories and create them if they don't exist
-for (sub_dir in sub_dirs) {
-  dir_path <- file.path(base_dir, sub_dir)
-  if (!dir.exists(dir_path)) {
-    dir.create(dir_path)
-    cat("Subdirectory '", dir_path, "' created.\n", sep = "")
-  } 
-}
-
 # Define the console output directory and file name.
 output_dir <- file.path(base_dir, "console_output")
 output_file <- file.path(output_dir, "core_console_output.txt")
@@ -122,17 +104,17 @@ USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
 
 #########################################################################
-# Load the USPS zipcode file
-USPS_abbreviations_reference_file <- file.path( data_file, "USPSabb.csv")
-
-USPSabbreviations <- as.data.frame(fread(
-  USPS_abbreviations_reference_file,
-  colClasses = "character"
-))
-
-
-USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
-names(USPSabbreviations) <- c("full", "abb")
+# # Load the USPS zipcode file
+# USPS_abbreviations_reference_file <- file.path( data_file, "USPSabb.csv")
+# 
+# USPSabbreviations <- as.data.frame(fread(
+#   USPS_abbreviations_reference_file,
+#   colClasses = "character"
+# ))
+# 
+# 
+# USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
+# names(USPSabbreviations) <- c("full", "abb")
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -399,15 +381,22 @@ for (field in fields) {
 final_results <- bind_rows(results)
 
 # Reshape the data to present as a table
-summary_table <- final_results %>%
+field_usage_summary_table <- final_results %>%
   pivot_wider(
     names_from = agency,
     values_from = count,
     values_fill = 0
   )
 
-# View the table
-print(summary_table, n=100)
+# Print the data frame without row names
+print(as.data.frame(field_usage_summary_table), row.names = FALSE)
+
+# Define the file path for saving the CSV
+summary_table_file_path <- file.path(writeFilePath, "field_usage_summary_table.csv")
+
+# Save the data frame as a CSV file
+write.csv(field_usage_summary_table, summary_table_file_path, row.names = FALSE)
+
 
 #########################################################################
 
