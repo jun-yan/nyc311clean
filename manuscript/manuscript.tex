@@ -294,7 +294,7 @@ characteristics of the 311 SR dataset used in this analysis:
   row representing a single SR. To facilitate 
   processing, column names were made lower case and 
   spaces were replaced with underscores, e.g. \texttt{complaint\_type}. 
-  This naming convention is used throught this paper. 
+  This naming convention is used throughout this paper. 
 	
 \item Each SR has four date fields: 
 	\begin{itemize}	
@@ -338,7 +338,7 @@ characteristics of the 311 SR dataset used in this analysis:
 During the 10-year period from 2014 to 2023,  NYC's 311 system
 experienced a 50\% increase in the number of SRs, 
 reflecting a growing public reliance on and usage of 
-the 311 system. (During this 10-year time-frame, the 
+the 311 system. (During this 10-year time frame, the 
 population of NYC grew just 0.6\%.). The most significant increase
 in activity occurred in 2020, when the volume of requests 
 surged to 3.23 million during the COVID-19 pandemic, 
@@ -357,7 +357,7 @@ both routine City operations and extraordinary events.
 Figure~\ref{fig:SRcountbyAgency} provides a breakdown of SRs by
 the responsible Agency, showing the cumulative 
 percentage of SRs handled by each
-agency over the 2-year time-frame. Note that the
+agency over the 2-year time frame. Note that the
 distribution of SRs is heavily concentrated among a few key 
 agencies. The six largest agencies are:
 
@@ -550,20 +550,31 @@ blank (or N/A values) they appear to divide into three groups:
 \end{itemize}
 
 The \textit{Mostly Empty} category includes fields such as
-\texttt{taxi\_company\_borough}, \texttt{due\_date},
-\jy{These variables seem only relevant to certain agencies, which
-  could be made available in a separate table.}
+\texttt{taxi\_company\_borough}, \texttt{due\_date}
 \texttt{road\_ramp}, and \texttt{bridge\_highway\_name}.
+
+Of particular note is that several of the \textit{Mostly Empty} fields
+are used by only one or two Agencies. Example:
+
+
+
+
+
+
 The \textit{Partially Empty} category includes fields such as
 \texttt{location\_type}, \texttt{landmark}, 
-and \texttt{cross\_street\_1 \& \_2}. And the \textit{Few/None Empty} 
+and \texttt{cross\_street\_1 \& \_2}. 
+
+And the \textit{Few/None Empty} 
 category includes \texttt{created\_date}, \texttt{complaint\_type},
-\texttt{agency}, and \texttt{status}. For some analysis efforts, it may be
-prudent to inquire further as to why some fields are 
-mostly or almost always blank. Figure~\ref{fig:blank_fields} is 
+\texttt{agency}, and \texttt{status}. 
+
+For some analysis efforts, it may be prudent to inquire 
+further as to why some fields are mostly or almost 
+always blank. Figure~\ref{fig:blank_fields} is 
 a graphic depiction of total empty (blank \& N/As) for each 
-field illustrating the grouping into 
-the Most, Partial, and Few/None categories.
+field illustrating the grouping into the Most, 
+Partial, and Few/None categories.
 
 \begin{figure}[tbp]
 	\centering
@@ -953,7 +964,7 @@ data. This approach is particularly useful in large datasets, where
 frequently repeated text-based categorical variables can 
 significantly increase storage requirements.
 
-\jy{Could refer to cross-plotform data format such as Arrow
+\jy{Could refer to cross-platform data format such as Arrow
   \citep{bates2024csv}.}
 
 
