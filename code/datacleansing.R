@@ -1,15 +1,15 @@
 #########################################################################
-# install.packages("ggplot2")
-# install.packages("campfin")
-# install.packages("stringr")
-# install.packages("stringdist")
-# install.packages("dply(raw data")
-# install.packages("styler")
-# install.packages("ggpmisc")
-# install.packages("lubridate")
-# install.packages("data.table")
-# install.packages("sf")
-# install.packages("tidyverse")
+install.packages("ggplot2")
+install.packages("campfin")
+install.packages("stringr")
+install.packages("stringdist")
+install.packages("dply(raw data")
+install.packages("styler")
+install.packages("ggpmisc")
+install.packages("lubridate")
+install.packages("data.table")
+install.packages("sf")
+install.packages("tidyverse")
 
 library(tidyr)
 library(ggplot2)
@@ -21,9 +21,10 @@ library(scales)
 library(ggpmisc)
 library(lubridate)
 library(data.table)
-library(sf)
+library(sf) 
 
 #########################################################################
+rm(list = ls())
 
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
 #main_data_file <- "smaller_test_data.csv"
@@ -35,16 +36,10 @@ max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
-cat("\nExecution begins at:", formattedStartTime)
 cat("\n***** Program initialization *****")
-
-# Prior to running program, ensure the R code is located in the working directory, 
-# and that the R functions are located in a sub-directory named "functions".
-# Data files should be placed in a sub-directory named "data".
 
 setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
 
-# Create the sub-directories used during program execution.
 # Get the current working directory
 working_dir <- getwd()
 
@@ -58,28 +53,36 @@ output_file <- file.path(output_dir, "core_console_output.txt")
 # Define the path to the directory containing your function scripts
 functions_path <- file.path(base_dir, "functions")
 
+# Get all .R files in the "functions" sub-directory
+function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+
+# Source each file with error handling and message logging
+lapply(function_files, function(file) {
+  tryCatch({
+    source(file)
+#    message("Successfully sourced: ", file)
+  }, error = function(e) {
+    message("Error sourcing: ", file, " - ", e$message)
+  })
+})
+
 # Define the path for the main data file (CSV file)
 data_file <- file.path(base_dir, "data")
-
 # Define the path for the charts
 chart_directory_path <- file.path(base_dir, "charts")
 
 # Create the directory for the reduced size file following shrinkage code.
 writeFilePath <- file.path(base_dir, "data")
 
+options(scipen = 999) # Set scipen option to a large value.
+options(digits = 15) # Set the number of decimal places to 15, the max observed.
+
+cat("\nExecution begins at:", formattedStartTime)
+
 # Start directing console output to the file
 sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
-
-# Source all .R files in the "functions" sub-directory
-function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
-lapply(function_files, source)  # Source each function file.
-
-options(scipen = 999) # Set scipen option to a large value.
-
-options(digits = 15) # Set the number of decimal places to 15, the max observed.
-
 #########################################################################
 # File contains column names in the "header" line.
 # The R "read.csv" function uses a "." to replace the spaces in column names.
@@ -102,19 +105,6 @@ USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
 USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
-
-#########################################################################
-# # Load the USPS zipcode file
-# USPS_abbreviations_reference_file <- file.path( data_file, "USPSabb.csv")
-# 
-# USPSabbreviations <- as.data.frame(fread(
-#   USPS_abbreviations_reference_file,
-#   colClasses = "character"
-# ))
-# 
-# 
-# USPSabbreviations <- make_column_names_user_friendly(USPSabbreviations)
-# names(USPSabbreviations) <- c("full", "abb")
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -226,8 +216,6 @@ latest_date_formatted <- format(latest_date, format = "%Y-%m-%d %H:%M:%S")
 earliest_title <- format(as.Date(earliest_date_formatted), format = "%Y-%m-%d")
 latest_title <- format(as.Date(latest_date_formatted), format = "%Y-%m-%d")
 
-#chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
-
 #########################################################################
 # consolidate Agencies (DCA, DOITT, NYC311-PRD)
 d311 <- consolidate_agencies((d311))
@@ -240,7 +228,10 @@ create_combo_chart(
   chart_title = NULL,
   chart_file_name = "SRs_by_Agency.pdf",
   console_print_out_title = "Summary of SRs by Agency",
-  chart_directory = chart_directory_path
+  chart_directory = chart_directory_path,
+  chart_width = 10,
+  chart_height = 10/1.6,
+  annotation_size = 4.3
 )
 
 # Display the results
@@ -312,22 +303,18 @@ blank_chart <- ggplot(missingDataPerColumn, aes(x = reorder(field, -total_empty)
   theme(
     axis.title = element_blank(), # Remove x and y axis titles for consistency
     plot.title = element_text(hjust = 0.5, size = 12),
-#    plot.subtitle = element_text(size = 7),
-    panel.background = element_rect(fill = "gray98", color = "gray98"),
+    panel.background = element_rect(fill = "gray96", color = "gray96"),
     axis.text.x = element_text(angle = 50, vjust = 1, hjust = 1, face = "bold", size = 7),
     axis.text.y = element_text(face = "bold", size = 9),
-    legend.position = "none", # Remove all legends
-    aspect.ratio = 0.618033 # Set aspect ratio (golden ratio)
+    legend.position = "none", # Remove all legends,
+    plot.margin = margin(1, 2, 1, 2)  # Adjust the top, right, bottom, and left margins
   ) +
   
-  # Standardize subtitle format
-#  ggtitle(NULL, subtitle = paste(chart_sub_title, format(num_rows_d311, big.mark = ","), sep = " ")) +
-  
-  # Add percentage labels with standardized font size
+# Add percentage labels with standardized font size
   geom_text(aes(
     x = field, y = total_empty, label = pct_empty,
     angle = -70
-  ), size = 2.5, color = "black") +
+  ), size = 3.5, color = "black") +
   
   # Remove x and y axis labels for consistency with base_bar_chart
   labs(x = NULL, y = NULL)
@@ -349,8 +336,7 @@ print(blank_chart)
 
 # Set desired width and height to match base_bar_chart
 chart_width <- 10
-#chart_height <- chart_width / 1.618 # Golden Ratio for height
-chart_height <- chart_width / 1.2 # Golden Ratio for height
+chart_height <- chart_width / 1.4 # Golden Ratio for height
 
 # Save the chart with the Golden Ratio aspect ratio
 chart_path <- file.path(chart_directory_path, "BlankFields.pdf")
@@ -360,7 +346,6 @@ ggsave(chart_path, plot = blank_chart, width = chart_width,
 #########################################################################
 # Determine field usage by Agency
 # Initialize the list of fields (excluding "agency")
-options(scipen = 999)
 fields <- setdiff(names(d311), "agency")
 
 # Initialize a list to store the results
@@ -396,7 +381,6 @@ summary_table_file_path <- file.path(writeFilePath, "field_usage_summary_table.c
 
 # Save the data frame as a CSV file
 write.csv(field_usage_summary_table, summary_table_file_path, row.names = FALSE)
-
 
 #########################################################################
 
@@ -480,7 +464,9 @@ create_combo_chart(
   chart_title = NULL,
   chart_file_name = "SR_by_Complaint_Type.pdf",
   chart_directory = chart_directory_path,
-  console_print_out_title = "Summary of Complaint Type"
+  console_print_out_title = "Summary of Complaint Type",
+  num_x_labels = 10,
+  annotation_size = 4
 )
 
 # Restore column names
@@ -739,7 +725,6 @@ taxi_company_boroughResults <-
     "taxi_company_borough")
 
 # check if SR channels contain only allowable values
-
 open_data_channelResults <-
   are_valid_values(
     d311$open_data_channel_type,
@@ -799,15 +784,6 @@ cb_results <- are_valid_values(
   cbValues, 
   "community_board")
 
-# if (!cb_results[[1]]) {
-#   create_combo_chart(
-#     dataset = cb_results[[2]],
-#     chart_title = "Invalid Community Boards by Agnecy & cumulative percentage",
-#     chart_file_name = "invalid_community_boards.pdf",
-#     console_print_out_title = "Summary of Invalid Community Boards"
-#   )
-# }
-
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
 USPSzipcodesList <- as.list(USPSzipcodesOnly$delivery_zipcode)
@@ -816,15 +792,6 @@ incident_zip_results <- are_valid_values(
   d311$incident_zip, 
   USPSzipcodesList, 
   "incident_zip")
-
-# if (!incident_zip_results[[1]]) {
-#   create_combo_chart(
-#     dataset = incident_zip_results[[3]],
-#     chart_title = "Invalid incident_zip by Agnecy & cumulative percentage",
-#     chart_file_name = "invalid_incident_zip.pdf",
-#     console_print_out_title = "Summary of Invalid incident_zip(s) by Agency"
-#   )
-# }
 
 #########################################################################
 
@@ -935,16 +902,15 @@ if (num_rows_closedBeforeOpened > 1) {
                  outlier.size = 1) +
     theme(
       legend.position = "none", plot.title = element_text(hjust = 0.5),
-#      plot.subtitle = element_text(size = 7),
       axis.text.x = element_text( face = "bold", size = 9),
       axis.text.y = element_text(face = "bold", size = 9),
-      panel.background = element_rect(fill = "gray98", color = "gray98")
+      plot.margin = margin(1, 2, 1, 2),
+      panel.background = element_rect(fill = "gray96", color = "gray96")
     ) +
     
     labs(
       title = "SRs closed before they were created (negative duration) *excluding large negative values",
       x = "", y = ""
-#      subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", nrow(large_neg_duration), sep = "")
     )
 
   print(negativeDurationChart)
@@ -1060,14 +1026,12 @@ if (num_rows_future > 0) {
       theme(
         legend.position = "none",
         plot.title = element_text(hjust = 0.5, size = 13),
-        panel.background = element_rect(fill = "gray98", color = "gray98")
-#        plot.subtitle = element_text(size = 8)
+        panel.background = element_rect(fill = "gray96", color = "gray96")
       ) +
       labs(
         title = "SRs closed in the future",
         x = "Days closed in the future",
         y = NULL
-#        subtitle = paste("(", earliest_title, "--", latest_title, ")", " n=", num_rows_future, sep = "")
       )
 
     print(closedinFutureChart)
@@ -1301,7 +1265,7 @@ cat("\n\n**********REDUCE FILE SIZE BY REMOVING DUPLICATE/REDUNDANT FIELDS******
 cat("\nCurrent column names for d311 dataframe\n")
 print(names(d311))
 
-# # List of redundant columns to remove
+# List of redundant columns to remove
 redundant_columns <- c(
   "agency_name",
   "park_borough",
@@ -1323,13 +1287,6 @@ for (column in redundant_columns) {
 
 # Delete the redundant columns
 d311_reduced <- d311[, !names(d311) %in% redundant_columns, ]
-
-# # Correct for excessive precision. Round to 5 decimal places for Lat/Long (4.37")
-# d311$latitude <- ifelse(!is.na(d311$latitude), round(as.numeric(d311$latitude), digits = 5), NA)
-# d311$longitude <- ifelse(!is.na(d311$longitude), round(as.numeric(d311$longitude), digits = 5), NA)
-# 
-# # Update and replace the "location" field
-# d311$location <- paste0( "(", d311$latitude, ", ", d311$longitude, ")")
 
 # Calculate the size of the new data table object
 reduced_size <- object.size(d311_reduced)

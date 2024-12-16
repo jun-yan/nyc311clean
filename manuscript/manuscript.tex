@@ -382,7 +382,7 @@ curation processes within these  high volume Agencies.
 
 \begin{figure}[tbp]
 	\centering
-	\includegraphics[width = \textwidth]{SRs_by_Agency-crop.pdf}
+	\includegraphics[width = \textwidth]{SRs_by_Agency.pdf}
   	\caption{311 SR counts by agency for the time period 2022--2023.}
 	\label{fig:SRcountbyAgency}
 \end{figure}
@@ -410,7 +410,7 @@ responsible for handling these high-volume complaints.
 
 \begin{figure}[tbp]
  \centering
-  \includegraphics[width = \textwidth]{SR_by_Complaint_Type-crop.pdf} 
+  \includegraphics[width = \textwidth]{SR_by_Complaint_Type.pdf} 
   \caption{Top 20 complaint types for the 311 SR during 2022--2023.} 
   \label{fig:SR_complaints}
 \end{figure}
@@ -543,42 +543,51 @@ determine if SRs were closed before or after their
 \texttt{due\_date} fields are blank. When sorting fields by
 blank (or N/A values) they appear to divide into three groups:
 
+
 \begin{itemize}[left=1.5em]
     \item Mostly Empty: 93-99.9\% blank 
     \item Partially Empty: 40-4\% blank
     \item Few/None Empty: 2-0\% blank
 \end{itemize}
 
-The \textit{Mostly Empty} category includes fields such as
+The Mostly Empty category includes:
 \texttt{taxi\_company\_borough}, \texttt{due\_date}
-\texttt{road\_ramp}, and \texttt{bridge\_highway\_name}.
-
-Of particular note is that several of the \textit{Mostly Empty} fields
-are used by only one or two Agencies. Example:
-
-
-
-
-
-
-The \textit{Partially Empty} category includes fields such as
+\texttt{road\_ramp}, and \texttt{bridge\_highway\_name}. The 
+Partially Empty category includes:
 \texttt{location\_type}, \texttt{landmark}, 
-and \texttt{cross\_street\_1 \& \_2}. 
-
-And the \textit{Few/None Empty} 
+and \texttt{cross\_street\_1 \& \_2}. And the Few/None Empty 
 category includes \texttt{created\_date}, \texttt{complaint\_type},
-\texttt{agency}, and \texttt{status}. 
+\texttt{agency}, and \texttt{status}. Of particular note is that 
+several of the Mostly Empty fields are used by only one or 
+two Agencies (See: \autoref{tab:field-usage-summary}).
+
+\begin{table}[htbp]
+    \centering
+    \caption{Fields used by only one or two Agencies with limited non-blank entires}
+    \label{tab:field-usage-summary}
+    \begin{tabular}{l r r p{4cm}}
+        \toprule
+        \textbf{Field} & \textbf{\# of entries} & \textbf{\% non-blank} & \textbf{Agencies using} \\
+        \midrule
+        \texttt{taxi\_company\_borough} & 3,567  & 0.06\% & TLC \\
+        \texttt{vehicle\_type}           & 18,642 & 0.29\% & TLC, NYPD \\
+        \texttt{due\_date}               & 24,414 & 0.38\% & DSNY \\
+        \texttt{taxi\_pick\_up\_location} & 64,954 & 1.02\% & TLC \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
 
 For some analysis efforts, it may be prudent to inquire 
 further as to why some fields are mostly or almost 
 always blank. Figure~\ref{fig:blank_fields} is 
 a graphic depiction of total empty (blank \& N/As) for each 
-field illustrating the grouping into the Most, 
-Partial, and Few/None categories.
+field illustrating the grouping into the Mostly Empty, 
+Partially Empty, and Few/None Empty categories.
 
 \begin{figure}[tbp]
 	\centering
-  	\includegraphics[width=\textwidth]{BlankFields-crop.pdf}
+  	\includegraphics[width=\textwidth]{BlankFields.pdf}
 	\caption{Number and percentage of empty/blank entries for the
           311 SR data during 2022--2023.}
 	\label{fig:blank_fields}
@@ -684,7 +693,7 @@ distorting the mean response time for a specific complaint category.
   \begin{subfigure}[t]{0.495\textwidth} % Adjust width as needed
     \centering
     \includegraphics[width=\textwidth]{negative_duration_SR_violin.pdf}
-    \caption{Distribution of negative response times.}
+    \caption{Distribution of SR durations.}
     \label{fig:negative-duration-violin}
   \end{subfigure}
   \hfill % Horizontal space between subfigures
@@ -696,8 +705,8 @@ distorting the mean response time for a specific complaint category.
     \label{fig:resolution-violin}
   \end{subfigure}
   % Main figure caption
-  \caption{Violin plots for negative response times and post-closed
-    resolution during 2022--2023.}
+  \caption{Violin plots for negative SR durations and post-closed
+    resolution updates (2022--2023.}
   \label{fig:violin-plots}
 \end{figure}
 
@@ -750,11 +759,6 @@ number of SRs closed exactly at midnight, as well
 as a large number created exactly at midnight. The magnitude 
 of this anomaly is well outside the 3$\sigma$ level as shown 
 in Figure~\ref{fig:exacthours}
-
-\jy{The font sizes of annotations in Figure 4 and 5 need to be
-  increased. In addition, the size of the pdf figure could be made
-  arguments to the R function that generated them (instead of being
-  fixed in within the function).}
 
 \begin{figure}[tbp]
     \centering
@@ -964,8 +968,17 @@ data. This approach is particularly useful in large datasets, where
 frequently repeated text-based categorical variables can 
 significantly increase storage requirements.
 
-\jy{Could refer to cross-platform data format such as Arrow
-  \citep{bates2024csv}.}
+
+One promising alternative to reducing data storage requirements 
+for this large 311 SR dataset (3.7GB) would be employment of 
+the cross-platform Apache Arrow package. Apache Arrow (arrow.apache.org) 
+is an innovative, cross-language development platform designed for 
+in-memory data. It defines a standard for representing columnar data, 
+enabling efficient analytics and real-time data processing. As such,
+it offers dramatic improvements in file storage size, as well as 
+efficient analysis and cross-platform support for R, Python, 
+and Julia programming languages. Remarkable storage size 
+reduction (within several orders of magnitude) is possible. \citep{bates2024csv}.
 
 
 \subsection{Data Dictionary} 

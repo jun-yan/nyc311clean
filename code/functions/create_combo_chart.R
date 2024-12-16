@@ -5,7 +5,12 @@ create_combo_chart <- function(
     chart_title = NULL,
     chart_file_name = NULL,
     console_print_out_title = "Data Summary",
-    chart_directory
+    chart_directory,
+    chart_width = 10,
+    chart_height = 7,
+    annotation_size = 4.5,
+    num_x_labels = 20,          # New parameter for when to skip labels
+    skip_frequency = 2          # New parameter for how often to skip labels
 ) {
   
   # Step 1: Create summary_df sorted by count and calculate cumulative percentage
@@ -18,7 +23,6 @@ create_combo_chart <- function(
       cumulative_percentage = cumsum(percentage)
     ) %>%
     slice_head(n = 20)
-  
   
   # Step 2: Reorder the agency factor based on the descending count
   summary_df <- summary_df %>%
@@ -36,52 +40,59 @@ create_combo_chart <- function(
   
   print(format(summary_df, justify = "left"), row.names = FALSE)
   
+  # Count the number of unique x-axis data points
+  total_x_labels <- length(unique(summary_df$agency))
+  
+  # Utility function to blank every 'skip_frequency' label if total x labels > num_x_labels
+  blank_alternate_labels <- function(values) {
+    if (total_x_labels > num_x_labels) {
+      ifelse(seq_along(values) %% skip_frequency == 0, "", values)
+    } else {
+      values
+    }
+  }
+  
+  # Apply the label blanking logic to the count and cumulative percentage labels
+  count_labels <- blank_alternate_labels(summary_df$count)
+  cumulative_labels <- blank_alternate_labels(round(summary_df$cumulative_percentage, 2))
+  
   # Chart creation
   max_count <- max(summary_df$count)
   total_count <- sum(summary_df$count)
   
-  # earliest_date <- min(dataset$created_date, na.rm = TRUE)
-  # latest_date <- max(dataset$created_date, na.rm = TRUE)
-  # earliest_title <- format(as.Date(earliest_date), format = "%Y-%m-%d")
-  # latest_title <- format(as.Date(latest_date), format = "%Y-%m-%d")
-  
-  # result <- calculate_values(max_count)
-  # starting_value <- result$starting_value
-  # increment <- result$increment
-
   # Step 1: Create the initial plot without specifying y-axis breaks
   combo_chart <- ggplot(summary_df) +
     
     geom_bar(aes(x = agency, y = count), stat = "identity", fill = "#44AA99", width = 0.55) +
     
-    geom_text(aes(label = count, x = agency, y = count), 
-              colour = "black", hjust = 0.5, vjust = -0.5, size = 2.5) +
+    # Count labels (primary axis)
+    geom_text(aes(label = count_labels, x = agency, y = count), 
+              colour = "black", hjust = 0.5, vjust = -0.5, size = annotation_size) +
     
-    geom_text(aes(label = round(cumulative_percentage, 2), x = agency, y = max_count * cumulative_percentage),
-              size = 3, colour = "black", hjust = 0.5, vjust = 1.7) +
+    # Cumulative percentage labels (secondary axis)
+    geom_text(aes(label = cumulative_labels, x = agency, y = max_count * cumulative_percentage),
+              size = annotation_size, colour = "black", hjust = 0.5, vjust = 1.7) +
     
     scale_y_continuous(
       labels = scales::comma,  # Use comma format for y-axis labels
       sec.axis = sec_axis(~ . / max_count)
     ) +
     
-#    ggtitle(chart_title, subtitle = paste("(", earliest_title, "--", latest_title, ")",
-#                                          " n=", format(total_count, big.mark = ","), sep = "")) +
     labs(x = NULL, y = NULL) +
     
     theme(
-      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = 8.5),
-      axis.text.y = element_text(face = "bold", size = 8),
-      axis.text.y.right = element_text(color = "black", face = "bold", size = 8),
-      plot.title = element_text(hjust = 0.5, size = 12),
-      plot.subtitle = element_text(size = 7),
-      panel.background = element_rect(fill = "gray98", color = "gray98"),
-            aspect.ratio = 0.618033
+      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = annotation_size + 3),
+      axis.text.y = element_text(face = "bold", size = annotation_size + 3),
+      axis.text.y.right = element_text(color = "black", face = "bold", size = annotation_size + 3),
+      plot.title = element_text(hjust = 0.5, size = annotation_size + 7),
+      plot.subtitle = element_text(size = annotation_size + 2),
+      panel.background = element_rect(fill = "gray96", color = "gray96"),
+      plot.margin = margin(1, 2, 1, 2)  # Adjust the top, right, bottom, and left margins
+      #      aspect.ratio = 0.618033
     )
   
   # Only add the geom_line if there's more than one agency
   if (nrow(summary_df) > 1) {
-    
     combo_chart <- combo_chart + 
       geom_line(aes(x = agency, y = cumulative_percentage * max_count, group = 1),
                 colour = "black", linewidth = 1, linetype = "dotted")
@@ -99,14 +110,9 @@ create_combo_chart <- function(
   # Print or save the chart as needed
   print(combo_chart)
   
-  
   # Save the plot
   chart_path <- file.path(chart_directory, chart_file_name)
-  chart_width <- 10
-#  chart_height <- chart_width / 1.618
-  chart_height <- chart_width / 1.2
-    ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
+  ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
 
 #########################################################################
-

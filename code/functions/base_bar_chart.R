@@ -10,7 +10,10 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
                            vertical_adjustment_max = -1,
                            console_print_out_title = "Data Summary",
                            chart_file_name = NULL,
-                           chart_directory) {
+                           chart_directory = ".",
+                           chart_width = 10,
+                           chart_height = 7,
+                           annotation_size = 5) {
   
   # Step 1: Print Data Summary
   cat("\n\n", console_print_out_title, " (first 20 rows):\n", sep = "")
@@ -33,12 +36,7 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
   if (inherits(dataset[[x_col]], "Date")) {
     x_scale <- scale_x_date(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
   } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
-    # Default to "6 months" break for POSIXct, unless finer granularity is detected
-    if (any(diff(as.numeric(dataset[[x_col]])) < 86400)) { # 86400 seconds = 1 day
-      x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%H:%M"), breaks = scales::date_breaks("2 hours"))
-    } else {
-      x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
-    }
+    x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
   } else if (is.numeric(dataset[[x_col]])) {
     x_scale <- scale_x_continuous(expand = c(0.01, 0))
   } else {
@@ -51,94 +49,51 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
     x_scale +
     scale_y_continuous(labels = y_axis_labels) +
     theme(
-      axis.title = element_blank(),  # Remove x and y axis titles
+      axis.title = element_blank(),
       plot.title = element_text(hjust = 0.5, size = 12),
-#      plot.subtitle = element_text(size = 7),
       axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 9),
       axis.text.y = element_text(face = "bold", size = 8),
       panel.background = element_rect(fill = "gray100", color = "gray100"),
       aspect.ratio = 0.618033
     ) +
-    
-    # Set the subtitle with total count included
-#    ggtitle(chart_title, subtitle = paste(sub_title, format(y_total_count, big.mark = ","), sep = " ")) +
-    
-    # Remove x and y axis labels
     labs(x = NULL, y = NULL)  
   
-  # Step 4: Build the plot to extract y-axis breaks
+  # Step 4: Add y-axis breaks
   built_plot <- ggplot_build(bar_chart)
   y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
-  y_breaks <- y_breaks[!is.na(y_breaks)]  # Filter out any NA values from y_breaks
-  
-  # Add hlines using the Y-axis breaks
+  y_breaks <- y_breaks[!is.na(y_breaks)]
   bar_chart <- bar_chart +
     geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
   
-  # Step 5: Conditional Annotations
-  
-  # Calculate the statistics
+  # Step 5: Add conditional annotations
   y_mean_value <- round(mean(dataset[[y_col]], na.rm = TRUE), 0)
   y_median_value <- round(median(dataset[[y_col]], na.rm = TRUE), 0)
   y_sd_value <- round(sd(dataset[[y_col]], na.rm = TRUE), 0)
   max_row <- dataset[which.max(dataset[[y_col]]), ]
   y_max_count <- max_row[[y_col]]
   
-  # Add mean line if requested
   if (add_mean) {
     bar_chart <- bar_chart +
       geom_hline(yintercept = y_mean_value, linetype = "twodash", color = "black", linewidth = 0.75) +
       annotate("text", x = min(sorted_dataset[[x_col]]), y = y_mean_value,
-               label = paste0("Avg: ", format(round(y_mean_value, 0), big.mark = ",")),
-               size = 4.5, color = "black", hjust = -0.5, vjust = -0.75)
+               label = paste0("Avg: ", format(y_mean_value, big.mark = ",")),
+               size = annotation_size, color = "black", hjust = -0.5, vjust = -0.75)
   }
   
-  # Add median line if requested
-  if (add_median) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = y_median_value, linetype = "twodash", color = "black", linewidth = 0.6) +
-      annotate("text", x = min(sorted_dataset[[x_col]]), y = y_median_value,
-               label = paste0("Median: ", format(round(y_median_value, 0), big.mark = ",")),
-               size = 4.5, color = "black", hjust = -0.5, vjust = -0.75)
-  }
-  
-  # Add standard deviation (SD) lines if requested
-  if (add_sd) {
-    bar_chart <- bar_chart +
-      geom_hline(yintercept = round(y_mean_value + 3 * y_sd_value, 0), linetype = "longdash", color = "black", linewidth = 0.3) +
-      annotate("text", x = min(sorted_dataset[[x_col]]), y = y_mean_value + 3 * y_sd_value,
-               label = "+3 sigma", size = 4, color = "black", hjust = -0.5, vjust = -0.75)
-  }
-  
-  # Add max annotation if requested
   if (add_maximum) {
     bar_chart <- bar_chart +
       annotate("text", x = max_row[[x_col]], y = y_max_count,
                label = paste0("Max: ", format(y_max_count, big.mark = ",")),
-               size = 4.25, color = "black", vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max)
+               size = annotation_size, color = "black", vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max)
   }
   
-  # Add second maximum annotation if requested
-  if (add_second_maximum) {
-    second_max <- dataset[order(dataset[[y_col]], decreasing = TRUE)[2], ]
-    bar_chart <- bar_chart +
-      annotate("text", x = second_max[[x_col]], y = second_max[[y_col]],
-               label = paste0("2nd Highest: ", format(second_max[[y_col]], big.mark = ",")),
-               size = 4.25, color = "black", vjust = -0.4, hjust = 0.05)  # Removed parse = TRUE
-  }
-  
-  # Step 6: Print and save the chart
-  print(bar_chart)
   if (!is.null(chart_file_name)) {
-    chart_width <- 10
-#    chart_height <- chart_width / 1.618  # Golden ratio
-    chart_height <- chart_width / 1.2  # Golden ratio
+    # Print or save the chart as needed
+    print(bar_chart)
     chart_path <- file.path(chart_directory, chart_file_name)
     ggsave(chart_path, plot = bar_chart, width = chart_width, 
            height = chart_height, dpi = 300)
   }
 }
-
-#########################################################################
 
 #########################################################################

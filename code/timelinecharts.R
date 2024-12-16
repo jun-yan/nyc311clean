@@ -15,9 +15,11 @@ library(ggpmisc)
 library(lubridate)
 library(data.table)
 
+#########################################################################
+rm(list = ls())
+
 programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
-cat("\nExecution begins at:", formattedStartTime)
 
 #########################################################################
 
@@ -30,10 +32,6 @@ main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 
 cat("\n***** Program initialization *****")
 
-# Prior to running program, ensure the R code is located in the working directory, 
-# and that the R functions are located in a sub-directory named "functions".
-# Data files should be placed in a sub-directory named "data".
-
 setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
 
 # Create the sub-directories used during program execution.
@@ -44,27 +42,6 @@ working_dir <- getwd()
 # Set the base directory under the working directory
 base_dir <- file.path(working_dir, "code")
 
-# Define the subdirectories
-sub_dirs <- c("charts", "functions", "data", "console_output")
-
-# Check if the base directory exists, and create it if it doesn't
-if (!dir.exists(base_dir)) {
-  dir.create(base_dir)
-  cat("Base directory '", base_dir, "' created.\n", sep = "")
-}
-
-# Loop through the subdirectories and create them if they don't exist
-for (sub_dir in sub_dirs) {
-  dir_path <- file.path(base_dir, sub_dir)
-  if (!dir.exists(dir_path)) {
-    dir.create(dir_path)
-    cat("Subdirectory '", dir_path, "' created.\n", sep = "")
-}
-}
-
-# Define the path to the directory containing your function scripts
-functions_path <- file.path(base_dir, "functions")
-
 # Define the path for the main data file (CSV file)
 data_file <- file.path(base_dir, "data")
 
@@ -74,22 +51,33 @@ chart_directory_path <- file.path(base_dir, "charts")
 # Create the directory for the reduced size file following shrinkage code.
 writeFilePath <- file.path(base_dir, "data")
 
-# Start directing console output to the file
 # Define the console output directory and file name.
 output_dir <- file.path(base_dir, "console_output")
 output_file <- file.path(output_dir, "timeline_console_output.txt")
 
-sink(output_file)
+# Define the path to the directory containing your function scripts
+functions_path <- file.path(base_dir, "functions")
+
+# Get all .R files in the "functions" sub-directory
+function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+
+# Source each file with error handling and message logging
+lapply(function_files, function(file) {
+  tryCatch({
+    source(file)
+    #    message("Successfully sourced: ", file)
+  }, error = function(e) {
+    message("Error sourcing: ", file, " - ", e$message)
+  })
+})
+
+options(scipen = 999) # Set scipen option to a large value.
+options(digits = 15) # Set the number of decimal places to 15, the max observed.
 
 cat("\nExecution begins at:", formattedStartTime)
 
-# Source all .R files in the "functions" sub-directory
-function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
-lapply(function_files, source)  # Source each function file.
-
-options(scipen = 999) # Set scipen option to a large value.
-
-options(digits = 15) # Set the number of decimal places to 15, the max observed.
+# Start directing console output to the file
+sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
 
@@ -138,8 +126,8 @@ num_years <- unique(years)
 
 cat("\nTotal rows:", format(num_rows, big.mark = ","), "covering", length(num_years), "years")
 
-year_digits <- "2"
-file_name_prefix <- "2"
+year_digits <- 2
+file_name_prefix <- "2-year"
 #########################################################################
 # Calculate the earliest and latest dates directly
 earliest_date <- min(d311$created_date, na.rm = TRUE)
@@ -156,28 +144,6 @@ cat(
 # Convert to yyyy-mm-dd format
 earliest_title <- format(earliest_date, "%Y-%m-%d")
 latest_title <- format(latest_date, "%Y-%m-%d")
-
-#chart_sub_title <- paste("(", earliest_title, "--", latest_title, ") total=", sep = "")
-
-#########################################################################
-# # Sort by Agency and rank
-# sorted_by_agency <- rank_by_agency(d311)
-# 
-# cat("\n\nRanking by Agency\n")
-# print_threshold <- nrow(sorted_by_agency)
-# sorted_by_agency <- as.data.frame(sorted_by_agency)
-# print(head(sorted_by_agency, print_threshold), row.names = FALSE, right = FALSE)
-# 
-# chart_title <- NULL
-# chart_file_name <- "Complaints_by_Agency.pdf"
-# 
-# create_combo_chart(
-#   dataset = d311,
-#   chart_title = chart_title,
-#   chart_file_name = chart_file_name,
-#   console_print_out_title = "Summary of complaints by Agency",
-#   chart_directory_path
-# )
 
 #########################################################################
 # Aggregate created_date by second (precise timestamps)
@@ -445,12 +411,6 @@ max_date <- daily_df$created_day[which.max(daily_df$count)]
 
 earliest_day <- min(daily_df$created_day)
 max_count <- max(daily_df$count)
-
-# extra_line2 <- annotate("text",
-#   x = earliest_day, y = max_count,
-#   label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
-#   size = 3.7, color = "#E69F00", vjust = 0.6, hjust = -2
-# )
 
 SR_daily <- create_bar_chart_categorical(
   dataset = daily_df,
@@ -1023,11 +983,6 @@ second <- second(second_level_closed_summary$closed_second)
 midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
 noon_closed_rows <- hour == 12 & minute == 0 & second == 0
 
-
-# # Identify rows with time exactly at midnight (00:00:00) and noon (12:00:00)
-# midnight_closed_rows <- hour == 0 & minute == 0 & second == 0
-# noon_closed_rows <- hour == 12 & minute == 0 & second == 0
-
 # Count the number of rows with time exactly at midnight and noon
 midnight_closed_count <- sum(midnight_closed_rows)
 noon_closed_count <- sum(noon_closed_rows)
@@ -1035,10 +990,6 @@ noon_closed_count <- sum(noon_closed_rows)
 # Get the data for SRs closed exactly at midnight or noon
 midnight_closed_data <- second_level_closed_summary[midnight_closed_rows, ]
 noon_closed_data <- second_level_closed_summary[noon_closed_rows, ]
-
-# If you need additional columns (e.g., created_date, agency), you can merge with the original data:
-#closed_at_midnight <- midnight_closed_data[, c("closed_second", "count")]
-#closed_at_noon <- noon_closed_data[, c("closed_second", "count")]
 
 # Subset the data for SRs closed at midnight and noon
 closed_at_midnight <- valid_closed_data[midnight_closed_rows, c("created_date", "agency")]
