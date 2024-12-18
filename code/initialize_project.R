@@ -1,10 +1,7 @@
 # ============================
 # INITIALIZATION SCRIPT
 # ============================
-# ============================
-# INITIALIZATION SCRIPT
-# ============================
-# Load required R packages and create sub-directories for core R programs.
+# Function to load required R packages and create sub-directories for core R programs.
 
 initialize_project <- function(working_dir = getwd()) {
   
@@ -62,8 +59,7 @@ initialize_project <- function(working_dir = getwd()) {
     }
   }
   
-  cat("✅ Project initialization complete.\n")
-  
+  cat("✅ Project directory structure  complete.")
   # -------------------------------------------------------------
   # 📦 Download and Extract Datasets from Figshare
   # -------------------------------------------------------------
@@ -84,7 +80,7 @@ initialize_project <- function(working_dir = getwd()) {
       tryCatch({
         download_cmd <- paste0('curl -o "', local_zip_path, '" -L "', figshare_urls[i], '"')
         system(download_cmd)
-        cat("\n✅ Download complete! File saved at:", local_zip_path, "\n")
+        cat("\n✅ Data files download complete! File saved at:", local_zip_path, "\n")
         
         cat("\n📂 Extracting files from ZIP file", i, "...\n")
         unzip(zipfile = local_zip_path, exdir = figshare_directory)
