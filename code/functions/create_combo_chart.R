@@ -22,7 +22,7 @@ create_combo_chart <- function(
       percentage = count / sum(count),
       cumulative_percentage = cumsum(percentage)
     ) %>%
-    slice_head(n = 20)
+    slice_head(n = 12)
   
   # Step 2: Reorder the agency factor based on the descending count
   summary_df <- summary_df %>%
