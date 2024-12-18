@@ -109,7 +109,7 @@ for (i in seq_along(figshare_urls)) {
 github_urls <- c(
   "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/datacleansing.R",
   "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/timelinecharts.R",
-  "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/initialize_project.R"
+  "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/run_this_program_first.R"
 )
 
 github_directory <- base_dir
@@ -135,7 +135,7 @@ for (i in seq_along(github_urls)) {
 
 
 # -------------------------------------------------------------
-# 📂 DOWNLOAD ALL R FUNCTION FILES FROM GITHUB
+# 📂 DOWNLOAD AND SOURCE ALL R FUNCTION FILES FROM GITHUB
 # -------------------------------------------------------------
 functions_dir <- file.path(base_dir, "functions")
 github_api_url <- "https://api.github.com/repos/jun-yan/nyc311clean/contents/code/functions"
@@ -175,9 +175,27 @@ tryCatch({
 
 
 # -------------------------------------------------------------
+# 📂 SOURCE ALL DOWNLOADED R FUNCTION FILES
+# -------------------------------------------------------------
+function_files <- list.files(functions_dir, pattern = "\\.R$", full.names = TRUE)
+
+if (length(function_files) > 0) {
+  for (file_path in function_files) {
+    tryCatch({
+      source(file_path)
+      cat("\n✅ Successfully sourced:", file_path, "\n")
+    }, error = function(e) {
+      cat("\n❌ Error sourcing file:", file_path, "-", e$message, "\n")
+    })
+  }
+} else {
+  cat("\n❌ No function files found to source in:", functions_dir, "\n")
+}
+
+
+# -------------------------------------------------------------
 # 🏁 FINAL MESSAGE TO THE USER
 # -------------------------------------------------------------
 cat("\n✅ All setup and initialization steps are complete!\n")
 cat("📂 You can now run 'datacleansing.R' and 'timelinecharts.R' from the following directory:\n")
 cat(base_dir, "\n")
-
