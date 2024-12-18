@@ -1,19 +1,14 @@
-# install.packages("ggplot2")
-# install.packages("scales")
-# install.packages("dplyr")
-# install.packages('zoo')
-# install.packages("ggpmisc")
-# install.packages("lubridate")
-# install.packages("data.table")
-#rm(list = ls(), envir = .GlobalEnv)
+# -------------------------------------------------------------
+# 📁 Set Working Directory for the Project
+# -------------------------------------------------------------
+# Set working directory to the location of the initialization script
+setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
-library(ggplot2)
-library(scales)
-library(dplyr)
-library(zoo)
-library(ggpmisc)
-library(lubridate)
-library(data.table)
+# Source the initialization.R script
+source("initialize_project.R")
+
+# Include the working directory for the R programs and sub-directories, passed as a parameter
+initialize_project(working_dir ="C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
 
 #########################################################################
 rm(list = ls())
@@ -22,25 +17,20 @@ programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 
 #########################################################################
-
 # Set path for the data file
 main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
 #########################################################################
-
 cat("\n***** Program initialization *****")
 
-setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
-
 # Create the sub-directories used during program execution.
-
 # Get the current working directory
 working_dir <- getwd()
 
 # Set the base directory under the working directory
-base_dir <- file.path(working_dir, "code")
+base_dir <- working_dir
 
 # Define the path for the main data file (CSV file)
 data_file <- file.path(base_dir, "data")
@@ -61,7 +51,7 @@ functions_path <- file.path(base_dir, "functions")
 # Get all .R files in the "functions" sub-directory
 function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
 
-# Source each file with error handling and message logging
+# Source each function R file with error handling and message logging
 lapply(function_files, function(file) {
   tryCatch({
     source(file)
@@ -71,13 +61,15 @@ lapply(function_files, function(file) {
   })
 })
 
+# Set global parameters
 options(scipen = 999) # Set scipen option to a large value.
 options(digits = 15) # Set the number of decimal places to 15, the max observed.
 
+# Begin Execution.
 cat("\nExecution begins at:", formattedStartTime)
 
 # Start directing console output to the file
-sink(output_file)
+#sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
 

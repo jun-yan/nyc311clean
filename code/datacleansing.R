@@ -1,27 +1,15 @@
 #########################################################################
-install.packages("ggplot2")
-install.packages("campfin")
-install.packages("stringr")
-install.packages("stringdist")
-install.packages("dply(raw data")
-install.packages("styler")
-install.packages("ggpmisc")
-install.packages("lubridate")
-install.packages("data.table")
-install.packages("sf")
-install.packages("tidyverse")
+# -------------------------------------------------------------
+# 📁 Set Working Directory for the Project
+# -------------------------------------------------------------
+# Set working directory to the location of the initialization script
+setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 
-library(tidyr)
-library(ggplot2)
-library(campfin)
-library(stringr)
-library(stringdist)
-library(dplyr)
-library(scales)
-library(ggpmisc)
-library(lubridate)
-library(data.table)
-library(sf) 
+# Source the initialization.R script
+source("initialize_project.R")
+
+# Include the working directory for the R programs and sub-directories, passed as a parameter
+initialize_project(working_dir ="C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
 
 #########################################################################
 rm(list = ls())
@@ -38,13 +26,11 @@ programStart <- as.POSIXct(Sys.time())
 formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 cat("\n***** Program initialization *****")
 
-setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\nyc311clean")
-
 # Get the current working directory
 working_dir <- getwd()
 
 # Set the base directory under the working directory
-base_dir <- file.path(working_dir, "code")
+base_dir <- working_dir
 
 # Define the console output directory and file name.
 output_dir <- file.path(base_dir, "console_output")
