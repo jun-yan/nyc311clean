@@ -2,10 +2,10 @@
 # 📁 Set Working Directory for the Project
 # -------------------------------------------------------------
 # Set working directory to the location of the initialization script
-setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
-
-# Source the initialization.R script
-source("initialize_project.R")
+# setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
+# 
+# # Source the initialization.R script
+# source("initialize_project.R")
 
 # Include the working directory for the R programs and sub-directories, passed as a parameter
 initialize_project(working_dir ="C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")

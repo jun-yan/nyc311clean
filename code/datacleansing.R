@@ -2,11 +2,11 @@
 # -------------------------------------------------------------
 # 📁 Set Working Directory for the Project
 # -------------------------------------------------------------
-# Set working directory to the location of the initialization script
-setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
-
-# Source the initialization.R script
-source("initialize_project.R")
+# # Set working directory to the location of the initialization script
+# setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
+# 
+# # Source the initialization.R script
+# source("initialize_project.R")
 
 # Include the working directory for the R programs and sub-directories, passed as a parameter
 initialize_project(working_dir ="C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
@@ -367,7 +367,7 @@ summary_table_file_path <- file.path(writeFilePath, "field_usage_summary_table.c
 
 # Save the data frame as a CSV file
 write.csv(field_usage_summary_table, summary_table_file_path, row.names = FALSE)
-
+cat("\nA csv file showing field usage by agency has been written to:", summary_table_file_path, "\n")
 #########################################################################
 
 cat("\n\n**********COMPLAINT TYPES**********\n")

@@ -1,7 +1,8 @@
 # ============================
 # INITIALIZATION SCRIPT
 # ============================
-# Function to load required R packages and create sub-directories for core R programs.
+# Function to load required R packages, create sub-directories, 
+# download necessary files, and source R files in the "functions" directory.
 
 initialize_project <- function(working_dir = getwd()) {
   
@@ -59,7 +60,8 @@ initialize_project <- function(working_dir = getwd()) {
     }
   }
   
-  cat("✅ Project directory structure  complete.")
+  cat("✅ Project directory structure complete.\n")
+  
   # -------------------------------------------------------------
   # 📦 Download and Extract Datasets from Figshare
   # -------------------------------------------------------------
@@ -104,7 +106,7 @@ initialize_project <- function(working_dir = getwd()) {
   github_urls <- c(
     "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/datacleansing.R",
     "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/timelinecharts.R",
-    "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/initialize_project.R"
+    "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/run_this_program_first.R"
   )
   
   github_directory <- base_dir
@@ -129,7 +131,7 @@ initialize_project <- function(working_dir = getwd()) {
   }
   
   # -------------------------------------------------------------
-  # 📂 Download all R function files from GitHub
+  # 📂 Download and source all R function files from GitHub
   # -------------------------------------------------------------
   functions_dir <- file.path(base_dir, "functions")
   github_api_url <- "https://api.github.com/repos/jun-yan/nyc311clean/contents/code/functions"
@@ -168,6 +170,24 @@ initialize_project <- function(working_dir = getwd()) {
   })
   
   # -------------------------------------------------------------
+  # 📂 Source all R files in the "functions" subdirectory
+  # -------------------------------------------------------------
+  function_files <- list.files(functions_dir, pattern = "\\.R$", full.names = TRUE)
+  
+  if (length(function_files) > 0) {
+    for (file_path in function_files) {
+      tryCatch({
+        source(file_path)
+        cat("\n✅ Successfully sourced:", file_path, "\n")
+      }, error = function(e) {
+        cat("\n❌ Error sourcing file:", file_path, "-", e$message, "\n")
+      })
+    }
+  } else {
+    cat("\n❌ No function files found to source in:", functions_dir, "\n")
+  }
+  
+  # -------------------------------------------------------------
   # 🏁 Final message to the user
   # -------------------------------------------------------------
   cat("\n✅ All setup and initialization steps are complete!\n")
@@ -177,6 +197,3 @@ initialize_project <- function(working_dir = getwd()) {
   # Return base_dir to the caller
   return(base_dir)
 }
-
-
-########################################################################################################
