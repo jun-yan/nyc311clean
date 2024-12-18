@@ -69,7 +69,7 @@ options(digits = 15) # Set the number of decimal places to 15, the max observed.
 cat("\nExecution begins at:", formattedStartTime)
 
 # Start directing console output to the file
-#sink(output_file)
+sink(output_file)
 
 cat("\nExecution begins at:", formattedStartTime)
 
