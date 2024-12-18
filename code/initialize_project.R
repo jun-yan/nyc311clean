@@ -107,7 +107,8 @@ initialize_project <- function(working_dir = getwd()) {
   # -------------------------------------------------------------
   github_urls <- c(
     "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/datacleansing.R",
-    "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/timelinecharts.R"
+    "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/timelinecharts.R",
+    "https://raw.githubusercontent.com/jun-yan/nyc311clean/refs/heads/main/code/initialize_project.R"
   )
   
   github_directory <- base_dir

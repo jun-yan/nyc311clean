@@ -1036,34 +1036,31 @@ if (noon_closed_count > 0) {
 }
 
 #########################################################################
+# Conclude program
+# Store the program end time and calculate the duration
 programStop <- as.POSIXct(Sys.time())
-duration <- difftime(programStop, programStart, units = "secs")
+formatted_end_time <- format(programStop, "%Y-%m-%d %H:%M:%S")
 
-if (duration > 3600) {
-  duration <- duration / 3600 # Convert to hours
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "hours\n")
-} else if (duration > 60) {
-  duration <- duration / 60 # Convert to minutes
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "minutes\n")
-} else {
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
-}
+# Calculate the duration of the program (in seconds)
+duration_seconds <- as.numeric(difftime(programStop, programStart, units = "secs"))
 
-cat("\n *****END OF PROGRAM*****")
+# Convert the duration to a formatted string (hours, minutes, and seconds with 4 decimal places)
+hours <- floor(duration_seconds / 3600)
+minutes <- floor((duration_seconds %% 3600) / 60)
+seconds <- round(duration_seconds %% 60, 4)  # Round to 4 decimal places
+
+# Create the formatted duration string
+duration_string <- paste0(
+  if (hours > 0) paste0(hours, " hours, ") else "",
+  if (minutes > 0) paste0(minutes, " minutes, ") else "",
+  seconds, " seconds"
+)
+
+# Print the final program information to the console
+cat("\n\n*****END OF PROGRAM*****\n")
+cat("\n📅 Execution ends at:", formatted_end_time, "\n")
+cat("\n⏱️ Program run-time:", duration_string, "\n")
+
 #########################################################################
-sink()
-
-programStop <- as.POSIXct(Sys.time())
-duration <- difftime(programStop, programStart, units = "secs")
-
-if (duration > 3600) {
-  duration <- duration / 3600 # Convert to hours
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "hours\n")
-} else if (duration > 60) {
-  duration <- duration / 60 # Convert to minutes
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "minutes\n")
-} else {
-  cat("\n\nProgram run-time: ", sprintf("%.2f", duration), "seconds\n")
-}
-
-cat("\n *****END OF PROGRAM*****")
+# Call the end_program function with the formatted end time and duration string
+end_program(formatted_end_time, duration_string)
