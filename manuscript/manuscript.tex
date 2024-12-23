@@ -185,14 +185,13 @@ where \citet{cantor2018facets} demonstrated the utility of curated
 data in evaluating community health determinants, and 
 \citet{shankar2021data} observed its critical role during the 
 COVID-19 pandemic in managing collective responses.
+However, the literature remains limited in providing specific and
+actionable frameworks for handling large-scale municipal datasets.
 
 
-
-\jy{The gap in the literature needs to be further highlighted to set 
-  the stage for our contributions.}
-
-
-
+By addressing this gap, this study transitions from theory to
+practical insights, aiming to establish principles that enhance both
+the reliability and utility of open government data.
 The contributions of this paper are twofold. First, we delve into
 the specifics of data curation challenges using the NYC 311 Service
 Request (SR) Data as a case study. This dataset serves as a prime 
@@ -260,24 +259,22 @@ utilize the core 311 software, while others transfer data to the
 The impact of NYC 311 data extends beyond operational efficiency; it
 has become instrumental in shaping City governance and community
 engagement. Open data not only ensures governmental transparency
-but also empowers researchers, civic developers, and the general
-
-\jy{back up with some references:}
-
-  \citep{minkoff2016nyc, o2017uncharted, kontokosta2021bias}
-public. The data has been pivotal in providing advice on shelters
+but also empowers civic developers, the general public, and
+policy-makers \citep{minkoff2016nyc, o2017uncharted,
+  kontokosta2021bias}.
+The data has been pivotal in providing advice on shelters
 during emergencies, handling inquiries during the COVID-19 pandemic,
 enforcing standards between landlords and tenants, reallocating taxi
 routes based on analyses by the Taxi and Limousine Commission (TLC),
 and improving responsiveness across City Agencies.
+It also supports a wide range of studies in resource allocation and
+emergency response strategies \citep{zha2014profiling, raj2021swift},
+social equity in service provision \citep{white2018promises,
+  kontokosta2021bias}, and urban challenges such as noise pollution
+\citep{dove2022sounds} and street flooding
+\citep{agonafir2022understanding}.
 
-\jy{need to expand the importance of 311 SR data to the research
-  community: such as
-  resource allocation/response \citep{zha2014profiling, raj2021swift},
-  social equity \citep{white2018promises, kontokosta2021bias},
-  noise \citep{dove2022sounds},
-  street flood \citep{agonafir2022understanding}, etc.}
-  
+
 Our investigation utilizes a 311 SR dataset covering  2-years (2022-2023).
 This sample was collected on 15 September 2024, and is used 
 to conduct detailed analysis in areas such as data 
@@ -781,6 +778,12 @@ in Figure~\ref{fig:exacthours}
     \caption{Comparison of 311 SRs created \& closed by hour-of-the-day during 2022--2023.}
     \label{fig:exacthours}
 \end{figure}
+\jy{Figure 4 and 5: Increase the fonts of the axis ticks. This might
+  be caused by the size of the pdf figure being too big relative to
+  the size shown in the compiled manuscript. So, keep the target size
+  in mind may help, avoiding overstretching. In addition, the x-axis
+  ticks could be made upright.}
+
 
 These unusual patterns of SR creation and closure exactly at midnight 
 suggest the presence of a bulk create/close software process, perhaps one
@@ -791,6 +794,7 @@ SRs as well as overall system usage by providing inaccurate
 dates. Further analysis of the distribution by Agency shows that over 92\% of 
 the ``closed-exactly-at-midnight'' SRs come from just two 
 Agencies: DOB (69\%) and DSNY  (23\%).
+
 
 \paragraph{Resolution Action Update Date}
 A similar issue occurs when an SR is modified (and the \texttt{resolution\_action\_update\_date} is altered) well 
@@ -841,7 +845,7 @@ the \texttt{latitude} and \texttt{longitude} fields albeit with a
 comma and parentheses added. Arguably, this makes the \texttt{location} field 
 more difficult to use than the individual fields. For example: 
 
-\vspace{.25cm}
+\begin{center}
 \begin{tikzpicture}[node distance=2cm and 1.5cm, >=stealth]
 
     % Nodes for latitude, longitude, and location (centered between margins)
@@ -858,7 +862,7 @@ more difficult to use than the individual fields. For example:
     \draw[->] (longitude.south) -- ([xshift=1.525cm]location.north);
 
 \end{tikzpicture}
-
+\end{center}
 
 \paragraph{\texttt{borough} \& \texttt{park\_borough}:} These two fields are fully redundant, 
 as they are 100\% matches.
@@ -978,7 +982,7 @@ enabling efficient analytics and real-time data processing. As such,
 it offers dramatic improvements in file storage size, as well as 
 efficient analysis and cross-platform support for R, Python, 
 and Julia programming languages. Remarkable storage size 
-reduction (within several orders of magnitude) is possible. \citep{bates2024csv}.
+reduction (within several orders of magnitude) is possible \citep{bates2024csv}.
 
 
 \subsection{Data Dictionary} 
