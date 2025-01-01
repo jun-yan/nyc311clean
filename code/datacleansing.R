@@ -1,15 +1,46 @@
 #########################################################################
 # -------------------------------------------------------------
-# 📁 Set Working Directory for the Project
+# 📦 INSTALL AND LOAD REQUIRED PACKAGES
+# -------------------------------------------------------------
+required_packages <- c(
+  "ggplot2", 
+  "scales", 
+  "dplyr", 
+  "zoo", 
+  "ggpmisc", 
+  "lubridate", 
+  "data.table",
+  "renv", 
+  "sf", 
+  
+  "stringdist", 
+  "styler", 
+  "tidyverse", 
+  "rlang", 
+  "httr"
+)
+
+# Check and install missing packages
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
+if (length(missing_packages)) {
+  install.packages(missing_packages)
+  cat("📦 Installed missing packages:", paste(missing_packages, collapse = ", "), "\n")
+}
+
+# Load the required packages
+lapply(required_packages, library, character.only = TRUE)
+
+# -------------------------------------------------------------
+# 📁 Set Working Directory for the Project.
 # -------------------------------------------------------------
 # Set working directory to the location of the initialization script
 setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 # 
 # # Source the initialization.R script.
-source("run_this_program_first.R")
+#source("run_this_program_first.R")
 
 # Include the working directory for the R programs and sub-directories, passed as a parameter
-setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
+#setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\code")
 
 #########################################################################
 rm(list = ls())
@@ -452,7 +483,9 @@ create_combo_chart(
   chart_directory = chart_directory_path,
   console_print_out_title = "Summary of Complaint Type",
   num_x_labels = 10,
-  annotation_size = 4
+  annotation_size = 4,
+  x_axis_tick_size = 10, 
+  x_axis_label_angle = 60
 )
 
 # Restore column names
@@ -875,36 +908,16 @@ if (num_rows_closedBeforeOpened > 1) {
     chart_directory = chart_directory_path
   )
 
-  # Create boxplot of the (negative) duration values
-  negativeDurationChart <- ggplot(
-    
-    data = large_neg_duration, 
-    aes(x = duration, y = factor(1))
-  ) +
-    
-    geom_jitter(color = "#0072B2", alpha = 0.85, size = 1.9, shape = 17, width = 0.2, height = 0.2) +
-    
-    geom_boxplot(width = 0.25, fill = "#E69F00", alpha = 0.65, outlier.colour = "black", 
-                 outlier.size = 1) +
-    theme(
-      legend.position = "none", plot.title = element_text(hjust = 0.5),
-      axis.text.x = element_text( face = "bold", size = 9),
-      axis.text.y = element_text(face = "bold", size = 9),
-      plot.margin = margin(1, 2, 1, 2),
-      panel.background = element_rect(fill = "gray96", color = "gray96")
-    ) +
-    
-    labs(
-      title = "SRs closed before they were created (negative duration) *excluding large negative values",
-      x = "", y = ""
-    )
-
-  print(negativeDurationChart)
-  chart_path <- file.path(chart_directory_path, "negative_duration_SR_boxplot.pdf")
-  chart_width = 10
-  chart_height = chart_width/1.2
-  ggsave(chart_path, plot = negativeDurationChart, width = chart_width, 
-         height = chart_height, dpi = 300)
+  # Boxplot for negative duration values
+  create_boxplot(
+    dataset = large_neg_duration,
+    x_axis_field = "duration",
+    chart_title = "SRs closed before they were created (negative duration) *excluding large negative values",
+    x_axis_title = "",
+    output_file_name = "negative_duration_SR_boxplot.pdf",
+    chart_directory = chart_directory_path
+  )
+  
 } else {
   cat("\n\nThere are no SRs 'closed' before they were 'created'.\n")
 }
@@ -999,33 +1012,18 @@ if (num_rows_future > 0) {
   x <- rank_by_agency(closedinFuture)
 
   if (num_rows_future > 4) {
-    # Create boxplot of the (negative) duration values
-    closedinFutureChart <- ggplot(
-      data = closedinFuture,
-      aes(x = future_days, y = factor(1))
-    ) +
-      geom_jitter(color = "#0072B2", size = 2, shape = 17, alpha = 0.85) +
-      geom_boxplot(
-        outlier.colour = "black", outlier.shape = 16, linewidth = 0.7,
-        fill = "#E69F00", size = 1, color = "black", alpha = 0.65
-      ) +
-      theme(
-        legend.position = "none",
-        plot.title = element_text(hjust = 0.5, size = 13),
-        panel.background = element_rect(fill = "gray96", color = "gray96")
-      ) +
-      labs(
-        title = "SRs closed in the future",
-        x = "Days closed in the future",
-        y = NULL
-      )
+    
+    # Boxplot for future closed values
+    create_boxplot(
+      dataset = closedinFuture,
+      x_axis_field = "future_days",
+      chart_title = "SRs closed in the future",
+      x_axis_title = "",
+      box_width = 0.75,  # Default width for the box
+      output_file_name = "future_closed.pdf",
+      chart_directory = chart_directory_path
+    )
 
-    print(closedinFutureChart)
-    chart_path <- file.path(chart_directory_path, "future_closed.pdf")
-    chart_width = 10
-    chart_height = chart_width/1.2
-    ggsave(chart_path, plot = closedinFutureChart, 
-           width = chart_width, height = chart_height, dpi = 300)
   }
 } else {
   cat("\n\nThere are no SRs with a 'closed_date' in the future.")

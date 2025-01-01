@@ -9,8 +9,11 @@ create_combo_chart <- function(
     chart_width = 10,
     chart_height = 7,
     annotation_size = 4.5,
-    num_x_labels = 20,          # New parameter for when to skip labels
-    skip_frequency = 2          # New parameter for how often to skip labels
+    num_x_labels = 20,           # Maximum number of x-axis labels before skipping
+    skip_frequency = 2,          # Frequency of skipping x-axis labels
+    x_axis_tick_size = 14,       # Font size for x-axis labels
+    x_axis_label_angle = 90,     # Angle for x-axis labels
+    x_axis_tick_length = unit(0.3, "cm")  # Length of x-axis tick marks
 ) {
   
   # Step 1: Create summary_df sorted by count and calculate cumulative percentage
@@ -28,16 +31,13 @@ create_combo_chart <- function(
   summary_df <- summary_df %>%
     mutate(agency = factor(agency, levels = agency))
   
-  # Print first 20 rows of dataset to console without row numbers
+  # Print the dataset summary to the console
   cat(paste0("\n", console_print_out_title, " (first 20 rows):\n"))
-  
-  # Format each column to left-align, then print without row names
   summary_df <- summary_df %>%
     mutate(
       percentage = round(percentage, 4),
       cumulative_percentage = round(cumulative_percentage, 4)
     )
-  
   print(format(summary_df, justify = "left"), row.names = FALSE)
   
   # Count the number of unique x-axis data points
@@ -62,7 +62,6 @@ create_combo_chart <- function(
   
   # Step 1: Create the initial plot without specifying y-axis breaks
   combo_chart <- ggplot(summary_df) +
-    
     geom_bar(aes(x = agency, y = count), stat = "identity", fill = "#44AA99", width = 0.55) +
     
     # Count labels (primary axis)
@@ -81,14 +80,15 @@ create_combo_chart <- function(
     labs(x = NULL, y = NULL) +
     
     theme(
-      axis.text.x = element_text(angle = 70, vjust = 1, hjust = 1, face = "bold", size = annotation_size + 3),
+      axis.text.x = element_text(angle = x_axis_label_angle, vjust = 1, hjust = 1, 
+                                 face = "bold", size = x_axis_tick_size),  # Updated for angle and size
       axis.text.y = element_text(face = "bold", size = annotation_size + 3),
       axis.text.y.right = element_text(color = "black", face = "bold", size = annotation_size + 3),
+      axis.ticks.length = x_axis_tick_length,  # Adjust tick mark length
       plot.title = element_text(hjust = 0.5, size = annotation_size + 7),
       plot.subtitle = element_text(size = annotation_size + 2),
       panel.background = element_rect(fill = "gray96", color = "gray96"),
-      plot.margin = margin(1, 2, 1, 2)  # Adjust the top, right, bottom, and left margins
-      #      aspect.ratio = 0.618033
+      plot.margin = margin(1, 2, 1, 2)
     )
   
   # Only add the geom_line if there's more than one agency

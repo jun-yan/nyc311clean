@@ -11,7 +11,10 @@ create_violin_chart <- function(
     margin_top = 1,     # Default margin values (units in pts)
     margin_right = 2,
     margin_bottom = 1,
-    margin_left = 2
+    margin_left = 2,
+    x_axis_tick_size = 14,       # New parameter for x-axis tick size
+    x_axis_label_size = 14,      # New parameter for x-axis label font size
+    x_axis_tick_length = unit(0.3, "cm")  # New parameter for x-axis tick length
 ) {
   
   # Create the violin chart
@@ -35,12 +38,15 @@ create_violin_chart <- function(
     
     theme(
       plot.title = element_text(size = 13, hjust = 0.5),
-      axis.text.x = element_text(face = "bold", size = 9),
+      axis.text.x = element_text(face = "bold", size = x_axis_tick_size),  # Adjust tick font size
+      axis.title.x = element_text(size = x_axis_label_size, face = "bold"), # Adjust axis label font size
+      axis.text.y = element_blank(),  # Remove y-axis labels
+      axis.ticks.y = element_blank(), # Remove y-axis tick marks
+      axis.ticks.length = x_axis_tick_length,  # Adjust tick mark length
       panel.background = element_rect(fill = "gray96", color = "gray96"),
       plot.margin = margin(t = margin_top, r = margin_right, 
                            b = margin_bottom, l = margin_left, unit = "pt")
     )
-  
   
   # Print the chart (suppress unnecessary warnings)
   suppressMessages(print(violin_chart))
@@ -50,4 +56,4 @@ create_violin_chart <- function(
   ggsave(chart_path, plot = violin_chart, dpi = 300,
          width = chart_width, height = chart_height)
 }
-#########################################################################
+##########################################################################

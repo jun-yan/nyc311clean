@@ -1,14 +1,44 @@
 # -------------------------------------------------------------
+# 📦 INSTALL AND LOAD REQUIRED PACKAGES
+# -------------------------------------------------------------
+required_packages <- c(
+  "ggplot2", 
+  "scales", 
+  "dplyr", 
+  "zoo", 
+  "ggpmisc", 
+  "lubridate", 
+  "data.table",
+  "renv", 
+  "sf", 
+  "stringdist", 
+  "styler", 
+  "tidyverse", 
+  "rlang", 
+  "httr"
+)
+
+# Check and install missing packages
+missing_packages <- required_packages[!(required_packages %in% installed.packages()[, "Package"])]
+if (length(missing_packages)) {
+  install.packages(missing_packages)
+  cat("📦 Installed missing packages:", paste(missing_packages, collapse = ", "), "\n")
+}
+
+# Load the required packages
+lapply(required_packages, library, character.only = TRUE)
+
+# -------------------------------------------------------------
 # 📁 Set Working Directory for the Project
 # -------------------------------------------------------------
 # Set working directory to the location of the initialization script
 setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 # 
 # # Source the initialization.R script.
-source("run_this_program_first.R")
+#source("run_this_program_first.R")
 
 # Include the working directory for the R programs and sub-directories, passed as a parameter
-setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
+#setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\download_code")
 
 #########################################################################
 rm(list = ls())
@@ -332,27 +362,27 @@ if (nrow(yearly_df) > 2) { # skip if <2 years. Not enough data to be meaningful.
     label = paste0(year_digits, "-yr growth: ", percentage_growth, "%", sep = ""),
     size = 3.7, color = "#661100", vjust = -1, hjust = 0.1
   )
-
-  SR_yearly <- create_bar_chart_numeric(
+  
+  SR_yearly <- base_bar_chart(
     dataset = yearly_df,
-    x_col = "Year",
-    y_col = "count",
-    chart_title = NULL,
-    sub_title = chart_sub_title,
-    console_print_out_title = "Yearly SR count",
-    add_mean = TRUE,
-    add_median = FALSE,
-    add_sd = FALSE,
-    add_trendline = TRUE,
-    add_maximum = FALSE,
-    add_minimum = FALSE,
-    add_second_maximum = FALSE,
-    extra_line = extra_line,
-    chart_file_name = paste0(file_name_prefix, "-trend_SRs_yearly.pdf"),
-    chart_directory = chart_directory_path
+    x_col = "Year",                     # Use the numeric column for x-axis
+    y_col = "count",                    # y-axis column
+    chart_title = NULL,                 # Chart title (can be NULL)
+    sub_title = chart_sub_title,        # Subtitle for the chart
+    console_print_out_title = "Yearly SR count",  # Console summary title
+    add_mean = TRUE,                    # Add mean annotation
+    add_median = FALSE,                 # Do not add median annotation
+    add_sd = FALSE,                     # Do not add standard deviation annotation
+    add_trendline = TRUE,               # Add a trendline to the chart
+    add_maximum = FALSE,                # Do not add maximum annotation
+    add_minimum = FALSE,                # Do not add minimum annotation
+    add_second_maximum = FALSE,         # Do not add second maximum annotation
+    extra_line = extra_line,            # Add an optional extra line
+    chart_file_name = paste0(file_name_prefix, "-trend_SRs_yearly.pdf"),  # Output file name
+    chart_directory = chart_directory_path  # Directory for saving the chart
   )
 }
-
+    
 #########################################################################
 # Chart SRs by month
 max_count <- max(monthly_df$count)
@@ -373,23 +403,23 @@ extra_line <- annotate("text",
   size = 5, color = "#661100", vjust = 1, hjust = 1
 )
 
-SR_monthly <- create_bar_chart_categorical(
+SR_monthly <- base_bar_chart(
   dataset = monthly_df,
-  x_col = "YearMonth",
-  y_col = "count",
-  chart_title = "SRs by Month",
-  sub_title = chart_sub_title,
-  console_print_out_title = "Monthly SR Count",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_monthly.pdf"),
-  chart_directory = chart_directory_path
+  x_col = "YearMonth",                # Use the Date column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs by Month",       # Chart title
+  sub_title = "",                     # Optional subtitle
+  console_print_out_title = "Monthly SR Count",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = "SRs_monthly.pdf",  # Output file name
+  chart_directory = "."                # Save in current directory
 )
 
 #########################################################################
@@ -404,25 +434,25 @@ max_date <- daily_df$created_day[which.max(daily_df$count)]
 earliest_day <- min(daily_df$created_day)
 max_count <- max(daily_df$count)
 
-SR_daily <- create_bar_chart_categorical(
+SR_daily <- base_bar_chart(
   dataset = daily_df,
-  x_col = "created_day",
-  y_col = "count",
-  chart_title = "Daily SR count",
-  sub_title = chart_sub_title,
-  console_print_out_title = "Daily SR Count",
-  add_mean = FALSE,
-  add_median = TRUE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_daily.pdf"),
-  chart_directory = chart_directory_path,
-  horizontal_adjustment_max = 1.2,
-  vertical_adjustment_max = 0.8
+  x_col = "created_day",              # Use the categorical or date column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "Daily SR count",     # Chart title
+  sub_title = chart_sub_title,        # Optional subtitle
+  console_print_out_title = "Daily SR Count",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = TRUE,                  # Add median annotation
+  add_sd = TRUE,                      # Add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_daily.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = 1.2,    # Adjust maximum label horizontally
+  vertical_adjustment_max = 0.8       # Adjust maximum label vertically
 )
 
 #########################################################################
@@ -441,45 +471,46 @@ calendar_month_df$count_per_day <- round(calendar_month_df$count / days_in_month
 # Order the dataframe by Month
 calendar_month_df <- calendar_month_df[order(calendar_month_df$Month), ]
 
-SR_calendar_month <- create_bar_chart_categorical(
+SR_calendar_month <- base_bar_chart(
   dataset = calendar_month_df,
-  x_col = "Month",
-  y_col = "count",
-  chart_title = "SRs by Calendar Month",
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs by Calendar Month",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf"),
-  chart_directory = chart_directory_path
+  x_col = "Month",                    # Use the categorical column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs by Calendar Month",  # Chart title
+  sub_title = chart_sub_title,        # Optional subtitle
+  console_print_out_title = "SRs by Calendar Month",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_calendar_month.pdf"),  # Output file name
+  chart_directory = chart_directory_path  # Directory for saving the chart
 )
 
 #########################################################################
-SR_day_of_the_year <- create_bar_chart_numeric(
+
+SR_day_of_the_year <- base_bar_chart(
   dataset = days_to_chart,
-  x_col = "day_number",
-  y_col = "count",
-  chart_title = "SRs by Day-of-the-Year",
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs by Day_of_the_year",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = TRUE,
-  extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_year.pdf"),
-  chart_directory = chart_directory_path,
-  horizontal_adjustment_max = 1.2,
-  vertical_adjustment_max = 1.5
+  x_col = "day_number",               # Use the numeric column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs by Day-of-the-Year",  # Chart title
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs by Day_of_the_year",  # Console summary title
+  add_mean = TRUE,                    # Add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add a trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = TRUE,          # Add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_year.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = 1.2,    # Adjust maximum label horizontally
+  vertical_adjustment_max = 1.5       # Adjust maximum label vertically
 )
 
 #########################################################################
@@ -495,26 +526,25 @@ day_of_week_df <- day_of_week_df %>%
 # Convert the 'day_of_week' column to a factor
 day_of_week_df$day_of_week <- factor(day_of_week_df$day_of_week)
 
-
-SR_day_of_the_week <- create_bar_chart_categorical(
+SR_day_of_the_week <- base_bar_chart(
   dataset = day_of_week_df,
-  x_col = "day_of_week",
-  y_col = "count",
-  chart_title = "SRs by Day-of-the-Week",
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs by Day-of-the-Week",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = NULL,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_week.pdf"),
-  chart_directory = chart_directory_path,
-  horizontal_adjustment_max = 0.5,
-  vertical_adjustment_max = 0.2
+  x_col = "day_of_week",              # Use the categorical column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs by Day-of-the-Week",  # Chart title
+  sub_title = chart_sub_title,        # Optional subtitle
+  console_print_out_title = "SRs by Day-of-the-Week",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_by_day_of_the_week.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = 0.5,    # Adjust maximum label horizontally
+  vertical_adjustment_max = 0.2       # Adjust maximum label vertically
 )
 
 #########################################################################
@@ -539,24 +569,23 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.4, hjust = 0.1
 )
 
-# Create the bar chart for SRs created exactly on the hour
-SR_created_by_top_of_hour <- create_bar_chart_numeric(
+SR_created_by_top_of_hour <- base_bar_chart(
   dataset = grouped_by_hour,
-  x_col = "created_hour",
-  y_col = "count",
-  chart_title = NULL,
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs Created Exactly on the Hour (xx:00:00)",
-  add_mean = FALSE,
-  add_median = TRUE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = FALSE,
-  add_minimum = FALSE,
-  add_second_maximum = TRUE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf"),
-  chart_directory = chart_directory_path
+  x_col = "created_hour",             # Use the numeric column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = NULL,                 # Chart title (can be NULL)
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs Created Exactly on the Hour (xx:00:00)",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = TRUE,                  # Add median annotation
+  add_sd = TRUE,                      # Add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = FALSE,                # Do not add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = TRUE,          # Add second maximum annotation
+  extra_line = extra_line,            # Add an optional extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_on_the_hour.pdf"),  # Output file name
+  chart_directory = chart_directory_path  # Directory for saving the chart
 )
 
 #########################################################################
@@ -581,24 +610,23 @@ minute_counts_busiest_day$hour_minute <- as.POSIXct(minute_counts_busiest_day$ho
 # Add scale for x-axis (formatting the time by 2-hour intervals)
 extra_line <- scale_x_datetime(expand = c(0.025, 0.025), date_labels = "%H:%M", breaks = scales::date_breaks("2 hours"))
 
-# Create the bar chart for SRs created minute by minute on the busiest day
-SR_created_by_minute_of_busiest_day <- create_bar_chart_numeric(
+SR_created_by_minute_of_busiest_day <- base_bar_chart(
   dataset = minute_counts_busiest_day,
-  x_col = "hour_minute",
-  y_col = "count",
-  chart_title = paste("SRs Created by Exact Minute of the Busiest Day (xx:xx:00) on", max_date),
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs Created Exactly on the Minute (yy:xx:00) on Busiest Day",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf"),
-  chart_directory= chart_directory_path
+  x_col = "hour_minute",              # Use the datetime column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = paste("SRs Created by Exact Minute of the Busiest Day (xx:xx:00) on", max_date),  # Chart title
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs Created Exactly on the Minute (yy:xx:00) on Busiest Day",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = TRUE,                      # Add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = extra_line,            # Add an optional extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_minute_of_busiest_day.pdf"),  # Output file name
+  chart_directory = chart_directory_path  # Directory for saving the chart
 )
 
 #########################################################################
@@ -624,25 +652,24 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.7, hjust = 0.1
 )
 
-# Create the bar chart for SRs closed exactly on the hour
-SR_closed_by_top_of_hour <- create_bar_chart_numeric(
+SR_closed_by_top_of_hour <- base_bar_chart(
   dataset = grouped_by_hour,
-  x_col = "closed_hour",
-  y_col = "count",
-  chart_title = NULL,
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs Closed Exactly on the Hour (xx:00:00)",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = FALSE,
-  add_minimum = FALSE,
-  add_second_maximum = TRUE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf"),
-  chart_directory= chart_directory_path
-  )
+  x_col = "closed_hour",              # Use the numeric column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = NULL,                 # Chart title (can be NULL)
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs Closed Exactly on the Hour (xx:00:00)",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = TRUE,                      # Add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = FALSE,                # Do not add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = TRUE,          # Add second maximum annotation
+  extra_line = extra_line,            # Add an optional extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_closed_on_the_hour.pdf"),  # Output file name
+  chart_directory = chart_directory_path  # Directory for saving the chart
+)
 
 #########################################################################
 # Show minute-by-minute closure of SRs on the busiest day of the year.
@@ -666,71 +693,25 @@ minute_counts$hour_minute <- as.POSIXct(minute_counts$hour_minute, format = "%H:
 
 extra_line <- scale_x_datetime(expand = c(.03, .03), date_labels = "%H:%M", breaks = "2 hour")
 
-SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
+SR_closed_by_minute_of_busiest_day <- base_bar_chart(
   dataset = minute_counts,
-  x_col = "hour_minute",
-  y_col = "count",
-  chart_title = paste("SRs closed by Exact Minute-of-the-busiest-Day (yy:xx:00) on", max_date),
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs closed by Exact Minute (yy:xx:00) of the Busiest Day",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = TRUE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),
-  chart_directory = chart_directory_path,
-  horizontal_adjustment_max = -1,
-  vertical_adjustment_max = 1
-)
-
-# Use pre-aggregated minute-level closed summary and filter for the busiest day
-# Filter for the busiest day
-minute_counts_busiest_day <- minute_level_closed_summary %>%
-  filter(as.Date(closed_minute) == as.Date(max_date))  # Filter for the busiest day
-
-minute_counts_busiest_day <- minute_level_closed_summary %>%
-  filter(as.Date(closed_minute) == as.Date(max_date)) # Filter for the busiest day
-
-# Group the data by hour and minute
-minute_counts_busiest_day <- minute_counts_busiest_day %>%
-  mutate(hour = hour(closed_minute), minute = minute(closed_minute)) %>%
-  group_by(hour, minute) %>%
-  summarise(count = sum(count), .groups = "drop")
-
-# Create a formatted "hour:minute" column
-minute_counts_busiest_day <- minute_counts_busiest_day %>%
-  mutate(hour_minute = sprintf("%02d:%02d", hour, minute))
-
-# Convert hour_minute to a POSIXct time format
-minute_counts_busiest_day$hour_minute <- as.POSIXct(minute_counts_busiest_day$hour_minute, format = "%H:%M")
-
-# Add scale for x-axis (formatting the time by 2-hour intervals)
-extra_line <- scale_x_datetime(expand = c(.03, .03), date_labels = "%H:%M", breaks = scales::date_breaks("2 hours"))
-
-# Create the bar chart for SRs closed minute by minute on the busiest day
-SR_closed_by_minute_of_busiest_day <- create_bar_chart_numeric(
-  dataset = minute_counts_busiest_day,
-  x_col = "hour_minute",
-  y_col = "count",
-  chart_title = paste("SRs Closed by Exact Minute-of-the-Busiest-Day (xx:xx:00) on", max_date),
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs Closed by Exact Minute (xx:xx:00) on Busiest Day",
-  add_mean = FALSE,
-  add_median = FALSE,
-  add_sd = TRUE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = TRUE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),
-  chart_directory= chart_directory_path,
-  horizontal_adjustment_max = -1,
-  vertical_adjustment_max = 1
+  x_col = "hour_minute",              # Use the datetime column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = paste("SRs closed by Exact Minute-of-the-busiest-Day (yy:xx:00) on", max_date),  # Chart title
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs closed by Exact Minute (yy:xx:00) of the Busiest Day",  # Console summary title
+  add_mean = FALSE,                   # Do not add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = TRUE,                      # Add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = TRUE,          # Add second maximum annotation
+  extra_line = extra_line,            # Add an optional extra line
+  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_minute_of_busiest_day.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = -1,     # Adjust maximum label horizontally
+  vertical_adjustment_max = 1         # Adjust maximum label vertically
 )
 
 #########################################################################
@@ -745,25 +726,25 @@ extra_line <- annotate("text",
   size = 4, color = "black", vjust = -0.7, hjust = -0.1
 )
 
-# Create the bar chart for SRs created by hour of the day
-SR_created_time_of_day <- create_bar_chart_numeric(
+SR_created_time_of_day <- base_bar_chart(
   dataset = created_hour_of_day_df,
-  x_col = "created_hour",
-  y_col = "count",
-  chart_title = "SRs created by Hour-of-the-Day",
-  sub_title = chart_sub_title,
-  console_print_out_title = "SR created by Hour-of-the-Day",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = FALSE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf"),
-  chart_directory= chart_directory_path,
-  horizontal_adjustment_max = -1,
-  vertical_adjustment_max = 1
+  x_col = "created_hour",             # Use the numeric column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs created by Hour-of-the-Day",  # Chart title
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SR created by Hour-of-the-Day",  # Console summary title
+  add_mean = TRUE,                    # Add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = FALSE,                # Do not add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = NULL,                  # No extra line
+  chart_file_name = paste0(file_name_prefix, "-trend_SRs_created_by_hour_of_day.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = -1,     # Adjust maximum label horizontally
+  vertical_adjustment_max = 1         # Adjust maximum label vertically
 )
 
 # Summary of SRs closed by hour-of-the-day
@@ -784,26 +765,25 @@ extra_line <- annotate("text",
   size = 3.7, color = "black", vjust = -0.7, hjust = -.5
 )
 
-# Create the bar chart for SRs closed by hour of the day
-SR_closed_time_of_day <- create_bar_chart_numeric(
+SR_closed_time_of_day <- base_bar_chart(
   dataset = closed_hour_of_day_df,
-  x_col = "closed_hour", # Change this to closed_hour_formatted if you want formatted values in the chart
-  y_col = "count",
-  chart_title = "SRs Closed by Hour of Day",
-  sub_title = chart_sub_title,
-  console_print_out_title = "SRs Closed by Hour-of-the-Day",
-  add_mean = TRUE,
-  add_median = FALSE,
-  add_sd = FALSE,
-  add_trendline = FALSE,
-  add_maximum = TRUE,
-  add_minimum = FALSE,
-  add_second_maximum = FALSE,
-  extra_line = extra_line,
-  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf"),
-  chart_directory= chart_directory_path,
-  horizontal_adjustment_max = -1,
-  vertical_adjustment_max = 1
+  x_col = "closed_hour",              # Use the numeric column for x-axis
+  y_col = "count",                    # y-axis column
+  chart_title = "SRs Closed by Hour of Day",  # Chart title
+  sub_title = chart_sub_title,        # Subtitle for the chart
+  console_print_out_title = "SRs Closed by Hour-of-the-Day",  # Console summary title
+  add_mean = TRUE,                    # Add mean annotation
+  add_median = FALSE,                 # Do not add median annotation
+  add_sd = FALSE,                     # Do not add standard deviation annotation
+  add_trendline = FALSE,              # Do not add trendline
+  add_maximum = TRUE,                 # Add maximum annotation
+  add_minimum = FALSE,                # Do not add minimum annotation
+  add_second_maximum = FALSE,         # Do not add second maximum annotation
+  extra_line = extra_line,            # Add an optional extra line
+  chart_file_name = paste0(file_name_prefix, "-trend-SRs_closed_by_hour_of_day.pdf"),  # Output file name
+  chart_directory = chart_directory_path,  # Directory for saving the chart
+  horizontal_adjustment_max = -1,     # Adjust maximum label horizontally
+  vertical_adjustment_max = 1         # Adjust maximum label vertically
 )
 
 # Summary of SRs closed by hour-of-the-day

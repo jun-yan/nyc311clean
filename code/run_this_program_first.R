@@ -5,8 +5,9 @@
 # -------------------------------------------------------------
 # 📂 SET THE BASE WORKING DIRECTORY
 # -------------------------------------------------------------
-# Customize this path as needed
-working_dir <- "C:/Users/David/OneDrive/Documents/datacleaningproject/download_code"
+# Customize this path as needed/desired
+working_dir <- "C:/Users/David/OneDrive/Documents/datacleaningproject/initialization_test_directory"
+# -------------------------------------------------------------
 
 # If the working directory does not exist, create it
 if (!dir.exists(working_dir)) {
@@ -17,7 +18,6 @@ if (!dir.exists(working_dir)) {
 setwd(working_dir)
 base_dir <- working_dir  # Store as 'base_dir' for use in subdirectories
 cat("📍 Working directory set to:", getwd(), "\n")
-
 
 # -------------------------------------------------------------
 # 📦 INSTALL AND LOAD REQUIRED PACKAGES
@@ -49,7 +49,6 @@ if (length(missing_packages)) {
 # Load the required packages
 lapply(required_packages, library, character.only = TRUE)
 
-
 # -------------------------------------------------------------
 # 📁 CREATE SUBDIRECTORIES UNDER THE WORKING DIRECTORY
 # -------------------------------------------------------------
@@ -63,7 +62,6 @@ for (sub_dir in sub_dirs) {
 }
 
 cat("\n✅ Project directory structure complete.")
-
 
 # -------------------------------------------------------------
 # 📦 DOWNLOAD AND EXTRACT DATASETS FROM FIGSHARE
@@ -133,7 +131,6 @@ for (i in seq_along(github_urls)) {
   }
 }
 
-
 # -------------------------------------------------------------
 # 📂 DOWNLOAD AND SOURCE ALL R FUNCTION FILES FROM GITHUB
 # -------------------------------------------------------------
@@ -191,7 +188,6 @@ if (length(function_files) > 0) {
 } else {
   cat("\n❌ No function files found to source in:", functions_dir, "\n")
 }
-
 
 # -------------------------------------------------------------
 # 🏁 FINAL MESSAGE TO THE USER

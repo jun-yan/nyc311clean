@@ -1,26 +1,39 @@
-#########################################################################
-
-base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title, 
-                           y_axis_labels = scales::comma, 
-                           add_maximum = FALSE, add_minimum = FALSE, 
-                           add_mean = FALSE, add_median = FALSE, 
-                           add_sd = FALSE, add_second_maximum = FALSE,
-                           add_trendline = FALSE, extra_line = NULL,
-                           horizontal_adjustment_max = 0.5,
-                           vertical_adjustment_max = -1,
-                           console_print_out_title = "Data Summary",
-                           chart_file_name = NULL,
-                           chart_directory = ".",
-                           chart_width = 10,
-                           chart_height = 7,
-                           annotation_size = 5) {
+base_bar_chart <- function(
+    dataset, 
+    x_col, 
+    y_col, 
+    chart_title = "Bar Chart", 
+    sub_title = "",
+    y_axis_labels = scales::comma,
+    add_maximum = FALSE, 
+    add_minimum = FALSE,
+    add_mean = FALSE, 
+    add_median = FALSE, 
+    add_sd = FALSE,
+    add_second_maximum = FALSE,
+    add_trendline = FALSE,
+    extra_line = NULL,
+    horizontal_adjustment_max = 0.5,
+    vertical_adjustment_max = -1,
+    console_print_out_title = "Data Summary",
+    chart_file_name = NULL,
+    chart_directory = ".",
+    chart_width = 10,
+    chart_height = 7,
+    annotation_size = 5,
+    x_axis_tick_size = 12,  # Size of x-axis ticks
+    x_axis_label_angle = 90,  # Angle of x-axis labels
+    x_axis_tick_length = unit(0.3, "cm")  # Length of x-axis tick marks
+) {
+  
+  cat("x_col type:", class(dataset[[x_col]]), "\n")
   
   # Step 1: Print Data Summary
   cat("\n\n", console_print_out_title, " (first 20 rows):\n", sep = "")
   dataset <- as.data.frame(dataset)
   print(head(dataset[, c(x_col, y_col)], 20), row.names = FALSE)
   
-  # Sort dataset by y_col (descending) and x_col based on type
+  # Step 2: Sort dataset by y_col (descending) and x_col based on type
   if (inherits(dataset[[x_col]], "Date") || inherits(dataset[[x_col]], "POSIXct")) {
     sorted_dataset <- dataset[order(-dataset[[y_col]], dataset[[x_col]]), ]
   } else if (is.factor(dataset[[x_col]])) {
@@ -29,21 +42,28 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
     sorted_dataset <- dataset[order(-dataset[[y_col]], -dataset[[x_col]]), ]
   }
   
-  # Calculate total count for y_col
-  y_total_count <- sum(dataset[[y_col]], na.rm = TRUE)
-  
-  # Step 2: Set up x_scale based on x_col type
-  if (inherits(dataset[[x_col]], "Date")) {
-    x_scale <- scale_x_date(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+  # Step 3: Determine x_scale based on x_col type
+  x_scale <- if (inherits(dataset[[x_col]], "Date")) {
+    scale_x_date(
+      expand = c(0.01, 0), 
+      labels = scales::date_format("%Y-%m"), 
+      breaks = scales::date_breaks("1 months")
+    )
   } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
-    x_scale <- scale_x_datetime(expand = c(0.01, 0), labels = scales::date_format("%Y-%m"), breaks = scales::date_breaks("6 months"))
+    scale_x_datetime(
+      expand = c(0.01, 0), 
+      labels = scales::date_format("%H:%M"), 
+      breaks = scales::date_breaks("1 hour")
+    )
   } else if (is.numeric(dataset[[x_col]])) {
-    x_scale <- scale_x_continuous(expand = c(0.01, 0))
+    scale_x_continuous(expand = c(0.01, 0))
+  } else if (is.factor(dataset[[x_col]]) || is.character(dataset[[x_col]])) {
+    scale_x_discrete(expand = c(0.01, 0))
   } else {
-    x_scale <- scale_x_discrete(expand = c(0.01, 0))
+    stop("Unsupported x_col type.")
   }
   
-  # Step 3: Create the base ggplot object
+  # Step 4: Create the base ggplot object
   bar_chart <- ggplot(sorted_dataset, aes(x = .data[[x_col]], y = .data[[y_col]])) +
     geom_bar(stat = "identity", fill = "#44AA99", na.rm = TRUE) +
     x_scale +
@@ -51,21 +71,28 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
     theme(
       axis.title = element_blank(),
       plot.title = element_text(hjust = 0.5, size = 12),
-      axis.text.x = element_text(angle = 60, vjust = 1, hjust = 1, face = "bold", size = 9),
+      axis.text.x = element_text(
+        angle = x_axis_label_angle, 
+        vjust = ifelse(x_axis_label_angle == 90, 0.5, 1),
+        hjust = ifelse(x_axis_label_angle == 90, 1, 0.5),
+        face = "bold", 
+        size = x_axis_tick_size
+      ),
       axis.text.y = element_text(face = "bold", size = 8),
+      axis.ticks.length = x_axis_tick_length,  # Adjust tick mark length
       panel.background = element_rect(fill = "gray100", color = "gray100"),
       aspect.ratio = 0.618033
     ) +
-    labs(x = NULL, y = NULL)  
+    labs(x = NULL, y = NULL)
   
-  # Step 4: Add y-axis breaks
+  # Step 5: Add y-axis breaks
   built_plot <- ggplot_build(bar_chart)
   y_breaks <- built_plot$layout$panel_params[[1]]$y$get_breaks()
   y_breaks <- y_breaks[!is.na(y_breaks)]
   bar_chart <- bar_chart +
     geom_hline(yintercept = y_breaks, linetype = "dotted", color = "gray35", linewidth = 0.5)
   
-  # Step 5: Add conditional annotations
+  # Step 6: Add conditional annotations
   y_mean_value <- round(mean(dataset[[y_col]], na.rm = TRUE), 0)
   y_median_value <- round(median(dataset[[y_col]], na.rm = TRUE), 0)
   y_sd_value <- round(sd(dataset[[y_col]], na.rm = TRUE), 0)
@@ -87,13 +114,10 @@ base_bar_chart <- function(dataset, x_col, y_col, chart_title, sub_title,
                size = annotation_size, color = "black", vjust = vertical_adjustment_max, hjust = horizontal_adjustment_max)
   }
   
+  # Step 7: Save or print the chart
   if (!is.null(chart_file_name)) {
-    # Print or save the chart as needed
     print(bar_chart)
     chart_path <- file.path(chart_directory, chart_file_name)
-    ggsave(chart_path, plot = bar_chart, width = chart_width, 
-           height = chart_height, dpi = 300)
+    ggsave(chart_path, plot = bar_chart, width = chart_width, height = chart_height, dpi = 300)
   }
 }
-
-#########################################################################
