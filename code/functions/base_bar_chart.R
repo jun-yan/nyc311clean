@@ -16,6 +16,7 @@ base_bar_chart <- function(
     horizontal_adjustment_max = 0.5,
     vertical_adjustment_max = -1,
     console_print_out_title = "Data Summary",
+    rows_to_print = 20,  # New parameter for number of rows to print
     chart_file_name = NULL,
     chart_directory = ".",
     chart_width = 10,
@@ -26,20 +27,41 @@ base_bar_chart <- function(
     x_axis_tick_length = unit(0.3, "cm")  # Length of x-axis tick marks
 ) {
   
-  cat("x_col type:", class(dataset[[x_col]]), "\n")
+  
+  # Step 0: Add percentage and cumulative percentage columns with 2 decimal points
+  dataset <- dataset %>%
+    mutate(
+      percentage = round(.data[[y_col]] / sum(.data[[y_col]]) * 100, 2),
+      cumulative_percentage = round(cumsum(.data[[y_col]]) / sum(.data[[y_col]]) * 100, 2)
+    )
+  
+  rows_to_print <- min(nrow(dataset), rows_to_print)
   
   # Step 1: Print Data Summary
-  cat("\n\n", console_print_out_title, " (first 20 rows):\n", sep = "")
+  cat("\n\n", console_print_out_title, " (first ", rows_to_print, " rows):\n", sep = "")
   dataset <- as.data.frame(dataset)
-  print(head(dataset[, c(x_col, y_col)], 20), row.names = FALSE)
+  
+  # Temporarily increase max.print to handle larger output
+  old_max_print <- getOption("max.print")  # Save the current max.print value
+  options(max.print = max(1000, rows_to_print * 4))  # Adjust based on expected rows and columns
+  
+  # Print the first 'rows_to_print' rows of all relevant columns
+  print(dataset[1:rows_to_print, c(x_col, y_col, "percentage", "cumulative_percentage")], row.names = FALSE)
+  
+  # Restore the original max.print value
+  options(max.print = old_max_print)
   
   # Step 2: Sort dataset by y_col (descending) and x_col based on type
   if (inherits(dataset[[x_col]], "Date") || inherits(dataset[[x_col]], "POSIXct")) {
     sorted_dataset <- dataset[order(-dataset[[y_col]], dataset[[x_col]]), ]
   } else if (is.factor(dataset[[x_col]])) {
     sorted_dataset <- dataset[order(-dataset[[y_col]]), ]
+  } else if (is.character(dataset[[x_col]]) && grepl("-", dataset[[x_col]][1])) {
+    # Extract numeric part of day_info for sorting
+    day_number <- as.numeric(sub(" -.*", "", dataset[[x_col]]))
+    sorted_dataset <- dataset[order(-dataset[[y_col]], day_number), ]
   } else {
-    sorted_dataset <- dataset[order(-dataset[[y_col]], -dataset[[x_col]]), ]
+    sorted_dataset <- dataset[order(-dataset[[y_col]]), ]
   }
   
   # Step 3: Determine x_scale based on x_col type

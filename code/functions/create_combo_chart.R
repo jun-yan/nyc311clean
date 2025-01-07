@@ -1,10 +1,9 @@
-#########################################################################
-
 create_combo_chart <- function(
     dataset,
     chart_title = NULL,
     chart_file_name = NULL,
     console_print_out_title = "Data Summary",
+    rows_to_print = 20,           # New parameter for number of rows to print
     chart_directory,
     chart_width = 10,
     chart_height = 7,
@@ -25,20 +24,20 @@ create_combo_chart <- function(
       percentage = count / sum(count),
       cumulative_percentage = cumsum(percentage)
     ) %>%
-    slice_head(n = 12)
+    slice_head(n = rows_to_print)
   
   # Step 2: Reorder the agency factor based on the descending count
   summary_df <- summary_df %>%
     mutate(agency = factor(agency, levels = agency))
   
   # Print the dataset summary to the console
-  cat(paste0("\n", console_print_out_title, " (first 20 rows):\n"))
+  cat(paste0("\n", console_print_out_title, " (first ", rows_to_print, " rows):\n"))
   summary_df <- summary_df %>%
     mutate(
       percentage = round(percentage, 4),
       cumulative_percentage = round(cumulative_percentage, 4)
     )
-  print(format(summary_df, justify = "left"), row.names = FALSE)
+  print(head(format(summary_df, justify = "left"), rows_to_print), row.names = FALSE)
   
   # Count the number of unique x-axis data points
   total_x_labels <- length(unique(summary_df$agency))
@@ -114,5 +113,3 @@ create_combo_chart <- function(
   chart_path <- file.path(chart_directory, chart_file_name)
   ggsave(chart_path, plot = combo_chart, width = chart_width, height = chart_height, dpi = 300)
 }
-
-#########################################################################

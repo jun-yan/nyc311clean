@@ -12,7 +12,6 @@ required_packages <- c(
   "data.table",
   "renv", 
   "sf", 
-  
   "stringdist", 
   "styler", 
   "tidyverse", 
@@ -45,7 +44,7 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 #########################################################################
 rm(list = ls())
 
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.CSV"
+main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_01-05-2025.CSV"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
@@ -85,6 +84,7 @@ lapply(function_files, function(file) {
 
 # Define the path for the main data file (CSV file)
 data_file <- file.path(base_dir, "data")
+
 # Define the path for the charts
 chart_directory_path <- file.path(base_dir, "charts")
 
@@ -361,7 +361,10 @@ ggsave(chart_path, plot = blank_chart, width = chart_width,
        height = chart_height, dpi = 300)
 
 #########################################################################
-# Determine field usage by Agency
+
+# Determine field usage by Agency. Produce Excel spreadsheet.
+
+#########################################################################
 # Initialize the list of fields (excluding "agency")
 fields <- setdiff(names(d311), "agency")
 
@@ -410,6 +413,8 @@ complaintData <- complaintData[order(-complaintData$Freq), ]
 complaintData$percent <- round(prop.table(complaintData$Freq) * 100, 2)
 complaintData$cumulative_percent <- cumsum(complaintData$percent)
 
+cat("\n\nThere are", nrow(complaintData),"different complaint_type(s).")
+
 unique_pairs <- unique(d311[, c("complaint_type", "agency")])
 unique_pairs <- unique_pairs[order(unique_pairs$complaint_type), ]
 
@@ -455,8 +460,11 @@ cat("\nComplaints with multiple responsible Agencies:\n")
 # Filter rows where agency is "MULTIPLE"
 multiple_agency_complaints <- complaintData[complaintData$agency == "MULTIPLE", ]
 
+# Remove the cumulative_percent column to prevent misinterpretation
+multiple_agency_complaints$cumulative_percent <- NULL
+
 # View the results
-head(multiple_agency_complaints, 50)
+print(head(multiple_agency_complaints, 20))
 
 # Identify the 'Noise' complaints
 noise_rows <- complaintData %>%
@@ -484,7 +492,8 @@ create_combo_chart(
   console_print_out_title = "Summary of Complaint Type",
   num_x_labels = 10,
   annotation_size = 4,
-  x_axis_tick_size = 10, 
+  x_axis_tick_size = 10,
+  rows_to_print = 20,
   x_axis_label_angle = 60
 )
 

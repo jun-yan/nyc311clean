@@ -100,14 +100,19 @@ cross_street_analysis <- function(
   if (num_rows_non_dup > 0) {
     agency_match_non_dup <- rank_by_agency(non_dup_streets)
     
-    chart_title <- paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
-    chart_file_name <- paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
+    chart_title <- 
+      paste0("Non-Matching '", cross_street, "' and '", intersection_street, "' by Agency & cumulative percentage", sep = "")
+    chart_file_name <- 
+      paste0("non-matching_", cross_street, "and", intersection_street, ".pdf", sep = "")
+    
     create_combo_chart(
       non_dup_streets,
       chart_title,
       chart_file_name,
       chart_directory,
-      console_print_out_title = paste0("Summary of non-Matching '", cross_street, "' and '", intersection_street, "'by Agency")
+      rows_to_print = 20,
+      console_print_out_title = 
+        paste0("Summary of non-Matching '", cross_street, "' and '", intersection_street, "'by Agency")
     )
   }
   

@@ -17,6 +17,9 @@ consolidate_agencies <-function(dataset)
   # Replace "DOITT" with "OTI" in the agency column
   dataset$agency[dataset$agency == "DOITT"] <- "OTI"
   
+  # Replace "311" with "OTI" in the agency column
+  dataset$agency[dataset$agency == "311"] <- "OTI"
+  
   return(dataset)
 }
 
