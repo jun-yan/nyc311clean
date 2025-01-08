@@ -129,8 +129,7 @@ main_data_file_path <- file.path( data_file, main_data_file)
 
 d311 <- as.data.frame(fread(
   main_data_file_path,
-  colClasses = "character"
-))
+  colClasses = "character" ))
 
 # Capture original file size for later use during file reduction routine.
 original_size <- object.size(d311)
@@ -142,7 +141,7 @@ num_rows_d311 <- nrow(d311)
 num_columns_d311 <- ncol(d311)
 
 #########################################################################
-# Convert character fields to upper case to facilitate comparisons
+#Convert character fields to upper case to facilitate comparisons
 columns_to_upper <- c(
   "agency",
   "agency_name",
@@ -393,18 +392,23 @@ field_usage_summary_table <- final_results %>%
     values_fill = 0
   )
 
+# Exclude the non-numeric "field" column and compute row sums
+field_usage_summary_table$TOTAL<- rowSums(field_usage_summary_table[, -1])
+
 # Print the data frame without row names
-print(as.data.frame(field_usage_summary_table), row.names = FALSE)
+cat("\n\nField Usage by Agency:\n")
+print(as.data.frame(field_usage_summary_table), row.names = FALSE, right = FALSE)
 
 # Define the file path for saving the CSV
 summary_table_file_path <- file.path(writeFilePath, "field_usage_summary_table.csv")
 
 # Save the data frame as a CSV file
 write.csv(field_usage_summary_table, summary_table_file_path, row.names = FALSE)
-cat("\nA csv file showing field usage by agency has been written to:", summary_table_file_path, "\n")
+cat("\nA CSV file showing field usage by Agency has been written to:\n", 
+    summary_table_file_path, "\n")
 #########################################################################
 
-cat("\n\n**********COMPLAINT TYPES**********\n")
+cat("\n\n**********COMPLAINT TYPES**********")
 
 #########################################################################
 # Calculate complaint frequency and responsible agency
@@ -413,7 +417,7 @@ complaintData <- complaintData[order(-complaintData$Freq), ]
 complaintData$percent <- round(prop.table(complaintData$Freq) * 100, 2)
 complaintData$cumulative_percent <- cumsum(complaintData$percent)
 
-cat("\n\nThere are", nrow(complaintData),"different complaint_type(s).")
+cat("\n\nThere are", nrow(complaintData),"different complaint_type(s).\n")
 
 unique_pairs <- unique(d311[, c("complaint_type", "agency")])
 unique_pairs <- unique_pairs[order(unique_pairs$complaint_type), ]
@@ -464,7 +468,7 @@ multiple_agency_complaints <- complaintData[complaintData$agency == "MULTIPLE", 
 multiple_agency_complaints$cumulative_percent <- NULL
 
 # View the results
-print(head(multiple_agency_complaints, 20))
+print(head(multiple_agency_complaints, 20),row.names = FALSE, right = FALSE)
 
 # Identify the 'Noise' complaints
 noise_rows <- complaintData %>%
@@ -476,7 +480,7 @@ print(noise_rows, right = c(0, rep(1, ncol(noise_rows) - 1)))
 cat(
   "\nNoise complaints of all types number",
   format(sum(noise_rows$count), big.mark = ","),
-  "constituting", round(sum(noise_rows$percent), 0), "% of all SRs.\n"
+  "constituting", round(sum(noise_rows$percent), 0), "% of all SRs.\n", sep = ""
 )
 
 # Rename columns to trick 'create_combo_chart' function to use 'complaint_type' as 'agency'
@@ -1129,20 +1133,27 @@ if (num_row_updatedLate > 0) {
 }
 
 if (num_row_updatedLate > 0) {
-  cat("\nMedian of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(median(updatedLate$postClosedUpdateDuration), 4), "days")
-  cat("\nAverage of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(mean(updatedLate$postClosedUpdateDuration), 4), "days")
-  cat("\nStandard deviation of late post-closed resolution updates >", resoultion_action_threshold, "is:", round(sd(updatedLate$postClosedUpdateDuration), 4), "days\n")
-  cat("\n\nThe average of all post-closed resolution updates in total is: ",
-    round(mean(post_closed_positive$postClosedUpdateDuration), 4), " days [", round(mean(post_closed_positive$postClosedUpdateDuration) * 24, 4), " hours]\n",
-    sep = ""
-  )
+  cat("\nMedian of late post-closed resolution updates >", resoultion_action_threshold, "is:", 
+      round(median(updatedLate$postClosedUpdateDuration), 4), "days")
+  cat("\nAverage of late post-closed resolution updates >", resoultion_action_threshold, "is:", 
+      round(mean(updatedLate$postClosedUpdateDuration), 4), "days")
+  cat("\nStandard deviation of late post-closed resolution updates >", resoultion_action_threshold, "is:", 
+      round(sd(updatedLate$postClosedUpdateDuration), 4), "days\n")
+  
+  cat("\n\nThe Average of all post-closed resolution updates, regardless of any exclusion threshold is: ",
+      round(mean(post_closed_positive$postClosedUpdateDuration), 6), " days [", 
+      round(mean(post_closed_positive$postClosedUpdateDuration) * 24, 6), " hours]", sep = ""  )
+  cat("\n\nThe Median of all post-closed resolution updates, regardless of any exclusion threshold is: ",
+      round(median(post_closed_positive$postClosedUpdateDuration), 6), " days [", 
+      round(median(post_closed_positive$postClosedUpdateDuration) * 24, 6), " hours]\n", sep = "" )
+  
   if (!is.null(updatedLate)) {
     create_combo_chart(
       dataset = updatedLate,
       chart_title = paste("Post-Closed Resolution Updates >", resoultion_action_threshold, "days by Agency & cumulative percentage"),
       chart_file_name = "post_Closed_Bar_Chart.pdf",
       chart_directory = chart_directory_path,
-      console_print_out_title = "Summary of post-close-resolution-updates by Agency"
+      console_print_out_title = "Summary of post-cloe-resolution-updates by Agency"
     )
 
     post_closed_violin_chart <- create_violin_chart(

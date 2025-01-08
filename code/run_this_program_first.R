@@ -195,3 +195,5 @@ if (length(function_files) > 0) {
 cat("\n✅ All setup and initialization steps are complete!\n")
 cat("📂 You can now run 'datacleansing.R' and 'timelinecharts.R' from the following directory:\n")
 cat(base_dir, "\n")
+
+###########################################################################

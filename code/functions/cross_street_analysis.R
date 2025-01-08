@@ -120,11 +120,12 @@ cross_street_analysis <- function(
   # cross_street is blank, but intersection_street is not blank
   ####################
   
+  if(num_rows_cross_street_blank > 0){
   cat(
     "\nThere are", format(num_rows_cross_street_blank, big.mark = ","),
     "occurrences where'", cross_street, "'is blank, \nbut '", intersection_street, "' is not blank representing",
     round((num_rows_cross_street_blank / num_rows_dataset * 100), 2), "% of total rows."
-  )
+    )
   
   cat(
     "\n\nSample where '", cross_street, "'is blank but '", intersection_street, "'is not blank:\n"
@@ -132,11 +133,14 @@ cross_street_analysis <- function(
   random_sample <- cross_street_blank %>% sample_n(min(num_rows_cross_street_blank, 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
   agency_cross_street_blank <- rank_by_agency(cross_street_blank)
-  
+  } else {
+  cat("\nThere are no rows where", cross_street, "is blank, but", intersection_street, "is not blank.")  
+  }
   
   ####################
   # intersection_street is blank, but cross_street is not blank
   
+  if(num_rows_intersection_street_blank > 0){
   cat(
     "\nThere are", format(num_rows_intersection_street_blank, big.mark = ","),
     "occurrences where'", intersection_street, "'is blank, \nbut '", cross_street, "' is not blank representing",
@@ -150,6 +154,9 @@ cross_street_analysis <- function(
   random_sample <- intersection_street_blank %>% sample_n(min(num_rows_intersection_street_blank, 5)) # random sample
   print(random_sample, row.names = FALSE, right = FALSE)
   agency_intersection_street_blank <- rank_by_agency(intersection_street_blank)
+  } else {
+    cat("\nThere are no rows where", intersection_street, "is blank, but", cross_street, "is not blank.")  
+  }
   
   ####################
   # Check for almost matches, using a Hamming distance of 2 characters different
@@ -179,15 +186,18 @@ cross_street_analysis <- function(
   matches_meeting_threshold <- subset(almost_match, hamming_distance <= threshold)
   num_rows_matches_meeting_threshold <- nrow(matches_meeting_threshold)
   
+  if(num_rows_matches_meeting_threshold > 0){
   cat(
     "\nThere are ", num_rows_matches_meeting_threshold, "near-matches between",
     cross_street, "and", intersection_street
   )
-  if (num_rows_matches_meeting_threshold > 0) {
-    cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
-    random_sample_almost_match <- matches_meeting_threshold %>%
-      sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
-    print(random_sample_almost_match, row.names = FALSE, right = FALSE)
+  cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
+  random_sample_almost_match <- matches_meeting_threshold %>%
+  sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
+  print(random_sample_almost_match, row.names = FALSE, right = FALSE)
+  } else {
+    cat("\nThere are no near-matches for fields", intersection_street, "and", cross_street)  
+    
   }
   
   ####################
