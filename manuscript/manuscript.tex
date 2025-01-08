@@ -235,7 +235,7 @@ maintenance requests. Initially a phone-based call center, the system
 evolved into a comprehensive data management platform handling
 millions of requests annually. Key milestones since its launch in 2003
 include the addition of online and mobile channels in 2009, a
-record monhtly high of 348,463 SRs in 
+record monthly high of 348,463 SRs in 
 August 2020 (associated with the the COVID-19 
 pandemic), the 2021 expansion to include the 
 Metropolitan Transit Authority (MTA) NYC subway 
@@ -275,16 +275,14 @@ social equity in service provision \citep{white2018promises,
 \citep{agonafir2022understanding}.
 
 
-Our investigation utilizes a 311 SR dataset covering  2-years (2022-2023).
-This sample was collected on 15 September 2024, and is used 
-to conduct detailed analysis in areas such as data 
-consistency, data validity, redundant fields, etc.. Instructions 
-on downloading this file from the NYC Open Data Portal 
-are available in the supplemental material. Here are some 
-characteristics of the 311 SR dataset used in this analysis:
+Our investigation uses a 311 SR dataset covering  2-years (2022-2023), 
+and was collected on 15 September 2024. It is to conduct 
+analysis in areas such as data consistency, data validity, 
+redundant fields, etc.. Instructions on downloading this file are 
+available in the supplemental material. Characteristics of the 311 SR dataset include:
 
 \begin{itemize}[left=1.5em]
-\item The dataset is approximately 3.7 GB in size and contains 
+\item The dataset is 3.7 GB in size and contains 
   over 6.4 million rows. It was exported as a CSV file.
 
 \item There are 41 columns (fields) of data for each row, with each
@@ -369,13 +367,13 @@ agencies. The six largest agencies are:
 
 
 Collectively these six City Agencies handle over 90\% of the total SR 
-volume, indicative of the critical role these Agencies play in managing
-public concerns, ranging from noise complaints and housing issues to
-sanitation and transportation problems. The remaining
-10\% of SRs is distributed across 10 additional Agencies. 
-This concentration of SRs to the ``big six'' Agencies 
-underscores the necessity for optimal data handling and 
-curation processes within these  high volume Agencies.
+volume, indicative of the critical role they play in managing
+public concerns; ranging from noise complaints and housing issues to
+sanitation and transportation issues. The remaining
+10\% of SRs are distributed across 10 additional Agencies. 
+This concentration of SRs to these ``big six'' Agencies 
+underscores the necessity for optimal data curation processes 
+within these  high volume Agencies.
 
 \begin{figure}[tbp]
 	\centering
@@ -472,9 +470,9 @@ actual error, correct,  or holds some other status.
 \subsection{Structural Issues}
 \label{sec:structural}
 Structural issues refers to how data is organized, formatted, 
-or presented within a dataset. They can make 
-it difficult to analyze the data effectively and often require extensive 
-data cleaning efforts. Here are three structural issues we encountered.
+or presented within a dataset. Structural issues can cause difficulty in 
+ analyzing the data effectively, often necessitating extensive 
+data cleaning. We encountered three structural issues.
  
 \paragraph{Undocumented Fields:} The 311 SR 
 The 311 SR Data Dictionary identifies 
@@ -533,12 +531,11 @@ for date-time stamps would help address this issue.
 
 \subsection{Missing Data by Field}
 \label{sec:blanks}
-Understanding the absence of data by field is important 
-when undertaking analysis. For example, if you wanted to 
-determine if SRs were closed before or after their
-\texttt{due\_date}, you would be challenged as 99.6\% of the
-\texttt{due\_date} fields are blank. When sorting fields by
-blank (or N/A values) they appear to divide into three groups:
+Understanding the absence of data by field greatly aids when 
+conducting analysis. For example, determining if SRs were closed 
+before or after their \texttt{due\_date}, you would be challenged as 99.6\% of the
+\texttt{due\_date} fields are blank, and are only used by one Agency, DSNY. Blank 
+(or N/A values) they appear to divide into three groups:
 
 
 \begin{itemize}[left=1.5em]
@@ -576,11 +573,10 @@ two Agencies (See: \autoref{tab:field-usage-summary}).
 
 
 For some analysis efforts, it may be prudent to inquire 
-further as to why some fields are mostly or almost 
-always blank. Figure~\ref{fig:blank_fields} is 
-a graphic depiction of total empty (blank \& N/As) for each 
-field illustrating the grouping into the Mostly Empty, 
-Partially Empty, and Few/None Empty categories.
+ as to why some fields are mostly/almost always blank. 
+Figure~\ref{fig:blank_fields} is a graphic depiction of the \%
+empty (blank \& N/As) for each field. It illustrates the grouping into 
+Mostly Empty, Partially Empty, and Few/None Empty segments. 
 
 \begin{figure}[tbp]
 	\centering
@@ -615,8 +611,8 @@ usage and as evidenced in other historical datasets:
     \item \texttt{city\_council\_district}
 \end{itemize}
 
-However,  some fields proved problematic as to their 
-compliance with a domain of allowable values. These include: 
+However, some fields lacked compliance
+to a domain of allowable values, including: 
 
 \paragraph{Zip Codes:}
 \label{sec:zipcodesissues}
@@ -747,7 +743,7 @@ distribution by agency, suggesting an Agency-specific issue.
 \paragraph{Created or Closed at Midnight:}
 Another issue involves the unusually large number of 
 SRs where the \texttt{created\_date} and \texttt{closed\_date} 
-indicate ``created'' or ``closed'' exactly at midnight (00:00:00), 
+indicate action exactly at midnight (00:00:00), 
 to the second. Normally, SR creation and closure follows 
 the work-day schedule, with most SRs created 
 during working hours and fewer at night or in the 
@@ -780,11 +776,11 @@ in Figure~\ref{fig:exacthours}
 \end{figure}
 
 
-These unusual patterns of SR creation and closure exactly at midnight 
+These unusual patterns of SR creation/closure at midnight 
 suggest the presence of a bulk create/close software process, perhaps one
 that automatically assigns time stamps of midnight (00:00:00) to 
-large batches of SRs prior to sending the data to the 311 
-data warehouse. This behavior distorts the calculated duration of these 
+ batches of SRs prior to sending the data to the 311 
+database. This behavior distorts the calculated duration of these 
 SRs as well as overall system usage by providing inaccurate 
 dates. Further analysis of the distribution by Agency shows that over 92\% of 
 the ``closed-exactly-at-midnight'' SRs come from just two 
@@ -815,24 +811,23 @@ and 12\% with DSNY.
 
 \subsection{Accuracy and Precision:}
 \label{sec:precision}
-An question of precision vs. accuracy arises with the \texttt{latitude} 
+The question of precision vs. accuracy arises with the \texttt{latitude} 
 and \texttt{longitude} fields. as well as with the duplicative 
 \texttt{location} field. These fields are expressed as
 a 14-decimal number, e.g. \texttt{latitude} 40.86769186022511. 
 Given that 1 degree of latitude at the equator is equal to 111.04 
-kilometers, the ``1'' at the end of the decimal number represents 
+kilometers, the ``1'' at the end of that decimal number represents 
 approximately 1.1 nanometers (1/1,000,000,000 of a meter). (For 
-reference a DNA molecule is approximately 2 nanometers in width.) The 
-representation of the \texttt{latitude} and \texttt{longitude} fields
-appears to be a classic case of extreme precision, but limited 
+reference a DNA molecule is approximately 2 nanometers in width.) This 
+representation appears to be a classic case of extreme precision, albeit with limited 
 accuracy. All the \texttt{latitude}, \texttt{longitude}, and \texttt{location}
 fields display this characteristic. 
 
 
 \subsection{Redundant Fields}
 \label{sec:duplicates}
-During this analysis, several redundant fields were identified and should 
-be examined for possible consolidation.
+This analysis revealed several redundant fields, indicting a potential need 
+for consolidation.
 
 \paragraph{\texttt{latitude/longitude} \& \texttt{location}:} 
 The \texttt{location} field is a pure concatenation of 
@@ -899,15 +894,20 @@ agencies that use different variable names to represent the same
 information, but no documentation exists to clarify this 
 relationship. Nonetheless, these two street-pairs are highly redundant.
 
+\begin{quote}
+\textit{Note: The authors attempted extensive standardization of street names  
+in an attempt to match what were obvious identical streets, deemed unequal 
+due only to spelling and naming conventions. Those efforts were intended to match, for example, 
+"KANE PL" and "KANE PLACE" as well as "FLATLANDS 7 ST" and "FLATLANDS 7 STREET". However, these 
+efforts were  abandoned after they increased street name matches by less than 1\%.)}
+\end{quote}
 
 \subsection{Reducing File Size}
 \label{sec:filesize}
-By removing duplicate and ``near-duplicate'' fields, it is possible to 
-shrink the file size by 39.5\%, which for this large dataset equates to 
-a reduction of 1.4GB, a significant amount. A smaller file size 
-means faster downloads, less storage impact, and often 
-simpler data analysis efforts. Below is a list of duplicate 
-and near-duplicate fields which we believe could be
+By removing duplicate and near-duplicate fields, one can reduce file size by 39.5\%, 
+equating to a reduction of 1.4GB, a significant amount. A smaller file size 
+means faster downloads, reduced storage impact, and often simpler data analysis. 
+Below is a list of duplicate and near-duplicate fields which we believe could be
 removed from the dataset with minimal data loss. 
 
 \begin{itemize}[left=1.5em]
@@ -916,14 +916,14 @@ removed from the dataset with minimal data loss.
     \texttt{agency\_name} can be removed with minimal data loss.
     
     \item \texttt{park\_borough}: This field is a 100\% match with 
-    the \texttt{borough} field and can be deleted without data loss.
+    the \texttt{borough} field. It can be deleted without data loss.
     
     \item \texttt{location}: This field is a straight concatenation of 
     the \texttt{latitude} and \texttt{longitude} fields. It can be 
     deleted without data loss.
      
     \item \texttt{cross\_street\_1/2} and \texttt{intersection\_street\_1/2}: 
-    These two street pairs both exhibit an 88\% match. While we cannot 
+    These two street pairs exhibit an 88\% match. Although we cannot 
     confirm the accuracy of either of these street pairs, we recommend deleting the 
     \texttt{intersection\_street\_1/2} fields while acknowledging 
     the concomitant data loss.
@@ -950,7 +950,7 @@ large (6.4 million row) dataset.}; non-trivial.]
     \item \texttt{taxi\_pick\_up\_location}
 \end{itemize}
 
-\paragraph{Field Encoding:} Further reduction is possible 
+\paragraph{Field Encoding:} Further size reduction is possible 
 by encoding selected categorical variables 
 Using \texttt{complaint\_type} as an example,
 instead of repeatedly storing the full text of each \texttt{complaint\_type}, 
@@ -958,17 +958,17 @@ one could use a numeric representation. For example,
 ``NOISE - STREET/SIDEWALK'' could be represented by a 
 numeric code (e.g. ``126''). For this dataset the 
 ``NOISE - STREET/SIDEWALK'' \texttt{complaint\_type} occurs 
-over 300,000 times. Such encoding not only reduces file 
+over 300,000 times. Encoding not only reduces file 
 size, but would likely improve processing efficiency by using numeric
-values instead of text strings. Moreover, standardizing 
-categorical inputs prevents the inclusion of misspellings 
-or unrecognized/invalid entries, ensuring cleaner, more reliable 
+values instead of text strings. Moreover, standardized 
+categorical inputs often prevents misspellings 
+and invalid entries, ensuring cleaner, more reliable 
 data. This approach is particularly useful in large datasets, where 
-frequently repeated text-based categorical variables can 
-significantly increase storage requirements.
+frequently repeated text-based categorical variables significantly 
+increases storage requirements.
 
 
-One promising alternative to reducing data storage requirements 
+One promising alternative to reducing data storage  
 for this large 311 SR dataset (3.7GB) would be employment of 
 the cross-platform Apache Arrow package. Apache Arrow (arrow.apache.org) 
 is an innovative, cross-language development platform designed for 
@@ -985,8 +985,7 @@ reduction (within several orders of magnitude) is possible \citep{bates2024csv}.
 
 The 311 SR Data Dictionary would greatly benefit from an update. We
 found several discrepancies between the Data Dictionary and the actual
-data, which could potentially mislead analytic efforts. Here are some
-examples:
+data. Such errors could potentially mislead analytic efforts. Examples include:
 
 
 \paragraph{Data typing:} While the NYC Open Data portal displays the data types of 
@@ -1022,24 +1021,24 @@ labeled as ``experimental'' or ``not for official use''.
 
 \section{Government Open Data Curation Recommendations}
 \label{sec:recommendations}
-Building upon the insights gained from our case study of the 
+Building upon  insights from our case study of the 
 NYC 311 SR data, we propose a set of data 
-curation principles tailored for government released open datasets. 
+curation principles tailored for government open datasets. 
 These principles are designed to address the unique challenges 
-and requirements observed in the curation of such datasets, 
-ensuring that they remain reliable, consistent, and useful for 
+ observed in the curation of such datasets, 
+ensuring they remain reliable, consistent, and useful for 
 public services, research, and other applications.
 
 \subsection{Principles}
-\paragraph{Principle 1: Establishing Cross-Orginazational Consistency}
+\paragraph{Principle 1: Establishing Cross-Organizational Consistency}
 A key challenge in government released datasets is the 
-harmonization of data fields across various Agencies and 
-maintaining this consistency over time. To address this, agencies should adopt 
+harmonization of data fields across various Agencies, and 
+maintaining that consistency over time. To address this, Agencies should adopt 
 standardized naming conventions, value domains, usages, and 
 formats across all datasets. Regular audits and data harmonization 
 processes should be implemented to ensure consistency 
-across long-term datasets, particularly as agency structures 
-or reporting standards evolve. For instance, ensuring that 
+across long-term datasets, particularly as Agency structures 
+and reporting standards evolve. For instance, ensuring that 
 historical datasets reflect the same field naming conventions 
 over a span of years can prevent inconsistent analyses. 
 These standards should be promulgated by the Open Data 
@@ -1056,12 +1055,12 @@ the maximum extent possible,the software should assist in
 ensuring data entries are accurate and valid. Some examples include:
 
 \begin{itemize}[left=1.5em]
-    \item Certain date fields should be promulgated by the software
-    system versus manual entry. Critical dates should be populated
+    \item Certain date fields should be promulgated by the application software
+     versus manual entry. Dates should be populated
     based upon an action in the system, such as a change in status. 
        
     \item Select fields should be subjected to automated checks 
-    that prevent logical errors, such as closing and opening. 
+    that prevent logical errors, such as a closing date occurring before the creation date. 
     
     \item A number of fields have clearly defined domains of legal
     values. These fields should be validated against a reference 
@@ -1084,13 +1083,13 @@ downloads,  and analysis processes.
 
 \paragraph{Principle 4: Updating Data Dictionaries}
 Clear and accurate data documentation is essential for the effective use 
-of government released datasets. Our study found several 
+of government datasets. Our study found several 
 instances where the Data Dictionary did not accurately reflect the 
 actual data. Domains of legal/allowable values should be referenced
 in the Data Dictionary. Regular reviews and updates should 
 occur whenever there are changes in data structure, data usage, or 
 content. This practice enhances the ability of external users, 
-including researchers and developers, to understand and work 
+including researchers and developers, to work 
 effectively with the data.
 
 \paragraph{Principle 5: Automating Quality Assurance Processes}
@@ -1156,7 +1155,7 @@ cleaning, identifying inconsistent data entries, and ensuring the
 dataset(s) structure is maintained over time. Their expertise is also 
 critical in developing protocols for validating incoming data, correcting 
 errors in real-time, and ensuring consistency across multiple data sources. 
-Feedback from statisticians and data scientists, such as the issues reported 
+Feedback, such as the issues reported 
 in this paper, benefit from a clear and accessible channel to the 311 SR data 
 team and other relevant City Agencies. Establishing such feedback loops 
 and other opportunities for public engagement, ensures that 
@@ -1167,14 +1166,14 @@ data users and City officials, leading to more dynamic
 and responsive data management practices.
 
 
-A particularly valuable avenue for engagement is through events such as NYC 
-Open Data Week, which fosters collaboration and innovation across sectors. 
+An especially valuable engagement avenue is through events such as NYC 
+Open Data Week, which foster collaboration and innovation across sectors. 
 Our involvement in this project stemmed from such an event, where we were 
 inspired by the potential of open data to enhance public services. Governments 
-should continue supporting these types of initiatives, which not only promote 
+should continue these types of initiatives, which not only promote 
 data literacy, but encourage community-driven improvements to datasets. 
 By leveraging the expertise of data scientists, statisticians, stakeholders, 
-and civic organizations, governments can ensure that their open datasets 
+and civic organizations, governments can ensure their open datasets 
 remain accurate, transparent, and useful for a wide range of applications.
 
 
