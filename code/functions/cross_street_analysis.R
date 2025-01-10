@@ -193,7 +193,7 @@ cross_street_analysis <- function(
   )
   cat("\n\nSample of near-matching '", cross_street, "' & '", intersection_street, "(both non-blank):\n")
   random_sample_almost_match <- matches_meeting_threshold %>%
-  sample_n(min(num_rows_matches_meeting_threshold, 10)) # random sample
+  sample_n(min(num_rows_matches_meeting_threshold, 15)) # random sample
   print(random_sample_almost_match, row.names = FALSE, right = FALSE)
   } else {
     cat("\nThere are no near-matches for fields", intersection_street, "and", cross_street)  
