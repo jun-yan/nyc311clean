@@ -86,8 +86,8 @@ open data movement has made vase amounts of data accessible, the
 challenge of ensuring data quality and usability through effective
 curation remain insufficiently addressed in the literature..
 This paper examines these challenges through a
-case study of the NYC 311 Service Request dataset, focusing on issues 
-of data validity, consistency, and curation efficiency. Based on 
+case study of the NYC 311 Service Request dataset, focusing on  
+data validity, consistency, and curation efficiency. Based on 
 insights from this case study, we propose a set of data curation 
 principles tailored for government-released open data aiming
 to enhance data management practices and ensure 
@@ -247,9 +247,9 @@ Today, the NYC 311 data system manages over 3 million service
 requests (SRs) per year. This data is publicly accessible 
 through the NYC Open Data Portal, which provides 
 tools for querying, grouping, aggregating,
-geo-mapping, visualizing, and exporting results. The
-NYC Office of Technology and Innovation (OTI) provides technical support for 
-the 311 application, the open data infrastructure, mobile \& web applications, 
+visualizing, and exporting results. The NYC Office of Technology and Innovation (OTI) 
+provides technical support for the 311 application, 
+the open data infrastructure, mobile \& web applications, 
 and the public-facing data portal. Input data for the 311 system 
 is sourced from 16 different NYC Agencies. Some of these Agencies
 utilize the core 311 software, while others transfer data to the
@@ -283,7 +283,7 @@ available in the supplemental material. Characteristics of the 311 SR dataset in
 
 \begin{itemize}[left=1.5em]
 \item The dataset is 3.7 GB in size and contains 
-  over 6.4 million rows. It was exported as a CSV file.
+  over 6.4 million rows. It exports as a CSV file.
 
 \item There are 41 columns (fields) of data for each row, with each
   row representing a single SR. To facilitate 
@@ -491,7 +491,7 @@ visible in the portal's ``Column manager'' widget, labeled with the prefix
     \item \texttt{police\_precinct}
 \end{itemize}
 
-While one can likely infer the meaning of these ``computed'' 
+While one can likely infer the meaning of these \textit{computed} 
 fields, uncertainty remains as to their derivation and 
 usage. These six fields are not included in
 the 311 SR Data Dictionary. Additionally, our analysis 
@@ -499,16 +499,15 @@ revealed that these six ``computed'' fields have
 significant data validity issues, leading us to categorize these six fields 
 as experimental and \textit{not for public use}. An update 
 to the Data Dictionary would seem appropriate. Accordingly, 
-we will not address these fields in our analysis. 
+we omit these fields in our analysis. 
 
 \paragraph{Representation of Missing data:} We found that the 
 311 SR dataset exhibited inconsistent approaches when 
-presenting missing data. We discovered many different 
+presenting missing data. We discovered different 
 representations of missing data: nulls, spaces, ``NA'', ``N/A'', 
 and ``<NA>''. This variety of representations complicates programming
-efforts, and increases the likelihood of introducing errors 
-in data analysis (typically by search for or excluding missing fields 
-and not aware of the various representations of such). A more consistent 
+efforts and increases the likelihood of introducing errors 
+in data analysis (typically when selecting data for blank, NA, or missing fields). A more consistent 
 approach to treating missing data should be employed to address this issue.
 
 \paragraph{Challenges with daylight saving time (DST):} The 311 SR 
@@ -531,11 +530,11 @@ for date-time stamps would help address this issue.
 
 \subsection{Missing Data by Field}
 \label{sec:blanks}
-Understanding the absence of data by field greatly aids when 
-conducting analysis. For example, determining if SRs were closed 
-before or after their \texttt{due\_date}, you would be challenged as 99.6\% of the
-\texttt{due\_date} fields are blank, and are only used by one Agency, DSNY. Blank 
-(or N/A values) they appear to divide into three groups:
+Understanding the absence of data by field greatly aids analysis. 
+For example, determining if SRs were closed 
+before their \texttt{due\_date}, would be challenging as 99.6\% of the
+\texttt{due\_date} entries are blank as only DSNY appears to use this field.
+Blank (or N/A values) divide into three groups:
 
 
 \begin{itemize}[left=1.5em]
@@ -544,21 +543,27 @@ before or after their \texttt{due\_date}, you would be challenged as 99.6\% of t
     \item Few/None Empty: 2-0\% blank
 \end{itemize}
 
+\vspace{\baselineskip}
+\noindent
 The Mostly Empty category includes:
-\texttt{taxi\_company\_borough}, \texttt{due\_date}
-\texttt{road\_ramp}, and \texttt{bridge\_highway\_name}. The 
-Partially Empty category includes:
-\texttt{location\_type}, \texttt{landmark}, 
-and \texttt{cross\_street\_1 \& \_2}. And the Few/None Empty 
-category includes \texttt{created\_date}, \texttt{complaint\_type},
-\texttt{agency}, and \texttt{status}. Of particular note is that 
-several of the Mostly Empty fields are used by only one or 
+\texttt{taxi\_company\_borough}, 
+\texttt{bridge\_highway\_name},
+\texttt{due\_date}, and \texttt{road\_ramp}. 
+The Partially Empty category includes:
+\texttt{cross\_street\_1 \& \_2},
+\texttt{location\_type}, and texttt{landmark}. And 
+the Few/None Empty category includes \texttt{created\_date}, 
+\texttt{complaint\_type},
+\texttt{agency}, 
+and \texttt{status}. 
+Of particular note is that several of the Mostly Empty fields are used by only one or 
 two Agencies (See: \autoref{tab:field-usage-summary}).
 
-\begin{table}[htbp]
+\begin{table}[tbp]
     \centering
     \caption{Fields used by only one or two Agencies with limited non-blank entires}
     \label{tab:field-usage-summary}
+    \small
     \begin{tabular}{l r r p{4cm}}
         \toprule
         \textbf{Field} & \textbf{\# of entries} & \textbf{\% non-blank} & \textbf{Agencies using} \\
@@ -571,7 +576,9 @@ two Agencies (See: \autoref{tab:field-usage-summary}).
     \end{tabular}
 \end{table}
 
-
+% Force a blank line and remove indentation
+\vspace{\baselineskip}
+\noindent
 For some analysis efforts, it may be prudent to inquire 
  as to why some fields are mostly/almost always blank. 
 Figure~\ref{fig:blank_fields} is a graphic depiction of the \%
@@ -585,6 +592,36 @@ Mostly Empty, Partially Empty, and Few/None Empty segments.
           311 SR data during 2022--2023.}
 	\label{fig:blank_fields}
 \end{figure}
+
+\vspace{\baselineskip}
+\noindent
+The accomanying R program also produces a CSV file showing Field usage by Agency. 
+Table~\ref{tab:field-usage-by-agency} contains a sample of Field usage by select Agencies.
+
+\begin{table}[tbp]
+\centering
+\caption{Sample Field Usage by select Agencies}
+\label{tab:field-usage-by-agency}
+\small
+\begin{tabular}{lrrrrrrr}
+\toprule
+\textbf{\textbf{Field}} & \textbf{DEP} & \textbf{DHS} & \textbf{DOB} & \textbf{DOT} & \textbf{DPR} & \textbf{DSNY} & \textbf{TLC} \\
+\midrule
+\texttt{landmark}                  & 2935     & 70185    & 282      & 135150   & 254218   & 424284   & 63133  \\
+\texttt{facility\_type}            & 175549   & 0        & 51575    & 159667   & 0        & 66012    & 0      \\
+\texttt{due\_date}                 & 0        & 0        & 0        & 0        & 0        & 32097    & 0      \\
+\texttt{community\_board}          & 361715   & 99613    & 203715   & 401143   & 266201   & 608188   & 73601  \\
+\texttt{vehicle\_type}             & 0        & 0        & 0        & 0        & 0        & 0        & 1696   \\
+\texttt{taxi\_company\_borough}    & 0        & 0        & 0        & 0        & 0        & 0        & 4025   \\
+\texttt{taxi\_pick\_up\_location}  & 0        & 0        & 0        & 0        & 0        & 0        & 72558  \\
+\texttt{bridge\_highway\_name}     & 15       & 21012    & 0        & 7451     & 0        & 613      & 977    \\
+\texttt{bridge\_highway\_direction} & 15      & 8973     & 0        & 7450     & 0        & 614      & 1006   \\
+\texttt{road\_ramp}                & 15       & 2588     & 0        & 7450     & 0        & 613      & 999    \\
+\texttt{bridge\_highway\_segment}  & 15       & 21013    & 0        & 7450     & 0        & 613      & 987    \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 
 \subsection{Validating Data for Acceptable Values}
@@ -611,6 +648,8 @@ usage and as evidenced in other historical datasets:
     \item \texttt{city\_council\_district}
 \end{itemize}
 
+\vspace{\baselineskip}
+\noindent
 However, some fields lacked compliance
 to a domain of allowable values, including: 
 
@@ -637,11 +676,10 @@ exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
 an automated process would normally exclude, including:
 
 \begin{itemize}[left=1.5em]
-    \item 12,450 SRs with a \texttt{closed\_date} that occurs before the 
-    \texttt{created\_date} resulting a nonsensical ``negative duration''. 
+    \item 12,450 SRs with a \texttt{closed\_date} before \texttt{created\_date} creating a nonsensical ``negative duration''. 
     \item Eight SRs with \texttt{created\_date(s)} or \texttt{closed\_date(s)} in 
-    the distant past, specifically ``1900-01-01''. Despite the small number of 
-    these entries, such extreme values can greatly distort analytical conclusions.
+    the distant past, specifically  \textit{1900-01-01}. Despite few of 
+    these entries, such extreme values can greatly distort analytical efforts. 
     \item 163,720 SRs with identical \texttt{created\_date(s)} and \texttt{closed\_date(s)} 
     to the second, creating a nonsensical ``zero duration''. 
     \item 247,000 SRs closed and/or created exactly at midnight, to the second.
@@ -771,7 +809,7 @@ in Figure~\ref{fig:exacthours}
         \label{fig:busiestclosed}
     \end{subfigure}
     % Main caption
-    \caption{Comparison of 311 SRs created \& closed by hour-of-the-day during 2022--2023.}
+    \caption{311 SRs Created \& Closed exactly on the hour (hh:00:00) for 2022--2023.}
     \label{fig:exacthours}
 \end{figure}
 
@@ -895,11 +933,11 @@ information, but no documentation exists to clarify this
 relationship. Nonetheless, these two street-pairs are highly redundant.
 
 \begin{quote}
-\textit{Note: The authors attempted extensive standardization of street names  
+\textit{Note: The authors attempted standardization of street names  
 in an attempt to match what were obvious identical streets, deemed unequal 
 due only to spelling and naming conventions. Those efforts were intended to match, for example, 
-"KANE PL" and "KANE PLACE" as well as "FLATLANDS 7 ST" and "FLATLANDS 7 STREET". However, these 
-efforts were  abandoned after they increased street name matches by less than 1\%.)}
+\textit{KANE PL} and \textit{KANE PLACE} as well as \textit{AVE P} and \textit{AVENUE P}. However, these 
+efforts were  abandoned after they resulted in an increase in street name matches of less than 1\%.)}
 \end{quote}
 
 \subsection{Reducing File Size}
@@ -924,19 +962,23 @@ removed from the dataset with minimal data loss.
      
     \item \texttt{cross\_street\_1/2} and \texttt{intersection\_street\_1/2}: 
     These two street pairs exhibit an 88\% match. Although we cannot 
-    confirm the accuracy of either of these street pairs, we recommend deleting the 
-    \texttt{intersection\_street\_1/2} fields while acknowledging 
+    confirm the accuracy of either of these pairs, we recommend deleting the 
+    \texttt{intersection\_street\_1/2} fields, acknowledging 
     the concomitant data loss.
 \end{itemize}
 
+\vspace{\baselineskip}
+\noindent
 Additionally, certain fields may not be useful for broad analysis
-due to their sparse data population. This especially applies to the fields below, 
-which are predominantly used by the TLC and are 99\% (or greater) blank.
+due to their sparse data population. This caveat applies to the fields 
+below which are 99\% (or greater) blank.
 
+\vspace{\baselineskip}
+\noindent
 \begin{quote}
-\textit{[We should note that even a field that is 99\% 
+\textit{We should note that even a field that is 99\% 
 blank will still contain 64,000 non-blank rows in this 
-large (6.4 million row) dataset.}; non-trivial.]
+large (6.4 million row) dataset.; certainly a non-trivia amount of data.}
 \end{quote}
 
 \begin{itemize}[left=1.5em]
@@ -983,9 +1025,9 @@ reduction (within several orders of magnitude) is possible \citep{bates2024csv}.
 \subsection{Data Dictionary} 
 \label{sec:datadictionary}
 
-The 311 SR Data Dictionary would greatly benefit from an update. We
-found several discrepancies between the Data Dictionary and the actual
-data. Such errors could potentially mislead analytic efforts. Examples include:
+The 311 SR Data Dictionary needs updating. We found several 
+discrepancies between the Data Dictionary and the actual
+data. Such errors could potentially mislead analytic efforts. Examples::
 
 
 \paragraph{Data typing:} While the NYC Open Data portal displays the data types of 
@@ -1223,8 +1265,11 @@ in machine learning models remains accurate, clean, and reliable
 
 
 \section*{Supplementary Material}
-The NYC 311 SR data and code used to produce the results reported in
-this paper are available at \url{https://github.com/jun-yan/nyc311clean}.
+The NYC 311 R code used to produce these results, along 
+with additional analytical findings, are available 
+at \url{https://github.com/jun-yan/nyc311clean}. Reference 
+data files (311 SR data, USPS zip codes) are available 
+at \url{https://doi.org/10.6084/m9.figshare.c.7617311}.
 
 
 \bibliographystyle{jds}
