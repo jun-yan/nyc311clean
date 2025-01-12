@@ -81,24 +81,24 @@ the forefront of this movement since the enactment of the Open
 Data Law in 2012, leading to the creation of the NYC Open Data
 portal. This portal currently hosts 2,700 datasets,
 serving as a crucial resource for research across various domains, 
-including health, urban development, and transportation. While the
-open data movement has made vase amounts of data accessible, the
-challenge of ensuring data quality and usability through effective
-curation remain insufficiently addressed in the literature..
-This paper examines these challenges through a
-case study of the NYC 311 Service Request dataset, focusing on  
-data validity, consistency, and curation efficiency. Based on 
-insights from this case study, we propose a set of data curation 
-principles tailored for government-released open data aiming
-to enhance data management practices and ensure 
-the ongoing utility of open data.
+including health, urban development, and transportation. However, the
+effective use of open data relies heavily on data quality and
+usability, challenges that remain insufficiently addressed in the
+literature. This paper examines these challenges through a
+case study of the NYC 311 Service Request dataset,  identifying key
+issues in data validity, consistency, and curation efficiency. We
+propose a set of data curation principles, tailored for
+government-released open data, to address these challenges.
+Our findings highlight the importance of harmonized field definitions,
+streamlined storage, and automated quality checks, offering practical
+guidelines for improving the reliability and utility of open datasets.
 \end{abstract}
 
 \begin{keywords} % no repeating those in title
   \kwd{Data cleansing}
   \kwd{Data science}
   \kwd{NYC Open Data}
-  \kwd{Smart Cities}
+  \kwd{Smart city}
   \kwd{Transparency}
 \end{keywords}
 
@@ -128,6 +128,9 @@ regarding government performance in silos. Their collective impact
 extends beyond mere data sharing to fostering a culture of openness 
 that benefits individuals, communities, governments, and economies worldwide 
 \citep{barns2016mine, wang2016adoption}.
+Despite these global efforts, the effective use of open data hinges on
+addressing critical challenges in data curation, such as ensuring
+quality, consistency, and usability.
 
 
 The City of New York (NYC) has emerged as a leader in the open data movement,
@@ -135,9 +138,10 @@ marked by the enactment of the Open Data Law in 2012
 \citep{zuiderwijk2014open}. This landmark legislation led to the
 creation of the NYC Open Data Portal \citep{dataNYC}, which 
 today hosts an impressive array of 2,700 datasets
-across 80 different city agencies. This resource has become invaluable
-for researchers across various fields and has significantly enhanced
-local government transparency. Popular datasets include information on
+across 80 different city agencies. This wealth of data serves as a
+powerful tool for researchers and policymakers, significantly
+enhancing local government transparency.
+Popular datasets include information on
 restaurant health inspection violations, car crashes, high school and
 college enrollment statistics, jail inmate charges, and the location
 of City-wide free Internet access points. These datasets have been
@@ -148,8 +152,12 @@ across multiple domains, including health \citep{cantor2018facets,
 shankar2021data}, urban development \citep{neves2020impacts}, and
 transportation \citep{gerte2019understanding}, aiding in the
 understanding and addressing of complex urban challenges.
+For example, NYC’s 311 data has been used to optimize resource
+allocation in urban planning and improve emergency response times,
+showcasing its practical relevance in real-time decision-making.
 
 
+However, the open data presents substantial curation challenges.
 Data curation, the process of organizing, maintaining, and ensuring
 the quality of datasets, plays a crucial role in maximizing the
 utility of open data. Proper curation ensures that datasets remain
@@ -167,7 +175,7 @@ curation may result in issues such as missing data, formatting errors,
 or inconsistent values, leading to biased or inaccurate outcomes 
 \citep{geiger2020garbage}. This is particularly critical in domains 
 where machine learning is applied to sensitive tasks, such as public 
-health or policy \citep{rahm2000data}.
+health or policy \citep{rahm2000data}. 
 
 
 Research into data curation has explored these challenges in-depth. 
@@ -185,8 +193,8 @@ where \citet{cantor2018facets} demonstrated the utility of curated
 data in evaluating community health determinants, and 
 \citet{shankar2021data} observed its critical role during the 
 COVID-19 pandemic in managing collective responses.
-However, the literature remains limited in providing specific and
-actionable frameworks for handling large-scale municipal datasets.
+Despite these advances, there remains a notable gap in providing
+actionable frameworks for managing large-scale municipal datasets.
 
 
 By addressing this gap, this study transitions from theory to
