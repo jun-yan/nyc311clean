@@ -313,7 +313,7 @@ available in the supplemental material. Characteristics of the 311 SR dataset in
 		\item{\texttt{landmark}}
 	\end{itemize}
           
-\item In addtion to \texttt{incident\_address}, each SR has six
+\item In addtion to \texttt{incident\_address}, each SR has eight
 	additional geographic fields:
 	\begin{itemize}
 		\item{\texttt{latitude} \& \texttt{longitude}}
@@ -535,16 +535,12 @@ For example, determining if SRs were closed
 before their \texttt{due\_date}, would be challenging as 99.6\% of the
 \texttt{due\_date} entries are blank as only DSNY appears to use this field.
 Blank (or N/A values) divide into three groups:
-
-
 \begin{itemize}[left=1.5em]
-    \item Mostly Empty: 93-99.9\% blank 
-    \item Partially Empty: 40-4\% blank
-    \item Few/None Empty: 2-0\% blank
+    \item Mostly Empty: 93-99.9\% blank;
+    \item Partially Empty: 40-4\% blank;
+    \item Few/None Empty: 2-0\% blank.
 \end{itemize}
 
-\vspace{\baselineskip}
-\noindent
 The Mostly Empty category includes:
 \texttt{taxi\_company\_borough}, 
 \texttt{bridge\_highway\_name},
@@ -576,14 +572,7 @@ two Agencies (See: \autoref{tab:field-usage-summary}).
     \end{tabular}
 \end{table}
 
-% Force a blank line and remove indentation
-\vspace{\baselineskip}
-\noindent
-For some analysis efforts, it may be prudent to inquire 
- as to why some fields are mostly/almost always blank. 
-Figure~\ref{fig:blank_fields} is a graphic depiction of the \%
-empty (blank \& N/As) for each field. It illustrates the grouping into 
-Mostly Empty, Partially Empty, and Few/None Empty segments. 
+
 
 \begin{figure}[tbp]
 	\centering
@@ -593,14 +582,32 @@ Mostly Empty, Partially Empty, and Few/None Empty segments.
 	\label{fig:blank_fields}
 \end{figure}
 
-\vspace{\baselineskip}
-\noindent
-The accomanying R program also produces a CSV file showing Field usage by Agency. 
-Table~\ref{tab:field-usage-by-agency} contains a sample of Field usage by select Agencies.
+For some analysis efforts, it may be prudent to inquire 
+as to why some fields are mostly/almost always blank. 
+Figure~\ref{fig:blank_fields} is a graphic depiction of the \%
+empty (blank \& N/As) for each field. It illustrates the grouping into 
+Mostly Empty, Partially Empty, and Few/None Empty segments. 
+
+
+Table~\ref{tab:field-usage-by-agency} highlights the varied usage of
+certain fields across NYC agencies, revealing both specialization and
+redundancy. For instance, \texttt{landmark} and
+\texttt{facility\_type} are widely used, indicating their importance
+in classifying SRs. In contrast, fields like
+\texttt{taxi\_company\_borough} and \texttt{vehicle\_type} are used
+exclusively by TLC, suggesting that such fields, which serve a narrow
+purpose, could be better stored in separate, agency-specific tables.
+This approach would reduce the size and complexity of the primary
+dataset, making it easier to maintain and analyze while preserving
+the ability to perform specialized analyses when necessary.
+Streamlining through harmonization and validation would further
+enhance consistency and optimize cross-agency analyses.
+
 
 \begin{table}[tbp]
 \centering
-\caption{Sample Field Usage by select Agencies}
+\caption{Sample field usage by select agencies among the 6.4 million
+  SRs in 2022--2023. }
 \label{tab:field-usage-by-agency}
 \small
 \begin{tabular}{lrrrrrrr}
@@ -636,7 +643,6 @@ of acceptable values for other fields. Nonetheless, the following
 fields were tested and found to comply with their expected
 domains, as determined by public
 usage and as evidenced in other historical datasets:
-
 \begin{itemize}[left=1.5em]
     \item \texttt{address\_type}
     \item \texttt{status}
@@ -647,11 +653,8 @@ usage and as evidenced in other historical datasets:
     \item \texttt{vehicle\_type}
     \item \texttt{city\_council\_district}
 \end{itemize}
-
-\vspace{\baselineskip}
-\noindent
 However, some fields lacked compliance
-to a domain of allowable values, including: 
+to a domain of allowable values, as outlined next.
 
 \paragraph{Zip Codes:}
 \label{sec:zipcodesissues}
@@ -674,7 +677,6 @@ the the software would automatically populate these fields.
 Unfortunately, this does not seem to be the case, as several anomalies 
 exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
 an automated process would normally exclude, including:
-
 \begin{itemize}[left=1.5em]
     \item 12,450 SRs with a \texttt{closed\_date} before \texttt{created\_date} creating a nonsensical ``negative duration''. 
     \item Eight SRs with \texttt{created\_date(s)} or \texttt{closed\_date(s)} in 
@@ -912,14 +914,15 @@ easily recognized and well understood.
 
 \paragraph{\texttt{landmark} \& \texttt{street\_name}:} Per the 
 311 SR Data Dictionary, the \texttt{landmark} 
-field \textit{can refer to any noteworthy location, 
-including but not limited to, parks, hospitals, airports, sports facilities, 
-performance spaces, etc..} However, most entries are actually 
-street names, with a 62\% match to \texttt{street\_name} field. 
-Even many of the non-matches (excluding blanks) appear to be 
-a logical match, differing only in spelling or formatting 
+field is intended to refer to any noteworthy location, 
+including but not limited to parks, hospitals, airports, sports facilities, 
+and performance spaces. However, most entries are actually 
+street names, with a 62\% match to the \texttt{street\_name} field. 
+Many of the non-matches (excluding blanks) also appear to be 
+logical matches, differing only in spelling or formatting 
 (e.g., ``NINTH AVE'' vs. ``9 AVE''). This indicates a possible 
-misuse of the \texttt{landmark} field as well as a high level of redundancy.
+misuse of the \texttt{landmark} field and highlights significant
+redundancy. 
 
 \paragraph{\texttt{cross\_street\_1 \& 2} \& \texttt{intersection\_street\_1 \& 2}:} These 
 two street pairs are used to help identify the 
@@ -932,13 +935,14 @@ agencies that use different variable names to represent the same
 information, but no documentation exists to clarify this 
 relationship. Nonetheless, these two street-pairs are highly redundant.
 
-\begin{quote}
-\textit{Note: The authors attempted standardization of street names  
-in an attempt to match what were obvious identical streets, deemed unequal 
-due only to spelling and naming conventions. Those efforts were intended to match, for example, 
-\textit{KANE PL} and \textit{KANE PLACE} as well as \textit{AVE P} and \textit{AVENUE P}. However, these 
-efforts were  abandoned after they resulted in an increase in street name matches of less than 1\%.)}
-\end{quote}
+
+We attempted to standardize street names to reconcile entries that
+were clearly identical but differed due to spelling or naming
+conventions. For example, we sought to match entries such as
+\textit{KANE PL} and \textit{KANE PLACE} or \textit{AVE P} and
+\textit{AVENUE P}. However, this standardization effort was
+ultimately abandoned, as it resulted in less than a 1\% increase in
+matched street names.
 
 \subsection{Reducing File Size}
 \label{sec:filesize}
@@ -967,20 +971,10 @@ removed from the dataset with minimal data loss.
     the concomitant data loss.
 \end{itemize}
 
-\vspace{\baselineskip}
-\noindent
+
 Additionally, certain fields may not be useful for broad analysis
-due to their sparse data population. This caveat applies to the fields 
-below which are 99\% (or greater) blank.
-
-\vspace{\baselineskip}
-\noindent
-\begin{quote}
-\textit{We should note that even a field that is 99\% 
-blank will still contain 64,000 non-blank rows in this 
-large (6.4 million row) dataset.; certainly a non-trivia amount of data.}
-\end{quote}
-
+due to their sparse data population. This applies to the fields 
+below which are 99\% (or greater) blank. 
 \begin{itemize}[left=1.5em]
     \item \texttt{taxi\_company\_borough}
     \item \texttt{road\_ramp}
@@ -991,6 +985,15 @@ large (6.4 million row) dataset.; certainly a non-trivia amount of data.}
     \item \texttt{bridge\_highway\_segment}
     \item \texttt{taxi\_pick\_up\_location}
 \end{itemize}
+While such sparsity may limit their use in 
+broad analyses, these fields can still contain valuable insights 
+for specific agency-level studies, given that even a 1\% 
+non-blank rate equates to approximately 64,000 rows in this 
+6.4 million-row dataset. Proper handling of sparse fields, 
+such as storing them in separate tables or using them in 
+targeted analyses, could improve data accessibility and 
+efficiency without compromising the dataset’s broader utility.
+
 
 \paragraph{Field Encoding:} Further size reduction is possible 
 by encoding selected categorical variables 
