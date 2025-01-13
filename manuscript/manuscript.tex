@@ -78,13 +78,13 @@ In the early 21st century, the open data movement began to transform
 societies and governments by promoting transparency,
 innovation, and public engagement. The City of New York (NYC) has been at
 the forefront of this movement since the enactment of the Open 
-Data Law in 2012, leading to the creation of the NYC Open Data
-portal. This portal currently hosts 2,700 datasets,
+Data Law in 2012, creating the NYC Open Data
+portal. The portal currently hosts 2,700 datasets,
 serving as a crucial resource for research across various domains, 
 including health, urban development, and transportation. However, the
 effective use of open data relies heavily on data quality and
 usability, challenges that remain insufficiently addressed in the
-literature. This paper examines these challenges through a
+literature. This paper examines these challenges via a
 case study of the NYC 311 Service Request dataset,  identifying key
 issues in data validity, consistency, and curation efficiency. We
 propose a set of data curation principles, tailored for
@@ -552,16 +552,17 @@ Blank (or N/A values) divide into three groups:
 
 The Mostly Empty category includes:
 \texttt{taxi\_company\_borough}, 
-\texttt{bridge\_highway\_name},
-\texttt{due\_date}, and \texttt{road\_ramp}. 
+\texttt{due\_date}, 
+\texttt{road\_ramp},
+and \texttt{bridge\_highway\_name}. 
 The Partially Empty category includes:
-\texttt{cross\_street\_1 \& \_2},
-\texttt{location\_type}, and texttt{landmark}. And 
-the Few/None Empty category includes \texttt{created\_date}, 
+\texttt{location\_type}, 
+\texttt{landmark} and \texttt{cross\_street\_1 \& \_2}.
+The Few/None Empty category includes \texttt{created\_date}, 
 \texttt{complaint\_type},
 \texttt{agency}, 
 and \texttt{status}. 
-Of particular note is that several of the Mostly Empty fields are used by only one or 
+Note that several of the Mostly Empty fields are used by only one or 
 two Agencies (See: \autoref{tab:field-usage-summary}).
 
 \begin{table}[tbp]
@@ -626,14 +627,11 @@ enhance consistency and optimize cross-agency analyses.
 \texttt{landmark}                  & 2935     & 70185    & 282      & 135150   & 254218   & 424284   & 63133  \\
 \texttt{facility\_type}            & 175549   & 0        & 51575    & 159667   & 0        & 66012    & 0      \\
 \texttt{due\_date}                 & 0        & 0        & 0        & 0        & 0        & 32097    & 0      \\
-\texttt{community\_board}          & 361715   & 99613    & 203715   & 401143   & 266201   & 608188   & 73601  \\
 \texttt{vehicle\_type}             & 0        & 0        & 0        & 0        & 0        & 0        & 1696   \\
 \texttt{taxi\_company\_borough}    & 0        & 0        & 0        & 0        & 0        & 0        & 4025   \\
 \texttt{taxi\_pick\_up\_location}  & 0        & 0        & 0        & 0        & 0        & 0        & 72558  \\
 \texttt{bridge\_highway\_name}     & 15       & 21012    & 0        & 7451     & 0        & 613      & 977    \\
-\texttt{bridge\_highway\_direction} & 15      & 8973     & 0        & 7450     & 0        & 614      & 1006   \\
 \texttt{road\_ramp}                & 15       & 2588     & 0        & 7450     & 0        & 613      & 999    \\
-\texttt{bridge\_highway\_segment}  & 15       & 21013    & 0        & 7450     & 0        & 613      & 987    \\
 \bottomrule
 \end{tabular}
 \end{table}
