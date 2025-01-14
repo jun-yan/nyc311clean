@@ -480,8 +480,10 @@ actual error, correct,  or holds some other status.
 \label{sec:structural}
 Structural issues refers to how data is organized, formatted, 
 or presented within a dataset. Structural issues can cause difficulty in 
- analyzing the data effectively, often necessitating extensive 
-data cleaning. We encountered three structural issues.
+analyzing the data effectively, often necessitating extensive 
+data cleaning. We identified three primary structural issues in the
+NYC 311 dataset: undocumented fields, inconsistent representations of
+missing data, and daylight saving time anomalies.
  
 \paragraph{Undocumented Fields:} The 311 SR 
 The 311 SR Data Dictionary identifies 
@@ -856,7 +858,7 @@ that 84\% of these late updates are associated with the TLC agency
 and 12\% with DSNY.
 
 
-\subsection{Accuracy and Precision:}
+\subsection{Accuracy and Precision}
 \label{sec:precision}
 The question of precision vs. accuracy arises with the \texttt{latitude} 
 and \texttt{longitude} fields. as well as with the duplicative 
@@ -1080,12 +1082,20 @@ These principles are designed to address the unique challenges
  observed in the curation of such datasets, 
 ensuring they remain reliable, consistent, and useful for 
 public services, research, and other applications.
+To facilitate implementation, the principles are prioritized based on
+their impact and feasibility, offering a clear roadmap for improving
+data curation practices.
+
 
 \subsection{Principles}
+
 \paragraph{Principle 1: Establishing Cross-Organizational Consistency}
 A key challenge in government released datasets is the 
 harmonization of data fields across various Agencies, and 
-maintaining that consistency over time. To address this, Agencies should adopt 
+maintaining that consistency over time. Inconsistent field
+definitions, data formats, or value domains can lead to erroneous
+analyses and hinder cross-agency collaboration.
+To address this, Agencies should adopt 
 standardized naming conventions, value domains, usages, and 
 formats across all datasets. Regular audits and data harmonization 
 processes should be implemented to ensure consistency 
@@ -1102,7 +1112,9 @@ open datasets. In the NYC 311 data, issues such as
 invalid zip codes and nonsensical date entries 
 highlight the need for rigorous validation processes. Governments 
 should establish clear protocols for data entry, ensuring that 
-fields are populated with valid, legally acceptable values. To 
+fields are populated with valid, legally acceptable values. Accurate
+data entry reduces the risk of introducing systemic errors,
+particularly in high-volume datasets. To
 the maximum extent possible,the software should assist in 
 ensuring data entries are accurate and valid. Some examples include:
 
@@ -1123,7 +1135,9 @@ ensuring data entries are accurate and valid. Some examples include:
 \paragraph{Principle 3: Optimizing Storage Efficiency}
 Efficient storage and data representation are crucial for handling 
 large government datasets. Our research found several duplicate and
-near-duplicate fields in the 311 SR dataset. Eliminating 
+near-duplicate fields in the 311 SR dataset. Removing these
+redundancies could reduce the dataset size by 39.5\%, improving
+performance without compromising analytical value. Eliminating 
 redundant fields and encoding categorical variables can 
 significantly reduce file sizes and improve the efficiency 
 of data analysis. Similarly, categorical variables could be 
@@ -1137,7 +1151,9 @@ downloads,  and analysis processes.
 Clear and accurate data documentation is essential for the effective use 
 of government datasets. Our study found several 
 instances where the Data Dictionary did not accurately reflect the 
-actual data. Domains of legal/allowable values should be referenced
+actual data. For example, undocumented fields and outdated domain
+definitions in the 311 SR dataset introduced ambiguity, complicating
+analysis. Domains of legal/allowable values should be referenced
 in the Data Dictionary. Regular reviews and updates should 
 occur whenever there are changes in data structure, data usage, or 
 content. This practice enhances the ability of external users, 
@@ -1151,7 +1167,9 @@ unusual trends can be identified, and irregularities highlighted.
 In the NYC 311 case, issues such as large spikes in SR 
 creation and closure at exactly midnight (or noon) likely 
 stem from a cron script process that distorts the 
-accurate capture of SR durations. By implementing 
+accurate capture of SR durations. Real-time validation systems could
+prevent such errors, ensuring data integrity at the point of entry. By
+implementing
 real-time and event-driven validation tools, governments 
 can both prevent such errors from entering the dataset in the first 
 place, as well as highlight anomalous trends. Automated 
@@ -1161,13 +1179,17 @@ also facilitate faster detection and correction of errors, reducing
 the need for manual intervention and ensuring the data 
 remains clean and reliable as it is continuously updated.
 
+Transparency is a core tenet of open data, and governments must ensure that datasets are not only accurate but also easily accessible and readily understandable. **This includes publishing clear metadata, which enables users to understand the dataset’s structure, limitations, and intended use cases.** Additionally, governments should communicate transparently about data quality issues, such as notifying the public when errors in SR fields (e.g., erroneous \texttt{closed\_date(s)}) are discovered, including an explanation about how such issues will be resolved. By ensuring transparency and keeping the public informed, governments foster trust and promote wider use of datasets for research, civic engagement, and innovation.
+
 \paragraph{Principle 6: Addressing Data Transparency}
 Transparency is a core tenet of open data, and governments must ensure 
 that datasets are not only accurate but also easily accessible and 
 readily understandable. This involves providing clear 
 metadata and making datasets available in user-friendly 
-formats. Additionally, governments should communicate transparently about 
-data quality issues, such as notifying the public when errors in SR 
+formats. This includes publishing clear metadata, which enables users
+to understand the dataset’s structure, limitations, and intended use
+cases. Additionally, governments should communicate transparently
+about data quality issues, such as notifying the public when errors in SR 
 fields (e.g., erroneous \texttt{closed\_ date(s)} are discovered, including
 an explanation about how such issues will be resolved. By 
 ensuring transparency and keeping the public informed, 
@@ -1177,12 +1199,16 @@ for research, civic engagement, and innovation.
 
 \subsection{Actionable Steps}
 While these principles are broad, actionable steps are required to 
-implement them effectively. Governments can begin by investing in 
+implement them effectively. Prioritizing these steps will help
+governments address the most critical data curation challenges
+first. Governments can begin by investing in
 real-time validation systems, regular updates to data dictionaries, 
 and tools for encoding and standardizing data fields. This would include
 systems that automate enforcement of data validation rules 
 (e.g., flagging incorrect zip codes), significantly improving data 
-quality. Collaboration with city agencies and stakeholders is crucial 
+quality. Automated systems can proactively detect and correct common
+issues, reducing the manual workload.
+Collaboration with city agencies and stakeholders is crucial
 to ensure that data standards, formats, and metadata meet the needs 
 of diverse users, including policymakers, researchers, and the 
 general public. Regular communication between agencies and external 
@@ -1196,7 +1222,9 @@ Automated Quality Assurance techniques should be employed to
 monitor the quality of the data, as measured by agreed upon
 standards, such as the \% of invalid zip codes. Such tools could
 capture and display the quality of the data sets as presented
-on appropriate dashboards. Deviations in quality would be
+on appropriate dashboards. These dashboards provide a real-time
+snapshot of data quality, making deviations immediately visible and
+actionable. Deviations in quality would be
 automatically highlighted, alerting appropriate corrective actions.
 
 
@@ -1204,18 +1232,17 @@ Engagement with data scientists and statisticians is key to improving
 data curation strategies. These experts can help design and refine 
 curation processes, such as creating algorithms for automatic data 
 cleaning, identifying inconsistent data entries, and ensuring the 
-dataset(s) structure is maintained over time. Their expertise is also 
-critical in developing protocols for validating incoming data, correcting 
-errors in real-time, and ensuring consistency across multiple data sources. 
+dataset(s) structure is maintained over time. Their involvement also
+helps to establish best practices for validating incoming data and
+maintaining consistency across data sources.
 Feedback, such as the issues reported 
 in this paper, benefit from a clear and accessible channel to the 311 SR data 
 team and other relevant City Agencies. Establishing such feedback loops 
 and other opportunities for public engagement, ensures that 
 recommendations for improving data curation and validation 
-are not only heard and discussed, but implemented. This feedback 
-mechanism would also allow ongoing dialogue between 
-data users and City officials, leading to more dynamic 
-and responsive data management practices.
+are not only heard and discussed, but implemented. An iterative
+feedback system enables timely resolution of issues and fosters
+long-term improvements in data management.
 
 
 An especially valuable engagement avenue is through events such as NYC 
@@ -1223,7 +1250,9 @@ Open Data Week, which foster collaboration and innovation across sectors.
 Our involvement in this project stemmed from such an event, where we were 
 inspired by the potential of open data to enhance public services. Governments 
 should continue these types of initiatives, which not only promote 
-data literacy, but encourage community-driven improvements to datasets. 
+data literacy, but encourage community-driven improvements to
+datasets. These events can strengthen public engagement and
+demonstrate the societal value of open data initiative
 By leveraging the expertise of data scientists, statisticians, stakeholders, 
 and civic organizations, governments can ensure their open datasets 
 remain accurate, transparent, and useful for a wide range of applications.
@@ -1244,6 +1273,11 @@ and fairness of predictive models, impacting real-world decisions in
 urban planning and policy \citep{rahm2000data, geiger2020garbage}.
 
 
+While the findings here are specific to NYC 311 data, the principles 
+proposed have broader applicability. Datasets in healthcare, 
+transportation, and environmental monitoring can similarly benefit 
+from these curation strategies, enabling improved outcomes across 
+domains.
 This research further emphasizes the necessity of harmonizing data
 across City agencies, particularly resolving discrepancies in field
 names, formats, usage, and definitions. Consistency in data is essential for
@@ -1278,7 +1312,7 @@ in machine learning models remains accurate, clean, and reliable
 The NYC 311 R code used to produce these results, along 
 with additional analytical findings, are available 
 at \url{https://github.com/jun-yan/nyc311clean}. Reference 
-data files (311 SR data, USPS zip codes) are available 
+data files (311 SR data of 2022--2023, USPS zip codes) are available 
 at \url{https://doi.org/10.6084/m9.figshare.c.7617311}.
 
 
