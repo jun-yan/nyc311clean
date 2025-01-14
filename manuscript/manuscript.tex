@@ -502,26 +502,26 @@ visible in the portal's ``Column manager'' widget, labeled with the prefix
     \item \texttt{police\_precinct}
 \end{itemize}
 
-While one can likely infer the meaning of these \textit{computed} 
+While one can likely infer the meaning of these \emph{computed} 
 fields, uncertainty remains as to their derivation and 
 usage. These six fields are not included in
 the 311 SR Data Dictionary. Additionally, our analysis 
 revealed that these six ``computed'' fields have 
 significant data validity issues, leading us to categorize these six fields 
-as experimental and \textit{not for public use}. An update 
+as experimental and \emph{not for public use}. An update 
 to the Data Dictionary would seem appropriate. Accordingly, 
 we omit these fields in our analysis. 
 
 \paragraph{Representation of Missing data:} We found that the 
 311 SR dataset exhibited inconsistent approaches when 
 presenting missing data. We discovered different 
-representations of missing data: nulls, spaces, ``NA'', ``N/A'', 
-and ``<NA>''. This variety of representations complicates programming
+representations of missing data: nulls, spaces, ``\texttt{NA}'', ``\texttt{N/A}'', 
+and ``\texttt{<NA>}''. This variety of representations complicates programming
 efforts and increases the likelihood of introducing errors 
 in data analysis (typically when selecting data for blank, NA, or missing fields). A more consistent 
 approach to treating missing data should be employed to address this issue.
 
-\paragraph{Challenges with daylight saving time (DST):} The 311 SR 
+\paragraph{Challenges with Daylight Saving Time (DST):} The 311 SR 
 dataset captures local NYC times. Accordingly, twice each 
 year there are changes to the local time as a result of observing 
 DST. This can introduce some unexpected results. For example, 
@@ -534,7 +534,7 @@ lifespan of SRs, albeit by a single hour. Similarly on both
 November 6, 2022 and November 5, 2023, the 
 hour of 1:00AM - 2:00AM is repeated twice. This can result 
 in a bizarre scenario where, for example, an SR can 
-be \textit{created} at 1:59AM and then be \textit{closed} 30 minutes later 
+be \emph{created} at 1:59AM and then be \emph{closed} 30 minutes later 
 at 1:29AM; seemingly nonsensical. Utilizing UTC time 
 for date-time stamps would help address this issue.
 
@@ -596,7 +596,7 @@ two Agencies (See: \autoref{tab:field-usage-summary}).
 
 For some analysis efforts, it may be prudent to inquire 
 as to why some fields are mostly/almost always blank. 
-Figure~\ref{fig:blank_fields} is a graphic depiction of the \%
+Figure~\ref{fig:blank_fields} is a graphic depiction of the percentage of
 empty (blank \& N/As) for each field. It illustrates the grouping into 
 Mostly Empty, Partially Empty, and Few/None Empty segments. 
 
@@ -671,9 +671,9 @@ All \texttt{incident\_zip} zip codes should
 validate against the USPS database, which contains 
 44,173 valid zip codes. We discovered that the \texttt{incident\_zip} 
 field has 0.07\% invalid entries, resulting in 4,374 errors. This includes
-zip codes such as ``12345'', ``10000'', and ``99999'. If you group 
+zip codes such as ``12345'', ``10000'', and ``99999''. If you group 
 the invalid zip code entries by percentage by agency, it 
-mirrors the \textit{overall} breakdown of SRs by Agency, potentially 
+mirrors the \emph{overall} breakdown of SRs by Agency, potentially 
 indicating a systemic problem.
 
 
@@ -687,19 +687,20 @@ Unfortunately, this does not seem to be the case, as several anomalies
 exist in the \texttt{created\_date} and \texttt{closed\_date} fields that
 an automated process would normally exclude, including:
 \begin{itemize}[left=1.5em]
-    \item 12,450 SRs with a \texttt{closed\_date} before \texttt{created\_date} creating a nonsensical ``negative duration''. 
-    \item Eight SRs with \texttt{created\_date(s)} or \texttt{closed\_date(s)} in 
-    the distant past, specifically  \textit{1900-01-01}. Despite few of 
-    these entries, such extreme values can greatly distort analytical efforts. 
-    \item 163,720 SRs with identical \texttt{created\_date(s)} and \texttt{closed\_date(s)} 
-    to the second, creating a nonsensical ``zero duration''. 
-    \item 247,000 SRs closed and/or created exactly at midnight, to the second.
+\item 12,450 SRs with a \texttt{closed\_date} before
+  \texttt{created\_date} creating a nonsensical ``negative duration''. 
+\item Eight SRs with \texttt{created\_date(s)} or \texttt{closed\_date(s)} in 
+  the distant past, specifically  \texttt{1900-01-01}. Despite few of 
+  these entries, such extreme values can greatly distort analytical efforts. 
+\item 163,720 SRs with identical \texttt{created\_date(s)} and \texttt{closed\_date(s)} 
+  to the second, creating a nonsensical ``zero duration''. 
+\item 247,000 SRs closed and/or created exactly at midnight, to the second.
 \end{itemize}
 
 
 \paragraph{Closed before Created (Negative Duration):}
 Citizens, NYC Government Officials, and Agencies use the \texttt{created\_date}(s) and 
-\texttt{closed\_date}(s) to measure the \textit{duration} of SRs, 
+\texttt{closed\_date}(s) to measure the \emph{duration} of SRs, 
 a useful surrogate to measure an agency's responsiveness. 
 While duration is not directly present in the dataset, 
 it is easily computed as the difference between
@@ -714,17 +715,18 @@ Although this represents only 0.2\% of the dataset, these errors can
 significantly impact response time analyses. Eight SRs with extremely 
 large negative durations, all originating from the 
 Department of Homeless Services (DHS); all contain an entry 
-of \textit{1900-01-01} as the \texttt{closed\_date}. This results 
+of \texttt{1900-01-01} as the \texttt{closed\_date}. This results 
 in very large negative durations exceeding $-$44,601 
 days (or 122 years). Many other SRs have negative durations 
 in excess of $-$300+ days. Such anomalies, though rare, can 
 significantly skew statistical results if not addressed during 
 data cleansing. Accordingly, these SR rows are removed from our analysis. 
 
-Excluding the extreme negative values (any that are <$-$730 days), 
+
+Excluding the extreme negative values (any that are lower than $-$730 days), 
 Figure~\ref{fig:negative-duration-violin} shows the broad spread of 
 negative duration SRs. While there are few outliers, the magnitude 
-of these negative durations (some <$-$300 days) is troubling 
+of these negative durations (some lower than $-$300 days) is troubling 
 and can produce bizarre analytical results such as greatly 
 distorting the mean response time for a specific complaint category.
 
@@ -762,7 +764,8 @@ errors occur.
 
 \begin{table}[tbp]
   \centering
-  \caption{Sample  negative durations [excluding extreme values that are <$-$730 days]}
+  \caption{Sample  negative durations [excluding extreme values that
+    are lower than $-$730 days]}
    \label{tab:largest-errors}
  	\begin{tabular}{l l l r l}
     \toprule
@@ -847,7 +850,7 @@ occurring over 2 years later. As shown in Figure~\ref{fig:resolution-violin},
 there are 10,265 SRs that were updated $>30$ days after the 
 \texttt{closed\_date} (Not that Figure~\ref{fig:resolution-violin} excludes 
 values $>730$ days, an arbitrary cutoff to exclude 
-infeasible dates such as \textit{1900-01-01}. The chart 
+infeasible dates such as \texttt{1900-01-01}. The chart 
 highlights the distribution of these post-closure 
  updates, with a notable concentration of updates occurring within 
 the 30--200 day range. This pattern raises 
@@ -936,7 +939,7 @@ redundancy.
 \paragraph{\texttt{cross\_street\_1 \& 2} \& \texttt{intersection\_street\_1 \& 2}:} These 
 two street pairs are used to help identify the 
 \texttt{incident address}. We found 88\% of both of these two 
-street pairs ( 1 \& 2) to be duplicates. Such a high level of duplication 
+street pairs (1 \& 2) to be duplicates. Such a high level of duplication 
 raises the question of which field-pair should be trusted; 
 and if these street pairs are used differently, how should they be treated?
 It is possible that these two street pairs originated from different 
@@ -948,8 +951,8 @@ relationship. Nonetheless, these two street-pairs are highly redundant.
 We attempted to standardize street names to reconcile entries that
 were clearly identical but differed due to spelling or naming
 conventions. For example, we sought to match entries such as
-\textit{KANE PL} and \textit{KANE PLACE} or \textit{AVE P} and
-\textit{AVENUE P}. However, this standardization effort was
+\texttt{KANE PL} and \texttt{KANE PLACE} or \texttt{AVE P} and
+\texttt{AVENUE P}. However, this standardization effort was
 ultimately abandoned, as it resulted in less than a 1\% increase in
 matched street names.
 
@@ -1007,11 +1010,10 @@ efficiency without compromising the dataset’s broader utility.
 \paragraph{Field Encoding:} Further size reduction is possible 
 by encoding selected categorical variables 
 Using \texttt{complaint\_type} as an example,
-instead of repeatedly storing the full text of each \texttt{complaint\_type}, 
+instead of repeatedly storing the full text of each possible value,
 one could use a numeric representation. For example, 
-``NOISE - STREET/SIDEWALK'' could be represented by a 
-numeric code (e.g. ``126''). For this dataset the 
-``NOISE - STREET/SIDEWALK'' \texttt{complaint\_type} occurs 
+``\texttt{NOISE - STREET/SIDEWALK}'' could be represented by a 
+numeric code. For this dataset this code occurs 
 over 300,000 times. Encoding not only reduces file 
 size, but would likely improve processing efficiency by using numeric
 values instead of text strings. Moreover, standardized 
@@ -1054,15 +1056,15 @@ and is not subjected to arithmetic operations.
 \paragraph{Domain of Legal Values:} Many of the data fields have
 domains of legal values that are missing, incomplete, or inaccurate. For 
 example, the Data Dictionary indicates 
-that the \texttt{status} field takes on values of \textit{assigned, canceled, 
-closed}, or \textit{pending}. However, we observed additional values 
-such as \textit{in progress, started}, and \textit{unspecified}. Additionally, 
-no SRs were found with a status of \textit{canceled}. Similarly, 
+that the \texttt{status} field takes on values of \texttt{assigned, canceled, 
+closed}, or \texttt{pending}. However, we observed additional values 
+such as \texttt{in progress, started}, and \texttt{unspecified}. Additionally, 
+no SRs were found with a status of \texttt{canceled}. Similarly, 
 the Data Dictionary for the \texttt{address\_type} field lists as acceptable
-values \textit{address, blockface, intersection, latlong}, and 
-\textit{placename}. However, we found additional values such 
-as \textit{bbl} and \textit{unrecognized}. Additionally, no 
-\textit{latlong} values were observed. Other fields, such 
+values \texttt{address, blockface, intersection, latlong}, and 
+\texttt{placename}. However, we found additional values such 
+as \texttt{bbl} and \texttt{unrecognized}. Additionally, no 
+\texttt{latlong} values were observed. Other fields, such 
 as \texttt{facility\_type}, \texttt{vehicle\_type}, \texttt{taxi\_pick\_up\_location},
 texttt{road\_ramp}, and \texttt{city}, exhibit similar inaccuracies 
 in their specified domain values.
@@ -1179,7 +1181,6 @@ also facilitate faster detection and correction of errors, reducing
 the need for manual intervention and ensuring the data 
 remains clean and reliable as it is continuously updated.
 
-Transparency is a core tenet of open data, and governments must ensure that datasets are not only accurate but also easily accessible and readily understandable. **This includes publishing clear metadata, which enables users to understand the dataset’s structure, limitations, and intended use cases.** Additionally, governments should communicate transparently about data quality issues, such as notifying the public when errors in SR fields (e.g., erroneous \texttt{closed\_date(s)}) are discovered, including an explanation about how such issues will be resolved. By ensuring transparency and keeping the public informed, governments foster trust and promote wider use of datasets for research, civic engagement, and innovation.
 
 \paragraph{Principle 6: Addressing Data Transparency}
 Transparency is a core tenet of open data, and governments must ensure 
@@ -1220,7 +1221,7 @@ and actionable for public use.
 
 Automated Quality Assurance techniques should be employed to 
 monitor the quality of the data, as measured by agreed upon
-standards, such as the \% of invalid zip codes. Such tools could
+standards, such as the percentage of invalid zip codes. Such tools could
 capture and display the quality of the data sets as presented
 on appropriate dashboards. These dashboards provide a real-time
 snapshot of data quality, making deviations immediately visible and
