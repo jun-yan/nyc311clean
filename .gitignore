@@ -5,6 +5,8 @@ code/charts
 code/console_output
 /data_anomalies/code/data
 /data_anomalies/references
+/measuring_data_quality_over_time/code/data/
+/measuring_data_quality_over_time/references
 *~
 *.RData
 # *.rds
