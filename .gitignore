@@ -1,3 +1,10 @@
+#	Folders to ignore with Github
+code/data/
+code/charts
+/references
+code/console_output
+/data_anomalies/code/data
+/data_anomalies/references
 *~
 *.RData
 # *.rds
@@ -30,20 +37,16 @@
 *.synctex.gz
 *.docx
 _region_.tex
-
 manuscript/*.pdf
   
 main-blind*
 main-full*
-
 jsm-comp/GodoyLucas-*
   
 *.fls
-
 *.fdb_latexmk
   
 *.sif
-
 ## Shapefiles 
 # *.dbf
 # *.fix
@@ -51,9 +54,7 @@ jsm-comp/GodoyLucas-*
 # *.qix
 # *.shp
 # *.shx
-
 .DS_Store
-
 manuscript/auto
   
 ## emacs files
@@ -65,49 +66,35 @@ manuscript/auto
 auto-save-list
 tramp
 .\#*
-
 # Org-mode
 .org-id-locations
 *_archive
-
 # flymake-mode
 *_flymake.*
-
 # eshell files
 /eshell/history
 /eshell/lastdir
-
 # elpa packages
 /elpa/
-
 # reftex files
 *.rel
-
 # AUCTeX auto folder
 /auto/
-
 # cask packages
 .cask/
 dist/
-
 # Flycheck
 flycheck_*.el
-
 # server auth directory
 /server/
-
 # projectiles files
 .projectile
-
 # directory configuration
 .dir-locals.el
-
 # files from marcos' computer
 .fuse_hidden*
-
 # not needed to run applications
 simulation/data/aux
-
 **.pdf
-
 **.Rhistory
+.httr-oauth

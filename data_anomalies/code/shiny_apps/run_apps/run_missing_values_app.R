@@ -1,0 +1,7 @@
+################################################################################
+
+# Run the missing_values_app.R
+library(shiny)
+runApp("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\data_anomalies\\code\\shiny_apps\\missing_values_app.R", port = 4002)
+
+################################################################################

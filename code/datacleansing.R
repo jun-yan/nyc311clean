@@ -44,12 +44,16 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 #########################################################################
 rm(list = ls())
 
-main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_01-05-2025.CSV"
+#main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_01-05-2025.CSV"
+main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
-# Hard code the max_closed_date to be midnight of the date of the data export from NYC Open Data
-max_closed_date <- as.POSIXct("2024-09-15 23:59:59", format = "%Y-%m-%d %H:%M:%S")
+# Extract the 10-character date after "AS_OF_"
+max_closed_date <- sub(".*AS_OF_([0-9-]+)\\.csv$", "\\1", main_data_file)
+
+# Convert to POSIXct format
+max_closed_date <- as.POSIXct(max_closed_date, format = "%m-%d-%Y", tz = "UTC") + (23*3600 + 59*60 + 59)
 
 #########################################################################
 programStart <- as.POSIXct(Sys.time())
@@ -648,7 +652,7 @@ points_df <- data.frame(
 )
 
 # Convert to an sf object and apply the State Plane projection.
-points_sf <- st_as_sf(points_df, coords = c("lon", "lat"), crs = 4326) # WGS84 lat/long
+points_sf <- st_as_sf(points_df, coords = c("lon", "lat"), crs = 4326) # WGS84 lat/long.
 points_sp <- st_transform(points_sf, crs = 2263) # Convert to State Plane
 
 # Change the x/y_coordinate_state_plane fields to "numeric" to enable comparison.
