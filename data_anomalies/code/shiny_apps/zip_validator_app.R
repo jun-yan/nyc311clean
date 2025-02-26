@@ -10,8 +10,8 @@ options(shiny.port = 4004)
 
 ##############################################################################################
 # Load the data
-data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
-zip_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/data_anomalies/code/data/USPS_zipcodes.rds"
+data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
+zip_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/code/data/USPS_zipcodes.rds"
 cleaned_data <- readRDS(data_path)
 zip_codes <- readRDS(zip_path)
 
@@ -46,6 +46,8 @@ ui <- fluidPage(
     column(12,
            actionButton("analyze", "Detect Invalid ZIP Codes", class = "btn-primary btn-lg"),
            br(), br(),
+           shinycssloaders::withSpinner(textOutput("total_invalid_summary"), type = 4),
+           br(),
            shinycssloaders::withSpinner(DTOutput("results_table"), type = 4)
     )
   )
@@ -86,6 +88,12 @@ server <- function(input, output, session) {
     
     zip_analysis_results(results)
     is_loading(FALSE)
+  })
+  
+  output$total_invalid_summary <- renderText({
+    req(zip_analysis_results())
+    sprintf("Total Invalid ZIP Codes: %s", 
+            format(zip_analysis_results()$total_invalid, big.mark = ","))
   })
   
   output$results_table <- renderDT({
