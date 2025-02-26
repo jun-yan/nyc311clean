@@ -10,7 +10,7 @@ library(stringr)
 options(shiny.port = 4006)
 
 # Load and prepare data
-data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
+data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
 cleaned_data <- readRDS(data_path)
 setDT(cleaned_data)
 

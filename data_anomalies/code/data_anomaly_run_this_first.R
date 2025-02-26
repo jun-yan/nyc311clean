@@ -6,7 +6,7 @@
 # 📂 SET THE BASE WORKING DIRECTORY
 # -------------------------------------------------------------
 # Customize this path as needed/desired
-working_dir <- "C:/Users/David/OneDrive/Documents/datacleaningproject/initialization_test_directory"
+working_dir <- "C:\Users\David\OneDrive\Documents\datacleaningproject\data_quality_timeline"
 # -------------------------------------------------------------
 
 # If the working directory does not exist, create it

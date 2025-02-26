@@ -17,7 +17,7 @@ options(shiny.port = 4007)
 
 ##################################################################################
 # Load data
-data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
+data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
 cleaned_data <- readRDS(data_path)
 setDT(cleaned_data)
 
@@ -335,8 +335,6 @@ compute_metaphone_matches <- function(
     dm_threshold = 0.85, 
     debug = FALSE) {
   
-  if (!exists("clean_already")) clean_already <- FALSE
-  
   # First apply the filtering
   valid_cases <- filter_valid_pairs(data, field1, field2)
   
@@ -344,29 +342,17 @@ compute_metaphone_matches <- function(
   if (!clean_already) {
     valid_cases[, clean_field1 := clean_text(get(field1))]
     valid_cases[, clean_field2 := clean_text(get(field2))]
-    clean_already <<- TRUE
+    clean_already <<- TRUE  # Ensure future calls know cleaning is done
   } else {
+    # Ensure the columns exist, otherwise redefine them
     if (!("clean_field1" %in% names(valid_cases))) valid_cases[, clean_field1 := get(field1)]
     if (!("clean_field2" %in% names(valid_cases))) valid_cases[, clean_field2 := get(field2)]
   }
   
-  # Additional cleaning for metaphone
-  valid_cases[, `:=`(
-    meta_field1 = gsub("[^A-Za-z ]", "", clean_field1),  # Remove all non-letters except spaces
-    meta_field2 = gsub("[^A-Za-z ]", "", clean_field2)
-  )]
-  
-  # Remove multiple spaces and trim
-  valid_cases[, `:=`(
-    meta_field1 = trimws(gsub("\\s+", " ", meta_field1)),
-    meta_field2 = trimws(gsub("\\s+", " ", meta_field2))
-  )]
-  
-  # Compute metaphone values
-  valid_cases[, `:=`(
-    dm_field1 = phonics::metaphone(meta_field1),
-    dm_field2 = phonics::metaphone(meta_field2)
-  )]
+  suppressWarnings({
+    valid_cases[, dm_field1 := phonics::metaphone(clean_field1)]
+    valid_cases[, dm_field2 := phonics::metaphone(clean_field2)]
+  })
   
   exact_matches <- valid_cases[clean_field1 == clean_field2]
   non_matching <- valid_cases[clean_field1 != clean_field2]
@@ -377,33 +363,9 @@ compute_metaphone_matches <- function(
       metaphone_match = (dm_field1 == dm_field2)
     )]
     
-    potential_matches <- data.table(
-      Field1 = non_matching[str_sim >= dm_threshold | metaphone_match == TRUE][[field1]],
-      Field2 = non_matching[str_sim >= dm_threshold | metaphone_match == TRUE][[field2]],
-      `Metaphone Value 1` = non_matching[str_sim >= dm_threshold | metaphone_match == TRUE]$dm_field1,
-      `Metaphone Value 2` = non_matching[str_sim >= dm_threshold | metaphone_match == TRUE]$dm_field2,
-      `String Similarity` = round(non_matching[str_sim >= dm_threshold | metaphone_match == TRUE]$str_sim, 4),
-      `Metaphone Match` = non_matching[str_sim >= dm_threshold | metaphone_match == TRUE]$metaphone_match
-    )
+    potential_matches <- non_matching[str_sim >= dm_threshold | metaphone_match == TRUE]
   } else {
-    potential_matches <- data.table(
-      Field1 = character(),
-      Field2 = character(),
-      `Metaphone Value 1` = character(),
-      `Metaphone Value 2` = character(),
-      `String Similarity` = numeric(),
-      `Metaphone Match` = logical()
-    )
-  }
-  
-  if(debug) {
-    cat("\nSample of text processing:\n")
-    print(head(valid_cases[, .(
-      original1 = get(field1),
-      cleaned1 = clean_field1,
-      meta1 = meta_field1,
-      dm1 = dm_field1
-    )]))
+    potential_matches <- data.table()
   }
   
   list(
@@ -681,6 +643,7 @@ server <- function(input, output, session) {
   ##########################################
   # Observe changes in matching method to show/hide relevant inputs
   observe({
+
     # Force the tab switch immediately via JavaScript
     shinyjs::runjs("$('#results_tabs a[data-value=\"Matches Table\"]').tab('show');")
     
@@ -719,8 +682,7 @@ server <- function(input, output, session) {
   ##########################################
   # Run Fuzzy Matching
   observeEvent(input$run_matching, {
-    cat("\n[DEBUG] Run matching button clicked\n")
-    
+   
     # Switch to Matches Table tab immediately
     shinyjs::runjs("$('#results_tabs a[data-value=\"Matches Table\"]').tab('show');")
     
@@ -732,150 +694,83 @@ server <- function(input, output, session) {
     )
     
     is_loading(TRUE)  # Set loading state
-    cat("[DEBUG] Loading state set to TRUE\n")
     
-    tryCatch({
-      # Run selected fuzzy matching method
-      results <- if (input$match_method == "metaphone") {
-        cat("[DEBUG] Running metaphone matching\n")
-        compute_metaphone_matches(
-          data(),
-          input$field1,
-          input$field2,
-          input$dm_threshold,
-          debug = TRUE
-        )
-      } else if (input$match_method == "lev") {
-        compute_levenshtein_matches(...)
-      } else if (input$match_method == "JW_combined") {
-        compute_JW_combined_matches(...)
-      } else {
-        compute_cosine_matches(...)
-      }
-      
-      cat("[DEBUG] Matching completed, storing results\n")
-      matching_results(results)
-      
-    }, error = function(e) {
-      cat("[DEBUG] Error occurred:", conditionMessage(e), "\n")
-      showNotification(
-        paste("Error in matching:", conditionMessage(e)),
-        type = "error"
+    # Run selected fuzzy matching method
+    results <- if (input$match_method == "lev") {
+      compute_levenshtein_matches(
+        data(), 
+        input$field1, 
+        input$field2, 
+        input$max_distance,
+        debug = TRUE
       )
-    }, finally = {
-      cat("[DEBUG] Setting loading state to FALSE\n")
-      is_loading(FALSE)  # Clear loading state
-      removeNotification(id = notif_id)
-    })
-  })
-  
-  # And in your renderDT:
-  output$matches_table <- renderDT({
-    cat("\n[DEBUG] Rendering matches table...\n")
-    
-    isolate({
-      if (is_loading()) {
-        cat("[DEBUG] Still loading, is_loading() =", is_loading(), "\n")
-        return(NULL)
-      }
-    })
-    
-    if (is.null(matching_results())) {
-      cat("[DEBUG] No matching results available\n")
-      return(datatable(data.frame()))
+    } else if (input$match_method == "JW_combined") {  
+      compute_JW_combined_matches(
+        data(),
+        input$field1,
+        input$field2,
+        input$jw_threshold,
+        input$require_both,
+        debug = TRUE
+      )
+    } else if (input$match_method == "metaphone") {
+      compute_metaphone_matches(
+        data(),
+        input$field1,
+        input$field2,
+        input$dm_threshold,
+        debug = TRUE
+      )
+    } else {  # cosine
+      compute_cosine_matches(
+        data(),
+        input$field1,
+        input$field2,
+        input$cosine_threshold,
+        input$ngram_size,
+        debug = TRUE
+      )
     }
     
-    matches_df <- matching_results()$potential_matches
-    cat("[DEBUG] Got matches_df with", nrow(matches_df), "rows\n")
+    # Store results
+    matching_results(results)
+    is_loading(FALSE)  # Clear loading state
     
-    dt <- if (input$match_method == "metaphone") {
-      cat("[DEBUG] Creating metaphone table\n")
-      data.table(
-        Field1 = matches_df$original_field1,
-        Field2 = matches_df$original_field2,
-        `Metaphone Value 1` = matches_df$dm_field1,
-        `Metaphone Value 2` = matches_df$dm_field2,
-        `String Similarity` = round(matches_df$str_sim, 4),
-        `Metaphone Match` = matches_df$metaphone_match
-      )
-    } else if (...) {
-      # Your other matching methods
-    }
-    
-    cat("[DEBUG] Created dt with", nrow(dt), "rows\n")
-    datatable(dt, options = list(pageLength = 25, scrollX = TRUE))
+    # Remove specific notification
+    removeNotification(id = notif_id)
   })
   
   ##########################################
-  # Matches Table Output
-  output$matches_table <- renderDT({
-    cat("\n[DEBUG] Rendering matches table...\n")
+  # Comparative analysis
+  observeEvent(input$run_comparative_analysis, {
+
+    # Force the tab switch immediately
+    shinyjs::runjs("$('#results_tabs a[data-value=\"Method Comparison\"]').tab('show');")
     
-    if (is_loading()) {
-      cat("[DEBUG] Still loading...\n")
-      return(NULL)
-    }
+    # Show loading notification
+    notif_id <- showNotification(
+      "Running comparative analysis...", 
+      type = "message", 
+      duration = NULL
+    )
     
-    if (is.null(matching_results())) {
-      cat("[DEBUG] No matching results available\n")
-      return(datatable(data.frame()))
-    }
+
+    # Run comparative analysis
+    comp_results <- compute_all_method_matches(
+      data(), 
+      input$field1, 
+      input$field2
+    )
     
-    cat("[DEBUG] Match method:", input$match_method, "\n")
-    matches_df <- matching_results()$potential_matches
-    cat("[DEBUG] matches_df columns:", paste(names(matches_df), collapse=", "), "\n")
+
+    # Store results
+    comparative_results(comp_results)
     
-    dt <- if (input$match_method == "lev") {
-      data.table(
-        original_field1 = matches_df[[input$field1]],
-        original_field2 = matches_df[[input$field2]],
-        distance = matches_df$levenshtein_dist
-      )
-    } else if (input$match_method == "JW_combined") {
-      if (!all(c("jw_dist", "phonetic_match") %in% names(matches_df))) {
-        cat("[DEBUG] Missing required columns for JW_combined\n")
-        return(datatable(data.frame()))
-      }
-      data.table(
-        original_field1 = matches_df[[input$field1]],
-        original_field2 = matches_df[[input$field2]],
-        jw_distance = round(matches_df$jw_dist, 4),
-        phonetic_match = matches_df$phonetic_match
-      )
-    } else if (input$match_method == "metaphone") {
-      cat("\n[DEBUG] Inside metaphone section\n")
-      
-      matches_df <- matching_results()$potential_matches
-      if(is.null(matches_df) || nrow(matches_df) == 0) {
-        return(datatable(data.frame(
-          Field1 = character(),
-          Field2 = character(),
-          `Metaphone Value 1` = character(),
-          `Metaphone Value 2` = character(),
-          `String Similarity` = numeric(),
-          `Metaphone Match` = logical()
-        )))
-      }
-      
-      datatable(as.data.frame(matches_df), 
-                options = list(
-                  pageLength = 25, 
-                  scrollX = TRUE
-                ))
-      
-    } else {  # cosine
-      if (!all(c("cosine_sim") %in% names(matches_df))) {
-        return(datatable(data.frame()))
-      }
-      data.table(
-        original_field1 = matches_df[[input$field1]],
-        original_field2 = matches_df[[input$field2]],
-        cosine_similarity = round(matches_df$cosine_sim, 4)
-      )
-    }
+    # Remove notification after a slight delay to ensure visibility
+    shinyjs::delay(300, {
+      removeNotification(id = notif_id)
+    })
     
-    cat("[DEBUG] Final dt structure:", str(dt), "\n")
-    datatable(dt, options = list(pageLength = 25, scrollX = TRUE))
   })
   
   ##########################################
@@ -916,6 +811,59 @@ server <- function(input, output, session) {
   })
   
   ##########################################
+  # Matches Table Output
+  output$matches_table <- renderDT({
+
+    if (is_loading()) {
+      return(NULL)
+    }
+    if (is.null(matching_results())) {
+      return(datatable(data.frame()))
+    }
+    
+    matches_df <- matching_results()$potential_matches
+
+    dt <- if (input$match_method == "lev") {
+      data.table(
+        original_field1 = matches_df[[input$field1]],
+        original_field2 = matches_df[[input$field2]],
+        distance = matches_df$levenshtein_dist
+      )
+    } else if (input$match_method == "JW_combined") {
+      if (!all(c("jw_dist", "phonetic_match") %in% names(matches_df))) {
+        return(datatable(data.frame()))
+      }
+      data.table(
+        original_field1 = matches_df[[input$field1]],
+        original_field2 = matches_df[[input$field2]],
+        jw_distance = round(matches_df$jw_dist, 4),
+        phonetic_match = matches_df$phonetic_match
+      )
+    } else if (input$match_method == "metaphone") {
+      if (!all(c("str_sim", "metaphone_match") %in% names(matches_df))) {
+        return(datatable(data.frame()))
+      }
+      data.table(
+        original_field1 = matches_df[[input$field1]],
+        original_field2 = matches_df[[input$field2]],
+        similarity = round(matches_df$str_sim, 4),
+        metaphone_match = matches_df$metaphone_match
+      )
+    } else {  # cosine
+      if (!all(c("cosine_sim") %in% names(matches_df))) {
+        return(datatable(data.frame()))
+      }
+      data.table(
+        original_field1 = matches_df[[input$field1]],
+        original_field2 = matches_df[[input$field2]],
+        cosine_similarity = round(matches_df$cosine_sim, 4)
+      )
+    }
+    
+    datatable(dt, options = list(pageLength = 25, scrollX = TRUE))
+  })
+  
+  ##########################################
   # Method Comparison Output
   output$method_comparison <- renderDT({
     req(comparative_results())
@@ -937,10 +885,7 @@ server <- function(input, output, session) {
         ordering = FALSE,
         dom = 't'
       ),
-      caption = htmltools::tags$caption(
-        style = "caption-side: top; text-align: left;", 
-        header_text
-      ),
+      caption = htmltools::tags$caption(style = "caption-side: top; text-align: left;", header_text),
       rownames = FALSE,
       colnames = c(
         "Fuzzy Algorithm",

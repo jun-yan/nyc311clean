@@ -10,7 +10,7 @@ options(shiny.port = 4005)
 options(digits.secs = 3)
 
 # Load and prepare data
-data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/data_anomalies/code/data/3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.rds"
+data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/code/data/1-year_311SR_01-01-2024_thru_12-31-2024_AS_OF_02-10-2025.rds"
 cleaned_data <- readRDS(data_path)
 setDT(cleaned_data)
 
@@ -263,6 +263,19 @@ validate_date_logic <- function(data) {
       Count = nrow(midnight_closed),
       Percentage = nrow(midnight_closed) / total_rows,
       Sample_Values = get_unique_samples(midnight_closed, "closed_date")
+    ))
+  }
+  
+  # 14. Check for closed date present but status not CLOSED
+  has_date_not_closed <- data[!is.na(closed_date) & status != "CLOSED"]
+  
+  if (nrow(has_date_not_closed) > 0) {
+    results <- rbind(results, data.table(
+      Rule = "Inconsistent Closure Status",
+      Error_Type = "closed_date exists but status is not CLOSED",
+      Count = nrow(has_date_not_closed),
+      Percentage = nrow(has_date_not_closed) / total_rows,
+      Sample_Values = get_unique_samples(has_date_not_closed, "closed_date")
     ))
   }
   
