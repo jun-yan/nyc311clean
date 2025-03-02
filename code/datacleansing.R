@@ -44,8 +44,8 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 #########################################################################
 rm(list = ls())
 
-#main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_01-05-2025.CSV"
-main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
+#main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_02-28-2025.CSV"
+main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_02-28-2025.CSV"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
