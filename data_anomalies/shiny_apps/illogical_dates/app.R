@@ -62,7 +62,6 @@ validate_date_logic <- function(data) {
   
   # 1. Check for negative duration (closed_date before created_date)
   invalid_closure <- data[!is.na(closed_date) & 
-                            !is.na(created_date) & 
                             closed_date < created_date]
   
   if (nrow(invalid_closure) > 0) {
@@ -142,8 +141,11 @@ validate_date_logic <- function(data) {
   }
   
   # 7. Check for resolution dates in future
-  future_resolution <- data[!is.na(resolution_action_updated_date) & 
+  future_resolution <- data[!is.na(resolution_action_updated_date) &
                               as.Date(resolution_action_updated_date) > max_closed_date]
+    cat("\nMax closed date\n")
+   print(max_closed_date)
+   print(nrow(future_resolution))
   
   if (nrow(future_resolution) > 0) {
     results <- rbind(results, data.table(
@@ -153,7 +155,7 @@ validate_date_logic <- function(data) {
       Percentage = nrow(future_resolution) / total_rows
     ))
   }
-  
+
   # 8. Check for missing closed dates with CLOSED status
   missing_closure <- data[status == "CLOSED" & is.na(closed_date)]
   
@@ -247,6 +249,7 @@ validate_date_logic <- function(data) {
 }
 
 ##############################################################################################
+# UI
 ui <- fluidPage(
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
   
@@ -264,18 +267,20 @@ ui <- fluidPage(
 ##############################################################################################
 # Server
 server <- function(input, output, session) {
-  validation_results <- reactiveVal(NULL)
+  # Create a reactive to handle the validation process
+  validation_data <- eventReactive(input$validate, {
+    # This is where the long calculation happens
+    validate_date_logic(cleaned_data)
+  }, ignoreNULL = FALSE)
   
-  observeEvent(input$validate, {
-    validation_results(NULL)  # Clear previous results
-    validation_output <- validate_date_logic(cleaned_data)  # Run validation
-    validation_results(validation_output)  # Store results
-  })
-  
+  # Render the output
   output$validation_results <- renderDT({
-    req(validation_results())
+    # Only proceed if validation has been triggered and has results
+    req(input$validate)
+    results <- validation_data()
+    req(results)
     
-    datatable(validation_results(),
+    datatable(results,
               rownames = FALSE,
               options = list(
                 pageLength = 25,

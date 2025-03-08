@@ -133,25 +133,22 @@ ui <- fluidPage(
   )
 )
 
-##############################################################################################
 server <- function(input, output, session) {
-  evaluation_results <- reactiveVal(NULL)
-  is_processing <- reactiveVal(FALSE)  # New reactive to track if processing is happening
-  
-  observeEvent(input$evaluate, {
-    evaluation_results(NULL)  # Clear results immediately to trigger UI update
-    Sys.sleep(0.5)  # Short delay to allow the UI to refresh
-    
+  # Create a reactive expression for the evaluation process
+  evaluation_data <- eventReactive(input$evaluate, {
+    # This is where the calculation happens and where the spinner will show
     dt <- load_data()  # Load dataset
-    evaluation_output <- run_field_evaluations(dt)  # Run evaluations
-    evaluation_results(evaluation_output)  # Store results
-  })
+    run_field_evaluations(dt)  # Run evaluations
+  }, ignoreNULL = FALSE)
   
+  # Render the output
   output$evaluation_results <- renderDT({
-    req(!is_processing())  # Wait until processing is finished before rendering
-    req(evaluation_results())  # Ensure results exist
+    # Only proceed if evaluation has been triggered and has results
+    req(input$evaluate)
+    results <- evaluation_data()
+    req(results)
     
-    datatable(evaluation_results()[, .(Field_Pair, Percentage, Matches, Non_Matches)], # Ensure correct column order
+    datatable(results[, .(Field_Pair, Percentage, Matches, Non_Matches)], # Ensure correct column order
               rownames = FALSE,
               options = list(
                 pageLength = 10,
@@ -163,6 +160,4 @@ server <- function(input, output, session) {
   })
 }
 
-##############################################################################################
 shinyApp(ui, server)
-##############################################################################################

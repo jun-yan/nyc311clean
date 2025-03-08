@@ -1,4 +1,4 @@
-##############################################################################################
+  ##############################################################################################
 
 ########## SCHEMA VALIDATOR ##########
 
@@ -18,7 +18,7 @@ options(digits.secs = 3)  # Ensure subsecond precision is maintained
 
 ##############################################################################################
 # Load and prepare data
-data_file <- file.path("data", "dataset.RDS")
+data_file <- file.path("data", "dataset.rds")
 
 if (file.exists(data_file)) {
   cleaned_data <- tryCatch({
@@ -50,6 +50,7 @@ schema <- list(
     type = "integer",
     allow_empty = FALSE,
     unique = TRUE,
+    pattern = "^[0-9]{8}$",  # Exactly 8 numeric digits
     description = "Unique identifier for each service request"
   ),
   created_date = list(
@@ -65,6 +66,9 @@ schema <- list(
   agency = list(
     type = "character",
     allow_empty = FALSE,
+    valid_values = c("NYPD", "HPD", "DOHMH", "DEP", "DOT", "DPR",
+                     "DSNY", "DOB", "TLC", "DCWP", "DHS", "EDC", "DOE", "OTI"
+                     ),
     description = "Agency code or abbreviation"
   ),
   agency_name = list(
@@ -98,13 +102,13 @@ schema <- list(
     allow_empty = FALSE,
     valid_values = c(
       "ASSIGNED",
-      "CANCEL",
+      "CANCELED",
       "CLOSED",
       "IN PROGRESS",
       "OPEN",
-      "PENDING",
-      "STARTED",
-      "UNSPECIFIED"
+      "PENDING"
+#      "STARTED"
+#      "UNSPECIFIED"
     ),
     description = "Current status of the service request"
   ),
@@ -121,7 +125,6 @@ schema <- list(
   incident_zip = list(
     type = "character",
     allow_empty = TRUE,
-    pattern = "^\\d{5}$",  # Exactly 5 digits
     description = "5-digit ZIP code of the incident location"
   ),
   borough = list(
@@ -170,10 +173,11 @@ schema <- list(
     allow_empty = TRUE,
     valid_values = c(
       "ADDRESS",
-      "BBL",
+#      "BBL",
       "BLOCKFACE",
       "INTERSECTION",
       "PLACENAME",
+      "latLong",
       "UNRECOGNIZED"
     ),
     description = "Type of address or location identifier"
@@ -211,7 +215,8 @@ schema <- list(
   city = list(
     type = "character",
     allow_empty = TRUE,
-    description = "City where the incident occurred"
+    description = "City where the incident occurred",
+    pattern = "^[A-Za-z0-9 ]+$"  # Only allows letters, numbers, and spaces
   ),
   landmark = list(
     type = "character",
@@ -254,6 +259,7 @@ schema <- list(
   bbl = list(
     type = "integer64",
     allow_empty = TRUE,
+    pattern = "^[0-9]{10}$",  # Ensures exactly 10 numeric digits
     description = "Borough, Block, and Lot (BBL) identifier"
   ),
   open_data_channel_type = list(
@@ -291,14 +297,14 @@ schema <- list(
     allow_empty = TRUE,
     valid_values = c(
       "AMBULETTE / PARATRANSIT",
-      "CAR",
+#      "CAR",
       "CAR SERVICE",
       "COMMUTER VAN",
-      "GREEN TAXI",
-      "OTHER",
-      "SUV",
-      "TRUCK",
-      "VAN"
+      "GREEN TAXI"
+#      "OTHER",
+#      "SUV",
+#      "TRUCK",
+#    "VAN"
     ),
     description = "Type of vehicle involved in the incident"
   ),
@@ -355,7 +361,7 @@ validate_schema <- function(data, schema) {
     Error_Type = character(),
     Count = numeric(),
     Percentage = numeric(),
-    Sample_Values = character()
+    Sample_Invalid_Values = character()
   )
   
   total_rows <- nrow(data)
@@ -370,7 +376,7 @@ validate_schema <- function(data, schema) {
         Error_Type = "Field missing from dataset",
         Count = total_rows,
         Percentage = 1,
-        Sample_Values = "N/A"
+        Sample_Invalid_Values = "N/A"
       ))
       next
     }
@@ -385,7 +391,7 @@ validate_schema <- function(data, schema) {
         Error_Type = paste("Invalid type: expected", field_def$type, "got", actual_type),
         Count = total_rows,
         Percentage = 1,
-        Sample_Values = paste(head(unique(data[[field]]), 5), collapse = ", ")
+        Sample_Invalid_Values = paste(head(unique(data[[field]]), 5), collapse = ", ")
       ))
       next
     }
@@ -409,7 +415,7 @@ validate_schema <- function(data, schema) {
           Error_Type = "Empty values not allowed",
           Count = total_empty,
           Percentage = total_empty / total_rows,
-          Sample_Values = if(blank_count > 0) "'' (blank)" else "NA"
+          Sample_Invalid_Values = if(blank_count > 0) "'' (blank)" else "NA"
         ))
       }
     }
@@ -435,7 +441,7 @@ validate_schema <- function(data, schema) {
               Error_Type = "Invalid date format",
               Count = failed_count,
               Percentage = failed_count / total_rows,
-              Sample_Values = paste(sample_bad_dates, collapse = ", ")
+              Sample_Invalid_Values = paste(sample_bad_dates, collapse = ", ")
             ))
           }
         }, error = function(e) {
@@ -444,7 +450,7 @@ validate_schema <- function(data, schema) {
             Error_Type = paste("Date conversion error:", conditionMessage(e)),
             Count = sum(!is.na(data[[field]])),
             Percentage = sum(!is.na(data[[field]])) / total_rows,
-            Sample_Values = paste(head(unique(data[[field]]), 5), collapse = ", ")
+            Sample_Invalid_Values = paste(head(unique(data[[field]]), 5), collapse = ", ")
           ))
         })
       } else {
@@ -462,7 +468,7 @@ validate_schema <- function(data, schema) {
               Error_Type = "NA values found in required date field",
               Count = sum(is.na(data[[field]])),
               Percentage = sum(is.na(data[[field]])) / total_rows,
-              Sample_Values = "NA"
+              Sample_Invalid_Values = "NA"
             ))
           }
         }
@@ -478,7 +484,7 @@ validate_schema <- function(data, schema) {
           Error_Type = "Invalid value",
           Count = invalid_count,
           Percentage = invalid_count / total_rows,
-          Sample_Values = paste(head(unique(invalid_values), 5), collapse = ", ")
+          Sample_Invalid_Values = paste(head(unique(invalid_values), 5), collapse = ", ")
         ))
       }
     }
@@ -497,7 +503,7 @@ validate_schema <- function(data, schema) {
           Error_Type = "Invalid format",
           Count = invalid_count,
           Percentage = invalid_count / total_rows,
-          Sample_Values = paste(head(unique(invalid_pattern), 5), collapse = ", ")
+          Sample_Invalid_Values = paste(head(unique(invalid_pattern), 5), collapse = ", ")
         ))
       }
     }
@@ -521,7 +527,7 @@ validate_schema <- function(data, schema) {
           Error_Type = "Value out of range",
           Count = length(out_of_range),
           Percentage = length(out_of_range) / total_rows,
-          Sample_Values = paste(head(unique(out_of_range), 5), collapse = ", ")
+          Sample_Invalid_Values = paste(head(unique(out_of_range), 5), collapse = ", ")
         ))
       }
     }
@@ -533,7 +539,7 @@ validate_schema <- function(data, schema) {
       Error_Type = "No Validation Errors",
       Count = 0,
       Percentage = 0,
-      Sample_Values = "N/A"
+      Sample_Invalid_Values = "N/A"
     )
   }
   
@@ -596,7 +602,7 @@ server <- function(input, output, session) {
         Error_Type = "No validation errors detected",
         Count = 0,
         Percentage = 0,
-        Sample_Values = "N/A"
+        Sample_Invalid_Values = "N/A"
       )
     }
     

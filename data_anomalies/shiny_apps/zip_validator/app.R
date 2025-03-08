@@ -14,10 +14,10 @@ options(shiny.port = 4004)
 
 ##############################################################################################
 # Load the data
-data_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/shiny_apps/zip_validator/data/dataset.rds"
+data_path <- file.path("data", "dataset.rds")
 cleaned_data <- readRDS(data_path)
 
-zip_code_path <- "C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies/shiny_apps/zip_validator/data/USPS_zipcodes.rds"
+zip_code_path <- file.path("data", "USPS_zipcodes.rds")
 zip_codes <- readRDS(zip_code_path)
 
 # Convert to data.table for better performance

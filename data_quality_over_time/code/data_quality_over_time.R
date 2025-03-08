@@ -44,13 +44,20 @@ create_condition_plot <- function(data, title, y_label, subtitle = NULL, value_f
                         paste0("+", format(round(total_percent_change, 1), nsmall = 1), "%"),
                         paste0(format(round(total_percent_change, 1), nsmall = 1), "%"))
   
+  # Compute a mid-range Y position
+  y_trend_position <- median(data_copy[[value_field]], na.rm = TRUE) + 
+    (diff(range(data_copy[[value_field]], na.rm = TRUE)) * 0.05)  # Slight offset
+  
+  # Compute a mid-range X position
+  x_trend_position <- median(data_copy$year_month)
+  
+
   # Create the plot (using dynamic mapping)
-  # Create the plot (using proper dynamic mapping)
   p <- ggplot(data_copy, aes(x = year_month, y = .data[[value_field]])) +
     
     # Add the points and line
     geom_line(color = "steelblue2", linewidth = 0.75) +
-    geom_point(size = 2.5, color = "steelblue4", shape = 18) +
+    geom_point(size = 2.75, color = "steelblue4", shape = 18) +
     
     # Add the mean and sigma lines
     geom_hline(yintercept = process_mean + 3*process_sd, color = "red", linetype = "dotted", linewidth = 0.7) +
@@ -69,23 +76,24 @@ create_condition_plot <- function(data, title, y_label, subtitle = NULL, value_f
     # Add linear trend line with custom confidence band
     geom_smooth(method = "lm", 
                 se = TRUE, 
-                color = "gray49", 
+                color = "gray45", 
                 linewidth = 0.9, 
                 fill = "gray81", 
                 alpha = 0.3) +
     
     # Add trend annotation (using dynamic calculation for y position)
+    # Add trend annotation in the middle
     annotate("text", 
-             x = max(data_copy$year_month), 
-             y = max(data_copy[[value_field]]) - 0.002,
+             x = x_trend_position, 
+             y = y_trend_position,  
              label = paste("Trend:", trend_label),
-             hjust = 1, vjust = 3.5, 
-             color = "gray35", fontface = "bold", size = 3.5) +
+             hjust = 0.5, vjust = -1,  
+             color = "gray35", fontface = "bold", size = 5) +
     
     # Formatting
     labs(
       title = title,
-      subtitle = subtitle,
+      subtitle = paste(subtitle, "\n\n"),
       x = "Year-Month",
       y = y_label,
       caption = paste("Mean:", format(round(process_mean, 4), nsmall = 4))
@@ -95,16 +103,22 @@ create_condition_plot <- function(data, title, y_label, subtitle = NULL, value_f
       date_breaks = "1 year",  # Show tick marks every year
       date_labels = "%Y"       # Format as year only
     ) +
-    
     theme(
-      axis.text.x = element_text(angle = 35, hjust = 1),
-      panel.grid.major = element_line(color = "white", linewidth = 0.5),
+      panel.border = element_rect(color = "black", fill = NA, linewidth = 0.75),  # Black border around plot area
+      axis.text.x = element_text(angle = 10, hjust = 1, color = "black"),  # Ensure labels are visible
+      panel.grid.major = element_line(color = "gray88", linewidth = 0.5),  # Adjust grid color for contrast
       panel.grid.minor = element_blank(),
-      plot.margin = unit(c(1, 1, 1, 2), "cm"),  # Increase left margin (last value)
-      panel.background = element_rect(fill = "gray94"),
-      plot.caption = element_text(hjust = 1, size = 9),
-      axis.title.y = element_text(margin = margin(r = 10, l = 0))  # Move y-axis title left
-    ) +
+      plot.margin = unit(c(0.3, 0.3, 0.3, 0.3), "cm"),  
+      panel.background = element_rect(fill = "gray99", color = NA),  # Dark gray for plot panel
+      plot.background = element_rect(fill = "gray89", color = NA),   # Dark gray for entire plot background
+      plot.caption = element_text(hjust = 1, size = 9, color = "black"),
+      axis.title.y = element_text(margin = margin(r = 10, l = 0), color = "black"),
+      axis.title.x = element_text(color = "black"),
+      axis.text.y = element_text(color = "black"),
+      legend.background = element_rect(fill = "gray95"),
+      legend.text = element_text(color = "black"),
+      legend.title = element_text(color = "black")
+    )
     
     scale_y_continuous(labels = function(x) format(round(x, 4), nsmall = 4))
   
@@ -509,13 +523,6 @@ subtitles <- list(
   negative_or_zero_duration = "closed_date is <= created_date (infeasible duration)"
 )
 
-# # Make absolutely sure any existing devices are closed
-# if (!is.null(dev.list())) {
-#   for (i in 1:length(dev.list())) {
-#     dev.off()
-#   }
-# }
-
 # Filter just the original (non-sampled) condition names
 original_conditions <- names(data_condition_results)[!grepl("_sampled$", names(data_condition_results))]
 
@@ -555,11 +562,6 @@ for (condition in original_conditions) {
     mean = process_mean,
     "fraction"
   )
-  
-  # # Print the information if desired
-  # cat("Title:", plot_title, "\n")
-  # cat("Trend:", trend_label, "\n")
-  # cat("Mean:", process_mean, "\n")
   
   # Construct the file path dynamically
   file_path <- paste0(chart_dir, "/", condition, ".pdf")
@@ -615,10 +617,10 @@ summary_df <- data.frame(
   mean = sapply(condition_summary, function(x) x$mean)
 )
 
-#print(summary_df)
-
-# Write to CSV
-write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
+# print(summary_df)
+# 
+# # Write to CSV
+# write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
 
 ##########################################################################    
 analyze_invalid_values <- function(data, field_name, valid_values_list, valid_field_name, seed = 42) {
@@ -726,6 +728,7 @@ zipcode_results_sample <- zipcode_results[[2]]
 
 # Then, if year_month is not a Date object, convert it by appending "-01"
 zipcode_results_full$year_month <- as.Date(paste0(zipcode_results_full$year_month, "-01"))
+
 # Create ggplot for ZIP codes
 zip_gg_plot <- create_condition_plot(
   zipcode_results_full,
@@ -735,8 +738,14 @@ zip_gg_plot <- create_condition_plot(
   "invalid_fraction"
 )
 
+# Extract details from the plot result
+zip_trend <- zip_gg_plot$trend_label
+zip_mean <- zip_gg_plot$process_mean
+zip_title <- zip_gg_plot$title
+
+
 # Display and save the ggplot
-print(zip_gg_plot)
+print(gg_plot)
 
 # Access the plot element from the list
 file_path <- paste0(chart_dir, "/invalid_zipcodes.pdf")
@@ -795,6 +804,28 @@ cb_gg_plot <- create_condition_plot(
   value_field = "invalid_fraction"
 )
 
+# Extract details from the plot result
+cb_trend <- cb_gg_plot$trend_label
+cb_mean <- cb_gg_plot$process_mean
+cb_title <- cb_gg_plot$title
+
+# New conditions data frame
+new_conditions_df <- data.frame(
+  condition = c("invalid_zipcodes", "invalid_community_boards"),
+  title = c(zip_title, cb_title),
+  trend = c(zip_trend, cb_trend),
+  mean = c(zip_mean, cb_mean)
+)
+
+# Append new conditions to summary_df
+summary_df <- rbind(summary_df, new_conditions_df)
+
+# Print and save the final summary
+print(summary_df)
+write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
+
+
+
 # Display and save the ggplot
 
 # Access the plot element from the list
@@ -829,6 +860,46 @@ tryCatch({
 }, error = function(e) {
   cat("Error creating Community Board QCC chart:", e$message, "\n")
 })
+
+##########################################################################
+# # Compute additional trends and means
+# compute_trend_slope <- function(data, value_field) {
+#   if (nrow(data) < 2) return(NA)  # Not enough data for trend calculation
+#   
+#   # Convert year_month to numeric for regression (e.g., number of days since start)
+#   data$numeric_date <- as.numeric(as.Date(data$year_month))
+#   
+#   # Fit a linear model (y = mx + b)
+#   model <- lm(get(value_field) ~ numeric_date, data = data)
+#   
+#   # Extract the slope (m)
+#   return(coef(model)[2])
+# }
+# 
+# 
+# 
+# zip_trend <- compute_trend_slope(zipcode_results_full, "invalid_fraction")  
+# cb_trend <- compute_trend_slope(community_board_full, "invalid_fraction")
+# 
+# zip_mean <- mean(zipcode_results_full$invalid_fraction, na.rm = TRUE)
+# cb_mean <- mean(community_board_full$invalid_fraction, na.rm = TRUE)
+# 
+# # New conditions data frame
+# new_conditions_df <- data.frame(
+#   condition = c("invalid_zipcodes", "invalid_community_boards"),
+#   title = c("Proportion of Invalid ZIP Codes", "Proportion of Invalid Community Boards"),
+#   trend = c(zip_trend, cb_trend),
+#   mean = c(zip_mean, cb_mean)
+# )
+# 
+# # Append to summary_df
+# summary_df <- rbind(summary_df, new_conditions_df)
+# 
+# # Print summary
+# print(summary_df)
+# 
+# # Write to CSV
+# write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
 
 ##########################################################################
 # Create a consolidate chart
@@ -885,21 +956,24 @@ combined_plot <- ggplot(normalized_data, aes(x = year_month, y = normalized_valu
   geom_line(linewidth = 1.2) +  # Slightly thicker lines for better visibility
   geom_point(size = 2.5) +  # Slightly larger points
   labs(
-    title = "Normalized Quality Metrics Over Time",
-    subtitle = "All metrics normalized to start at 1.0",
-    x = "Year-Month",
+    title = "",
+    x = "",
     y = "Normalized Value (1.0 = Initial Value)",
-    color = "Quality Metric"
+    color = NULL  # Removes the legend title
   ) +
   # Add a horizontal reference line at y=1
   geom_hline(yintercept = 1.0, linetype = "dashed", color = "gray50", alpha = 0.7) +
   theme_minimal() +
   theme(
-    legend.position = "bottom",
+    legend.position = c(0.5, 0.945),  # Centered at the top inside the plot area
+    legend.justification = "center",  # Ensures proper centering
+    legend.background = element_rect(fill = alpha("white", 0.6)),  # Semi-transparent white background
+    legend.key = element_rect(fill = NA),  # Transparent legend keys
+    legend.direction = "horizontal",  # Arranges legend items in a row
     panel.grid.major = element_line(color = "white", linewidth = 0.5),
     panel.grid.minor = element_blank(),
     panel.background = element_rect(fill = "gray95"),
-    axis.text.x = element_text(angle = 45, hjust = 1) 
+    axis.text.x = element_text(angle = 0, hjust = 1) 
   ) +
   scale_y_continuous(labels = scales::number_format(accuracy = 0.01)) +
   # Replace the "Set1" palette with a more contrasting palette

@@ -44,10 +44,7 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 #########################################################################
 rm(list = ls())
 
-#main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_02-28-2025.CSV"
-main_data_file <- "311_Service_Requests_from_2023-2024_AS_OF_02-28-2025.CSV"
-#main_data_file <- "smaller_test_data.csv"
-#main_data_file <- "extra_small.csv"
+main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
 
 # Extract the 10-character date after "AS_OF_"
 max_closed_date <- sub(".*AS_OF_([0-9-]+)\\.csv$", "\\1", main_data_file)
@@ -1335,6 +1332,7 @@ duration_string <- paste0(
 cat("\n\n*****END OF PROGRAM*****\n")
 cat("\n📅 Execution ends at:", formatted_end_time, "\n")
 cat("\n⏱️ Program run-time:", duration_string, "\n")
+sink()
 
 #########################################################################
 # Call the end_program function with the formatted end time and duration string

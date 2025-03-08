@@ -97,9 +97,9 @@ lapply(function_files, function(file) {
 })
 
 ##########################################################################
-save_shiny_data <- function(cleaned_data, required_fields, app_name, filter_expr = NULL, metadata = NULL) {
+save_shiny_data <- function(data, required_fields, app_name, filter_expr = NULL, metadata = NULL) {
   # Subset dataset based on required fields
-  dataset <- cleaned_data[, ..required_fields]
+  dataset <- data[, ..required_fields]
   
   # Apply any filtering if a filter expression is provided
   if (!is.null(filter_expr)) {
@@ -122,7 +122,7 @@ save_shiny_data <- function(cleaned_data, required_fields, app_name, filter_expr
   
   # Print message and preview first few rows
   message("Dataset saved for ", app_name, ":")
-
+  
   return(invisible(NULL)) # Keeps function output clean while still printing
 }
 
@@ -205,7 +205,7 @@ cat("\nColumns converted to upper case")
   cleaned_data[, (date_columns) := lapply(.SD, function(x) {
     as.POSIXct(x, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
   }), .SDcols = date_columns]
-  cat("Date standardization complete\n")
+#  cat("Date standardization complete\n")
   
 # Adjust February 29 dates
   cat("\nChecking for February 29 dates to adjust...\n")
@@ -270,7 +270,7 @@ cat("\nColumns converted to upper case")
                                       "landmark"),
                   app_name = "fuzzy_matching")
   
-  # Save dataset for fuzzy_matching (street and intersection-related fields)
+  # Save dataset for missing values (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = names(cleaned_data),
                   app_name = "missing_values")
@@ -280,10 +280,21 @@ cat("\nColumns converted to upper case")
                   required_fields = names(cleaned_data),
                   app_name = "schema_validator")
   
-  # Save dataset for schema validation (street and intersection-related fields)
+  # Save dataset for zip code validation (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = "incident_zip",
                   app_name = "zip_validator")
+  
+
+##########################################################################    
+  # Define the path to the directory containing your function scripts
+  code_path <- file.path(base_dir, "code")
+  
+  # Construct the full path to the deployment script
+  deploy_script <- file.path(code_path, "deploy_all_shiny_apps.R")
+  
+  # Source the script
+  source(deploy_script)
   
 ##########################################################################  
   # Process USPS data
