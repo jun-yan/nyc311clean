@@ -15,17 +15,40 @@ options(digits.secs = 3)
 
 ##############################################################################################
 # Load and prepare data
-data_file <- file.path("data", "dataset.rds")  # Ensure dataset is stored locally
+# 1. Ensure your app directory structure looks like this:
+# app_directory/
+# ├── app.R
+# └── data/
+#     └── dataset.rds
+
+# 2. Modify your file loading code to be more robust:
+data_file <- file.path("data", "dataset.rds")
+
+# Add a debugging message to help troubleshoot
+message("Looking for data file at: ", normalizePath(data_file, mustWork = FALSE))
 
 if (file.exists(data_file)) {
   cleaned_data <- tryCatch({
-    readRDS(data_file)  # Load the pre-processed dataset
+    readRDS(data_file)
   }, error = function(e) {
     stop("Error loading dataset: ", e$message)
   })
   message("Dataset successfully loaded from local RDS file!")
 } else {
-  stop("Data file not found in the 'data' directory.")
+  # Try an alternative path as a fallback
+  alt_data_file <- file.path(getwd(), "data", "dataset.rds")
+  message("Primary path failed. Trying alternative path: ", normalizePath(alt_data_file, mustWork = FALSE))
+  
+  if (file.exists(alt_data_file)) {
+    cleaned_data <- tryCatch({
+      readRDS(alt_data_file)
+    }, error = function(e) {
+      stop("Error loading dataset from alternative path: ", e$message)
+    })
+    message("Dataset successfully loaded from alternative path!")
+  } else {
+    stop("Data file not found in either the 'data' directory or working directory/data.")
+  }
 }
 
 setDT(cleaned_data)  # Convert to data.table for better performance
@@ -41,26 +64,13 @@ validate_date_logic <- function(data) {
   
   total_rows <- nrow(data)
   
-  # Load preprocessed dataset
-  data_file <- file.path("data", "dataset.RDS")
+  # Use the max_closed_date from the dataset attributes
+  max_closed_date <- attr(data, "max_closed_date")
   
-  if (file.exists(data_file)) {
-    cleaned_data <- tryCatch({
-      readRDS(data_file)  # Load dataset
-    }, error = function(e) {
-      stop("Error loading dataset: ", e$message)
-    })
-    
-    # Retrieve max_closed_date from dataset attributes
-    max_closed_date <- attr(cleaned_data, "max_closed_date")
-    
-    if (is.null(max_closed_date)) {
-      stop("Error: max_closed_date not found in dataset.")
-    }
-    
-    message("Dataset successfully loaded from local RDS file! max_closed_date:", max_closed_date)
-  } else {
-    stop("Data file not found in the 'data' directory.")
+  if (is.null(max_closed_date)) {
+    # If attribute is missing, calculate it (fallback)
+    max_closed_date <- as.Date(Sys.Date())  # or use a specific cutoff date
+    warning("max_closed_date attribute not found, using current date as fallback")
   }
   
   # 1. Check for negative duration (closed_date before created_date)
@@ -87,7 +97,7 @@ validate_date_logic <- function(data) {
       Error_Type = "due_date precedes created_date",
       Count = nrow(invalid_due),
       Percentage = nrow(invalid_due) / total_rows
-      ))
+    ))
   }
   
   # 3. Check for closed_date in future
@@ -146,9 +156,9 @@ validate_date_logic <- function(data) {
   # 7. Check for resolution dates in future
   future_resolution <- data[!is.na(resolution_action_updated_date) &
                               as.Date(resolution_action_updated_date) > max_closed_date]
-    cat("\nMax closed date\n")
-   print(max_closed_date)
-   print(nrow(future_resolution))
+  cat("\nMax closed date\n")
+  print(max_closed_date)
+  print(nrow(future_resolution))
   
   if (nrow(future_resolution) > 0) {
     results <- rbind(results, data.table(
@@ -158,7 +168,7 @@ validate_date_logic <- function(data) {
       Percentage = nrow(future_resolution) / total_rows
     ))
   }
-
+  
   # 8. Check for missing closed dates with CLOSED status
   missing_closure <- data[status == "CLOSED" & is.na(closed_date)]
   
