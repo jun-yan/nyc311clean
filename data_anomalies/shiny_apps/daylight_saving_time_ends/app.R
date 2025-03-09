@@ -1,5 +1,7 @@
 #########################################################################
+
 # Daylight Saving Time Ends Shiny App
+
 #########################################################################
 
 library(shiny)
@@ -24,9 +26,6 @@ cleaned_data <- tryCatch({
 }, error = function(e) {
   stop("\nError loading dataset: ", e$message)
 })
-
-
-print(head(cleaned_data))
 
 #########################################################################
 # UI modifications
