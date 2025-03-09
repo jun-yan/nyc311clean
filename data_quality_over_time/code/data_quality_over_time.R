@@ -1,6 +1,11 @@
 
-#########################################################################
-create_condition_plot <- function(data, title, y_label, subtitle = NULL, value_field = "fraction") {
+################################################################################
+create_condition_plot <- function(
+                          data, 
+                          title = NULL, 
+                          y_label = NULL, 
+                          subtitle = NULL, 
+                          value_field = "fraction") {
   
   # Make a copy of the data to avoid modifying the original
   data_copy <- data.frame(data)
@@ -130,7 +135,7 @@ create_condition_plot <- function(data, title, y_label, subtitle = NULL, value_f
   ))
 }
 
-#########################################################################
+################################################################################
 # For analyze_data_conditions function:
 analyze_data_conditions <- function(cleaned_data) {
   
@@ -229,8 +234,7 @@ analyze_data_conditions <- function(cleaned_data) {
   return(results)
 }
 
-#########################################################################
-#########################################################################
+################################################################################
 # -------------------------------------------------------------
 # 📦 INSTALL AND LOAD REQUIRED PACKAGES
 # -------------------------------------------------------------
@@ -289,8 +293,8 @@ cat("\nExecution begins at:", formattedStartTime)
 # Set working directory to the location of the initialization script
 setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_quality_over_time")
 
-#########################################################################
-main_data_file <- "2-year_dataset_AS_OF_02-27-2025.csv"
+################################################################################
+main_data_file <- "5-year_311SR_01-01-2024_thru_12-31-2024_AS_OF_02-27-2025.csv"
 
 # Extract the 10-character date after "AS_OF_"
 max_closed_date <- sub(".*AS_OF_([0-9-]+)\\.csv$", "\\1", main_data_file)
@@ -300,7 +304,7 @@ max_closed_date <- as.POSIXct(max_closed_date, format = "%m-%d-%Y", tz = "Americ
                     + (23*3600 + 59*60 + 59)
 message("\nMax closed date:", max_closed_date)
 
-#########################################################################
+################################################################################
 # Set the base directory under the working directory base_dir <- getwd()
 base_dir <- getwd()
 
@@ -331,7 +335,7 @@ lapply(function_files, function(file) {
   })
 })
 
-##########################################################################
+################################################################################
 #========= Configuration =========
 
 # Define columns to convert to uppercase
@@ -375,7 +379,7 @@ date_columns <- c(
   "resolution_action_updated_date"
 )
 
-##########################################################################
+################################################################################
 #========= Main Execution =========
 
 #####################
@@ -464,34 +468,50 @@ setDT(cleaned_data)
 saveRDS(cleaned_data, rds_path)
 cat("\nSaved cleaned 311 data to:", rds_path, "\n")
   
-##########################################################################  
+################################################################################
 # Process USPS data
 usps_data_file <- "USPS_zipcodes.csv"
-  
+
 cat("\nProcessing USPS Zipcode data...\n")
 usps_path <- file.path(data_dir, usps_data_file)
 usps_rds_file <- gsub("\\.csv$", ".rds", usps_data_file)
-  
+
 zipcode_data <- fread(
-    usps_path,
-    select = "DELIVERY ZIPCODE",
-    colClasses = "character"
-  )
-  
+  usps_path,
+  select = "DELIVERY ZIPCODE",
+  colClasses = "character"
+)
+
 zipcode_data <- unique(zipcode_data)
 zipcode_data <- modify_column_names(zipcode_data)
-  
+
+# Get frequency count of ZIP codes in the incident dataset
+zip_frequencies <- table(cleaned_data$incident_zip, useNA = "no")
+
+# Get sorted list of ZIP codes that are both valid and appear in the data
+valid_zipcodes <- zipcode_data$delivery_zipcode
+common_zipcodes <- names(sort(zip_frequencies[names(zip_frequencies) %in% valid_zipcodes], 
+                              decreasing = TRUE))
+
+# Add any valid ZIP codes that don't appear in the incident data
+remaining_zipcodes <- setdiff(valid_zipcodes, common_zipcodes)
+
+# Create the optimized zipcode list
+optimized_zipcodes <- data.table(
+  delivery_zipcode = c(common_zipcodes, remaining_zipcodes)
+)
+
+# Replace zipcode_data with the optimized version
+zipcode_data <- optimized_zipcodes
+
 # Save the RDS file
 usps_rds_file <- gsub("\\.csv$", ".rds", usps_data_file)
-
 if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
-  
+
 # Construct the full file path using the existing variable name
 file_path <- file.path(data_dir, usps_rds_file)
-
 # Save the zipcode_data to this location
 saveRDS(zipcode_data, file = file_path)
-
 # Print summary
 cat("\nUSPS data RDS saved at:", file_path, "\n")
 
@@ -509,7 +529,7 @@ if (file.exists(rds_path)) {
 # Extract year-month for grouping
 cleaned_data[, year_month := format(created_date, "%Y-%m")]
 
-##########################################################################    
+################################################################################
 # Analyze all conditions
 data_condition_results <- analyze_data_conditions(cleaned_data)
 
@@ -577,22 +597,29 @@ for (condition in original_conditions) {
   # Create a file name using the condition
   file_name <- paste0(chart_dir, "/qcc_p_chart_", condition, ".pdf")
   
+  # Define data and variables explicitly before plotting
+  count_data <- sampled_data$count  # Make sure this is the correct column for all conditions
+  sample_sizes <- sampled_data$N
+  chart_title <- paste("QCC p-chart of", gsub("_", " ", tools::toTitleCase(condition)))
+  x_labels <- format(sampled_data$year_month, "%Y-%m")
+  
   # First create and display the plot in RStudio
   tryCatch({
-    qcc_plot <- qcc(sampled_data$count, 
-                    sizes = sampled_data$N, 
+    qcc_plot <- qcc(count_data, 
+                    sizes = sample_sizes, 
                     type = "p", 
-                    title = paste("QCC p-chart of", gsub("_", " ", tools::toTitleCase(condition))),
+                    title = chart_title,
                     xlab = "Year-Month",
                     ylab = "Non-conforming Proportion",
-                    labels = format(sampled_data$year_month, "%Y-%m"))
+                    labels = x_labels)
   }, error = function(e) {
     cat("Error creating QCC chart:", e$message, "\n")
   })
   
   # Then save the displayed plot to the file
   pdf(file_name, width = 10, height = 7)
-  plot(qcc_plot)  # Re-draw the plot to the PDF device
+  # Use the explicitly defined title again
+  plot(qcc_plot, title = chart_title)  
   dev.off()
   
   # Add a 4 second delay to let plots render completely
@@ -600,14 +627,6 @@ for (condition in original_conditions) {
   Sys.sleep(4)   
 }
 
-# Keep only the specified columns
-cleaned_data <- cleaned_data[, c("created_date", 
-                                 "closed_date", 
-                                 "incident_zip", 
-                                 "status", 
-                                 "resolution_action_updated_date", 
-                                 "community_board", 
-                                 "year_month")]
 
 # Create a data frame from the summaries
 summary_df <- data.frame(
@@ -617,27 +636,23 @@ summary_df <- data.frame(
   mean = sapply(condition_summary, function(x) x$mean)
 )
 
-# print(summary_df)
-# 
-# # Write to CSV
-# write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
-
-##########################################################################    
-analyze_invalid_values <- function(data, field_name, valid_values_list, valid_field_name, seed = 42) {
+################################################################################
+analyze_invalid_values <- function(data, 
+                                   field_name, 
+                                   valid_values_list, 
+                                   valid_field_name, 
+                                   seed = 42) {
   
   # Step 1: Remove NAs from the specified field
   data_no_na <- data[ !is.na(data[[field_name]]) & data[[field_name]] != "", ]
   
   # Step 2: Add boolean column for valid values
   data_no_na$zip_validity <- data_no_na[[field_name]] %in% valid_values_list[[valid_field_name]]
-  # cat("\nRaw data boolean results\n")
-  # table(data_no_na$zip_validity)
-  
+
   # Step 3: Find minimum count per year_month to use as sample size
   total_per_month <- data_no_na[, .N, by = year_month]
   min_count <- min(total_per_month$N)
-#  print(paste("Using minimum monthly count:", min_count))
-  
+
   # Step 4: Create the sampled dataset
   # Take random samples of equal size from each month
   sampled_data <- data.table()
@@ -655,9 +670,7 @@ analyze_invalid_values <- function(data, field_name, valid_values_list, valid_fi
   }
   
   sampled_data$zip_validity <- sampled_data[[field_name]] %in% valid_values_list[[valid_field_name]]
-#  cat("\n\nSampled data boolean results\n")
-#  table(sampled_data$zip_validity)
-  
+
   # Step 5: Count invalid values in full and sampled datasets
   full_summary <- data_no_na[, .(
     total_records = .N,
@@ -665,19 +678,11 @@ analyze_invalid_values <- function(data, field_name, valid_values_list, valid_fi
     invalid_fraction = sum(zip_validity == FALSE) / .N
   ), by = year_month]
   
-  
-  # cat("\nFull summary")
-  # print(full_summary)
-  
   sampled_summary <- sampled_data[, .(
     total_records = .N,
     invalid_zips = sum(!zip_validity),
     invalid_fraction = sum(zip_validity == FALSE) / .N
   ), by = year_month]
-  
-  # cat("\nSampled summary")
-  # print(sampled_summary)
-  
   
   # Return all the datasets
   return(list(
@@ -685,11 +690,94 @@ analyze_invalid_values <- function(data, field_name, valid_values_list, valid_fi
     sampled_summary))
 }
 
+################################################################################
+
+########## Zip Code Evaluation ##########
+
+################################################################################
+
 #######################
 # Read the ZIP codes reference data
 valid_zipcodes_path <- file.path(data_dir, usps_rds_file)
 valid_zipcodes <- readRDS(valid_zipcodes_path)
 
+#######################
+# Run analyses with consistent seed
+zipcode_results <- analyze_invalid_values(cleaned_data, "incident_zip", valid_zipcodes, "delivery_zipcode")
+
+# First, convert year_month to Date objects
+zipcode_results[[1]]$year_month <- as.Date(paste0(zipcode_results[[1]]$year_month, "-01"))
+zipcode_results[[2]]$year_month <- as.Date(paste0(zipcode_results[[2]]$year_month, "-01"))
+
+# First, extract the data frames from zipcode_results
+zipcode_results_full <- zipcode_results[[1]] %>%
+  arrange(year_month)
+
+zipcode_results_sample <- zipcode_results[[2]] %>%
+  arrange(year_month)
+
+
+# Create ggplot for ZIP codes
+zip_gg_plot <- create_condition_plot(
+                  data = zipcode_results_full,
+                  title = "Proportion of Invalid ZIP Codes",
+                  y_label = "Non-conforming Proportion",
+                  subtitle = "incident_zip not in USPS database",
+                  value_field = "invalid_fraction"
+)
+
+
+# Display and save the ggplot
+print(zip_gg_plot)
+
+# Access the plot element from the list
+file_path <- paste0(chart_dir, "/invalid_zipcodes.pdf")
+ggsave(file_path, plot = zip_gg_plot$plot, width = 10, height = 7)
+
+# Extract details from the plot result
+zip_trend <- zip_gg_plot$trend_label
+zip_mean <- zip_gg_plot$process_mean
+zip_title <- zip_gg_plot$title
+
+# Delay between charts
+cat("\nWaiting 4 seconds between charts...\n")
+Sys.sleep(4)
+
+# Create QCC chart for ZIP codes
+tryCatch({
+
+    # Define variables explicitly
+  zip_count_data <- zipcode_results_sample$invalid_zips
+  zip_sample_sizes <- zipcode_results_sample$total_records
+  zip_chart_title <- "QCC p-chart of Invalid ZIP Codes"
+  zip_labels <- format(zipcode_results_sample$year_month, "%Y-%m")
+  
+  zip_qcc_plot <- qcc(zip_count_data,  # Count of defects
+                      sizes = zip_sample_sizes,  # Sample sizes
+                      type = "p",  # Proportion chart
+                      title = zip_chart_title,
+                      xlab = "Year-Month",
+                      ylab = "Non-conforming Proportion",
+                      labels = zip_labels)
+  
+  # Save QCC chart - with explicit title
+  pdf(paste0(chart_dir, "/qcc_p_chart_invalid_zipcodes.pdf"), width = 10, height = 7)
+  plot(zip_qcc_plot, title = zip_chart_title)
+  dev.off()
+  
+  # Add a 4 second delay to let plots render completely
+  cat("\nWaiting 4 seconds before continuing to next chart...\n")
+  Sys.sleep(4)   
+  
+}, error = function(e) {
+  cat("Error creating ZIP code QCC chart:", e$message, "\n")
+})
+
+################################################################################
+
+########## Community Board Evaluatio ##########
+
+################################################################################
 # Define valid community boards
 valid_community_boards <- c(
   "01 BRONX", "01 BROOKLYN", "01 MANHATTAN", "01 QUEENS", "01 STATEN ISLAND",
@@ -717,73 +805,6 @@ valid_community_boards <- c(
 valid_cb <- data.table(cb = valid_community_boards)
 
 #######################
-# Run analyses with consistent seed
-zipcode_results <- analyze_invalid_values(cleaned_data, "incident_zip", valid_zipcodes, "delivery_zipcode")
-
-# First, extract the data frames from zipcode_results
-zipcode_results_full <- zipcode_results[[1]]  
-zipcode_results_sample <- zipcode_results[[2]]
-
-# ZIP CODE CHARTS
-
-# Then, if year_month is not a Date object, convert it by appending "-01"
-zipcode_results_full$year_month <- as.Date(paste0(zipcode_results_full$year_month, "-01"))
-
-# Create ggplot for ZIP codes
-zip_gg_plot <- create_condition_plot(
-  zipcode_results_full,
-  "Proportion of Invalid ZIP Codes",
-  "Non-conforming Proportion",
-  "incident_zip not in USPS database",
-  "invalid_fraction"
-)
-
-# Extract details from the plot result
-zip_trend <- zip_gg_plot$trend_label
-zip_mean <- zip_gg_plot$process_mean
-zip_title <- zip_gg_plot$title
-
-
-# Display and save the ggplot
-print(gg_plot)
-
-# Access the plot element from the list
-file_path <- paste0(chart_dir, "/invalid_zipcodes.pdf")
-ggsave(file_path, plot = zip_gg_plot$plot, width = 10, height = 7)
-
-# Delay between charts
-cat("\nWaiting 4 seconds between charts...\n")
-Sys.sleep(4)
-
-# Create QCC chart for ZIP codes
-tryCatch({
-  # Convert year_month to Date if it's not already
-  if(!inherits(zipcode_results_sample$year_month, "Date")) {
-    zipcode_results_sample$year_month <- as.Date(paste0(zipcode_results_sample$year_month, "-01"))
-  }
-  
-  zip_qcc_plot <- qcc(zipcode_results_sample$invalid_zips,  # Count of defects
-                      sizes = zipcode_results_sample$total_records,  # Sample sizes
-                      type = "p",  # Proportion chart
-                      title = "QCC p-chart of Invalid ZIP Codes",
-                      xlab = "Year-Month",
-                      ylab = "Non-conforming Proportion",
-                      labels = format(zipcode_results_sample$year_month, "%Y-%m"))
-  
-  # Save QCC chart
-  pdf(paste0(chart_dir, "/qcc_p_chart_invalid_zipcodes.pdf"), width = 10, height = 7)
-  plot(zip_qcc_plot)
-  dev.off()
-  
-  # Add a 4 second delay to let plots render completely
-  cat("\nWaiting 4 seconds before continuing to next chart...\n")
-  Sys.sleep(4)   
-  
-}, error = function(e) {
-  cat("Error creating ZIP code QCC chart:", e$message, "\n")
-})
-
-#######################
 community_board_results <- analyze_invalid_values(cleaned_data, "community_board", valid_cb, "cb")
 
 # Extract the data
@@ -794,6 +815,11 @@ community_board_sample <- community_board_results[[2]]
 community_board_full$year_month <- as.Date(paste0(community_board_full$year_month, "-01"))
 community_board_sample$year_month <- as.Date(paste0(community_board_sample$year_month, "-01"))
 
+# Arrange by year_month from oldest to newest
+community_board_full <- community_board_full %>% arrange(year_month)
+community_board_sample <- community_board_sample %>% arrange(year_month)
+
+
 # COMMUNITY BOARD CHARTS
 # Create ggplot for community boards
 cb_gg_plot <- create_condition_plot(
@@ -803,6 +829,16 @@ cb_gg_plot <- create_condition_plot(
   subtitle = "NYC Community Board validation",
   value_field = "invalid_fraction"
 )
+
+# Display and save the ggplot
+file_path <- paste0(chart_dir, "/invalid_community_boards.pdf")
+ggsave(file_path, plot = cb_gg_plot$plot, width = 10, height = 7)
+
+print(cb_gg_plot$plot)  # Note the $plot to access the actual plot from the return list
+
+# Delay between charts
+cat("\nWaiting 4 seconds between charts...\n")
+Sys.sleep(4)
 
 # Extract details from the plot result
 cb_trend <- cb_gg_plot$trend_label
@@ -824,33 +860,25 @@ summary_df <- rbind(summary_df, new_conditions_df)
 print(summary_df)
 write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
 
-
-
-# Display and save the ggplot
-
-# Access the plot element from the list
-file_path <- paste0(chart_dir, "/invalid_community_boards.pdf")
-ggsave(file_path, plot = cb_gg_plot$plot, width = 10, height = 7)
-
-print(cb_gg_plot$plot)  # Note the $plot to access the actual plot from the return list
-
-# Delay between charts
-cat("\nWaiting 4 seconds between charts...\n")
-Sys.sleep(4)
-
 # Create QCC chart for community boards
 tryCatch({
-  cb_qcc_plot <- qcc(community_board_sample$invalid_zips,  # Use invalid_zips from the sample data
-                     sizes = community_board_sample$total_records,  # Use total_records as sizes
+  # Define variables explicitly
+  cb_count_data <- community_board_sample$invalid_zips
+  cb_sample_sizes <- community_board_sample$total_records
+  cb_chart_title <- "QCC p-chart of Invalid Community Boards"
+  cb_labels <- format(community_board_sample$year_month, "%Y-%m")
+  
+  cb_qcc_plot <- qcc(cb_count_data,  # Use invalid_zips from the sample data
+                     sizes = cb_sample_sizes,  # Use total_records as sizes
                      type = "p", 
-                     title = "QCC p-chart of Invalid Community Boards",
+                     title = cb_chart_title,
                      xlab = "Year-Month",
                      ylab = "Non-conforming Proportion",
-                     labels = format(community_board_sample$year_month, "%Y-%m"))
+                     labels = cb_labels)
   
-  # Save QCC chart
+  # Save QCC chart - with explicit title
   pdf(paste0(chart_dir, "/qcc_p_chart_invalid_community_boards.pdf"), width = 10, height = 7)
-  plot(cb_qcc_plot)
+  plot(cb_qcc_plot, title = cb_chart_title)
   dev.off()
   
   # Add a 4 second delay to let plots render completely
@@ -862,50 +890,9 @@ tryCatch({
 })
 
 ##########################################################################
-# # Compute additional trends and means
-# compute_trend_slope <- function(data, value_field) {
-#   if (nrow(data) < 2) return(NA)  # Not enough data for trend calculation
-#   
-#   # Convert year_month to numeric for regression (e.g., number of days since start)
-#   data$numeric_date <- as.numeric(as.Date(data$year_month))
-#   
-#   # Fit a linear model (y = mx + b)
-#   model <- lm(get(value_field) ~ numeric_date, data = data)
-#   
-#   # Extract the slope (m)
-#   return(coef(model)[2])
-# }
-# 
-# 
-# 
-# zip_trend <- compute_trend_slope(zipcode_results_full, "invalid_fraction")  
-# cb_trend <- compute_trend_slope(community_board_full, "invalid_fraction")
-# 
-# zip_mean <- mean(zipcode_results_full$invalid_fraction, na.rm = TRUE)
-# cb_mean <- mean(community_board_full$invalid_fraction, na.rm = TRUE)
-# 
-# # New conditions data frame
-# new_conditions_df <- data.frame(
-#   condition = c("invalid_zipcodes", "invalid_community_boards"),
-#   title = c("Proportion of Invalid ZIP Codes", "Proportion of Invalid Community Boards"),
-#   trend = c(zip_trend, cb_trend),
-#   mean = c(zip_mean, cb_mean)
-# )
-# 
-# # Append to summary_df
-# summary_df <- rbind(summary_df, new_conditions_df)
-# 
-# # Print summary
-# print(summary_df)
-# 
-# # Write to CSV
-# write.csv(summary_df, paste0(chart_dir, "/condition_summaries.csv"), row.names = FALSE)
-
-##########################################################################
 # Create a consolidate chart
 # Step 1: Create a consolidated data frame
 consolidated_data <- data.frame()
-
 # Add each date condition with its identifier
 for (condition in names(data_condition_results)[!grepl("_sampled$", names(data_condition_results))]) {
   temp_data <- data_condition_results[[condition]]
@@ -914,7 +901,6 @@ for (condition in names(data_condition_results)[!grepl("_sampled$", names(data_c
   consolidated_data <- rbind(consolidated_data, 
                              temp_data[, c("year_month", "condition", "value")])
 }
-
 # Add zip code data
 zipcode_data <- data.frame(
   year_month = zipcode_results_full$year_month,
@@ -922,7 +908,6 @@ zipcode_data <- data.frame(
   value = zipcode_results_full$invalid_fraction
 )
 consolidated_data <- rbind(consolidated_data, zipcode_data)
-
 # Add community board data
 cb_data <- data.frame(
   year_month = community_board_full$year_month,
@@ -930,6 +915,10 @@ cb_data <- data.frame(
   value = community_board_full$invalid_fraction
 )
 consolidated_data <- rbind(consolidated_data, cb_data)
+
+# Filter to only include 2023-2024 data
+consolidated_data <- consolidated_data %>%
+  filter(format(year_month, "%Y") %in% c("2023", "2024"))
 
 # Step 2: Normalize the data
 # Normalize so all metrics start at 1.0, handling zero first values
@@ -1016,4 +1005,4 @@ cat("\n\n*****END OF PROGRAM*****\n")
 cat("\n📅 Execution ends at:", formatted_end_time, "\n")
 cat("\n⏱️ Program run-time:", duration_string, "\n")
 
-#########################################################################
+##########################################################################
