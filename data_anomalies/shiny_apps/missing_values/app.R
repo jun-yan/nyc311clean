@@ -13,7 +13,7 @@ options(shiny.port = 4002)
 
 ##############################################################################################
 # Load the data
-data_file <- file.path("data", "dataset.RDS")
+data_file <- file.path("data", "dataset.rds")
 
 if (file.exists(data_file)) {
   cleaned_data <- tryCatch({

@@ -17,7 +17,7 @@ library(stringr)
 options(shiny.port = 4006)
 
 load_data <- function() {
-  data_file <- file.path("data", "dataset.RDS")
+  data_file <- file.path("data", "dataset.rds")
   if (file.exists(data_file)) {
     tryCatch({
       dt <- readRDS(data_file)  # Load dataset on demand

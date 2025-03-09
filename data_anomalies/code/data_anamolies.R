@@ -1,4 +1,8 @@
 #########################################################################
+
+########## Core Data Anomalies Program ##########
+
+#########################################################################
 # -------------------------------------------------------------
 # 📦 INSTALL AND LOAD REQUIRED PACKAGES
 # -------------------------------------------------------------
@@ -53,7 +57,7 @@ cat("\nExecution begins at:", formattedStartTime)
 # 📁 Set Working Directory for the Project.
 # -------------------------------------------------------------
 # Set working directory to the location of the initialization script
-setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/data_anomalies")
+getwd()
 
 #########################################################################
 main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
@@ -67,7 +71,7 @@ message("\nMax closed date:", max_closed_date)
 
 #########################################################################
 # Set the base directory under the working directory base_dir <- getwd()
-base_dir <- getwd()
+base_dir <-file.path("datacleaningproject", "nyc311clean","data_anomalies")
 
 # Define the console output directory and file name.
 output_dir <- file.path(base_dir, "console_output")
@@ -113,17 +117,22 @@ save_shiny_data <- function(data, required_fields, app_name, filter_expr = NULL,
     }
   }
   
-  # Define output path
-  output_dir <- file.path("shiny_apps", app_name, "data")
+  cat("\nSaving data in directory\n")
+  print(output_dir)
+  
+  
+  output_dir <- file.path("datacleaningproject", 
+                          "nyc311clean",
+                          "data_anomalies",
+                          "shiny_apps", 
+                          app_name, 
+                          "data")
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
   
   # Save dataset
   saveRDS(dataset, file = file.path(output_dir, "dataset.rds"))
   
-  # Print message and preview first few rows
-  message("Dataset saved for ", app_name, ":")
-  
-  return(invisible(NULL)) # Keeps function output clean while still printing
+return(invisible(NULL)) # Keeps function output clean while still printing
 }
 
 ##########################################################################
@@ -242,12 +251,6 @@ cat("\nColumns converted to upper case")
   cat("\nSaved cleaned 311 data to:", rds_path, "\n") 
   
 ##########################################################################    
-  # Save dataset for daylight_saving_time (only Nov 2024 created_date)
-  save_shiny_data(cleaned_data,
-                  required_fields = "created_date",
-                  app_name = "daylight_saving_time",
-                  filter_expr = quote(format(created_date, "%Y-%m") == "2024-11"))
-  
   # Save dataset for duplicate_fields (selected location-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = c("latitude", "longitude", "location", "borough",
@@ -263,13 +266,7 @@ cat("\nColumns converted to upper case")
                   app_name = "illogical_dates",
                   metadata = list(max_closed_date = max_closed_date))
   
-  # Save dataset for fuzzy_matching (street and intersection-related fields)
-  save_shiny_data(cleaned_data,
-                  required_fields = c("cross_street_1", "cross_street_2", "street_name",
-                                      "intersection_street_1", "intersection_street_2",  
-                                      "landmark"),
-                  app_name = "fuzzy_matching")
-  
+   
   # Save dataset for missing values (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = names(cleaned_data),
@@ -285,7 +282,22 @@ cat("\nColumns converted to upper case")
                   required_fields = "incident_zip",
                   app_name = "zip_validator")
   
-
+  # # Save dataset for daylight_saving_time (only Nov 2024 created_date)
+  # save_shiny_data(cleaned_data,
+  #                 required_fields = "created_date",
+  #                 app_name = "daylight_saving_time",
+  #                 filter_expr = quote(format(created_date, "%Y-%m") == "2024-11"))
+  # 
+  
+  
+  # # Save dataset for fuzzy_matching (street and intersection-related fields)
+  # save_shiny_data(cleaned_data,
+  #                 required_fields = c("cross_street_1", "cross_street_2", "street_name",
+  #                                     "intersection_street_1", "intersection_street_2",  
+  #                                     "landmark"),
+  #                 app_name = "fuzzy_matching")
+  
+  
 ##########################################################################    
   # Define the path to the directory containing your function scripts
   code_path <- file.path(base_dir, "code")
@@ -325,7 +337,7 @@ cat("\nColumns converted to upper case")
   saveRDS(zipcode_data, file = file.path(usps_rds_dir, "USPS_zipcodes.rds"))
   
   # Print summary
-  cat("\nUSPS data RDS:", usps_rds_path, "\n")
+  cat("\nUSPS data rds:", usps_rds_path, "\n")
   cat("\nSetup complete.\n")
 
 ##########################################################################

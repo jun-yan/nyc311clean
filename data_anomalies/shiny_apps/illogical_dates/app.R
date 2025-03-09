@@ -13,8 +13,9 @@ library(lubridate)
 options(shiny.port = 4005)
 options(digits.secs = 3)
 
+##############################################################################################
 # Load and prepare data
-data_file <- file.path("data", "dataset.RDS")  # Ensure dataset is stored locally
+data_file <- file.path("data", "dataset.rds")  # Ensure dataset is stored locally
 
 if (file.exists(data_file)) {
   cleaned_data <- tryCatch({
@@ -26,6 +27,8 @@ if (file.exists(data_file)) {
 } else {
   stop("Data file not found in the 'data' directory.")
 }
+
+setDT(cleaned_data)  # Convert to data.table for better performance
 
 ##############################################################################################
 validate_date_logic <- function(data) {
