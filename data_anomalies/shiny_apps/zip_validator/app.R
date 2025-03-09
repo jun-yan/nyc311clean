@@ -13,16 +13,52 @@ library(data.table)  # Adding for better performance
 options(shiny.port = 4004)
 
 ##############################################################################################
-# Load the data
-data_path <- file.path("data", "dataset.rds")
-cleaned_data <- readRDS(data_path)
 
-zip_code_path <- file.path("data", "USPS_zipcodes.rds")
-zip_codes <- readRDS(zip_code_path)
+print(getwd())  # Print working directory
+print(list.files())  # Print files in the app root
+print(list.files("data"))  # List files inside the 'data' directory
 
-# Convert to data.table for better performance
-setDT(cleaned_data)
-setDT(zip_codes)
+data_file <- file.path("data", "dataset.rds")
+
+if (!file.exists(data_file)) {
+  stop("Data file not found. Files in 'data' directory:", paste(list.files("data"), collapse = ", "))
+}
+
+dataset <- readRDS(data_file)
+
+
+print(file.access(data_file, mode = 4))  # Check read permissions
+
+
+
+
+
+
+# Define file paths using relative paths
+data_file <- file.path("data", "dataset.rds")
+zip_code_file <- file.path("data", "USPS_zipcodes.rds")
+
+# Read dataset with error handling
+if (file.exists(data_file)) {
+  cleaned_data <- tryCatch({
+    readRDS(data_file)
+  }, error = function(e) {
+    stop("Error loading dataset.rds: ", e$message)
+  })
+} else {
+  stop("Error: dataset.rds not found in the 'data' directory.")
+}
+
+# Read ZIP code dataset with error handling
+if (file.exists(zip_code_file)) {
+  zip_codes <- tryCatch({
+    readRDS(zip_code_file)
+  }, error = function(e) {
+    stop("Error loading USPS_zipcodes.rds: ", e$message)
+  })
+} else {
+  stop("Error: USPS_zipcodes.rds not found in the 'data' directory.")
+}
 
 ##############################################################################################
 # Function to validate zip codes
@@ -82,7 +118,6 @@ server <- function(input, output, session) {
       
       total_records <- nrow(cleaned_data)
       
-      print(head(cleaned_data))
       total_non_blank_records <- nrow(cleaned_data[!is.na(cleaned_data$incident_zip),])
       invalid_summary[, Percentage := round(Count / total_non_blank_records, 6)]
       
