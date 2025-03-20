@@ -8,15 +8,12 @@ library(shiny)
 library(shinycssloaders)
 library(DT)
 library(data.table)  # Adding for better performance
+library(bslib)
 
 # Specify the port (choose a unique port number)
 options(shiny.port = 4004)
 
 ##############################################################################################
-
-print(getwd())  # Print working directory
-print(list.files())  # Print files in the app root
-print(list.files("data"))  # List files inside the 'data' directory
 
 data_file <- file.path("data", "dataset.rds")
 
@@ -25,14 +22,6 @@ if (!file.exists(data_file)) {
 }
 
 dataset <- readRDS(data_file)
-
-
-print(file.access(data_file, mode = 4))  # Check read permissions
-
-
-
-
-
 
 # Define file paths using relative paths
 data_file <- file.path("data", "dataset.rds")
@@ -60,6 +49,10 @@ if (file.exists(zip_code_file)) {
   stop("Error: USPS_zipcodes.rds not found in the 'data' directory.")
 }
 
+# Convert to data.table for better performance
+setDT(cleaned_data)
+total_records <- nrow(cleaned_data)
+
 ##############################################################################################
 # Function to validate zip codes
 are_valid_values <- function(check_values, valid_values) {
@@ -70,6 +63,35 @@ are_valid_values <- function(check_values, valid_values) {
   # Check if each value exists in the valid set
   check_values %in% valid_values
 }
+
+##############################################################################################
+# Pre-compute zip code validation results
+validate_zip_codes <- function(data, valid_zips) {
+  invalid_zips <- !are_valid_values(data$incident_zip, valid_zips$delivery_zipcode)
+  
+  invalid_zips_filtered <- data$incident_zip[invalid_zips]
+  invalid_zips_filtered <- invalid_zips_filtered[!is.na(invalid_zips_filtered) & 
+                                                   invalid_zips_filtered != "" & 
+                                                   invalid_zips_filtered != " "]
+  
+  invalid_summary <- data.table(
+    Invalid_Zip_Code = unique(invalid_zips_filtered),
+    Count = as.numeric(table(invalid_zips_filtered))
+  )
+  
+  total_non_blank_records <- nrow(data[!is.na(data$incident_zip),])
+  invalid_summary[, Percentage := round(Count / total_non_blank_records, 6)]
+  
+  setorder(invalid_summary, -Count)
+  
+  list(
+    total_invalid = length(invalid_zips_filtered),
+    summary = invalid_summary
+  )
+}
+
+# Pre-compute the results
+pre_computed_results <- validate_zip_codes(cleaned_data, zip_codes)
 
 ##############################################################################################
 ui <- fluidPage(
@@ -85,7 +107,18 @@ ui <- fluidPage(
   
   fluidRow(
     column(12,
-           actionButton("analyze", "Detect Invalid ZIP Codes", class = "btn-primary btn-lg"),
+           div(
+             style = "display: flex; justify-content: space-between; align-items: center;",
+             actionButton("analyze", "Detect Invalid ZIP Codes", class = "btn-primary btn-lg"),
+             div(
+               textOutput("data_status"),
+               style = "font-style: italic; color: gray; font-size: 0.9em;"
+             )
+           ),
+           div(
+             style = "margin-top: 10px; font-weight: bold; color: #333;",
+             textOutput("record_count")
+           ),
            br(), br(),
            shinycssloaders::withSpinner(textOutput("total_invalid_summary"), type = 4),
            br(),
@@ -96,51 +129,30 @@ ui <- fluidPage(
 
 ##############################################################################################
 server <- function(input, output, session) {
-  zip_analysis_results <- reactiveVal(NULL)
-  is_loading <- reactiveVal(FALSE)
-  
-  observeEvent(input$analyze, {
-    is_loading(TRUE)
-    zip_analysis_results(NULL)
-    
-    results <- local({
-      invalid_zips <- !are_valid_values(cleaned_data$incident_zip, zip_codes$delivery_zipcode)
-      
-      invalid_zips_filtered <- cleaned_data$incident_zip[invalid_zips]
-      invalid_zips_filtered <- invalid_zips_filtered[!is.na(invalid_zips_filtered) & 
-                                                       invalid_zips_filtered != "" & 
-                                                       invalid_zips_filtered != " "]
-      
-      invalid_summary <- data.table(
-        Invalid_Zip_Code = unique(invalid_zips_filtered),
-        Count = as.numeric(table(invalid_zips_filtered))
-      )
-      
-      total_records <- nrow(cleaned_data)
-      
-      total_non_blank_records <- nrow(cleaned_data[!is.na(cleaned_data$incident_zip),])
-      invalid_summary[, Percentage := round(Count / total_non_blank_records, 6)]
-      
-      setorder(invalid_summary, -Count)
-      
-      list(
-        total_invalid = length(invalid_zips_filtered),
-        summary = invalid_summary
-      )
-    })
-    
-    zip_analysis_results(results)
-    is_loading(FALSE)
+  # Display pre-loading status
+  output$data_status <- renderText({
+    "Data pre-loaded and ready for fast display"
   })
   
+  # Display total record count
+  output$record_count <- renderText({
+    paste("Total records:", format(total_records, big.mark = ",", scientific = FALSE))
+  })
+  
+  # Use pre-computed results
+  zip_analysis_results <- eventReactive(input$analyze, {
+    pre_computed_results
+  }, ignoreNULL = FALSE)
+  
   output$total_invalid_summary <- renderText({
+    req(input$analyze)
     req(zip_analysis_results())
     sprintf("Total Invalid ZIP Codes: %s", 
             format(zip_analysis_results()$total_invalid, big.mark = ","))
   })
   
   output$results_table <- renderDT({
-    if(is_loading()) return(NULL)
+    req(input$analyze)
     req(zip_analysis_results())
     
     datatable(zip_analysis_results()$summary,

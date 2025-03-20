@@ -1,4 +1,4 @@
-  ##############################################################################################
+##############################################################################################
 
 ########## SCHEMA VALIDATOR ##########
 
@@ -33,6 +33,7 @@ if (file.exists(data_file)) {
 }
 
 setDT(cleaned_data)  # Convert to data.table for better performance
+total_records <- nrow(cleaned_data)  # Store the total record count
 
 ##############################################################################################
 # # Process date columns
@@ -547,6 +548,10 @@ validate_schema <- function(data, schema) {
 }
 
 ##############################################################################################
+# Pre-compute validation results for faster response
+pre_computed_results <- validate_schema(cleaned_data, schema)
+
+##############################################################################################
 ui <- fluidPage(
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
   
@@ -554,7 +559,18 @@ ui <- fluidPage(
   
   fluidRow(
     column(12,
-           actionButton("validate", "Validate Data", class = "btn-primary btn-lg"),
+           div(
+             style = "display: flex; justify-content: space-between; align-items: center;",
+             actionButton("validate", "Validate Data", class = "btn-primary btn-lg"),
+             div(
+               textOutput("data_status"),
+               style = "font-style: italic; color: gray; font-size: 0.9em;"
+             )
+           ),
+           div(
+             style = "margin-top: 10px; font-weight: bold; color: #333;",
+             textOutput("record_count")
+           ),
            br(), br(),
            shinycssloaders::withSpinner(DTOutput("validation_results"), type = 4)
     )
@@ -563,32 +579,26 @@ ui <- fluidPage(
 
 ##############################################################################################
 server <- function(input, output, session) {
-  validation_results <- reactiveVal(NULL)
-  is_loading <- reactiveVal(FALSE)
-  
-  observeEvent(input$validate, {
-    is_loading(TRUE)
-    validation_results(NULL)  # Clear previous results
-    
-    req(cleaned_data)
-    
-    # Notify user validation is starting
-    notif_id <- showNotification("Validating dataset...", type = "message", duration = NULL)
-    
-    # Run validation and store the result
-    results <- validate_schema(cleaned_data, schema)
-    validation_results(results)  # Store results in reactiveVal
-    
-    is_loading(FALSE)  # Mark validation as complete
-    
-    # Remove notification when validation is complete
-    removeNotification(notif_id)
+  # Display pre-loading status
+  output$data_status <- renderText({
+    "Data pre-loaded and ready for fast display"
   })
   
+  # Display total record count
+  output$record_count <- renderText({
+    paste("Total records:", format(total_records, big.mark = ",", scientific = FALSE))
+  })
+  
+  # Create a reactive for the validation results using pre-computed data
+  validation_data <- eventReactive(input$validate, {
+    # Use pre-computed results
+    pre_computed_results
+  }, ignoreNULL = FALSE)
+  
   output$validation_results <- renderDT({
-    req(validation_results())  # Ensure results exist before proceeding
-    
-    results <- validation_results()
+    req(input$validate)
+    results <- validation_data()
+    req(results)
     
     # Ensure it's a data.table or convert it
     if (!inherits(results, "data.table")) {

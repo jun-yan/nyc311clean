@@ -1,30 +1,54 @@
 ################################################################################
+################################################################################
 
-# deploy_all_apps.R - Deploy multiple Shiny apps to shinyapps.io
+########## Deploy multiple Shiny apps to shinyapps.io ##########
+########## Deploy 5 apps to davidtussey@gmail.com account ######
 
 ################################################################################
 
 library(rsconnect)
 
-# Define your Shiny apps and their directories
+# Define  Shiny apps and their directories
 # Using relative paths from your current working directory
-base_path <- "datacleaningproject/nyc311clean/data_anomalies"
 
+# Set working directory and base path
+working_dir <- getwd()
+base_shiny_path <- file.path(working_dir, "datacleaningproject", "nyc311clean", "data_anomalies", "shiny_apps")
+
+# Define apps and their associated accounts
 apps <- list(
-    "zip_validator" = file.path(base_path, "shiny_apps/zip_validator"),
-    "duplicate_fields" = file.path(base_path, "shiny_apps/duplicate_fields"),
-    "illogical_dates" = file.path(base_path, "shiny_apps/illogical_dates"),
-    "missing_values" = file.path(base_path, "shiny_apps/missing_values"),
-    "schema_validator" = file.path(base_path, "shiny_apps/schema_validator")
-   )
+  "nycopendataweek2025" = list(
+    "zip_validator" = file.path(base_shiny_path, "zip_validator"),
+    "duplicate_fields" = file.path(base_shiny_path, "duplicate_fields"),
+    "illogical_dates" = file.path(base_shiny_path, "illogical_dates"),
+    "missing_values" = file.path(base_shiny_path, "missing_values"),
+    "schema_validator" = file.path(base_shiny_path, "schema_validator")
+  ),
+  "nycodw2025" = list(
+    "fuzzy_matching" = file.path(base_shiny_path, "fuzzy_matching"),
+    "daylight_saving_time_begins" = file.path(base_shiny_path, "daylight_saving_time_begins"),
+    "daylight_saving_time_ends" = file.path(base_shiny_path, "daylight_saving_time_ends")
+  )
+)
 
+# Define rsconnect credentials
+rsconnect_credentials <- list(
+  "nycopendataweek2025" = list(
+    "token"  = "DACD710234595CD43FB98EE3DF3BB310",
+    "secret" = "cy1tFjJW760AJ7Rxmfr4+qAik1JRAjRI6XioTWqf"
+  ),
+  "nycodw2025" = list(
+    "token"  = "76F679A5FCAC0AAB8B03187BB850495F",
+    "secret" = "YEkvtg58zfQNWLNhzywzsdkG5Wvt/dUpa7gRyt+J"
+  )
+)
 
-# Authenticate rsconnect (Only needs to be done once per session)
-
-rsconnect::setAccountInfo(name = "nycopendataweek2025",
-                          token = "DACD710234595CD43FB98EE3DF3BB310",
-                          secret= "cy1tFjJW760AJ7Rxmfr4+qAik1JRAjRI6XioTWqf" )
-
+# Function to authenticate account
+authenticate_account <- function(account) {
+  creds <- rsconnect_credentials[[account]]
+  rsconnect::setAccountInfo(name = account, token = creds$token, secret = creds$secret)
+  message("🔑 Authenticated account: ", account, "\n")
+}
 
 # Function to deploy an app
 deploy_app <- function(app_name, app_path) {
@@ -37,9 +61,13 @@ deploy_app <- function(app_name, app_path) {
   })
 }
 
-# Loop through all apps and deploy them
-for (app in names(apps)) {
-  deploy_app(app, apps[[app]])
+# Deploy apps, switching accounts as needed
+for (account in names(apps)) {
+  authenticate_account(account)  # Set the correct account
+  for (app in names(apps[[account]])) {
+    deploy_app(app, apps[[account]][[app]])
+  }
 }
 
+##############################################################################
 ################################################################################

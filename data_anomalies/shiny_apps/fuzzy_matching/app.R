@@ -21,12 +21,9 @@ library(later)
 options(shiny.port = 4007)
 
 ##################################################################################
-# standarizing street names
+# standardizing street names
 
 standardize_street_name <- function(street_name) {
-  start_time <- Sys.time()  # Start timing
-  
-  message("Standardizing street names...")  # Debug message
   
   # Define street type patterns (in order of priority)
   street_patterns <- c(
@@ -59,11 +56,6 @@ standardize_street_name <- function(street_name) {
   
   # Remove extra spaces
   street_name <- str_squish(street_name)  # `str_squish()` trims & collapses spaces
-  
-  end_time <- Sys.time()  # Stop timing
-  elapsed_time <- end_time - start_time  # Compute elapsed time
-  
-  message(sprintf("Standardization completed in %.4f seconds", elapsed_time))
   
   return(street_name)
 }

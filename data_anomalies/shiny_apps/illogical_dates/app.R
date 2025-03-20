@@ -8,6 +8,7 @@ library(shinycssloaders)
 library(DT)
 library(data.table)
 library(lubridate)
+library(bslib)
 
 # Configure options
 options(shiny.port = 4005)
@@ -156,9 +157,9 @@ validate_date_logic <- function(data) {
   # 7. Check for resolution dates in future
   future_resolution <- data[!is.na(resolution_action_updated_date) &
                               as.Date(resolution_action_updated_date) > max_closed_date]
-  cat("\nMax closed date\n")
-  print(max_closed_date)
-  print(nrow(future_resolution))
+  # cat("\nMax closed date\n")
+  # print(max_closed_date)
+  # print(nrow(future_resolution))
   
   if (nrow(future_resolution) > 0) {
     results <- rbind(results, data.table(
@@ -262,6 +263,11 @@ validate_date_logic <- function(data) {
 }
 
 ##############################################################################################
+# Pre-compute results for faster response
+pre_computed_results <- validate_date_logic(cleaned_data)
+total_records <- nrow(cleaned_data)
+
+##############################################################################################
 # UI
 ui <- fluidPage(
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
@@ -270,7 +276,18 @@ ui <- fluidPage(
   
   fluidRow(
     column(12,
-           actionButton("validate", "Validate Date Logic", class = "btn-primary btn-lg"),
+           div(
+             style = "display: flex; justify-content: space-between; align-items: center;",
+             actionButton("validate", "Validate Date Logic", class = "btn-primary btn-lg"),
+             div(
+               textOutput("data_status"),
+               style = "font-style: italic; color: gray; font-size: 0.9em;"
+             )
+           ),
+           div(
+             style = "margin-top: 10px; font-weight: bold; color: #333;",
+             textOutput("record_count")
+           ),
            br(), br(),
            shinycssloaders::withSpinner(DTOutput("validation_results"), type = 4)
     )
@@ -280,10 +297,20 @@ ui <- fluidPage(
 ##############################################################################################
 # Server
 server <- function(input, output, session) {
+  # Display pre-loading status
+  output$data_status <- renderText({
+    "Data pre-loaded and ready for fast display"
+  })
+  
+  # Display total record count
+  output$record_count <- renderText({
+    paste("Total records:", format(total_records, big.mark = ",", scientific = FALSE))
+  })
+  
   # Create a reactive to handle the validation process
   validation_data <- eventReactive(input$validate, {
-    # This is where the long calculation happens
-    validate_date_logic(cleaned_data)
+    # Use pre-computed results for faster response
+    pre_computed_results
   }, ignoreNULL = FALSE)
   
   # Render the output

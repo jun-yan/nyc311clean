@@ -8,6 +8,7 @@ library(shiny)
 library(shinycssloaders)
 library(ggplot2)
 library(data.table)
+library(bslib)
 
 #########################################################################
 # Load Dataset
@@ -22,6 +23,14 @@ if (file.exists(data_file)) {
 } else {
   stop("Data file not found in the 'data' directory.")
 }
+
+# Convert to data.table if not already
+setDT(cleaned_data)
+total_records <- nrow(cleaned_data)
+
+# Calculate total records for March 2024
+march_2024_data <- cleaned_data[format(created_date, "%Y-%m") == "2024-03"]
+march_2024_count <- nrow(march_2024_data)
 
 #########################################################################
 # Precompute Data Before App Starts
@@ -86,7 +95,18 @@ ui <- fluidPage(
   
   fluidRow(
     column(12,
-           actionButton("analyze", "Run Analysis", class = "btn-primary btn-lg"),
+           div(
+             style = "display: flex; justify-content: space-between; align-items: center;",
+             actionButton("analyze", "Run Analysis", class = "btn-primary btn-lg"),
+             div(
+               textOutput("data_status"),
+               style = "font-style: italic; color: gray; font-size: 0.9em;"
+             )
+           ),
+           div(
+             style = "margin-top: 10px; font-weight: bold; color: #333;",
+             htmlOutput("record_counts")
+           ),
            br(), br(),
            shinycssloaders::withSpinner(plotOutput("hourly_bar_chart"), type = 4),
            br(),
@@ -101,6 +121,19 @@ ui <- fluidPage(
 #########################################################################
 # Server modifications
 server <- function(input, output, session) {
+  # Display pre-loading status
+  output$data_status <- renderText({
+    "Data pre-loaded and ready for fast display"
+  })
+  
+  # Display record counts - both total and March 2024 specific
+  output$record_counts <- renderUI({
+    HTML(paste(
+      sprintf("<span>Total records: %s</span>", format(total_records, big.mark = ",", scientific = FALSE)),
+      sprintf("<span style='margin-left: 30px;'>March 2024 records: %s</span>", format(march_2024_count, big.mark = ",", scientific = FALSE))
+    ))
+  })
+  
   # Reactive storage for precomputed data
   filtered_data <- reactiveVal(NULL)
   stats_data <- reactiveVal(NULL)

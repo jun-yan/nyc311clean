@@ -54,10 +54,9 @@ cat("\nExecution begins at:", formattedStartTime)
 cat("\nExecution begins at:", formattedStartTime)
 
 # -------------------------------------------------------------
-# 📁 Set Working Directory for the Project.
+# 📁 Get Working Directory
 # -------------------------------------------------------------
-# Set working directory to the location of the initialization script
-getwd()
+working_dir <- getwd()
 
 #########################################################################
 main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
@@ -71,17 +70,10 @@ message("\nMax closed date:", max_closed_date)
 
 #########################################################################
 # Set the base directory under the working directory base_dir <- getwd()
-base_dir <-file.path("datacleaningproject", "nyc311clean","data_anomalies")
-
-# Define the console output directory and file name.
-output_dir <- file.path(base_dir, "console_output")
-output_file <- file.path(output_dir, "data_anomalies_console_output.txt")
+base_dir <-file.path(working_dir,"datacleaningproject", "nyc311clean","data_anomalies")
 
 # Define the path for the main data file (CSV file)
 data_dir <- file.path(base_dir, "data")
-
-# Define the path for the charts
-chart_dir <- file.path(base_dir, "charts")
 
 # Define the path to the directory containing your function scripts
 functions_path <- file.path(base_dir, "code", "functions")
@@ -117,16 +109,7 @@ save_shiny_data <- function(data, required_fields, app_name, filter_expr = NULL,
     }
   }
   
-  cat("\nSaving data in directory\n")
-  print(output_dir)
-  
-  
-  output_dir <- file.path("datacleaningproject", 
-                          "nyc311clean",
-                          "data_anomalies",
-                          "shiny_apps", 
-                          app_name, 
-                          "data")
+  output_dir <- file.path(base_dir, "shiny_apps", app_name, "data")
   if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
   
   # Save dataset
@@ -190,7 +173,7 @@ rds_path <- file.path(data_dir, rds_file)
 
 # Read data
 raw_data <- fread(main_data_path)
-cat("Initial row count:", nrow(raw_data), "\n")
+cat("Initial row count:", format(nrow(raw_data),big.mark = ","), "\n")
 
 # Clean column names
 cleaned_data <- modify_column_names(raw_data)
@@ -205,7 +188,7 @@ cleaned_data[, (valid_columns) := lapply(.SD, toupper), .SDcols = valid_columns]
 cat("\nColumns converted to upper case")
 
 #Consolidate agency names
-  cat("Consolidating agency names...\n")
+  cat("\nConsolidating agency names...\n")
   cleaned_data <- consolidate_agencies(cleaned_data)
   cat("Agency consolidation complete\n")
   
@@ -251,7 +234,13 @@ cat("\nColumns converted to upper case")
   cat("\nSaved cleaned 311 data to:", rds_path, "\n") 
   
 ##########################################################################    
-  # Save dataset for duplicate_fields (selected location-related fields)
+  #1. Save dataset for daylight_saving_time_ends (only Nov 2024 created_date)
+  save_shiny_data(cleaned_data,
+                  required_fields = "created_date",
+                  app_name = "daylight_saving_time_ends",
+                  filter_expr = quote(format(created_date, "%Y-%m") == "2024-11"))
+  
+  #2. Save dataset for duplicate_fields (selected location-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = c("latitude", "longitude", "location", "borough",
                                       "park_borough", "taxi_company_borough", "street_name",
@@ -259,55 +248,50 @@ cat("\nColumns converted to upper case")
                                       "intersection_street_1", "intersection_street_2"),
                   app_name = "duplicate_fields")
   
-  # Save dataset for illogical_dates with max_closed_date metadata
+  #3. Save dataset for fuzzy_matching (street and intersection-related fields)
+  save_shiny_data(cleaned_data,
+                  required_fields = c("cross_street_1", "cross_street_2", "street_name",
+                                      "intersection_street_1", "intersection_street_2",
+                                      "landmark"),
+                  app_name = "fuzzy_matching")
+  
+  
+  #4. Save dataset for illogical_dates with max_closed_date metadata
   save_shiny_data(cleaned_data,
                   required_fields = c("created_date", "closed_date", 
                                       "due_date", "resolution_action_updated_date", "status"),
                   app_name = "illogical_dates",
                   metadata = list(max_closed_date = max_closed_date))
-  
    
-  # Save dataset for missing values (street and intersection-related fields)
+  #5. Save dataset for missing values (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = names(cleaned_data),
                   app_name = "missing_values")
   
-  # Save dataset for schema validation (street and intersection-related fields)
+  #6. Save dataset for schema validation (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = names(cleaned_data),
                   app_name = "schema_validator")
   
-  # Save dataset for zip code validation (street and intersection-related fields)
+  #7. Save dataset for zip code validation (street and intersection-related fields)
   save_shiny_data(cleaned_data,
                   required_fields = "incident_zip",
                   app_name = "zip_validator")
   
-  # # Save dataset for daylight_saving_time (only Nov 2024 created_date)
-  # save_shiny_data(cleaned_data,
-  #                 required_fields = "created_date",
-  #                 app_name = "daylight_saving_time",
-  #                 filter_expr = quote(format(created_date, "%Y-%m") == "2024-11"))
-  # 
-  
-  
-  # # Save dataset for fuzzy_matching (street and intersection-related fields)
-  # save_shiny_data(cleaned_data,
-  #                 required_fields = c("cross_street_1", "cross_street_2", "street_name",
-  #                                     "intersection_street_1", "intersection_street_2",  
-  #                                     "landmark"),
-  #                 app_name = "fuzzy_matching")
-  
+  #8. Deploy dataset for daylight_saving_time_begings
+  code_path <- file.path(base_dir, "code")
+  source(file.path(code_path, "build_dataset_for_daylight_saving_time_begin.R"))
   
 ##########################################################################    
   # Define the path to the directory containing your function scripts
   code_path <- file.path(base_dir, "code")
   
   # Construct the full path to the deployment script
-  deploy_script <- file.path(code_path, "deploy_all_shiny_apps.R")
+  deploy_all_shiny_apps_script <- file.path(code_path, "deploy_all_shiny_apps.R")
   
-  # Source the script
-  source(deploy_script)
-  
+  # Source the scripts
+  source(deploy_all_shiny_apps_script) # Five apps under davidtussey@gmail.com account
+
 ##########################################################################  
   # Process USPS data
 
