@@ -1,22 +1,14 @@
 source := $(wildcard *.tex)
-bib := $(wildcard *.bib)
 out := $(patsubst %.tex,%.pdf,$(source))
-latest := $(shell git log -1 --pretty=format:"%h")
-rev := $(latest)
+rev := 56a50ce
+bib := $(wildcard *.bib)
 
 .PHONY: all
 all: $(out)
 
 %.pdf: %.tex $(bib)
-	@latexmk -halt-on-error -pdf $<
-
-full: main.tex $(bib)
-	sed "s|BLINDCODE|0|" main.tex > main-full.tex
-
-blind: main.tex $(bib)
-	sed "s|BLINDCODE|1|" main.tex > main-blind.tex
-
-##	@latexmk -c
+	@latexmk -pdf $<
+#	@latexmk -c
 
 ## compare modification with the latest version checked into git
 ## for comparison of specific commits:
@@ -25,9 +17,10 @@ diff:
 	latexdiff-vc --git --pdf --force $(source) -r $(rev)
 
 log:
-	@git log -5 --pretty=format:"%h by %an at %ar: %s" $(source)
+	@git log --pretty=format:"%h by %an at %ar: %s" $(source) | head -n 15
 
 .PNONY: clean
 clean:
-	rm -rf $(out) *~ .*~ .\#* .Rhistory *.aux *.bbl *.blg *.dvi *.out *.log *.toc \
-	*.fff *.fdb_latexmk *.fls *.ttt *diff* *oldtmp* .blb
+	rm -rf $(out)\
+	  *~ .*~ .\#* .Rhistory *.aux *.bbl *.blg *.out *.log *.toc\
+	  *.fff *.fdb_latexmk *.fls *.ttt *diff* *oldtmp*
