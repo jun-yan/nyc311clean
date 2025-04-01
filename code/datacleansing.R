@@ -38,9 +38,6 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 # # Source the initialization.R script.
 #source("run_this_program_first.R")
 
-# Include the working directory for the R programs and sub-directories, passed as a parameter
-#setwd("C:\\Users\\David\\OneDrive\\Documents\\datacleaningproject\\code")
-
 #########################################################################
 rm(list = ls())
 
@@ -122,7 +119,7 @@ USPSzipcodes <- as.data.frame(USPSzipcodes)
 USPSzipcodes <- make_column_names_user_friendly(USPSzipcodes)
 
 # extract the 'delivery_zipcode' field
-USPSzipcodesOnly <- USPSzipcodes[, "delivery_zipcode", drop = FALSE]
+USPSzipcodesOnly <- USPSzipcodes[, "zip", drop = FALSE]
 
 #########################################################################
 # Load the main 311 SR data file. Set the read & write paths.
@@ -551,6 +548,7 @@ if (is_posixct) {
 invalid_incident_zip_rows <- filter_non_numeric_zipcodes(d311, "incident_zip")
 
 num_row_invalid_incident_zip_rows <- nrow(invalid_incident_zip_rows)
+
 if (num_row_invalid_incident_zip_rows == 0) {
   cat("\n\nAll 'incident_zip' entries are 5 numeric digits.")
 } else {
@@ -819,7 +817,7 @@ cb_results <- are_valid_values(
 
 #########################################################################
 # Check for invalid zip codes in d311$incident_zip using USPSzipcodesOnly
-USPSzipcodesList <- as.list(USPSzipcodesOnly$delivery_zipcode)
+USPSzipcodesList <- as.list(USPSzipcodesOnly$zip)
 
 incident_zip_results <- are_valid_values(
   d311$incident_zip, 

@@ -278,7 +278,7 @@ cat("\nColumns converted to upper case")
                   required_fields = "incident_zip",
                   app_name = "zip_validator")
   
-  #8. Deploy dataset for daylight_saving_time_begings
+  #8. Deploy dataset for daylight_saving_time_begins
   code_path <- file.path(base_dir, "code")
   source(file.path(code_path, "build_dataset_for_daylight_saving_time_begin.R"))
   
@@ -295,7 +295,7 @@ cat("\nColumns converted to upper case")
 ##########################################################################  
   # Process USPS data
 
-   usps_data_file <- "USPS_zipcodes.csv"
+   usps_data_file <- "zip_code_database.csv"
 
   cat("\nProcessing USPS Zipcode data...\n")
   usps_path <- file.path(data_dir, usps_data_file)
@@ -305,7 +305,7 @@ cat("\nColumns converted to upper case")
   
   zipcode_data <- fread(
     usps_path,
-   select = "DELIVERY ZIPCODE",
+   select = "zip",
     colClasses = "character"
   )
   
@@ -313,7 +313,7 @@ cat("\nColumns converted to upper case")
   zipcode_data <- modify_column_names(zipcode_data)
   
   usps_rds_file <- gsub("\\.csv$", ".rds", usps_data_file)
-  usps_rds_dir <- file.path("shiny_apps", "zip_validator", "data")
+  usps_rds_dir <- file.path(base_dir,"shiny_apps", "zip_validator", "data")
   
   if (!dir.exists(usps_rds_dir)) dir.create(usps_rds_dir, recursive = TRUE)
   
