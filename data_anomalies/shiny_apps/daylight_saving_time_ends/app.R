@@ -44,6 +44,11 @@ dst_data <- cleaned_data[as.Date(created_date) == as.Date("2024-11-03"),
 # Hourly summary for November 3
 data_summary <- dst_data[, .N, by = created_hour]
 
+# Ensure all hours exist in data_summary
+all_hours <- data.table(created_hour = 0:23)
+data_summary <- merge(all_hours, data_summary, by = "created_hour", all.x = TRUE)
+data_summary[is.na(N), N := 0]  # Replace NA counts with 0
+
 # Get data for all other November days (excluding Nov 3)
 nov_data <- cleaned_data[format(created_date, "%Y-%m") == "2024-11" & 
                            as.Date(created_date) != as.Date("2024-11-03") &
@@ -53,7 +58,7 @@ nov_data <- cleaned_data[format(created_date, "%Y-%m") == "2024-11" &
 # Calculate statistics for 01:00 hour
 mean_01 <- mean(nov_data$N, na.rm = TRUE)
 sd_01 <- sd(nov_data$N, na.rm = TRUE)
-count_01_1103 <- data_summary[created_hour == 1, sum(N, na.rm = TRUE)] # sum in case of multiple entries
+count_01_1103 <- sum(data_summary[created_hour == 1, N], na.rm = TRUE)
 z_value_01 <- (count_01_1103 - mean_01) / sd_01
 
 # Store precomputed statistics
@@ -67,6 +72,7 @@ precomputed_stats <- list(
 #########################################################################
 # UI modifications
 ui <- fluidPage(
+  title = "Ending Daylight Saving Time", 
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
   titlePanel(HTML("<div style='color:steelblue; font-size:30px;'>
                   Daylight Saving Time Analysis (SR creation) - ends on 3 Nov 2024<br>
@@ -115,37 +121,42 @@ server <- function(input, output, session) {
     ))
   })
   
-  filtered_data <- reactiveVal(NULL)
-  stats_data <- reactiveVal(NULL)
+  # Create a reactive expression for the data that copies the original data
+  # This ensures we always work with a fresh copy of the data
+  plot_data <- eventReactive(input$analyze, {
+    # Make a deep copy of the data to avoid modification issues
+    copy(data_summary)
+  })
   
-  observeEvent(input$analyze, {
-    # Use pre-computed data
-    filtered_data(data_summary)
-    stats_data(precomputed_stats)
+  # Similar approach for stats data
+  stats_data <- eventReactive(input$analyze, {
+    # Return a copy of the precomputed stats
+    list(
+      mean = precomputed_stats$mean,
+      sd = precomputed_stats$sd,
+      count = precomputed_stats$count,
+      z_score = precomputed_stats$z_score
+    )
   })
   
   output$hourly_bar_chart <- renderPlot({
-    req(input$analyze)
-    req(filtered_data())
-    req(stats_data())  # Ensure stats_data() is available before proceeding
+    req(plot_data())
     
-    stats <- stats_data()
-    mean_0100 <- stats$mean  # Extract mean for 01:00 hour
-    
-    plot_data <- filtered_data()
+    # Get fresh copy of the data
+    pd <- plot_data()
     
     # Convert created_hour to proper four-digit time format (0000, 0100, ..., 2300)
-    plot_data[, created_hour := sprintf("%04d", as.integer(created_hour) * 100)]
+    pd[, hour_label := sprintf("%04d", created_hour * 100)]
     
     # Ensure only valid hourly intervals appear in the correct order
     valid_hours <- sprintf("%04d", seq(0, 2300, by = 100))
-    plot_data[, created_hour := factor(created_hour, levels = valid_hours)]
+    pd[, hour_label := factor(hour_label, levels = valid_hours)]
     
-    ggplot(plot_data, aes(x = created_hour, y = N)) +
+    ggplot(pd, aes(x = hour_label, y = N)) +
       geom_bar(stat = "identity", fill = "steelblue") +
       # Use geom_crossbar() to increase width of the black bar
-      geom_crossbar(data = data.table(created_hour = "0100", mean_y = mean_0100),
-                    aes(x = created_hour, ymin = mean_y, ymax = mean_y, y = mean_y),
+      geom_crossbar(data = data.table(hour_label = "0100", mean_y = stats_data()$mean),
+                    aes(x = hour_label, ymin = mean_y, ymax = mean_y, y = mean_y),
                     inherit.aes = FALSE, color = "yellow", fill = "yellow", fatten = 5, width = 0.85) +  
       labs(x = "Hour of Day", 
            y = "Count", 
@@ -155,7 +166,7 @@ server <- function(input, output, session) {
   })
   
   output$stats_summary <- renderText({
-    req(stats_data())  # Ensure stats_data() is available
+    req(stats_data())
     stats <- stats_data()
     
     HTML(paste(

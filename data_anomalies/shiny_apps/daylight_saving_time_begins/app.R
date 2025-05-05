@@ -44,10 +44,10 @@ dst_data <- cleaned_data[as.Date(created_date) == as.Date("2024-03-10"),
 # Hourly summary for March 10
 data_summary <- dst_data[, .N, by = created_hour]
 
-# Ensure 02:00 appears in the dataset with N = 0
-if (!2 %in% data_summary$created_hour) {
-  data_summary <- rbind(data_summary, data.table(created_hour = 2, N = 0))
-}
+# Ensure all hours exist in data_summary
+all_hours <- data.table(created_hour = 0:23)
+data_summary <- merge(all_hours, data_summary, by = "created_hour", all.x = TRUE)
+data_summary[is.na(N), N := 0]  # Replace NA counts with 0
 
 # Get data for all other March days (excluding March 10)
 mar_data_0200 <- cleaned_data[format(created_date, "%Y-%m") == "2024-03" & 
@@ -63,12 +63,12 @@ mar_data_0300 <- cleaned_data[format(created_date, "%Y-%m") == "2024-03" &
 # Precompute statistics
 mean_0200 <- mean(mar_data_0200$N, na.rm = TRUE)
 sd_0200 <- sd(mar_data_0200$N, na.rm = TRUE)
-count_0200_0310 <- data_summary[created_hour == 2, sum(N, na.rm = TRUE)]  # Should be 0
+count_0200_0310 <- sum(data_summary[created_hour == 2, N], na.rm = TRUE)  # Should be 0
 z_value_0200 <- (count_0200_0310 - mean_0200) / sd_0200
 
 mean_0300 <- mean(mar_data_0300$N, na.rm = TRUE)
 sd_0300 <- sd(mar_data_0300$N, na.rm = TRUE)
-count_0300_0310 <- data_summary[created_hour == 3, sum(N, na.rm = TRUE)]
+count_0300_0310 <- sum(data_summary[created_hour == 3, N], na.rm = TRUE)
 z_value_0300 <- (count_0300_0310 - mean_0300) / sd_0300
 
 # Store precomputed statistics in a list
@@ -86,6 +86,7 @@ precomputed_stats <- list(
 #########################################################################
 # UI modifications
 ui <- fluidPage(
+  title = "Beginning Daylight Saving Time", 
   theme = bslib::bs_theme(version = 5, bootswatch = "flatly"),
   titlePanel(HTML("<div style='color:steelblue; font-size:30px;'>
                   Daylight Saving Time Analysis (SR creation) - Begins 10 Mar 2024<br>
@@ -134,39 +135,51 @@ server <- function(input, output, session) {
     ))
   })
   
-  # Reactive storage for precomputed data
-  filtered_data <- reactiveVal(NULL)
-  stats_data <- reactiveVal(NULL)
+  # Create a reactive expression for the data that copies the original data
+  # This ensures we always work with a fresh copy of the data
+  plot_data <- eventReactive(input$analyze, {
+    # Make a deep copy of the data to avoid modification issues
+    copy(data_summary)
+  })
   
-  observeEvent(input$analyze, {
-    # Store precomputed data in reactive variables when the button is pressed
-    filtered_data(data_summary)
-    stats_data(precomputed_stats)
+  # Similar approach for stats data
+  stats_data <- eventReactive(input$analyze, {
+    # Return a copy of the precomputed stats to avoid modification issues
+    list(
+      mean_0200 = precomputed_stats$mean_0200,
+      sd_0200 = precomputed_stats$sd_0200,
+      count_0200 = precomputed_stats$count_0200,
+      z_score_0200 = precomputed_stats$z_score_0200,
+      mean_0300 = precomputed_stats$mean_0300,
+      sd_0300 = precomputed_stats$sd_0300,
+      count_0300 = precomputed_stats$count_0300,
+      z_score_0300 = precomputed_stats$z_score_0300
+    )
   })
   
   output$hourly_bar_chart <- renderPlot({
-    req(filtered_data())
+    req(plot_data())
     req(stats_data())
     
     stats <- stats_data()
-    plot_data <- filtered_data()
+    pd <- plot_data()
     
     # Convert created_hour to proper four-digit time format
-    plot_data[, created_hour := sprintf("%04d", as.integer(created_hour) * 100)]
+    pd[, hour_label := sprintf("%04d", created_hour * 100)]
     
     # Ensure only valid hourly intervals appear in the correct order
     valid_hours <- sprintf("%04d", seq(0, 2300, by = 100))
-    plot_data[, created_hour := factor(created_hour, levels = valid_hours)]
+    pd[, hour_label := factor(hour_label, levels = valid_hours)]
     
-    ggplot(plot_data, aes(x = created_hour, y = N)) +
+    ggplot(pd, aes(x = hour_label, y = N)) +
       geom_bar(stat = "identity", fill = "steelblue") +
       # Black bar for missing 02:00 hour
-      geom_crossbar(data = data.table(created_hour = "0200", mean_y = stats$mean_0200),
-                    aes(x = created_hour, ymin = mean_y, ymax = mean_y, y = mean_y),
-                    inherit.aes = FALSE, color = "black", fill = "black", fatten = 8 , width = 0.95) +  
+      geom_crossbar(data = data.table(hour_label = "0200", mean_y = stats$mean_0200),
+                    aes(x = hour_label, ymin = mean_y, ymax = mean_y, y = mean_y),
+                    inherit.aes = FALSE, color = "black", fill = "black", fatten = 8, width = 0.95) +  
       # Yellow bar for expected 03:00 hour
-      geom_crossbar(data = data.table(created_hour = "0300", mean_y = stats$mean_0300),
-                    aes(x = created_hour, ymin = mean_y, ymax = mean_y, y = mean_y),
+      geom_crossbar(data = data.table(hour_label = "0300", mean_y = stats$mean_0300),
+                    aes(x = hour_label, ymin = mean_y, ymax = mean_y, y = mean_y),
                     inherit.aes = FALSE, color = "yellow", fill = "yellow", fatten = 5, width = 0.85) +  
       labs(x = "Hour of Day", 
            y = "Count", 
@@ -193,3 +206,5 @@ server <- function(input, output, session) {
 #########################################################################
 # Run the Shiny App
 shinyApp(ui, server)
+
+#########################################################################

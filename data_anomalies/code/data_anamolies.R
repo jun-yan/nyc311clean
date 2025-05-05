@@ -1,4 +1,29 @@
 #########################################################################
+# Set the base directory under the working directory 
+
+base_dir <-file.path(getwd(),"datacleaningproject", "nyc311clean","data_anomalies")
+
+# Define the path for the main data file (CSV file)
+data_dir <- file.path(base_dir, "data")
+
+# Define the path to the directory containing your function scripts
+functions_path <- file.path(base_dir, "code", "functions")
+
+########## Source the function files ##########
+# Get all .R files in the "functions" sub-directory
+function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
+
+# Source each file with error handling and message logging
+lapply(function_files, function(file) {
+  tryCatch({
+    source(file)
+    #    message("Successfully sourced: ", file)
+  }, error = function(e) {
+    message("Error sourcing: ", file, " - ", e$message)
+  })
+})
+
+#########################################################################
 
 ########## Core Data Anomalies Program ##########
 
@@ -18,6 +43,8 @@ required_packages <- c(
   "lubridate",
   "renv",
   "rlang",
+  "rsconnect",
+  "shinycssloaders",
   "scales",
   "sf",
   "shiny",
@@ -67,30 +94,6 @@ max_closed_date <- sub(".*AS_OF_([0-9-]+)\\.csv$", "\\1", main_data_file)
 # Convert to POSIXct format
 max_closed_date <- as.POSIXct(max_closed_date, format = "%m-%d-%Y", tz = "America/New_York") + (23*3600 + 59*60 + 59)
 message("\nMax closed date:", max_closed_date)
-
-#########################################################################
-# Set the base directory under the working directory base_dir <- getwd()
-base_dir <-file.path(working_dir,"datacleaningproject", "nyc311clean","data_anomalies")
-
-# Define the path for the main data file (CSV file)
-data_dir <- file.path(base_dir, "data")
-
-# Define the path to the directory containing your function scripts
-functions_path <- file.path(base_dir, "code", "functions")
-
-########## Source the function files ##########
-# Get all .R files in the "functions" sub-directory
-function_files <- list.files(functions_path, pattern = "\\.R$", full.names = TRUE)
-
-# Source each file with error handling and message logging
-lapply(function_files, function(file) {
-  tryCatch({
-    source(file)
-#    message("Successfully sourced: ", file)
-  }, error = function(e) {
-    message("Error sourcing: ", file, " - ", e$message)
-  })
-})
 
 ##########################################################################
 save_shiny_data <- function(data, required_fields, app_name, filter_expr = NULL, metadata = NULL) {
@@ -289,13 +292,14 @@ cat("\nColumns converted to upper case")
   # Construct the full path to the deployment script
   deploy_all_shiny_apps_script <- file.path(code_path, "deploy_all_shiny_apps.R")
   
-  # Source the scripts
+  # Source the scriptsThe following required packages are not installed:
+#- shinycssloaders
   source(deploy_all_shiny_apps_script) # Five apps under davidtussey@gmail.com account
 
 ##########################################################################  
   # Process USPS data
 
-   usps_data_file <- "zip_code_database.csv"
+   usps_data_file <- "USPS_zipcodes.csv"
 
   cat("\nProcessing USPS Zipcode data...\n")
   usps_path <- file.path(data_dir, usps_data_file)

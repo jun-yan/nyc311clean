@@ -1,12 +1,23 @@
 ################################################################################
 ################################################################################
 
-########## Deploy multiple Shiny apps to shinyapps.io ##########
-########## Deploy 5 apps to davidtussey@gmail.com account ######
+########## Deploy multiple Shiny apps to shinyapps.io ###########
+########## Deploy 5 apps to davidtussey@gmail.com account #######
+########## Deploy 3 apps to janem423@gmail.com account ##########
 
 ################################################################################
+required_packages <- c("future", "phonics", "shinyjs", "rsconnect")
 
-library(rsconnect)
+# Install any missing packages
+installed_packages <- rownames(installed.packages())
+missing_packages <- setdiff(required_packages, installed_packages)
+
+if (length(missing_packages) > 0) {
+  install.packages(missing_packages)
+}
+
+# Load the packages
+lapply(required_packages, library, character.only = TRUE)
 
 # Define  Shiny apps and their directories
 # Using relative paths from your current working directory
