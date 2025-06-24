@@ -325,7 +325,7 @@ cat("\nColumns converted to upper case")
   saveRDS(zipcode_data, file = file.path(usps_rds_dir, "USPS_zipcodes.rds"))
   
   # Print summary
-  cat("\nUSPS data rds:", usps_rds_path, "\n")
+  cat("\nUSPS data rds:", usps_rds_path, "\n") 
   cat("\nSetup complete.\n")
 
 ##########################################################################
