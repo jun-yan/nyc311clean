@@ -1,7 +1,7 @@
 #########################################################################
-
 # Define the function to modify column names for an entire dataset
 modify_column_names <- function(dataset) {
+
   # Ensure the input is a data frame
   if (!is.data.frame(dataset)) {
     stop("Input must be a data frame.")
