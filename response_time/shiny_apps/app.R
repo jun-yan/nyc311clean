@@ -1,4 +1,3 @@
-# CLEAN VERSION - Replace the top of your app.R with this:
 
 # Set CRAN mirror for package installation on shinyapps.io
 options(repos = c(CRAN = "https://cran.rstudio.com/"))

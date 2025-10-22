@@ -3,7 +3,6 @@
 
 ########## Deploy multiple Shiny apps to shinyapps.io ###########
 ########## Deploy 5 apps to davidtussey@gmail.com account #######
-########## Deploy 3 apps to janem423@gmail.com account ##########
 
 ################################################################################
 required_packages <- c("future", "phonics", "shinyjs", "rsconnect")
@@ -34,11 +33,6 @@ apps <- list(
     "illogical_dates" = file.path(base_shiny_path, "illogical_dates"),
     "missing_values" = file.path(base_shiny_path, "missing_values"),
     "schema_validator" = file.path(base_shiny_path, "schema_validator")
-  ),
-  "nycodw2025" = list(
-    "fuzzy_matching" = file.path(base_shiny_path, "fuzzy_matching"),
-    "daylight_saving_time_begins" = file.path(base_shiny_path, "daylight_saving_time_begins"),
-    "daylight_saving_time_ends" = file.path(base_shiny_path, "daylight_saving_time_ends")
   )
 )
 
@@ -47,10 +41,6 @@ rsconnect_credentials <- list(
   "nycopendataweek2025" = list(
     "token"  = "DACD710234595CD43FB98EE3DF3BB310",
     "secret" = "cy1tFjJW760AJ7Rxmfr4+qAik1JRAjRI6XioTWqf"
-  ),
-  "nycodw2025" = list(
-    "token"  = "76F679A5FCAC0AAB8B03187BB850495F",
-    "secret" = "YEkvtg58zfQNWLNhzywzsdkG5Wvt/dUpa7gRyt+J"
   )
 )
 

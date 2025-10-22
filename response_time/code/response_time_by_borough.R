@@ -40,7 +40,7 @@ options(warn = 2)  # Convert warnings to errors
 ################################################################################
 ################################################################################
 # Select desired data file
-main_data_file <- "6-year_311SR_01-01-2020_thru_06-10-2025_AS_OF_06-11-2025.rds"
+main_data_file <- "6-year_311SR_01-01-2020_thru_06-30-2025__AS_OF_07-07-2025.rds"
 #main_data_file <- 
                   "11-year_311SR_01-01-2016_thru_05-31-2025_AS_OF_06-08-2025.rds"
 
@@ -152,6 +152,12 @@ if (length(function_files) > 0) {
 
 cat("\nExecution begins at:", formattedStartTime)
 
+# Check the current number of threads
+num_cores <- getDTthreads()
+
+# Set the number of threads to max -1
+setDTthreads(num_cores - 1)
+
 # Process 311 data
 cat("\n\nReading in 311 Service Request data...")
 file_path <- file.path(data_dir, main_data_file )
@@ -199,9 +205,9 @@ backup_cleaned_data <- cleaned_data
 # ----- Step 1: Remove rows that do not contain valid borough names -----
 
 # Define valid boroughs
+# Note: Removing "UNSPECIFIED" as a borough for this analysis
 valid_boroughs <- c("MANHATTAN", "BRONX", "BROOKLYN", "QUEENS", 
                     "STATEN ISLAND")
-# Note: Removing "UNSPECIFIED" as a borough for this analysis
 
 # Process invalid borough entries first
 invalid_borough_count <- cleaned_data[!borough %in% valid_boroughs, .N]
@@ -280,7 +286,7 @@ if(missing_closed_count > 0) {
   
   # Distribution by complaint type (top 10) with created_date
   missing_by_complaint <- cleaned_data[is.na(closed_date), .N, 
-                               by = .(complaint_type, created_date)][order(-N)]
+                               by = complaint_type][order(-N)]
   # Add percentage and cumulative percentage columns
   missing_by_complaint[, pct := round(N/missing_closed_count * 100, 2)]
   missing_by_complaint[, cum_pct := cumsum(pct)]
@@ -423,7 +429,7 @@ negative_percent <- 100 * negative_count / original_count
 
 cat("\n\n---- Records with negative response times ----")
 cat("\nCount:", format(negative_count, big.mark = ","))
-cat("\nPercentage of original dataset:", round(negative_percent, 2), "%")
+cat("\nPercentage of original dataset:", round(negative_percent, 4), "%")
 
 # Optional: Examine a few of these problematic records to understand the issue
 if(negative_count > 0) {
@@ -646,6 +652,101 @@ cleaned_data <- cleaned_step6
 ################################################################################
 # ---- Step 7: Remove Agencies with total row count < threshold ----
 
+#####################
+#Create Histogram
+# Compute the cutoff in days
+seconds_cutoff <- 300
+cutoff_days <- seconds_cutoff / 86400  # 60 seconds in days
+
+small_response_times <- cleaned_data[
+  response_time <= cutoff_days & response_time > 0,
+  .(response_time_sec = response_time * 86400)
+]
+
+# Floor to get bin start (since binwidth=1 and boundary=0.5)
+small_response_times[, response_time_sec_bin := floor(response_time_sec)]
+
+total_records <- nrow(small_response_times)
+
+# Compute stats on counts
+median_count <- median(hist_counts$N)
+sigma_count  <- sd(hist_counts$N)
+plus3sigma   <- median_count + 3 * sigma_count
+
+ggplot(small_response_times, aes(x = response_time_sec)) +
+  geom_histogram(
+    binwidth = 1,
+    boundary = 0.5,
+    color = "gray30",
+    fill = "steelblue"
+  ) +
+  geom_hline(
+    yintercept = median_count,
+    color = "gray30",
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  geom_hline(
+    yintercept = plus3sigma,
+    color = "goldenrod4",
+    linetype = "dashed",
+    linewidth = 1
+  ) +
+  annotate(
+    "text",
+    x = 2.75,   # Left margin
+    y = median_count,
+    label = sprintf("Median: %.0f", median_count),
+    hjust = 0,
+    vjust = -0.5,
+    color = "gray30",
+    fontface = "bold",
+    size = 3.5
+  ) +
+  annotate(
+    "text",
+    x = 2.75,   # Left margin
+    y = plus3sigma,
+    label = sprintf("3σ: %.0f", plus3sigma),
+    hjust = 0,
+    vjust = -0.5,
+    color = "goldenrod4",
+    fontface = "bold",
+    size = 3.5
+  ) +
+  scale_x_continuous(
+    breaks = seq(0, 300, by = 10),
+    name = "Response Time (seconds)"
+  ) +
+  labs(
+    title = paste0("Histogram of Response Times (>0 & <= ", seconds_cutoff, 
+                   " seconds)"),
+    subtitle = sprintf(
+      "Median count: %.0f   |   +3σ threshold: %.0f",
+      median_count, plus3sigma
+    ),
+    y = ""
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(face = "bold"),
+    axis.text.y = element_text(face = "bold"),
+    panel.background = element_rect(fill = "grey93", color = NA),
+    panel.grid.major = element_line(color = "white", linewidth = 0.75)
+  )
+
+
+
+hist_counts <- small_response_times[
+  ,
+  .N,
+  by = response_time_sec_bin
+][order(response_time_sec_bin)]
+
+hist_counts[, interval_label := as.character(response_time_sec_bin)]
+print(hist_counts[, .(interval_label, N)], nrows = seconds_cutoff)
+#####################
+
 # Set threshold for agency removal. 
 # Remove rows where the total count of agency is less than this threshold.
 agency_removal_threshold <- 10
@@ -764,12 +865,17 @@ cat("\nPercentage of original dataset:", round(small_response_time_percent, 4),
 if(small_response_time_count > 0) {
   
   # Show distribution of small response times
-  response_time_dist <- small_response_time_records[, .N, 
-                                                    by = response_time][order(response_time)]
+  response_time_dist <- small_response_time_records[
+    ,
+    .N,
+    by = .(response_time_sec = response_time * (24 * 60 * 60))
+  ][order(response_time_sec)]
+  
+  
   response_time_dist[, pct := round(N/small_response_time_count * 100, 1)]
   response_time_dist[, cum_pct := cumsum(pct)]
   
-  cat("\nDistribution of response times <", 
+  cat("\nDistribution of response times (in seconds) that are <", 
       response_time_removal_threshold_seconds, "seconds:\n")
   print(response_time_dist)
   
@@ -805,11 +911,22 @@ if(small_response_time_count > 0) {
   
   # Show some examples of the small response times
   cat("\nSample of records being removed (first 20):\n")
-  sample_records <- head(small_response_time_records[, .(agency, complaint_type,
-                                                         borough,
-                                                         response_time,
-                                                         created_date,
-                                                         closed_date)], 20)
+  sample_records <- head(
+    small_response_time_records[
+      ,
+      .(
+        agency,
+        complaint_type,
+        borough,
+#        response_time_days = response_time,           # keep original for reference
+        response_time_sec  = response_time * (24 * 60 * 60),   # new column in seconds
+        created_date,
+        closed_date
+      )
+    ],
+    20
+  )
+  
   print(sample_records)
 }
 

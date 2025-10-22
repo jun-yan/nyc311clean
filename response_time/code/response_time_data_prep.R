@@ -1,7 +1,8 @@
 ################################################################################
 ################################################################################
 
-main_data_file <-"16-year_311SR_01-01-2010_thru_06-10-2025_AS_OF_06-11-2025.csv"
+main_data_file <-
+  "311_Service_Requests_from_2010_to_Present_20250707_AS_OF_07-07-2025.csv"
 
 ################################################################################
 # -------------------------------------------------------------
@@ -120,7 +121,7 @@ console_output_file <- file.path(
   "response_time_data_prep_console_output.txt"
 )
 
-sink(console_output_file)
+#sink(console_output_file)
 cat("\nExecution begins at:", formattedStartTime, "\n")
 
 ################################################################################
@@ -147,13 +148,15 @@ file_size_mb <- file.info(main_data_path)$size / 1e6
 cat("→ Base Data File:", basename(main_data_path), "\n")
 cat("→ File Size:", format(round(file_size_mb), big.mark = ","), "MB\n")
 
-# Determine number of threads
-num_cores <- max(1L, parallel::detectCores() - 1)
+# Check the current number of threads
+num_cores <- getDTthreads()
+
+# Set the number of threads to max -1
+setDTthreads(num_cores - 1)
 
 # Read the raw CSV data
 raw_data <- fread(
   main_data_path,
-  nThread = num_cores,
   check.names = FALSE,
   strip.white = TRUE,
   showProgress = TRUE
@@ -164,7 +167,9 @@ num_rows_raw_data <- nrow(raw_data)
 cat("✅ Raw data row count:", format(num_rows_raw_data, big.mark = ","), "\n")
 
 
+
 backup_raw_data <- raw_data # create a backup copy for ease of repeating testing
+
 
 
 ################################################################################
@@ -358,14 +363,65 @@ cat("✅ Step 8 complete: 'AS-OF' date extracted. Year dates extracted.")
 ################################################################################
 # Step 9: Generate RDS subsets for selected durations
 cat("\n\n🔄 Step 9 starting:Generating RDS subset for selected durations...\n")
+# 
+# #year_spans <- c(3, 6, 11, 16)
+# year_spans <- c(3, 6)
+# 
+# cat("\n💾 Preparing datasets for", paste(year_spans, collapse = ", "), 
+#     "years\n")
+# 
+# for (years in year_spans) { 
+#   make_and_save_subset(years)
+# }
 
-year_spans <- c(3, 6, 11, 16)
-cat("\n💾 Preparing datasets for", paste(year_spans, collapse = ", "), 
-    "years\n")
 
-for (years in year_spans) {
-  make_and_save_subset(years)
+# Determine min and max years in the data
+min_year <- year(min(raw_data$created_date, na.rm = TRUE))
+max_year <- year(max(raw_data$created_date, na.rm = TRUE))
+
+cat("\nPreparing datasets starting from specified years")
+
+# Define the years you want to generate datasets from
+start_years <- c(2010, 2015, 2020)
+
+############
+# Function to create and save subsets from a specific start year
+make_and_save_subset_from_year <- function(start_year) {
+  
+  # Determine the start and end datetime
+  start_date <- as.POSIXct(sprintf("%d-01-01 00:00:00", start_year), tz = "UTC")
+  end_date <- as.POSIXct(sprintf("%d-12-31 23:59:59", max_year), tz = "UTC")
+  
+  # Subset the data
+  subset <- raw_data[created_date >= start_date & created_date <= end_date]
+  
+  # Format dates for file naming
+  s_date <- format(start_date, "%m-%d-%Y")
+  e_date <- format(end_date, "%m-%d-%Y")
+  
+  # Compose filename
+  file_name <- sprintf(
+    "dataset_from_%s_thru_%s_ASOF_%s.rds",
+    s_date, e_date, as_of_date
+  )
+  
+  # Save
+  full_path <- file.path(data_dir, file_name)
+  saveRDS(subset, full_path)
+  
+  cat(sprintf("\nSaved dataset starting %d with %d records", start_year, nrow(subset)))
 }
+##########
+
+# Loop over start years
+for (start_year in start_years) {
+  if (start_year < min_year) {
+    cat(sprintf("\nSkipping %d: data begins later (min year: %d)", start_year, min_year))
+  } else {
+    make_and_save_subset_from_year(start_year)
+  }
+}
+
 cat("✅ Step 9 complete: RDS datasets produced.")
 
 ################################################################################
