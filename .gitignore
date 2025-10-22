@@ -100,3 +100,72 @@ simulation/data/aux
 **.pdf
 **.Rhistory
 .httr-oauth
+/data_anomalies/ODW2025_presentation_data_quality
+/data_anomalies/data
+/data_quality_over_time/charts
+/data_anomalies/code/functions/Not needed
+/data_quality_over_time/code/functions/Not needed
+/data_quality_over_time/data
+/data_quality_over_time/references
+/data_anomalies/shiny_apps/zip_validator/data
+/data_anomalies/shiny_apps/schema_validator/data
+/data_anomalies/shiny_apps/illogical_dates/data
+/data_anomalies/shiny_apps/fuzzy_matching/data
+/data_anomalies/shiny_apps/duplicate_fields/data
+/data_anomalies/shiny_apps/daylight_saving_time/data
+/data_quality_over_time/code/archived
+/data_anomalies/code/archived
+/data_anomalies/ODW2025_presentation_data_anomalies
+/data_anomalies/shiny_apps/daylight_saving_time_begins/rsconnect/shinyapps.io/nycodw2025
+/data_anomalies/shiny_apps/daylight_saving_time_begins/data
+/data_anomalies/shiny_apps/daylight_saving_time_ends/data
+/data_anomalies/shiny_apps/daylight_saving_time_ends/rsconnect/shinyapps.io/nycodw2025
+/data_anomalies/shiny_apps/duplicate_fields/rsconnect
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps/schema_validator/rsconnect
+/data_anomalies/shiny_apps/missing_values/data
+/data_quality_over_time/ODW2025_quality_over_time_presentation
+/data_quality_over_time/console_output
+/data_anomalies/shiny_apps/missing_values/data
+/response_time/charts
+/response_time/code/Archived
+/response_time/code/functions/Not needed
+/response_time/console_output
+/response_time/data
+/data_anomalies/code/ODW2025_presentation_data_anomalies
+/data_quality_over_time/GASP2025 presentation
+/response_time/shiny_apps/www
+/data_anomalies/shiny_apps
+/data_anomalies/shiny_apps/illogical_dates/rsconnect/shinyapps.io/nycopendataweek2025
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps/illogical_dates/rsconnect/shinyapps.io/nycopendataweek2025
+/data_anomalies/shiny_apps/missing_values/data
+/data_anomalies/shiny_apps
+/Journal_of_Data_Science/charts
+/Journal_of_Data_Science/code/.Rproj.user
+/Journal_of_Data_Science/code/functions/Archive
+/Journal_of_Data_Science/code/misc_programs
+/Journal_of_Data_Science/console_output
+/Journal_of_Data_Science/data
+/response_time
+/response_time
+/response_time/code
+Journal_of_Data_Science/DST End Analysis.xlsx
+Journal_of_Data_Science/JDS_manuscript/_config.yml
+Journal_of_Data_Science/JDS_manuscript/biblio.bib
+Journal_of_Data_Science/JDS_manuscript/JDS references/texsupport.ruc-jds-main.zip
+Journal_of_Data_Science/JDS_manuscript/jds.bst
+Journal_of_Data_Science/JDS_manuscript/JDS_manuscript.synctex(busy)
+Journal_of_Data_Science/JDS_manuscript/jds_sample.tex
+Journal_of_Data_Science/JDS_manuscript/jds_template.tex
+Journal_of_Data_Science/JDS_manuscript/jdsart.cls
+Journal_of_Data_Science/JDS_manuscript/Makefile
+Journal_of_Data_Science/JDS_manuscript/README
+Journal_of_Data_Science/JDS_manuscript/README.md
+Journal_of_Data_Science/JDS_manuscript/temp.tex
+response_time/shiny_apps/app.R
+response_time/code/response_time_by_borough.R
+response_time/code/response_time_data_prep.R
