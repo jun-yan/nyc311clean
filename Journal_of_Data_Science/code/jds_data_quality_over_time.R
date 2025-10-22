@@ -4,63 +4,102 @@
 
 ################################################################################
 # Set the base directory under the working directory base_dir <- getwd()
-working_dir <- getwd()
+base_dir <- file.path(
+  "C:",
+  "Users",
+  "David",
+  "OneDrive",
+  "Documents", 
+  "datacleaningproject", 
+  "nyc311clean",
+  "Journal_of_Data_Science"
+)
+cat("Running in STANDALONE mode\n")
+cat("Base directory:", base_dir, "\n")
+#}
 
-base_dir <- file.path(working_dir, "datacleaningproject", "nyc311clean",  
-                      "data_quality_over_time" )
+# Define all paths relative to base_dir (works in both modes)
+data_dir      <- file.path(base_dir, "data")
+chart_dir     <- file.path(base_dir, "charts", "quality")
+functions_dir <- file.path(base_dir, "code", "functions")
+console_dir   <- file.path(base_dir, "console_output")
+write_dir     <- file.path(base_dir, "data")
 
-# Define the path for the main data file (CSV file)
-data_dir <- file.path(base_dir, "data")
- 
-# Define the path for the charts
-chart_dir <- file.path(base_dir, "charts")
+# Create directories if they don't exist
+dirs_to_create <- c(data_dir, chart_dir, console_dir)
+for (dir in dirs_to_create) {
+  if (!dir.exists(dir)) {
+    dir.create(dir, recursive = TRUE)
+    cat("Created directory:", dir, "\n")
+  }
+}
 
-# Define the path to the directory containing your function scripts
-functions_path <- file.path(base_dir, "code", "functions")
+cat("\nDirectory paths set:\n")
+cat("  Data:", data_dir, "\n")
+cat("  Charts:", chart_dir, "\n")
+cat("  Functions:", functions_dir, "\n")
+cat("  Console output:", console_dir, "\n")
+cat("  Write:", write_dir, "\n")
 
+# Okabe-Ito palette for colorblind safe
+palette(c("#E69F00", "#56B4E9", "#009E73", "#F0E442", 
+          "#0072B2", "#D55E00", "#CC79A7", "#999999"))
+
+################################################################################
+# Get all .R files in the "functions" sub-directory
 ######### Commence directing console output to the file ##########
 # Define the path for the console output
-console_dir <- file.path(base_dir, "console_output")
 console_output_file <- file.path(console_dir, 
-                                 "chartsquality_over_time_console_output.txt")
+                                 "jds_chartsquality_over_time_console_output.txt")
 
 ################################################################################
 # Select desired data file
-#main_data_file <- "2-year_311SR_01-01-2023_thru_12-31-2024_AS_OF_04-06-2025.rds"
-#main_data_file <- "5-year_311SR_01-01-2020_thru_12-31-2024_AS_OF_04-06-2025.rds"
-#main_data_file <- "10-year_311SR_01-01-2015_thru_12-31-2024_AS_OF_05-05-2025.rds"
-main_data_file <- "15-year_311SR_01-01-2010_thru_12-31-2024_AS_OF_05-05-2025.rds"
+main_data_file <- "5-year_311SR_01-01-2020_thru_12-31-2024_AS_OF_09-23-2025.rds"
 
 ################################################################################
 # -------------------------------------------------------------
 # 📦 INSTALL AND LOAD REQUIRED PACKAGES
 # -------------------------------------------------------------
-required_packages <- c( 
-  "arrow",
-  "bslib",
-  "DT",
+required_packages <- c(
+  # Core data manipulation (load first - fundamental infrastructure)
   "data.table",
-  "dplyr",
-  "ggplot2",
-  "ggpmisc",
-  "httr",
+  "arrow",
+  
+  # Date/time handling
+  "fasttime",
   "lubridate",
+  "zoo",
+  
+  # Spatial data
+  "sf",
+  
+  # Tidyverse core (dplyr, ggplot2, stringr are part of tidyverse)
+  "tidyverse",
+  
+  # Additional ggplot2 extensions and formatting
+  "scales",
+  "ggpmisc",
+  
+  # Quality control and statistical visualization
   "qcc",
   "qicharts2",
-  "renv",
-  "rlang",
-  "scales",
-  "sf",
+  
+  # Shiny and web components
+  "bslib",
   "shiny",
-  "stringdist",
-  "stringr",
-  "styler",
-  "tidyverse",
-  "zoo",
-  "fasttime",
+  "DT",
+  
+  # Table formatting and display
+  "gt",
   "gridExtra",
   "grid",
-  "gt"
+  
+  # Utilities
+  "httr",
+  "stringdist",
+  "styler",
+  "rlang",
+  "renv"
 )
 
 # Check and install missing packages
@@ -627,7 +666,7 @@ growth_chart <- ggplot(yearly_counts, aes(x = year, y = n, fill = status)) +
            y = yearly_counts$n[yearly_counts$year == 2025] * 0.5, 
            label = "Projected",
            angle = 90,
-           color = "red",
+           color = "indianred",
            vjust = 0,
            size = 4,
            fontface = "bold") +
@@ -660,9 +699,7 @@ growth_chart <- ggplot(yearly_counts, aes(x = year, y = n, fill = status)) +
 
 # Print the chart
 print(growth_chart)
-
 # Add a 2 second delay to let plots render completely
-cat("\nWaiting 2 seconds before continuing to next chart...\n")
 Sys.sleep(2)   
 
 file_path <- paste0(chart_dir, "/year_over_year.pdf")
@@ -744,8 +781,6 @@ for (condition in original_conditions) {
   
   # Print ggplot to the new device
   print(gg_plot)
-  
-  cat("\nWaiting 2 seconds before continuing to next chart...\n")
   Sys.sleep(2)
   
   # Save to file without affecting the display device
@@ -783,8 +818,7 @@ for (condition in original_conditions) {
         height = 8.5)
   plot(qcc_plot, title = chart_title)
   dev.off()
-  
-  cat("\nWaiting 2 seconds before continuing to next chart...\n")
+
   Sys.sleep(2)
 } 
 
@@ -805,151 +839,6 @@ summary_df <- data.frame(
 # Process USPS data
 usps_zipcodes <- readRDS(file.path(data_dir, "USPS_zipcodes.rds"))
 setDT(usps_zipcodes)
-
-# valid_zips <- usps_zipcodes$zip
-# 
-# # Step 1: Filter cleaned_data to exclude NA and blank values
-# dt <- cleaned_data[!is.na(incident_zip) & incident_zip != "",]
-# 
-# # Step 2: Clean incident_zip and extract 5-digit ZIP from end of string 
-# # (after removing ZIP+4 if present)
-# dt[, incident_zip_clean := trimws(incident_zip)]
-# 
-# # Extract ZIP5: remove ZIP+4 suffix and extract trailing 5-digit ZIP
-# dt[, zip5 := toupper(str_extract(
-#   gsub("[- /][0-9]{1,4}$", "", incident_zip_clean),
-#   "[0-9]{5}$"
-# ))]
-# 
-# # Step 3: Check if zip5 is a strictly valid ZIP format (i.e., exactly 5 digits)
-# dt[, is_format_valid_zip := grepl("^[0-9]{5}$", zip5)]
-# 
-# # Step 4: Check against reference ZIPs
-# dt[, is_in_ref := zip5 %in% valid_zips]
-# 
-# # Step 5: Flag invalid ZIPs
-# dt[, is_invalid_zip := !(is_format_valid_zip & is_in_ref)]
-# 
-# # Step 6: Table of invalid ZIPs (from original values)
-# invalid_zip_table <- dt[is_invalid_zip == TRUE, .N, 
-#                         by = incident_zip_clean][order(-N)]
-# fwrite(invalid_zip_table, file = file.path(data_dir, "invalid_zip_codes.csv"))
-# 
-# # Step 7: Count invalid ZIPs by year_month
-# invalid_counts <- dt[is_invalid_zip == TRUE, .N, by = year_month]
-# setnames(invalid_counts, "N", "num_invalid_zipcodes")
-# 
-# # Step 8: Count total valid incidents (non-empty, non-NA ZIPs)
-# total_valid_counts <- cleaned_data[!is.na(incident_zip) & incident_zip != "", 
-#                                    .N, by = year_month]
-# setnames(total_valid_counts, "N", "total_valid_incidents")
-# 
-# # Step 10: Merge and compute fraction
-# summary_stats <- merge(invalid_counts, total_valid_counts, by = "year_month", 
-#                        all = TRUE)
-# 
-# # Fill NAs *before* computing fraction
-# summary_stats[is.na(num_invalid_zipcodes), num_invalid_zipcodes := 0]
-# summary_stats[is.na(total_valid_incidents), total_valid_incidents := 0]
-# 
-# # Now safely compute fraction
-# summary_stats[, fraction_invalid := num_invalid_zipcodes / total_valid_incidents]
-# 
-# summary_stats$fraction_invalid <- summary_stats$fraction_invalid # bias
-# 
-# # Step 11: Save summary stats
-# fwrite(summary_stats, file = file.path(data_dir, 
-#                                        "invalid_zip_summary_stats.csv"))
-# 
-# # Optional: Print results
-# cat("\n")
-# print(head(invalid_zip_table, 40))
-# #print(summary_stats[order(-year_month)])
-# 
-# #######################
-# # Create ggplot for ZIP codes
-# zip_gg_plot <- create_condition_plot(
-#                   data = summary_stats,
-#                   title = "Proportion of Invalid ZIP Codes w/loess fitting",
-#                   y_label = "Non-conforming Proportion",
-#                   subtitle = "incident_zip codes not in USPS database",
-#                   value_field = "fraction_invalid",
-#                   bias_value = 1
-# )
-# 
-# # Extract details from the plot result
-# zip_title <- zip_gg_plot$title
-# zip_first_mean <- zip_gg_plot$first_year_mean
-# zip_last_mean  <- zip_gg_plot$last_year_mean
-# zip_plot <- zip_gg_plot$plot
-# 
-# # Display and save the ggplot
-# print(zip_plot)
-# 
-# # Delay between charts
-# cat("\nWaiting 2 seconds between charts...\n")
-# Sys.sleep(2)
-# 
-# # Access the plot element from the list
-# file_path <- paste0(chart_dir, "/invalid_zipcodes.pdf")
-# ggsave(file_path, 
-#        plot = zip_gg_plot$plot, 
-#        width = 13, 
-#        height = 8.5)
-# 
-# #######################
-# # Create QCC chart for ZIP codes
-# set.seed(42)
-# 
-# # Step 1: Compute the minimum number of rows per year_month
-# min_count <- dt[, .N, by = year_month][, min(N)]
-# 
-# # Step 2: Sample min_count rows per year_month
-# dt_sampled <- dt[, .SD[sample(.N, min_count)], by = year_month]
-# 
-# # Step 3: Define variables explicitly
-# 
-# # Count of TRUE is_invalid_zip per year_month
-# # Step 1: Get all year_month values (i.e., sample structure)
-# all_months <- dt_sampled[, .(year_month = unique(year_month))]
-# 
-# # Step 2: Count TRUE is_invalid_zip values by year_month
-# zip_counts <- dt_sampled[is_invalid_zip == TRUE, .N, by = year_month]
-# 
-# # Step 3: Left join to include all months, even those with 0
-# zip_count_data <- merge(all_months, zip_counts, by = "year_month", all.x = TRUE)
-# 
-# # Step 4: Replace NA with 0
-# zip_count_data[is.na(N), N := 0]
-# 
-# # Sample size per year_month (constant, but computed for verification)
-# zip_sample_sizes <- dt_sampled[, .N, by = year_month][order(year_month)]
-# 
-# # Extract just the count and sample size vectors
-# zip_counts <- zip_count_data$invalid_zip_count
-# zip_sizes <- zip_sample_sizes$N
-# zip_chart_title <- "QCC p-chart of Invalid Zipcodes"
-# 
-# # Create and display QCC chart directly
-# zip_qcc_plot <- qcc(summary_stats$N,  # Count of defects
-#  #                   sizes = zip_sizes,  # Sample sizes
-#                     type = "p",  # Proportion chart
-#                     title = zip_chart_title,
-#                     xlab = "Year-Month",
-#                     ylab = "Non-conforming Proportion",
-#                     labels = zip_sample_sizes$year_month,
-#                     plot = TRUE)  # This will display the plot in RStudio
-# 
-# # Add a 2 second delay to let plots render completely
-# cat("\nWaiting 2 seconds before continuing to next chart...\n")
-# Sys.sleep(3)
-# 
-# # Save QCC chart (keeping the separate PDF device since QCC requires it)
-# pdf(paste0(chart_dir, "/qcc_p_chart_invalid_zipcodes.pdf"), 
-#                                   width = 13, height = 8.5)
-# plot(zip_qcc_plot, title = zip_chart_title)
-# dev.off()
-
 
 # Step 1: Copy cleaned_data to preserve original
 zip_check_data <- copy(cleaned_data)
@@ -974,7 +863,6 @@ zip_cleaned_data[, incident_zip_5 := NULL]          # drop helper column
 
 # Step 5: Derive valid ZIP reference from data itself
 valid_zips_clean <- unique(zip_cleaned_data[, .(zip = incident_zip)])
-
 
 # Step 6: Run analyze_invalid_values
 incident_zip_results <- analyze_invalid_values(
@@ -1028,6 +916,8 @@ zip_gg_plot <- create_condition_plot(
 
 # Display plot
 print(zip_gg_plot$plot)  # Use $plot to access ggplot object from list
+# Pause to allow rendering
+Sys.sleep(2)
 
 # Save plot to PDF
 file_path <- file.path(chart_dir, "invalid_incident_zips.pdf")
@@ -1036,9 +926,7 @@ ggsave(file_path,
        width = 13,
        height = 8.5)
 
-# Pause to allow rendering
-cat("\nWaiting 2 seconds between charts...\n")
-Sys.sleep(2)
+
 
 # Step 11: Generate the qcc p-chart
 # Extract metadata from ggplot object
@@ -1063,7 +951,6 @@ zip_qcc_plot <- qcc(zip_count_data,
                     plot = TRUE)
 
 # Let plot render before next chart
-cat("\nWaiting 2 seconds before continuing to next chart...\n")
 Sys.sleep(2)
 
 # Save QCC chart to PDF
@@ -1071,8 +958,6 @@ pdf(file.path(chart_dir, "qcc_p_chart_invalid_incident_zips.pdf"),
     width = 13, height = 8.5)
 plot(zip_qcc_plot, title = zip_chart_title)
 dev.off()
-
-
 
 ################################################################################
 
@@ -1137,6 +1022,8 @@ cb_gg_plot <- create_condition_plot(
 )
 
 print(cb_gg_plot$plot)  # Note the $plot to access the plot from the return list
+# Delay between charts
+Sys.sleep(2)
 
 # Display and save the ggplot
 file_path <- paste0(chart_dir, "/invalid_community_boards.pdf")
@@ -1144,10 +1031,6 @@ ggsave(file_path,
        plot = cb_gg_plot$plot, 
        width = 13, 
        height = 8.5)
-
-# Delay between charts
-cat("\nWaiting 2 seconds between charts...\n")
-Sys.sleep(2)
 
 # Extract details from the plot result
 cb_title <- cb_gg_plot$title
@@ -1172,7 +1055,6 @@ cb_qcc_plot <- qcc(cb_count_data,  # Use invalid_zips from the sample data
                    plot = TRUE)  # This will display the plot in RStudio
 
 # Add a 2 second delay to let plots render completely
-cat("\nWaiting 2 seconds before continuing to next chart...\n")
 Sys.sleep(2)
 
 # Save QCC chart - with explicit title
@@ -1238,24 +1120,26 @@ summary_data_dst_end <- dst_hour_data %>%
   group_by(dst_end_date) %>%
   summarize(
     records_0100_0200 = n(),
-    records_closed_leq_created = 
-      sum(!is.na(closed_date) & closed_date <= created_date, na.rm = TRUE),
+    # ✅ changed from <= to < to exclude 0-duration SRs
+    records_closed_lt_created = 
+      sum(!is.na(closed_date) & closed_date < created_date, na.rm = TRUE),
     avg_negative_duration_minutes = 
-      if (sum(!is.na(closed_date) & closed_date <= created_date) > 0) {
-      mean(duration_minutes[!is.na(closed_date) 
-                            & closed_date <= created_date], na.rm = TRUE)
-    } else {
-      0
-    },
+      if (sum(!is.na(closed_date) & closed_date < created_date) > 0) {
+        mean(duration_minutes[!is.na(closed_date) 
+                              & closed_date < created_date], na.rm = TRUE)
+      } else {
+        0
+      },
     .groups = "drop"
   ) %>%
   mutate(
-    fraction_closed_leq_created = ifelse(records_0100_0200 > 0,
-                               records_closed_leq_created / records_0100_0200,
-                               0),
+    fraction_closed_lt_created = ifelse(records_0100_0200 > 0,
+                                        records_closed_lt_created / records_0100_0200,
+                                        0),
     abs_duration_minutes = abs(avg_negative_duration_minutes)
   ) %>%
   arrange(dst_end_date)
+
 
 # Step 3b: Determine sampling size
 sample_size <- dst_hour_data %>%
@@ -1278,7 +1162,7 @@ sample_dst_end <- sampled_dst_end_data %>%
   group_by(dst_end_date) %>%
   summarize(
     records_0100_0200 = n(),
-    records_closed_leq_created = 
+    records_closed_lt_created  = 
       sum(!is.na(closed_date) & closed_date <= created_date, na.rm = TRUE),
     avg_negative_duration_minutes = 
       if (sum(!is.na(closed_date) & closed_date <= created_date) > 0) {
@@ -1291,7 +1175,7 @@ sample_dst_end <- sampled_dst_end_data %>%
   ) %>%
   mutate(
     fraction_closed_leq_created = ifelse(records_0100_0200 > 0,
-                             records_closed_leq_created / records_0100_0200,
+                             records_closed_lt_created  / records_0100_0200,
                              0),
     abs_duration_minutes = abs(avg_negative_duration_minutes)
   ) %>%
@@ -1305,16 +1189,16 @@ summary_data_dst_end <- summary_data_dst_end %>%
 
 stacked_data <- summary_data_dst_end %>%
   mutate(
-    other_records = records_0100_0200 - records_closed_leq_created
+    other_records = records_0100_0200 - records_closed_lt_created
   ) %>%
   pivot_longer(
-    cols = c(other_records, records_closed_leq_created),  # Order matters here
+    cols = c(other_records, records_closed_lt_created),  # no trailing space
     names_to = "record_type",
     values_to = "count"
   ) %>%
   mutate(
-    record_type = factor(record_type, levels = c("other_records", 
-                                                 "records_closed_leq_created"))
+    record_type = factor(record_type, 
+                         levels = c("other_records", "records_closed_lt_created"))
   )
 
 ####################
@@ -1366,7 +1250,7 @@ dst_end_chart_stacked <- ggplot(stacked_data,
     color = "red3"
   ) +
   geom_text(
-    data = stacked_data %>% filter(record_type == "records_closed_leq_created"),
+    data = stacked_data %>% filter(record_type == "records_closed_lt_created"),
     aes(x = as.factor(dst_end_date), y = count, label = count),
     position = position_stack(vjust = 1),  # Top of the segment
     inherit.aes = FALSE,
@@ -1388,11 +1272,11 @@ dst_end_chart_stacked <- ggplot(stacked_data,
   scale_fill_manual(
     values = c(
       "other_records" = "steelblue3",                     # Base
-      "records_closed_leq_created" = "darkorange"         # Overlay
+      "records_closed_lt_created" = "darkorange"         # Overlay
     ),
     labels = c(
       "other_records" = "Total 0100–0159 Records",
-      "records_closed_leq_created" = "Closed <= Created"
+      "records_closed_lt_created" = "Closed <= Created"
     )
   ) +
 
@@ -1445,11 +1329,10 @@ labs(
 )
 
 print(dst_end_chart_stacked)
-cat("\nWaiting 2 seconds between charts...\n")
 Sys.sleep(2)
 
 # ---- Export ----
-output_file <- file.path(chart_dir, "paired_bar_dst.pdf")
+output_file <- file.path(chart_dir, "stacked_bar_dst_end.pdf")
 ggsave(
   filename = output_file,
   plot = dst_end_chart_stacked,
@@ -1462,31 +1345,29 @@ ggsave(
 dst_end_chart <- create_condition_plot( data = summary_data_dst_end,
               title = "Proportion of affected SRs on DST 'end-day' w/trendline",
               y_label = "Affected Proportion",
-              subtitle = "SRs where closed_date <= created_date",
-              value_field = "fraction_closed_leq_created",
+              subtitle = "SRs where closed_date < created_date",
+              value_field = "fraction_closed_lt_created",
               bias_value = 1,
               date_field = "dst_end_date"
                                   )
 print(dst_end_chart$plot)
-
-cat("\nWaiting 2 seconds between charts...\n")
 Sys.sleep(2)
 
 # ---- Export ----
-output_file <- file.path(chart_dir, "Affected_SRs_on DST_end-day.pdf")
+output_file <- file.path(chart_dir, "SRs_proportion_dst_end.pdf")
+
+# ---- Export ----
 ggsave(
-      filename = output_file,
-      plot = dst_end_chart$plot,
-      device = "pdf",
-      width = 13,
-      height = 8.5,
-      units = "in"
+  filename = output_file,
+  plot = dst_end_chart$plot,
+  width = 13,
+  height = 8.5
 )
 
-# Create QCC chart for community boards
+# Create QCC chart
 # Define variables explicitly
 # Count of "defects" — i.e., closed <= created
-dst_count_data <- sample_dst_end$records_closed_leq_created
+dst_count_data <- sample_dst_end$records_closed_lt_created 
 
 # Sample size — i.e., all records from 01:00–01:59 on DST-end date
 dst_sample_sizes <- sample_dst_end$records_0100_0200
@@ -1508,40 +1389,126 @@ dst_end_qcc_plot <- qcc(
 )
 
 # Add a 2 second delay to let plots render completely
-cat("\nWaiting 2 seconds before continuing to next chart...\n")
 Sys.sleep(2)
 
 # Save QCC chart - with explicit title
-pdf(paste0(chart_dir, "/QCC p-chart of DST-End with negative durations.pdf"),
+pdf(paste0(chart_dir, "QCC p-chart of DST-End with negative durations.pdf"),
     width = 13, height = 8.5)
 plot(dst_end_qcc_plot, title = dst_chart_title)
 dev.off()
 
 ################################################################################
 # DST start-day computations. Clock is moved forward from 0159 => 0300.
-# Filter for rows that meet conditions for DST start (spring forward)
 
-# Step 1: Extract DST end days from cleaned_data
-march_data <- cleaned_data %>% filter(month(created_date) == 3)
+# Get DST info for all years in the dataset
+years <- unique(year(cleaned_data$created_date))
+dst_info <- bind_rows(lapply(years, function(y) {
+  dst_data <- get_dst_start(y)
+  dst_data %>% mutate(year = y)
+}))
 
-dst_start_days <- march_data %>%
-  filter(day(created_date) > 7, , day(created_date) <= 14, 
-                                                      wday(created_date) == 1 )
+cat("\nDST dates:\n")
+print(dst_info)
 
-# Step 2: Filter to DST hour (01:00-01:59) and identify affected records
-dst_start_affected_records <- dst_start_days %>%
-  filter(hour(created_date) >= 1 & hour(created_date) < 2) %>%
-  mutate(
-    dst_start_date = as.Date(created_date),
-    duration_minutes = as.numeric(difftime(closed_date, created_date, 
-                                                          units = "mins"))
+# Filter out records with missing time components from the full dataset
+cleaned_data_filtered <- cleaned_data %>%
+  filter(!(hour(created_date) == 0 & minute(created_date) == 0 & second(created_date) == 0))
+
+cat("\nAfter filtering missing created times:", nrow(cleaned_data_filtered), "\n")
+
+cleaned_data_filtered <- cleaned_data_filtered %>%
+  filter(!(hour(closed_date) == 0 & minute(closed_date) == 0 & second(closed_date) == 0))
+
+cat("After filtering missing closed times:", nrow(cleaned_data_filtered), "\n")
+
+# Loop through each DST date and find affected records
+results_list <- list()
+
+for (i in 1:nrow(dst_info)) {
+  year_val <- dst_info$year[i]
+  dst_start_val <- dst_info$dst_start[i]
+  dst_end_val <- dst_info$dst_end[i]
+  dst_date_val <- dst_info$dst_start_date[i]
+  
+  cat(sprintf("\nProcessing year %d, dst_start: %s, dst_end: %s\n", 
+              year_val, dst_start_val, dst_end_val))
+  
+  # Find all records (any year) that span this DST transition
+  affected <- cleaned_data_filtered %>%
+    filter(created_date <= dst_start_val & closed_date >= dst_end_val) %>%
+    mutate(
+      dst_year = year_val,
+      dst_date = dst_date_val
+    )
+  
+  cat(sprintf("  Found %s affected records\n", scales::comma(nrow(affected))))
+  
+  if (nrow(affected) > 0) {
+    results_list[[i]] <- affected
+  }
+}
+
+cat("\nNumber of result sets:", length(results_list), "\n")
+
+# Combine all results
+if (length(results_list) > 0) {
+  dst_start_affected_records <- bind_rows(results_list)
+  
+  cat("Total combined rows:", nrow(dst_start_affected_records), "\n")
+  cat("Columns:", paste(names(dst_start_affected_records), collapse = ", "), "\n")
+} else {
+  cat("No affected records found!\n")
+  stop("No DST-affected records")
+}
+
+# --- Summary by actual spring-forward date ---
+spring_summary <- dst_start_affected_records %>%
+  count(dst_date, name = "n_rows") %>%
+  arrange(dst_date)
+
+# --- Add TOTAL row ---
+if (nrow(spring_summary) > 0) {
+  total <- tibble(
+    dst_date = as.Date(NA),
+    n_rows = nrow(dst_start_affected_records)
   )
+  spring_summary <- bind_rows(spring_summary, total)
+}
+
+# --- Print summary ---
+cat("\nDST Spring-forward systemic +1 hour durations:\n")
+print(
+  spring_summary %>%
+    mutate(
+      dst_date = ifelse(is.na(dst_date), "TOTAL", as.character(dst_date)),
+      n_rows = format(n_rows, big.mark = ",")
+    )
+)
+
+# --- Breakdown by year ---
+cat("\n=== Breakdown by DST Year ===\n")
+year_summary <- dst_start_affected_records %>%
+  count(dst_year, name = "row_count") %>%
+  arrange(dst_year)
+print(year_summary)
+
+# Ensure the output directory exists
+if (!dir.exists(data_dir)) dir.create(data_dir, recursive = TRUE)
+
+# Build a filename
+outfile <- file.path(data_dir, "dst_start_affected_records.csv")
+
+# Write to CSV
+write.csv(dst_start_affected_records, outfile, row.names = FALSE)
+
+cat("\nSaved DST start affected records to:", outfile, "\n")
+cat("Total records saved:", scales::comma(nrow(dst_start_affected_records)), "\n")
 
 # Step 3: Create summary dataset for records affected by DST start
 summary_data_dst_start <- if (nrow(dst_start_affected_records) == 0) {
   # Handle edge case where no records exist
   tibble(
-    dst_start_date = as.Date(character(0)),
+    dst_date = as.Date(character(0)),
     records_0100_0200 = integer(0),
     records_affected_by_dst = integer(0),
     fraction_affected = numeric(0)
@@ -1553,88 +1520,76 @@ summary_data_dst_start <- if (nrow(dst_start_affected_records) == 0) {
       affected_by_dst = is.na(closed_date) | 
         (hour(closed_date) >= 3 & as.Date(closed_date) == as.Date(created_date))
     ) %>%
-    group_by(dst_start_date) %>%
+    group_by(dst_date) %>%
     summarize(
       records_0100_0200 = n(),
       records_affected_by_dst = sum(affected_by_dst, na.rm = TRUE),
-      fraction_affected = sum(affected_by_dst, na.rm = TRUE) / n()
+      fraction_affected = sum(affected_by_dst, na.rm = TRUE) / n(),
+      .groups = "drop"
     ) %>%
-    arrange(dst_start_date)
+    arrange(dst_date)
 }
 
 # Step 4: Create summary for the sampled DST start dataset
-# Determine the minimum count of records across all DST start dates
-sample_size <- dst_start_affected_records %>%
-  count(dst_start_date) %>%
-  summarize(min_n = min(n)) %>%
-  pull(min_n)
 
-# Step 4b: Create a stratified sample by dst_start_date (equal n per group)
-set.seed(42)
 
-dst_start_sampled_records <- dst_start_affected_records %>%
-  group_by(dst_start_date) %>%
-  slice_sample(n = sample_size) %>%
-  ungroup()
-
-# Step 5: Create summary for the sampled dataset
-sample_dst_start <- dst_start_sampled_records %>%
-  group_by(dst_start_date) %>%
-  summarize(
-    records_0100_0200 = n(),
-    records_affected_by_dst = sum(is.na(closed_date) | 
-      (hour(closed_date) >= 3 & as.Date(closed_date) == as.Date(created_date)), 
-      na.rm = TRUE),
-      .groups = "drop"
+# Create summary with total records per year
+summary_by_year <- dst_start_affected_records %>%
+  count(dst_year, dst_date, name = "records_affected_by_dst") %>%
+  left_join(
+    cleaned_data_filtered %>%
+      mutate(year = year(created_date)) %>%
+      count(year, name = "total_year_records"),
+    by = c("dst_year" = "year")
   ) %>%
   mutate(
-    fraction_affected = ifelse(records_0100_0200 > 0,
-                               records_affected_by_dst / records_0100_0200,
-                               0)
-  ) %>%
-  arrange(dst_start_date)
+    records_in_scope = total_year_records,
+    fraction_affected = records_affected_by_dst / total_year_records
+  )
 
-# Create stacked bar data
-stacked_data <- summary_data_dst_start %>%
+# Create stacked data
+stacked_data <- summary_by_year %>%
   mutate(
-    unaffected_records = records_0100_0200 - records_affected_by_dst
+    unaffected_records = records_in_scope - records_affected_by_dst
   ) %>%
+  select(dst_date, records_in_scope, fraction_affected, unaffected_records, records_affected_by_dst) %>%
   pivot_longer(
     cols = c(unaffected_records, records_affected_by_dst),
     names_to = "record_type",
     values_to = "count"
   ) %>%
   mutate(
-    record_type = factor(record_type, levels = c("unaffected_records", 
-                                                 "records_affected_by_dst"))
+    record_type = factor(record_type, levels = c("unaffected_records", "records_affected_by_dst"))
   )
+
+print(stacked_data)
 
 # ---- Final plot (stacked bar version) ----
 dst_start_stacked_chart <- ggplot(stacked_data, aes(x = 
-                              as.factor(dst_start_date), y = count, 
-                              fill = record_type)) +
+                                                      as.factor(dst_date), y = count, 
+                                                    fill = record_type)) +
   geom_bar(stat = "identity", position = "stack", width = 0.7) +
   
-  # Show count of affected records
+  # Show count of affected records (on top of the orange segment)
   geom_text(
     data = stacked_data %>% filter(record_type == "records_affected_by_dst"),
-    aes(x = as.factor(dst_start_date), y = count, label = count),
-    position = position_stack(vjust = 1),  # Top of the segment
+    aes(x = as.factor(dst_date), y = count, label = scales::comma(count)),
+    position = position_stack(vjust = 0.5),  # Middle of the affected segment
     inherit.aes = FALSE,
     size = 3,
-    color = "black",
-    vjust = -0.2  # Slight nudge above the bar
+    color = "white",
+    fontface = "bold"
   ) +
   
-  # Show total count
+  # Show total count (on top of the full stacked bar)
   geom_text(
-    data = summary_data_dst_start,
-    aes(x = as.factor(dst_start_date), y = records_0100_0200, 
-      label = records_0100_0200),
-      inherit.aes = FALSE,
-      vjust = -0.5,
-      size = 3,
-      color = "black"
+    data = summary_by_year,
+    aes(x = as.factor(dst_date), y = records_in_scope, 
+        label = scales::comma(records_in_scope)),
+    inherit.aes = FALSE,
+    vjust = -0.5,
+    size = 3,
+    color = "black"
   ) +
   
   scale_fill_manual(
@@ -1643,13 +1598,14 @@ dst_start_stacked_chart <- ggplot(stacked_data, aes(x =
       "records_affected_by_dst" = "darkorange"       
     ),
     labels = c(
-      "unaffected_records" = "Total 0100–0159 Records",
+      "unaffected_records" = "Unaffected Records",
       "records_affected_by_dst" = "Affected by DST (+1hr)"
     )
   ) +
   
   scale_y_continuous(
-    name = "# of Records: 0100–0159 on DST start day"
+    name = "# of Records by Year",
+    labels = scales::comma
   ) +
   
   theme(
@@ -1675,26 +1631,24 @@ dst_start_stacked_chart <- ggplot(stacked_data, aes(x =
   ) +
   
   labs(
-    title = "DST Starting Days Analysis",
-    subtitle = "Comparing 0100–0159 created records to those affected by 'spring forward'",
-    y = "# of Records: 0100-0159 on DST start day",
+    title = "DST Spring-forward Analysis by Year",
+    subtitle = "All records created each year vs. those spanning DST transition",
+    y = "# of Records by Year",
     fill = "Record Type",
     x = NULL
   )
 
 print(dst_start_stacked_chart)
-cat("\nWaiting 2 seconds between charts...\n")
 Sys.sleep(2)
 
 # ---- Export ----
-output_file <- file.path(chart_dir, "paired_bar_dst.pdf")
+output_file <- file.path(chart_dir, "stacked_bar_dst_start.pdf")
+
 ggsave(
   filename = output_file,
-  plot = dst_start_stacked_chart,
-  device = "pdf",
+  plot = dst_end_chart$plot,
   width = 13,
-  height = 8.5,
-  units = "in"
+  height = 8.5
 )
 
 dst_start_chart <- create_condition_plot( data = summary_data_dst_start,
@@ -1703,16 +1657,14 @@ dst_start_chart <- create_condition_plot( data = summary_data_dst_start,
                                         subtitle = "SRs where 1 hour added to closed_date",
                                         value_field = "fraction_affected",
                                         bias_value = 1,
-                                        date_field = "dst_start_date"
+                                        date_field = "dst_date"
 )
 
 print(dst_start_chart$plot)
-
-cat("\nWaiting 2 seconds between charts...\n")
 Sys.sleep(2)
 
 # ---- Export ----
-output_file <- file.path(chart_dir, "Affected_SRs_on DST_start-day.pdf")
+output_file <- file.path(chart_dir, "SRs_proportion_dst_start.pdf")
 ggsave(
   filename = output_file,
   plot = dst_start_chart$plot,
@@ -1722,7 +1674,60 @@ ggsave(
   units = "in"
 )
 
-# Create QCC chart for community boards
+# Determine the minimum count of records across all DST start dates
+# Determine sample size (minimum affected count across years)
+sample_size <- dst_start_affected_records %>%
+  count(dst_date) %>%
+  pull(n) %>%
+  min()
+
+cat("\nSample size:", sample_size, "\n")
+
+# For each DST year, sample from ALL records created that year
+set.seed(42)
+
+yearly_sample_list <- list()
+
+for (i in 1:nrow(dst_info)) {
+  year_val <- dst_info$year[i]
+  dst_start_val <- dst_info$dst_start[i]
+  dst_end_val <- dst_info$dst_end[i]
+  dst_date_val <- dst_info$dst_start_date[i]
+  
+  # Get all records from that year (after filtering missing timestamps)
+  year_records <- cleaned_data_filtered %>%
+    filter(year(created_date) == year_val)
+  
+  # Sample from them
+  if (nrow(year_records) >= sample_size) {
+    yearly_sample <- year_records %>%
+      slice_sample(n = sample_size) %>%
+      mutate(
+        dst_year = year_val,
+        dst_date = dst_date_val,
+        dst_start = dst_start_val,
+        dst_end = dst_end_val,
+        # Test if this record meets DST criteria
+        meets_dst_criteria = (created_date <= dst_start_val & closed_date >= dst_end_val)
+      )
+    
+    n_affected <- sum(yearly_sample$meets_dst_criteria)
+    pct_affected <- 100 * n_affected / sample_size
+    
+    cat(sprintf("Year %d: %d/%d (%.1f%%) meet DST criteria\n", 
+                year_val, n_affected, sample_size, pct_affected))
+    
+    yearly_sample_list[[i]] <- yearly_sample
+  }
+}
+
+yearly_sample <- bind_rows(yearly_sample_list)
+
+cat("\nTotal sampled records:", nrow(yearly_sample), "\n")
+
+
+# Create QCC chart for dst_start
+
 # Count of "defects" — i.e., closed <= created
 dst_count_data <- sample_dst_start$records_affected_by_dst
 
@@ -1733,7 +1738,7 @@ dst_sample_sizes <- sample_dst_start$records_0100_0200
 dst_chart_title <- "QCC p-chart of DST-Start-day affected SRs"
 
 # X-axis labels — use full date for clarity
-dst_labels <- format(sample_dst_start$dst_start_date, "%Y-%m-%d")
+dst_labels <- format(sample_dst_start$dst_date, "%Y-%m-%d")
 
 # Create and display QCC chart directly
 dst_qcc_plot <- qcc(
@@ -1746,11 +1751,10 @@ dst_qcc_plot <- qcc(
 )
 
 # Add a 2 second delay to let plots render completely
-cat("\nWaiting 2 seconds before continuing to next chart...\n")
 Sys.sleep(2)
 
 # Save QCC chart - with explicit title
-pdf(paste0(chart_dir, "/QCC p-chart of DST-Start-day affected SRs.pdf"),
+pdf(paste0(chart_dir, "QCC p-chart of DST-Start-day affected SRs.pdf"),
     width = 13, height = 8.5)
 plot(dst_qcc_plot, title = dst_chart_title)
 dev.off()

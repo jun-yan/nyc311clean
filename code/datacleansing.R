@@ -41,7 +41,7 @@ setwd("C:/Users/David/OneDrive/Documents/datacleaningproject/nyc311clean/code")
 #########################################################################
 rm(list = ls())
 
-main_data_file <- "3-month_311SR_10-01-2024_thru_12-31-2024_AS_OF_02-02-2025.csv"
+main_data_file <- "5-year_311SR_01-01-2020_thru_12-31-2024_AS_OF_09-23-2025.csv"
 
 # Extract the 10-character date after "AS_OF_"
 max_closed_date <- sub(".*AS_OF_([0-9-]+)\\.csv$", "\\1", main_data_file)

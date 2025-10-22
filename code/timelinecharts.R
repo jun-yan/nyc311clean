@@ -45,7 +45,8 @@ formattedStartTime <- format(programStart, "%Y-%m-%d %H:%M:%S")
 
 #########################################################################
 # Set path for the data file
-main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
+main_data_file <- "5-year_311SR_01-01-2020_thru_12-31-2024_AS_OF_09-23-2025.csv"
+#main_data_file <- "311_Service_Requests_from_2022-2023_AS_OF_09-15-2024.csv"
 #main_data_file <- "smaller_test_data.csv"
 #main_data_file <- "extra_small.csv"
 
@@ -62,7 +63,7 @@ base_dir <- working_dir
 data_file <- file.path(base_dir, "data")
 
 # Define the path for the charts
-chart_directory_path <- file.path(base_dir, "charts")
+chart_directory_path <- file.path(base_dir, "charts", "5-year_charts")
 
 # Create the directory for the reduced size file following shrinkage code.
 writeFilePath <- file.path(base_dir, "data")
@@ -133,8 +134,8 @@ d311[columns_to_upper] <- lapply(d311[columns_to_upper], toupper)
 d311 <- consolidate_agencies((d311))
 
 # Convert each date field to POSIXct format in UTC
-d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
-d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "UTC")
+d311$created_date <- as.POSIXct(d311$created_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
+d311$closed_date <- as.POSIXct(d311$closed_date, format = "%m/%d/%Y %I:%M:%S %p", tz = "America/New_York")
 
 # Call the function on your dataframe d311
 date_columns <- c("created_date", "closed_date")
@@ -148,8 +149,8 @@ num_years <- unique(years)
 
 cat("\nTotal rows:", format(num_rows, big.mark = ","), "covering", length(num_years), "years")
 
-year_digits <- 2
-file_name_prefix <- "2-year"
+year_digits <- 5
+file_name_prefix <- "5-year"
 #########################################################################
 # Calculate the earliest and latest dates directly
 earliest_date <- min(d311$created_date, na.rm = TRUE)
@@ -408,6 +409,7 @@ extra_line <- annotate("text",
 
 SR_monthly <- base_bar_chart(
   dataset = monthly_df,
+  x_label_every = 180,
   x_col = "YearMonth",                # Use the Date column for x-axis
   y_col = "count",                    # y-axis column
   chart_title = "SRs by Month",       # Chart title
@@ -440,6 +442,7 @@ max_count <- max(daily_df$count)
 
 SR_daily <- base_bar_chart(
   dataset = daily_df,
+  x_label_every = 180,
   x_col = "created_day",              # Use the categorical or date column for x-axis
   y_col = "count",                    # y-axis column
   chart_title = "Daily SR count",     # Chart title
@@ -568,7 +571,7 @@ calendar_month_df <- calendar_month_df[order(calendar_month_df$Month), ]
 cat("\nCalendar Month with total count and count_per_day:\n")
 print(calendar_month_df, row.names = FALSE, right = FALSE)
 
-SR_calendar_month <- base_bar_chart(
+SR_calendar_month <- base_bar_chart( 
   dataset = calendar_month_df,
   x_col = "Month",                    # Use the categorical column for x-axis
   y_col = "count",                    # y-axis column
@@ -591,6 +594,7 @@ SR_calendar_month <- base_bar_chart(
 
 SR_day_of_the_year <- base_bar_chart(
   dataset = days_to_chart,
+  x_label_every = 10,
   x_col = "day_info",               # Use the numeric column for x-axis
   y_col = "count",                    # y-axis column
   chart_title = "SRs by Day-of-the-Year",  # Chart title

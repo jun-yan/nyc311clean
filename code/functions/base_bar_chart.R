@@ -16,17 +16,17 @@ base_bar_chart <- function(
     horizontal_adjustment_max = 0.5,
     vertical_adjustment_max = -1,
     console_print_out_title = "Data Summary",
-    rows_to_print = 20,  # New parameter for number of rows to print
+    rows_to_print = 20,
     chart_file_name = NULL,
     chart_directory = ".",
     chart_width = 10,
     chart_height = 7,
     annotation_size = 5,
-    x_axis_tick_size = 12,  # Size of x-axis ticks
-    x_axis_label_angle = 90,  # Angle of x-axis labels
-    x_axis_tick_length = unit(0.3, "cm")  # Length of x-axis tick marks
+    x_axis_tick_size = 12,
+    x_axis_label_angle = 90,
+    x_axis_tick_length = unit(0.3, "cm"),
+    x_label_every = 1  # NEW PARAMETER: show every nth x-axis label
 ) {
-  
   
   # Step 0: Add percentage and cumulative percentage columns with 2 decimal points
   dataset <- dataset %>%
@@ -42,8 +42,8 @@ base_bar_chart <- function(
   dataset <- as.data.frame(dataset)
   
   # Temporarily increase max.print to handle larger output
-  old_max_print <- getOption("max.print")  # Save the current max.print value
-  options(max.print = max(1000, rows_to_print * 4))  # Adjust based on expected rows and columns
+  old_max_print <- getOption("max.print")
+  options(max.print = max(1000, rows_to_print * 4))
   
   # Print the first 'rows_to_print' rows of all relevant columns
   print(dataset[1:rows_to_print, c(x_col, y_col, "percentage", "cumulative_percentage")], row.names = FALSE)
@@ -64,23 +64,44 @@ base_bar_chart <- function(
     sorted_dataset <- dataset[order(-dataset[[y_col]]), ]
   }
   
-  # Step 3: Determine x_scale based on x_col type
-  x_scale <- if (inherits(dataset[[x_col]], "Date")) {
-    scale_x_date(
+  # Step 3: Determine x_scale based on x_col type with label spacing
+  if (inherits(dataset[[x_col]], "Date")) {
+    # For dates, use date_breaks with multiplier
+    break_interval <- paste(x_label_every, "days")
+    x_scale <- scale_x_date(
       expand = c(0.01, 0), 
-      labels = scales::date_format("%Y-%m"), 
-      breaks = scales::date_breaks("1 months")
+      labels = scales::date_format("%Y-%m-%d"), 
+      breaks = scales::date_breaks(break_interval)
     )
   } else if (inherits(dataset[[x_col]], "POSIXct") || inherits(dataset[[x_col]], "POSIXt")) {
-    scale_x_datetime(
+    break_interval <- paste(x_label_every, "hours")
+    x_scale <- scale_x_datetime(
       expand = c(0.01, 0), 
       labels = scales::date_format("%H:%M"), 
-      breaks = scales::date_breaks("1 hour")
+      breaks = scales::date_breaks(break_interval)
     )
   } else if (is.numeric(dataset[[x_col]])) {
-    scale_x_continuous(expand = c(0.01, 0))
+    # For numeric, calculate breaks manually
+    x_range <- range(sorted_dataset[[x_col]], na.rm = TRUE)
+    x_breaks <- seq(from = x_range[1], to = x_range[2], by = x_label_every)
+    x_scale <- scale_x_continuous(
+      expand = c(0.01, 0),
+      breaks = x_breaks
+    )
   } else if (is.factor(dataset[[x_col]]) || is.character(dataset[[x_col]])) {
-    scale_x_discrete(expand = c(0.01, 0))
+    # For discrete variables, select every nth level
+    unique_values <- unique(sorted_dataset[[x_col]])
+    if (x_label_every > 1) {
+      # Select every nth value for breaks
+      break_indices <- seq(1, length(unique_values), by = x_label_every)
+      x_breaks <- unique_values[break_indices]
+    } else {
+      x_breaks <- unique_values
+    }
+    x_scale <- scale_x_discrete(
+      expand = c(0.01, 0),
+      breaks = x_breaks
+    )
   } else {
     stop("Unsupported x_col type.")
   }
@@ -101,11 +122,13 @@ base_bar_chart <- function(
         size = x_axis_tick_size
       ),
       axis.text.y = element_text(face = "bold", size = 8),
-      axis.ticks.length = x_axis_tick_length,  # Adjust tick mark length
+      axis.ticks.length = x_axis_tick_length,
       panel.background = element_rect(fill = "gray100", color = "gray100"),
       aspect.ratio = 0.618033
     ) +
     labs(x = NULL, y = NULL)
+  
+  bar_chart <- bar_chart + david_theme()
   
   # Step 5: Add y-axis breaks
   built_plot <- ggplot_build(bar_chart)
@@ -139,6 +162,7 @@ base_bar_chart <- function(
   # Step 7: Save or print the chart
   if (!is.null(chart_file_name)) {
     print(bar_chart)
+    Sys.sleep(3)
     chart_path <- file.path(chart_directory, chart_file_name)
     ggsave(chart_path, plot = bar_chart, width = chart_width, height = chart_height, dpi = 300)
   }
