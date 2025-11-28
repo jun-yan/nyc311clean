@@ -1,0 +1,10 @@
+name: illogical_dates
+title:
+username: nycopendataweek2025
+account: nycopendataweek2025
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14059188
+bundleId: 10234020
+url: https://nycopendataweek2025.shinyapps.io/illogical_dates/
+version: 1

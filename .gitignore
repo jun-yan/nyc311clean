@@ -1,0 +1,62 @@
+
+/code/charts
+/code/console_output
+/code/data
+data_anomalies/.Rhistory
+code/.Rhistory
+code/.RDataTmp
+.Rhistory
+.httr-oauth
+/data_anomalies/code/archived
+/data_anomalies/code/functions/Not needed
+/data_anomalies/data
+/data_quality_over_time/charts
+/data_quality_over_time/code/archived
+/data_quality_over_time/code/functions/Not needed
+/data_quality_over_time/console_output
+/data_quality_over_time/data
+data_quality_over_time/Flowchart work.docx
+data_quality_over_time/references/MVCollisionsDataDictionary_20190813_ERD.xlsx
+/Journal_of_Data_Science/charts
+/Journal_of_Data_Science/code/.Rproj.user
+/Journal_of_Data_Science/code/functions/Archive
+Journal_of_Data_Science/code/code.Rproj
+/Journal_of_Data_Science/code/misc_programs
+/Journal_of_Data_Science/console_output
+/Journal_of_Data_Science/data
+Journal_of_Data_Science/DST End Analysis.xlsx
+data_anomalies/shiny_apps/zip_validator/data/dataset.rds
+data_anomalies/shiny_apps/zip_validator/data/USPS_zipcodes.rds
+Journal_of_Data_Science/JDS_manuscript/_config.yml
+Journal_of_Data_Science/JDS_manuscript/biblio.bib
+Journal_of_Data_Science/JDS_manuscript/JDS references/jds_sample.pdf
+Journal_of_Data_Science/JDS_manuscript/JDS references/jdsmanual.pdf
+Journal_of_Data_Science/JDS_manuscript/JDS references/texsupport.ruc-jds-main.zip
+Journal_of_Data_Science/JDS_manuscript/jds.bst
+Journal_of_Data_Science/JDS_manuscript/JDS_manuscript.pdf
+Journal_of_Data_Science/JDS_manuscript/JDS_manuscript.synctex(busy)
+Journal_of_Data_Science/JDS_manuscript/JDS_manuscript.synctex.gz
+Journal_of_Data_Science/JDS_manuscript/jds_sample.tex
+Journal_of_Data_Science/JDS_manuscript/jds_template.tex
+Journal_of_Data_Science/JDS_manuscript/jdsart.cls
+Journal_of_Data_Science/JDS_manuscript/Makefile
+Journal_of_Data_Science/JDS_manuscript/manuscript.log
+Journal_of_Data_Science/JDS_manuscript/manuscript.out
+Journal_of_Data_Science/JDS_manuscript/README
+Journal_of_Data_Science/JDS_manuscript/README.md
+Journal_of_Data_Science/JDS_manuscript/temp.tex
+manuscript/manuscript.aux
+manuscript/manuscript.log
+manuscript/manuscript.out
+manuscript/manuscript.pdf
+manuscript/manuscript.synctex.gz
+manuscript/Mostly Empty fields.docx
+response_time/charts/agency_delta_removals.pdf
+response_time/charts/agency_percentage_removals.pdf
+response_time/charts/borough_vs_citywide_comparison.pdf
+/response_time/charts
+/response_time/code/functions/Not needed
+/response_time/code/Archived
+/response_time/console_output
+/response_time/data
+*.rds

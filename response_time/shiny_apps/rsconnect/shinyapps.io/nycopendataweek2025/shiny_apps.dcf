@@ -1,0 +1,10 @@
+name: shiny_apps
+title:
+username: nycopendataweek2025
+account: nycopendataweek2025
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14849325
+bundleId: 10364566
+url: https://nycopendataweek2025.shinyapps.io/shiny_apps/
+version: 1

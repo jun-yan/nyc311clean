@@ -1,0 +1,10 @@
+name: zip_validator
+title:
+username: nycopendataweek2025
+account: nycopendataweek2025
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 14193193
+bundleId: 10234008
+url: https://nycopendataweek2025.shinyapps.io/zip_validator/
+version: 1

@@ -1,0 +1,5 @@
+To compile, follow these steps:
++ latexmk -pdf main.tex
+
+This has been set up in the Makefile. So, if make is installed,
+simply type 'make'.
